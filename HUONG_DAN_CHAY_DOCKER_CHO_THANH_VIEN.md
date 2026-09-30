@@ -384,6 +384,16 @@ ports:
 
 API không cần sửa chuỗi kết nối vì các container vẫn kết nối nội bộ qua `sqlserver:1433`.
 
+### `db-init` báo database tồn tại nhưng thiếu bảng bắt buộc
+
+`db-init` chủ động dừng để tránh chạy lại toàn bộ schema/seed trên database đang có và gây mất hoặc trùng dữ liệu. Trước tiên lấy log:
+
+```powershell
+docker compose logs --tail 100 db-init
+```
+
+Không tự chạy `docker compose down -v`. Gửi log cho thành viên Backend để xác định database chỉ là bản khởi tạo dở dang hay đang chứa dữ liệu cần giữ. Chỉ dựng lại database khi đã xác nhận không có dữ liệu cần bảo toàn; database đang sử dụng thật phải được sửa bằng migration hoặc script khôi phục riêng.
+
 ## 16. Quy ước làm việc nhóm
 
 - Không commit `.env`.

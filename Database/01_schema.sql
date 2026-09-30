@@ -28,6 +28,19 @@ QUY UOC:
 =====================================================================
 */
 
+/*
+Các SET option này là bắt buộc khi tạo filtered index trên SQL Server.
+Khai báo ngay trong script để chạy nhất quán bằng SSMS lẫn sqlcmd/Docker.
+*/
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_PADDING ON;
+SET ANSI_WARNINGS ON;
+SET ARITHABORT ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET NUMERIC_ROUNDABORT OFF;
+GO
+
 IF DB_ID(N'RentalCameraDb20') IS NULL
     CREATE DATABASE RentalCameraDb20;
 GO
