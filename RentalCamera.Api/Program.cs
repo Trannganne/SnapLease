@@ -40,6 +40,7 @@ if (OperatingSystem.IsWindows()) dataProtection.ProtectKeysWithDpapi();
 builder.Services.AddScoped<IPasswordHasher<TaiKhoan>, PasswordHasher<TaiKhoan>>();
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 100_000);
 builder.Services.AddSingleton<TokenIssuer>();
+builder.Services.AddSingleton<PasswordResetTokenService>();
 builder.Services.AddScoped<AvailabilityService>();
 builder.Services.AddHostedService<ReservationExpirationService>();
 builder.Services.AddEndpointsApiExplorer();
@@ -49,7 +50,7 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Rental Camera API",
         Version = "v1",
-        Description = "70 API nghiệp vụ dùng chung cho web và mobile Rental Camera."
+        Description = "API nghiệp vụ dùng chung cho web và mobile Rental Camera."
     });
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {

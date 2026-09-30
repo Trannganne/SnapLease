@@ -111,6 +111,8 @@ services:
       Cors__AllowedOrigins__3: "http://localhost:4200"
       Rental__HoldMinutes: "20"
       Rental__ContractSignMinutes: "30"
+      PasswordReset__TokenLifetimeMinutes: "15"
+      PasswordReset__ReturnTokenInResponse: "true"
     ports:
       - "5000:8080"
     volumes:

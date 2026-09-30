@@ -67,6 +67,64 @@ public static class AuthEndpoints
             return Results.Created($"/api/auth/me", new { account.MaTaiKhoan, customer.MaKhachThue, account.TenDangNhap });
         }).RequireRateLimiting("auth");
 
+        group.MapPost("/quen-mat-khau", async (
+            ForgotPasswordRequest request,
+            RentalCameraContext db,
+            PasswordResetTokenService resetTokens,
+            IConfiguration configuration,
+            CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.TenDangNhapHoacEmail) ||
+                request.TenDangNhapHoacEmail.Length > 255)
+                return Results.BadRequest(new { loi = "Tên đăng nhập hoặc email không hợp lệ." });
+
+            var lookup = request.TenDangNhapHoacEmail.Trim();
+            var account = await db.TaiKhoan.AsNoTracking()
+                .Where(x => x.TrangThai == "HOAT_DONG" &&
+                    (x.TenDangNhap == lookup || db.KhachThue.Any(k =>
+                        k.MaTaiKhoan == x.MaTaiKhoan && k.Email == lookup)))
+                .FirstOrDefaultAsync(ct);
+
+            var lifetimeMinutes = Math.Clamp(
+                configuration.GetValue("PasswordReset:TokenLifetimeMinutes", 15), 5, 60);
+            var exposeToken = configuration.GetValue("PasswordReset:ReturnTokenInResponse", false);
+            var token = account is null
+                ? null
+                : resetTokens.Issue(account.MaTaiKhoan, account.MatKhauHash,
+                    TimeSpan.FromMinutes(lifetimeMinutes));
+
+            return Results.Accepted(value: new
+            {
+                thongBao = "Nếu tài khoản tồn tại, yêu cầu đặt lại mật khẩu đã được tạo.",
+                resetToken = exposeToken ? token : null,
+                expiresInSeconds = exposeToken && token is not null ? lifetimeMinutes * 60 : (int?)null
+            });
+        }).RequireRateLimiting("auth");
+
+        group.MapPost("/dat-lai-mat-khau", async (
+            ResetPasswordRequest request,
+            RentalCameraContext db,
+            IPasswordHasher<TaiKhoan> hasher,
+            PasswordResetTokenService resetTokens,
+            CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(request.ResetToken) || request.ResetToken.Length > 5000)
+                return Results.BadRequest(new { loi = "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn." });
+            if (!PasswordPolicy.IsValid(request.MatKhauMoi))
+                return Results.BadRequest(new { loi = PasswordPolicy.Description });
+            if (!resetTokens.TryRead(request.ResetToken.Trim(), out var accountId, out var fingerprint))
+                return Results.BadRequest(new { loi = "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn." });
+
+            var account = await db.TaiKhoan.SingleOrDefaultAsync(
+                x => x.MaTaiKhoan == accountId && x.TrangThai == "HOAT_DONG", ct);
+            if (account is null || !resetTokens.MatchesCurrentPassword(fingerprint, account.MatKhauHash))
+                return Results.BadRequest(new { loi = "Token đặt lại mật khẩu không hợp lệ hoặc đã được sử dụng." });
+
+            account.MatKhauHash = hasher.HashPassword(account, request.MatKhauMoi);
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).RequireRateLimiting("auth");
+
         group.MapPost("/login", async (
             LoginRequest request,
             RentalCameraContext db,
@@ -162,5 +220,7 @@ public static class AuthEndpoints
 }
 
 public sealed record RegisterRequest(string TenDangNhap, string MatKhau, string HoTen, string SoDienThoai, string? Email);
+public sealed record ForgotPasswordRequest(string TenDangNhapHoacEmail);
+public sealed record ResetPasswordRequest(string ResetToken, string MatKhauMoi);
 public sealed record LoginRequest(string TenDangNhap, string MatKhau);
 public sealed record ChangePasswordRequest(string MatKhauCu, string MatKhauMoi);
