@@ -1,0 +1,18 @@
+**/bin/
+**/obj/
+.vs/
+.idea/
+TestResults/
+*.user
+*.suo
+*.log
+
+# Cau hinh va bi mat chi dung tren tung may
+.env
+**/.env
+!.env.example
+
+# Khong dua khoa Data Protection va cau hinh cuc bo len Git
+**/.keys/*.xml
+**/appsettings.Development.json
+**/appsettings.Local.json
