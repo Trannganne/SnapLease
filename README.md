@@ -27,26 +27,6 @@ Backend_Api/
 └── HUONG_DAN_CHAY_DOCKER_CHO_THANH_VIEN.md
 ```
 
-## Flow đặt thuê
-
-```text
-GioHang
-  → GiuCho (giữ capacity trong 20 phút)
-  → HopDong (CHO_KY)
-  → DA_KY
-  → CHO_BAN_GIAO
-  → DANG_THUE
-  → CHO_HOAN_TRA
-  → HOAN_THANH
-```
-
-- Giỏ hàng không giữ số lượng thiết bị.
-- Lịch trống được tính theo dòng máy, cửa hàng và khoảng thời gian thuê.
-- Số lượng còn trống phải trừ hợp đồng đang chiếm lịch và giữ chỗ chưa hết hạn.
-- Giữ chỗ hết hạn được Backend tự chuyển sang `HET_HAN` để trả capacity.
-- Serial thiết bị cụ thể được nhân viên gán sau khi hợp đồng đã ký.
-- Thay đổi giữ chỗ, xác nhận hợp đồng và duyệt gia hạn đều phải kiểm tra lịch lại trong transaction.
-
 ## Chạy bằng Docker
 
 ### 1. Yêu cầu
