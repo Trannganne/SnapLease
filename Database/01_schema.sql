@@ -152,13 +152,18 @@ CREATE TABLE KhachThue (
     HoTen NVARCHAR(150) NOT NULL,
     SoDienThoai VARCHAR(15) NOT NULL UNIQUE,
     Email VARCHAR(255) NULL,
-    CCCD VARCHAR(20) NULL UNIQUE,
+    CCCD VARCHAR(20) NULL,
     DiaChi NVARCHAR(500) NULL,
     NgaySinh DATE NULL,
 
     CONSTRAINT FK_KhachThue_TaiKhoan
         FOREIGN KEY (MaTaiKhoan) REFERENCES TaiKhoan(MaTaiKhoan)
 );
+GO
+
+CREATE UNIQUE INDEX UX_KhachThue_CCCD_NotNull
+ON KhachThue(CCCD)
+WHERE CCCD IS NOT NULL;
 GO
 
 /* ================================================================

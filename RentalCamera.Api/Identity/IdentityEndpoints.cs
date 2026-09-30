@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
@@ -74,10 +75,23 @@ public static class IdentityEndpoints
             document.TrangThaiXacMinh = request.KetQua;
             document.GhiChu = request.GhiChu?.Trim();
             var customer = await db.KhachThue.SingleAsync(x => x.MaKhachThue == document.MaKhachThue, ct);
-            if (request.KetQua == "HOP_LE" && document.LoaiGiayTo == "CCCD") customer.CCCD = document.SoGiayTo;
+            if (request.KetQua == "HOP_LE" && document.LoaiGiayTo == "CCCD")
+            {
+                var cccd = document.SoGiayTo.Trim();
+                if (await db.KhachThue.AnyAsync(x => x.CCCD == cccd && x.MaKhachThue != customer.MaKhachThue, ct))
+                    return Results.Conflict(new { loi = "CCCD đã được sử dụng bởi khách thuê khác." });
+                customer.CCCD = cccd;
+            }
             ApiAccess.AddNotification(db, customer.MaTaiKhoan, "XAC_MINH_GIAY_TO", "Kết quả xác minh giấy tờ",
                 request.KetQua == "HOP_LE" ? "Giấy tờ của bạn đã được xác minh." : $"Giấy tờ bị từ chối. {request.GhiChu}");
-            await db.SaveChangesAsync(ct);
+            try
+            {
+                await db.SaveChangesAsync(ct);
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 })
+            {
+                return Results.Conflict(new { loi = "CCCD đã được sử dụng bởi khách thuê khác." });
+            }
             return Results.Ok(new { document.MaGiayTo, document.TrangThaiXacMinh, document.GhiChu });
         }).RequireAuthorization("Staff");
     }

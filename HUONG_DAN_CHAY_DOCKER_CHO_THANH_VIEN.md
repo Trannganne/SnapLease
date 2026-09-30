@@ -177,7 +177,7 @@ Quản trị viên:
 docker compose exec api dotnet RentalCamera.Api.dll set-password admin01
 ```
 
-Mật khẩu phải có ít nhất 12 ký tự. Khi nhập mật khẩu, PowerShell không hiển thị ký tự nhưng vẫn đang nhận dữ liệu. Nhập xong nhấn Enter.
+Mật khẩu phải có 8–128 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt. Khi nhập mật khẩu, PowerShell không hiển thị ký tự nhưng vẫn đang nhận dữ liệu. Nhập xong nhấn Enter.
 
 ## 8. Đăng nhập trên Swagger
 
@@ -414,4 +414,3 @@ Mở Swagger:
 ```text
 http://localhost:5000/swagger
 ```
-

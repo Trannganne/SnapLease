@@ -110,7 +110,7 @@ if (args.Length == 2 && args[0] == "set-password")
         Console.WriteLine("Không tìm thấy tài khoản.");
         return;
     }
-    Console.Write("Mật khẩu mới (ít nhất 12 ký tự): ");
+    Console.Write("Mật khẩu mới (8–128 ký tự, có chữ hoa, chữ thường, chữ số và ký tự đặc biệt): ");
     var password = new System.Text.StringBuilder();
     while (true)
     {
@@ -120,9 +120,9 @@ if (args.Length == 2 && args[0] == "set-password")
         else if (!char.IsControl(key.KeyChar) && password.Length < 128) password.Append(key.KeyChar);
     }
     Console.WriteLine();
-    if (password.Length < 12)
+    if (!PasswordPolicy.IsValid(password.ToString()))
     {
-        Console.WriteLine("Mật khẩu quá ngắn; chưa thay đổi dữ liệu.");
+        Console.WriteLine($"{PasswordPolicy.Description} Chưa thay đổi dữ liệu.");
         return;
     }
     account.MatKhauHash = hasher.HashPassword(account, password.ToString());

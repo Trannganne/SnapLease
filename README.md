@@ -80,7 +80,7 @@ docker compose exec api dotnet RentalCamera.Api.dll set-password nhanvien01
 docker compose exec api dotnet RentalCamera.Api.dll set-password admin01
 ```
 
-Mật khẩu phải có ít nhất 12 ký tự. Sau đó đăng nhập bằng `POST /api/auth/login`.
+Mật khẩu phải có 8–128 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt. Sau đó đăng nhập bằng `POST /api/auth/login`.
 
 Sao chép `accessToken`, mở nút **Authorize** trong Swagger và dán token trực tiếp.
 

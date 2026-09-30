@@ -108,6 +108,8 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.HasKey(x => x.MaKhachThue);
             entity.Property(x => x.MaKhachThue).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaTaiKhoan).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.CCCD).HasMaxLength(20).IsUnicode(false).IsRequired(false);
+            entity.HasIndex(x => x.CCCD).IsUnique().HasFilter("[CCCD] IS NOT NULL");
             entity.HasOne<TaiKhoan>().WithOne()
                 .HasForeignKey<KhachThue>(x => x.MaTaiKhoan)
                 .OnDelete(DeleteBehavior.Restrict);

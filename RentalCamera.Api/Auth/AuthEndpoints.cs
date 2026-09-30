@@ -21,12 +21,14 @@ public static class AuthEndpoints
         {
             if (string.IsNullOrWhiteSpace(request.TenDangNhap) ||
                 !Regex.IsMatch(request.TenDangNhap, "^[a-zA-Z0-9_.-]{4,50}$") ||
-                string.IsNullOrWhiteSpace(request.MatKhau) || request.MatKhau.Length < 12 ||
-                request.MatKhau.Length > 128 ||
+                !PasswordPolicy.IsValid(request.MatKhau) ||
                 string.IsNullOrWhiteSpace(request.HoTen) || request.HoTen.Length > 150 ||
                 string.IsNullOrWhiteSpace(request.SoDienThoai) ||
                 !Regex.IsMatch(request.SoDienThoai, "^[0-9]{9,15}$"))
-                return Results.BadRequest(new { loi = "Tên đăng nhập 4–50 ký tự; mật khẩu 12–128 ký tự; họ tên và số điện thoại hợp lệ." });
+                return Results.BadRequest(new
+                {
+                    loi = $"Tên đăng nhập phải có 4–50 ký tự; {PasswordPolicy.Description} Họ tên và số điện thoại phải hợp lệ."
+                });
 
             var username = request.TenDangNhap.Trim();
             var phone = request.SoDienThoai.Trim();
@@ -133,9 +135,8 @@ public static class AuthEndpoints
             CancellationToken ct) =>
         {
             if (string.IsNullOrEmpty(request.MatKhauCu) ||
-                string.IsNullOrEmpty(request.MatKhauMoi) ||
-                request.MatKhauMoi.Length is < 12 or > 128)
-                return Results.BadRequest(new { loi = "Mật khẩu mới phải có từ 12 đến 128 ký tự." });
+                !PasswordPolicy.IsValid(request.MatKhauMoi))
+                return Results.BadRequest(new { loi = PasswordPolicy.Description });
 
             var accountId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
             var account = await db.TaiKhoan.SingleOrDefaultAsync(x => x.MaTaiKhoan == accountId, ct);
