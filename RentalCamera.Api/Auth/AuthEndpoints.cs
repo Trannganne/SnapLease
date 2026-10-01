@@ -22,12 +22,11 @@ public static class AuthEndpoints
             if (string.IsNullOrWhiteSpace(request.TenDangNhap) ||
                 !Regex.IsMatch(request.TenDangNhap, "^[a-zA-Z0-9_.-]{4,50}$") ||
                 !PasswordPolicy.IsValid(request.MatKhau) ||
-                string.IsNullOrWhiteSpace(request.HoTen) || request.HoTen.Length > 150 ||
                 string.IsNullOrWhiteSpace(request.SoDienThoai) ||
                 !Regex.IsMatch(request.SoDienThoai, "^[0-9]{9,15}$"))
                 return Results.BadRequest(new
                 {
-                    loi = $"Tên đăng nhập phải có 4–50 ký tự; {PasswordPolicy.Description} Họ tên và số điện thoại phải hợp lệ."
+                    loi = $"Tên đăng nhập phải có 4–50 ký tự; {PasswordPolicy.Description} Số điện thoại phải hợp lệ."
                 });
 
             var username = request.TenDangNhap.Trim();
@@ -49,7 +48,9 @@ public static class AuthEndpoints
             {
                 MaKhachThue = "KH" + Guid.NewGuid().ToString("N")[..17].ToUpperInvariant(),
                 MaTaiKhoan = account.MaTaiKhoan,
-                HoTen = request.HoTen.Trim(),
+                // HoTen là bắt buộc trong database nhưng chỉ được người dùng cung cấp
+                // ở bước gửi giấy tờ xác minh. Dùng tên đăng nhập làm giá trị tạm thời.
+                HoTen = username,
                 SoDienThoai = phone,
                 Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim()
             };
@@ -74,15 +75,15 @@ public static class AuthEndpoints
             IConfiguration configuration,
             CancellationToken ct) =>
         {
-            if (string.IsNullOrWhiteSpace(request.TenDangNhapHoacEmail) ||
-                request.TenDangNhapHoacEmail.Length > 255)
-                return Results.BadRequest(new { loi = "Tên đăng nhập hoặc email không hợp lệ." });
+            if (string.IsNullOrWhiteSpace(request.EmailHoacSoDienThoai) ||
+                request.EmailHoacSoDienThoai.Length > 255)
+                return Results.BadRequest(new { loi = "Email hoặc số điện thoại không hợp lệ." });
 
-            var lookup = request.TenDangNhapHoacEmail.Trim();
+            var lookup = request.EmailHoacSoDienThoai.Trim();
             var account = await db.TaiKhoan.AsNoTracking()
                 .Where(x => x.TrangThai == "HOAT_DONG" &&
-                    (x.TenDangNhap == lookup || db.KhachThue.Any(k =>
-                        k.MaTaiKhoan == x.MaTaiKhoan && k.Email == lookup)))
+                    db.KhachThue.Any(k => k.MaTaiKhoan == x.MaTaiKhoan &&
+                        (k.Email == lookup || k.SoDienThoai == lookup)))
                 .FirstOrDefaultAsync(ct);
 
             var lifetimeMinutes = Math.Clamp(
@@ -219,8 +220,8 @@ public static class AuthEndpoints
     }
 }
 
-public sealed record RegisterRequest(string TenDangNhap, string MatKhau, string HoTen, string SoDienThoai, string? Email);
-public sealed record ForgotPasswordRequest(string TenDangNhapHoacEmail);
+public sealed record RegisterRequest(string TenDangNhap, string MatKhau, string SoDienThoai, string? Email);
+public sealed record ForgotPasswordRequest(string EmailHoacSoDienThoai);
 public sealed record ResetPasswordRequest(string ResetToken, string MatKhauMoi);
 public sealed record LoginRequest(string TenDangNhap, string MatKhau);
 public sealed record ChangePasswordRequest(string MatKhauCu, string MatKhauMoi);

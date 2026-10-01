@@ -24,6 +24,7 @@ public static class IdentityEndpoints
         group.MapPost("", async (IdentityDocumentRequest request, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
             if (request.LoaiGiayTo is not ("CCCD" or "HO_CHIEU" or "GPLX") ||
+                string.IsNullOrWhiteSpace(request.HoTen) || request.HoTen.Length > 150 ||
                 string.IsNullOrWhiteSpace(request.SoGiayTo) || string.IsNullOrWhiteSpace(request.MatTruocUrl))
                 return Results.BadRequest(new { loi = "Thông tin giấy tờ không hợp lệ." });
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
@@ -37,6 +38,8 @@ public static class IdentityEndpoints
                 MatTruocUrl = request.MatTruocUrl.Trim(), MatSauUrl = request.MatSauUrl?.Trim(),
                 NgayTaiLen = DateTime.Now, TrangThaiXacMinh = "CHO_XAC_MINH"
             };
+            var customer = await db.KhachThue.SingleAsync(x => x.MaKhachThue == customerId, ct);
+            customer.HoTen = request.HoTen.Trim();
             db.GiayToTuyThan.Add(entity);
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/giay-to/{entity.MaGiayTo}", entity);
@@ -98,5 +101,5 @@ public static class IdentityEndpoints
 }
 
 public sealed record IdentityDocumentRequest(
-    string LoaiGiayTo, string SoGiayTo, string MatTruocUrl, string? MatSauUrl);
+    string HoTen, string LoaiGiayTo, string SoGiayTo, string MatTruocUrl, string? MatSauUrl);
 public sealed record VerifyIdentityRequest(string KetQua, string? GhiChu);

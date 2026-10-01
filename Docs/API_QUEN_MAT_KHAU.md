@@ -11,9 +11,11 @@ Content-Type: application/json
 
 ```json
 {
-  "tenDangNhapHoacEmail": "khachhang01"
+  "emailHoacSoDienThoai": "khachhang01@example.com"
 }
 ```
+
+Trường `emailHoacSoDienThoai` nhận email hoặc số điện thoại đã đăng ký. Tên đăng nhập chỉ dùng cho API đăng nhập.
 
 Response luôn dùng thông báo chung để hạn chế dò tài khoản:
 
