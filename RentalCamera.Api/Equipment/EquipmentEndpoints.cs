@@ -28,7 +28,12 @@ public static class EquipmentEndpoints
                 .Select(x => new
                 {
                     x.MaThietBi, x.MaDongMay, x.DongMay.TenDongMay, x.MaCuaHang,
-                    x.CuaHang.TenCuaHang, x.SoSerial, x.TinhTrang, x.TrangThai, x.NgayNhap
+                    x.CuaHang.TenCuaHang, x.SoSerial, x.TinhTrang, x.TrangThai, x.NgayNhap,
+                    x.DongMay.MaDanhMuc, x.DongMay.DanhMuc.TenDanhMuc,
+                    x.DongMay.MaThuongHieu, x.DongMay.ThuongHieu.TenThuongHieu,
+                    x.DongMay.GiaThueNgay, x.DongMay.TienCoc, x.DongMay.PhanTramGiamGia,
+                    AnhDaiDien = x.DongMay.AnhThietBi.Where(a => a.LaAnhDaiDien)
+                        .Select(a => a.DuongDanAnh).FirstOrDefault()
                 }).ToListAsync(ct);
             return Results.Ok(data);
         });
@@ -41,6 +46,14 @@ public static class EquipmentEndpoints
                 {
                     x.MaThietBi, x.MaDongMay, x.DongMay.TenDongMay, x.MaCuaHang,
                     x.CuaHang.TenCuaHang, x.SoSerial, x.TinhTrang, x.TrangThai, x.NgayNhap,
+                    x.DongMay.MoTa, x.DongMay.MaDanhMuc, x.DongMay.DanhMuc.TenDanhMuc,
+                    x.DongMay.MaThuongHieu, x.DongMay.ThuongHieu.TenThuongHieu,
+                    x.DongMay.GiaThueNgay, x.DongMay.TienCoc, x.DongMay.PhanTramGiamGia,
+                    Anh = x.DongMay.AnhThietBi.OrderBy(a => a.ThuTuHienThi)
+                        .Select(a => new
+                        {
+                            a.MaAnh, a.DuongDanAnh, a.LaAnhDaiDien, a.ThuTuHienThi
+                        }).ToList(),
                     RowVersion = Convert.ToBase64String(x.RowVersion)
                 }).FirstOrDefaultAsync(ct);
             if (item is null) return Results.NotFound();

@@ -103,7 +103,19 @@ public static class CatalogEndpoints
                 {
                     x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia,
                     x.MaDanhMuc, x.DanhMuc.TenDanhMuc, x.MaThuongHieu, x.ThuongHieu.TenThuongHieu,
-                    AnhDaiDien = x.AnhThietBi.Where(a => a.LaAnhDaiDien).Select(a => a.DuongDanAnh).FirstOrDefault()
+                    AnhDaiDien = x.AnhThietBi.Where(a => a.LaAnhDaiDien)
+                        .Select(a => a.DuongDanAnh).FirstOrDefault(),
+                    Rating = db.DanhGia.Where(r => db.ChiTietHopDong.Any(d =>
+                            d.MaChiTietHopDong == r.MaChiTietHopDong && db.ThietBi.Any(t =>
+                                t.MaThietBi == d.MaThietBi && t.MaDongMay == x.MaDongMay)))
+                        .Average(r => (double?)r.SoSao) ?? 0d,
+                    ReviewCount = db.DanhGia.Count(r => db.ChiTietHopDong.Any(d =>
+                        d.MaChiTietHopDong == r.MaChiTietHopDong && db.ThietBi.Any(t =>
+                            t.MaThietBi == d.MaThietBi && t.MaDongMay == x.MaDongMay))),
+                    Available = db.ThietBi.Any(t =>
+                        t.MaDongMay == x.MaDongMay && t.TrangThai == "SAN_SANG"),
+                    BranchIds = db.ThietBi.Where(t => t.MaDongMay == x.MaDongMay)
+                        .Select(t => t.MaCuaHang).Distinct().OrderBy(branchId => branchId).ToList()
                 }).ToListAsync(ct);
             return Results.Ok(new { trang = page, kichThuocTrang = pageSize, tongSo = total, duLieu = items });
         });
@@ -114,13 +126,17 @@ public static class CatalogEndpoints
                 {
                     x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia,
                     x.MaDanhMuc, x.DanhMuc.TenDanhMuc, x.MaThuongHieu, x.ThuongHieu.TenThuongHieu,
-                    Anh = x.AnhThietBi.OrderBy(a => a.ThuTuHienThi),
+                    Anh = x.AnhThietBi.OrderBy(a => a.ThuTuHienThi)
+                        .Select(a => new
+                        {
+                            a.MaAnh, a.DuongDanAnh, a.LaAnhDaiDien, a.ThuTuHienThi
+                        }).ToList(),
                     TonKho = db.ThietBi.Where(t => t.MaDongMay == id)
                         .GroupBy(t => t.MaCuaHang).Select(g => new
                         {
                             MaCuaHang = g.Key, TongSo = g.Count(),
                             SanSang = g.Count(t => t.TrangThai == "SAN_SANG")
-                        })
+                        }).ToList()
                 }).FirstOrDefaultAsync(ct);
             return result is null ? Results.NotFound() : Results.Ok(result);
         });

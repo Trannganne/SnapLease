@@ -24,7 +24,8 @@ INSERT INTO DongMay (MaDongMay, MaDanhMuc, MaThuongHieu, TenDongMay, MoTa, GiaTh
 ('DONG001','DM001','TH001',N'Canon EOS R6',N'Mirrorless full-frame',500000,5000000,0),
 ('DONG002','DM001','TH002',N'Sony Alpha A7 III',N'Mirrorless full-frame',450000,4500000,5),
 ('DONG003','DM002','TH001',N'Canon RF 24-70mm F2.8',N'Ống kính zoom tiêu chuẩn',300000,3000000,0),
-('DONG004','DM001','TH003',N'Nikon Z6 II',N'Mirrorless full-frame',470000,4700000,0);
+('DONG004','DM001','TH003',N'Nikon Z6 II',N'Mirrorless full-frame',470000,4700000,0),
+('DONG005','DM001','TH001',N'Canon EOS RP',N'Dòng máy mẫu chưa có ảnh và đánh giá',350000,3500000,0);
 
 INSERT INTO AnhThietBi (MaAnh, MaDongMay, DuongDanAnh, LaAnhDaiDien, ThuTuHienThi) VALUES
 ('A001','DONG001',N'https://res.cloudinary.com/rqdym8rq/image/upload/canon-r6-1.jpg',1,1),
@@ -61,7 +62,9 @@ INSERT INTO ThietBi (MaThietBi, MaDongMay, MaCuaHang, SoSerial, TinhTrang, Trang
 ('TB002','DONG001','CH001','CR6-0002',N'Xước nhẹ thân máy','BAO_TRI','2026-02-01'),
 ('TB003','DONG002','CH001','SA7-0001',N'Tốt','SAN_SANG','2026-02-15'),
 ('TB004','DONG003','CH001','RF2470-001',N'Tốt','SAN_SANG','2026-03-01'),
-('TB005','DONG004','CH002','NZ6-0001',N'Tốt','DANG_THUE','2026-03-20');
+('TB005','DONG004','CH002','NZ6-0001',N'Tốt','DANG_THUE','2026-03-20'),
+('TB006','DONG001','CH002','CR6-0003',N'Tốt','DANG_THUE','2026-04-01'),
+('TB007','DONG005','CH001','CRP-0001',N'Tốt','SAN_SANG','2026-04-05');
 
 INSERT INTO GioHang (MaGioHang, MaKhachThue, MaCuaHang, NgayTao, NgayCapNhat, TrangThai) VALUES
 ('GH001','KH001','CH001','2026-08-01T09:00:00','2026-08-01T09:15:00','DA_CHUYEN_HOP_DONG'),
