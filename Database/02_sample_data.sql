@@ -27,11 +27,11 @@ INSERT INTO DongMay (MaDongMay, MaDanhMuc, MaThuongHieu, TenDongMay, MoTa, GiaTh
 ('DONG004','DM001','TH003',N'Nikon Z6 II',N'Mirrorless full-frame',470000,4700000,0);
 
 INSERT INTO AnhThietBi (MaAnh, MaDongMay, DuongDanAnh, LaAnhDaiDien, ThuTuHienThi) VALUES
-('A001','DONG001',N'/images/canon-r6-1.jpg',1,1),
-('A002','DONG001',N'/images/canon-r6-2.jpg',0,2),
-('A003','DONG002',N'/images/sony-a7iii.jpg',1,1),
-('A004','DONG003',N'/images/canon-rf2470.jpg',1,1),
-('A005','DONG004',N'/images/nikon-z6ii.jpg',1,1);
+('A001','DONG001',N'https://res.cloudinary.com/rqdym8rq/image/upload/canon-r6-1.jpg',1,1),
+('A002','DONG001',N'https://res.cloudinary.com/rqdym8rq/image/upload/canon-r6-2.jpg',0,2),
+('A003','DONG002',N'https://res.cloudinary.com/rqdym8rq/image/upload/sony-a7iii.jpg',1,1),
+('A004','DONG003',N'https://res.cloudinary.com/rqdym8rq/image/upload/canon-rf2470.jpg',1,1),
+('A005','DONG004',N'https://res.cloudinary.com/rqdym8rq/image/upload/nikon-z6ii.jpg',1,1);
 
 INSERT INTO CuaHang (MaCuaHang, TenCuaHang, DiaChi, SoDienThoai, Email, MoTa) VALUES
 ('CH001',N'Rental Camera Quận 1',N'01 Nguyễn Huệ, Quận 1, TP.HCM','0901000001','q1@rentalcamera.vn',N'Chi nhánh trung tâm'),
