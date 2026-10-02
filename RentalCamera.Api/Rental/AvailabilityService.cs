@@ -86,13 +86,15 @@ public sealed class AvailabilityService(RentalCameraContext db)
             FROM SucChuaTaiTungMoc
             """;
 
-        return await db.Database.SqlQueryRaw<int>(sql,
+        var result = await db.Database.SqlQueryRaw<int>(sql,
                 new SqlParameter("@store", storeId),
                 new SqlParameter("@model", modelId),
                 new SqlParameter("@fromDate", from),
                 new SqlParameter("@toDate", to),
                 new SqlParameter("@excludeHold", (object?)excludeHoldId ?? DBNull.Value),
                 new SqlParameter("@excludeContract", (object?)excludeContractId ?? DBNull.Value))
-            .SingleAsync(ct);
+            .ToListAsync(ct);
+            
+        return result.Single();
     }
 }
