@@ -25,6 +25,25 @@ public static class RentalEndpoints
             });
         });
 
+        app.MapGet("/api/tam-tinh", async (
+            string maCuaHang, string maDongMay, int soLuong, DateTime ngayBatDau, DateTime ngayKetThuc,
+            RentalCameraContext db, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(maCuaHang) || string.IsNullOrWhiteSpace(maDongMay) || soLuong is < 1 or > 10 ||
+                !ValidPeriod(ngayBatDau, ngayKetThuc))
+                return Results.BadRequest(new { loi = "Đầu vào hoặc thời gian thuê không hợp lệ." });
+            
+            if (!await db.CuaHang.AnyAsync(x => x.MaCuaHang == maCuaHang && x.TrangThai == "HOAT_DONG", ct))
+                return Results.NotFound(new { loi = "Cửa hàng không tồn tại hoặc đang khóa." });
+
+            var model = await db.DongMay.AsNoTracking().SingleOrDefaultAsync(x => x.MaDongMay == maDongMay, ct);
+            if (model is null)
+                return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+
+            var quote = CalculatePrice(model, soLuong, ngayBatDau, ngayKetThuc);
+            return Results.Ok(quote);
+        });
+
         var carts = app.MapGroup("/api/gio-hang").RequireAuthorization("Customer");
 
         carts.MapGet("", async (ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
@@ -391,18 +410,33 @@ public static class RentalEndpoints
         await db.SaveChangesAsync(ct);
     }
 
+    public sealed record PriceQuote(
+        string MaDongMay, int SoLuong, DateTime NgayBatDau, DateTime NgayKetThuc,
+        int SoNgayTinhPhi, decimal GiaThueNgay, decimal PhanTramGiamGia, decimal DonGiaSauGiam,
+        decimal TongTienThue, decimal TienCocMotDonVi, decimal TongTienCoc);
+
+    private static PriceQuote CalculatePrice(DongMay model, int quantity, DateTime from, DateTime to)
+    {
+        var days = (int)Math.Ceiling((to - from).TotalDays);
+        var unitPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
+        return new PriceQuote(
+            model.MaDongMay, quantity, from, to, days,
+            model.GiaThueNgay, model.PhanTramGiamGia, unitPrice,
+            unitPrice * days * quantity, model.TienCoc, model.TienCoc * quantity
+        );
+    }
+
     private static void ApplyServerPrice(
         ChiTietGioHang item, DongMay model, int quantity, DateTime from, DateTime to)
     {
-        var days = (decimal)Math.Ceiling((to - from).TotalDays);
-        var unitPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
-        item.MaDongMay = model.MaDongMay;
-        item.SoLuong = quantity;
-        item.NgayBatDau = from;
-        item.NgayKetThuc = to;
-        item.DonGia = unitPrice;
-        item.TienCoc = model.TienCoc;
-        item.ThanhTien = unitPrice * days * quantity;
+        var quote = CalculatePrice(model, quantity, from, to);
+        item.MaDongMay = quote.MaDongMay;
+        item.SoLuong = quote.SoLuong;
+        item.NgayBatDau = quote.NgayBatDau;
+        item.NgayKetThuc = quote.NgayKetThuc;
+        item.DonGia = quote.DonGiaSauGiam;
+        item.TienCoc = quote.TienCocMotDonVi;
+        item.ThanhTien = quote.TongTienThue;
     }
 
     private static bool ValidPeriod(DateTime from, DateTime to) =>
