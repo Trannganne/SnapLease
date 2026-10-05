@@ -230,10 +230,13 @@ services:
       ElectronicSignature__MaxAttempts: "5"
       ElectronicSignature__TermsVersion: "1.0"
       ElectronicSignature__ReturnOtpInResponse: "true"
+      ContractFiles__Directory: "App_Data/contracts"
+      ContractFiles__MaximumMegabytes: "10"
     ports:
       - "5000:8080"
     volumes:
       - rentalcamera-api-keys:/app/.keys
+      - rentalcamera-contract-files:/app/App_Data/contracts
     depends_on:
       db-init:
         condition: service_completed_successfully
@@ -242,3 +245,4 @@ services:
 volumes:
   rentalcamera-sql-data:
   rentalcamera-api-keys:
+  rentalcamera-contract-files:

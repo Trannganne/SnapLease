@@ -14,6 +14,10 @@ IF COL_LENGTH('dbo.HopDong', 'MaBamNoiDung') IS NULL
     ALTER TABLE dbo.HopDong ADD MaBamNoiDung CHAR(64) NULL;
 GO
 
+IF COL_LENGTH('dbo.HopDong', 'MaBamTepPdf') IS NULL
+    ALTER TABLE dbo.HopDong ADD MaBamTepPdf CHAR(64) NULL;
+GO
+
 IF COL_LENGTH('dbo.HopDong', 'NoiDungHopDongJson') IS NULL
     ALTER TABLE dbo.HopDong ADD NoiDungHopDongJson NVARCHAR(MAX) NULL;
 GO
@@ -35,6 +39,7 @@ BEGIN
         ThietBiKy NVARCHAR(500) NULL,
         PhienBanDieuKhoan VARCHAR(20) NOT NULL,
         MaBamNoiDung CHAR(64) NOT NULL,
+        MaBamTepPdf CHAR(64) NULL,
         NoiDungHopDongJson NVARCHAR(MAX) NOT NULL,
         CONSTRAINT FK_XacNhanKyHopDong_HopDong
             FOREIGN KEY (MaHopDong) REFERENCES dbo.HopDong(MaHopDong),
@@ -45,6 +50,10 @@ BEGIN
         CONSTRAINT CK_XacNhanKyHopDong_Json CHECK (ISJSON(NoiDungHopDongJson) = 1)
     );
 END;
+GO
+
+IF COL_LENGTH('dbo.XacNhanKyHopDong', 'MaBamTepPdf') IS NULL
+    ALTER TABLE dbo.XacNhanKyHopDong ADD MaBamTepPdf CHAR(64) NULL;
 GO
 
 IF NOT EXISTS (

@@ -116,6 +116,7 @@ public sealed class HopDong
     public bool DaDongYDieuKhoan { get; set; }
     public string? PhienBanDieuKhoan { get; set; }
     public string? MaBamNoiDung { get; set; }
+    public string? MaBamTepPdf { get; set; }
     public string? NoiDungHopDongJson { get; set; }
 }
 
@@ -134,6 +135,7 @@ public sealed class XacNhanKyHopDong
     public string? ThietBiKy { get; set; }
     public string PhienBanDieuKhoan { get; set; } = "";
     public string MaBamNoiDung { get; set; } = "";
+    public string? MaBamTepPdf { get; set; }
     public string NoiDungHopDongJson { get; set; } = "";
 }
 

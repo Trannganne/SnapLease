@@ -421,6 +421,7 @@ CREATE TABLE HopDong (
     DaDongYDieuKhoan BIT NOT NULL DEFAULT 0,
     PhienBanDieuKhoan VARCHAR(20) NULL,
     MaBamNoiDung CHAR(64) NULL,
+    MaBamTepPdf CHAR(64) NULL,
     NoiDungHopDongJson NVARCHAR(MAX) NULL,
 
     CONSTRAINT FK_HopDong_GioHang
@@ -492,6 +493,7 @@ CREATE TABLE XacNhanKyHopDong (
     ThietBiKy NVARCHAR(500) NULL,
     PhienBanDieuKhoan VARCHAR(20) NOT NULL,
     MaBamNoiDung CHAR(64) NOT NULL,
+    MaBamTepPdf CHAR(64) NULL,
     NoiDungHopDongJson NVARCHAR(MAX) NOT NULL,
 
     CONSTRAINT FK_XacNhanKyHopDong_HopDong

@@ -217,6 +217,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.TrangThai).HasMaxLength(30).IsUnicode(false);
             entity.Property(x => x.PhienBanDieuKhoan).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaBamNoiDung).HasMaxLength(64).IsUnicode(false);
+            entity.Property(x => x.MaBamTepPdf).HasMaxLength(64).IsUnicode(false);
             entity.Property(x => x.TongTien).HasPrecision(18, 2);
             entity.Property(x => x.TongTienCoc).HasPrecision(18, 2);
             entity.HasOne<GioHang>().WithMany()
@@ -244,6 +245,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.ThietBiKy).HasMaxLength(500);
             entity.Property(x => x.PhienBanDieuKhoan).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaBamNoiDung).HasMaxLength(64).IsUnicode(false);
+            entity.Property(x => x.MaBamTepPdf).HasMaxLength(64).IsUnicode(false);
             entity.HasIndex(x => new { x.MaHopDong, x.TrangThai });
             entity.HasOne<HopDong>().WithMany()
                 .HasForeignKey(x => x.MaHopDong).OnDelete(DeleteBehavior.Restrict);

@@ -18,6 +18,18 @@ Lấy thông tin hợp đồng để hiển thị và kiểm tra trước khi k�
 GET /api/hop-dong/{maHopDong}
 ```
 
+Tải bản PDF cố định lên backend trước khi tạo OTP. Body của request là dữ liệu nhị phân của chính file PDF:
+
+```http
+PUT /api/hop-dong/{maHopDong}/tep-pdf
+Content-Type: application/pdf
+Authorization: Bearer ACCESS_TOKEN
+
+<PDF bytes>
+```
+
+Response trả `maBamTepPdf` được tính trực tiếp bằng SHA-256 từ byte của file. Backend giới hạn PDF tối đa 10 MB và từ chối dữ liệu không bắt đầu bằng header `%PDF-`.
+
 Khi người dùng tích đồng ý điều khoản, tạo OTP ký:
 
 ```http
@@ -44,12 +56,17 @@ Content-Type: application/json
 {
   "maXacNhan": "XK...",
   "maOtp": "123456",
-  "daDongYDieuKhoan": true,
-  "tepHopDongUrl": null
+  "daDongYDieuKhoan": true
 }
 ```
 
-Backend chỉ cho chính khách hàng sở hữu hợp đồng ký, OTP hết hạn sau 5 phút và khóa sau 5 lần nhập sai. Khi thành công, backend lưu bản chụp JSON của nội dung hợp đồng, mã băm SHA-256, phiên bản điều khoản, IP, thiết bị và thời gian xác nhận rồi chuyển hợp đồng sang `DA_KY`.
+Backend chỉ cho chính khách hàng sở hữu hợp đồng ký, OTP hết hạn sau 5 phút và khóa sau 5 lần nhập sai. Trước khi ký, backend băm lại file PDF và từ chối nếu file đã thay đổi. Khi thành công, backend lưu bản chụp JSON, mã băm nội dung, mã băm PDF, phiên bản điều khoản, IP, thiết bị và thời gian xác nhận rồi chuyển hợp đồng sang `DA_KY`.
+
+Tải lại PDF đã được kiểm tra mã băm:
+
+```http
+GET /api/hop-dong/{maHopDong}/tep-pdf
+```
 
 Tra cứu dấu vết ký, không trả về mã OTP hoặc mã băm OTP:
 
@@ -63,7 +80,7 @@ Lấy lại đúng bản nội dung đã được người dùng xác nhận và
 GET /api/hop-dong/{maHopDong}/noi-dung-da-ky
 ```
 
-Response có `maBamHopLe=true` khi nội dung lưu trong database vẫn khớp với mã băm lúc ký.
+Response có `maBamHopLe=true` khi nội dung JSON vẫn khớp và `maBamTepPdfHopLe=true` khi byte của PDF vẫn khớp mã băm lúc ký.
 
 ## 2. Yêu cầu gia hạn
 

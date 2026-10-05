@@ -42,6 +42,7 @@ builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCo
 builder.Services.AddSingleton<TokenIssuer>();
 builder.Services.AddSingleton<PasswordResetTokenService>();
 builder.Services.AddSingleton<ContractSignatureService>();
+builder.Services.AddSingleton<ContractPdfService>();
 builder.Services.AddScoped<AvailabilityService>();
 builder.Services.AddHostedService<ReservationExpirationService>();
 builder.Services.AddEndpointsApiExplorer();
