@@ -8,7 +8,9 @@ Tất cả API hợp đồng, thanh toán và gia hạn cần header:
 Authorization: Bearer ACCESS_TOKEN
 ```
 
-## 1. Ký hợp đồng
+## 1. Xác nhận hợp đồng bằng OTP
+
+Đây là ký điện tử mô phỏng phục vụ đồ án, không phải chữ ký số được nhà cung cấp chứng thư số chứng thực.
 
 Lấy thông tin hợp đồng để hiển thị và kiểm tra trước khi ký:
 
@@ -16,7 +18,22 @@ Lấy thông tin hợp đồng để hiển thị và kiểm tra trước khi k�
 GET /api/hop-dong/{maHopDong}
 ```
 
-Khi người dùng đã tích đồng ý điều khoản và bấm `Ký và xác nhận`:
+Khi người dùng tích đồng ý điều khoản, tạo OTP ký:
+
+```http
+POST /api/hop-dong/{maHopDong}/yeu-cau-ky
+Content-Type: application/json
+```
+
+```json
+{
+  "daDongYDieuKhoan": true
+}
+```
+
+Response trả `maXacNhan`, thời hạn OTP, phiên bản điều khoản và mã băm nội dung hợp đồng. Trong Development, `maOtp` cũng được trả về để kiểm thử; khi triển khai thật phải gửi OTP qua SMS/email.
+
+Sau khi người dùng nhập OTP và bấm `Ký và xác nhận`:
 
 ```http
 PUT /api/hop-dong/{maHopDong}/ky
@@ -25,13 +42,28 @@ Content-Type: application/json
 
 ```json
 {
+  "maXacNhan": "XK...",
+  "maOtp": "123456",
   "daDongYDieuKhoan": true,
-  "hinhThucKy": "DIEN_TU",
   "tepHopDongUrl": null
 }
 ```
 
-Backend chỉ cho chính khách hàng sở hữu hợp đồng ký, chỉ nhận hợp đồng đang `CHO_KY` và tự chuyển trạng thái sang `DA_KY`.
+Backend chỉ cho chính khách hàng sở hữu hợp đồng ký, OTP hết hạn sau 5 phút và khóa sau 5 lần nhập sai. Khi thành công, backend lưu bản chụp JSON của nội dung hợp đồng, mã băm SHA-256, phiên bản điều khoản, IP, thiết bị và thời gian xác nhận rồi chuyển hợp đồng sang `DA_KY`.
+
+Tra cứu dấu vết ký, không trả về mã OTP hoặc mã băm OTP:
+
+```http
+GET /api/hop-dong/{maHopDong}/lich-su-ky
+```
+
+Lấy lại đúng bản nội dung đã được người dùng xác nhận và kiểm tra mã băm:
+
+```http
+GET /api/hop-dong/{maHopDong}/noi-dung-da-ky
+```
+
+Response có `maBamHopLe=true` khi nội dung lưu trong database vẫn khớp với mã băm lúc ký.
 
 ## 2. Yêu cầu gia hạn
 
@@ -143,3 +175,11 @@ Content-Type: application/json
 ```
 
 Trong môi trường Development, response bước đầu có thể trả `resetToken` để kiểm thử. Khi triển khai thật phải gửi token qua email/SMS và tắt cấu hình trả token trong response.
+
+## Cập nhật database đang tồn tại
+
+Docker Compose tự chạy script cập nhật. Nếu cần chạy thủ công:
+
+```powershell
+docker compose run --rm --no-deps --entrypoint /bin/bash db-init -lc '/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$MSSQL_SA_PASSWORD" -C -b -i /database/06_add_electronic_signature.sql'
+```

@@ -1,5 +1,6 @@
 using System.Data;
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
@@ -72,7 +73,9 @@ public static class ContractEndpoints
                 ThoiGianBanGiao = hold.ChiTiet.Min(x => x.NgayBatDau),
                 ThoiGianTraDuKien = hold.ChiTiet.Max(x => x.NgayKetThuc),
                 TongTien = total, TongTienCoc = deposit,
-                HinhThucKy = null, TrangThai = "CHO_KY", TepHopDongUrl = null
+                HinhThucKy = null, TrangThai = "CHO_KY", TepHopDongUrl = null,
+                DaDongYDieuKhoan = false, PhienBanDieuKhoan = null,
+                MaBamNoiDung = null, NoiDungHopDongJson = null
             };
             db.HopDong.Add(contract);
             hold.TrangThai = "DA_CHUYEN_HOP_DONG";
@@ -150,28 +153,25 @@ public static class ContractEndpoints
                 contract.ThoiGianBanGiao, contract.ThoiGianTraDuKien,
                 contract.TongTien, contract.TongTienCoc, contract.HinhThucKy,
                 contract.TrangThai, contract.TepHopDongUrl,
+                contract.DaDongYDieuKhoan, contract.PhienBanDieuKhoan,
+                contract.MaBamNoiDung,
                 DatTheoDongMay = booked, ChiTiet = details,
                 ThanhToan = payments, PhuLuc = supplements
             });
         });
 
-        contracts.MapPut("/{id}/ky", async (
-            string id, SignContractRequest request, ClaimsPrincipal principal,
-            RentalCameraContext db, IConfiguration configuration, CancellationToken ct) =>
+        contracts.MapPost("/{id}/yeu-cau-ky", async (
+            string id, RequestContractSignatureRequest request, HttpContext httpContext,
+            ClaimsPrincipal principal, RentalCameraContext db,
+            ContractSignatureService signatureService, IConfiguration configuration,
+            CancellationToken ct) =>
         {
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customerId is null) return Results.Forbid();
             if (!request.DaDongYDieuKhoan)
                 return Results.BadRequest(new { loi = "Bạn phải đọc và đồng ý điều khoản hợp đồng trước khi ký." });
 
-            var signingMethod = string.IsNullOrWhiteSpace(request.HinhThucKy)
-                ? "DIEN_TU"
-                : request.HinhThucKy.Trim().ToUpperInvariant();
-            if (signingMethod is not ("DIEN_TU" or "MAN_HINH"))
-                return Results.BadRequest(new { loi = "Hình thức ký không hợp lệ." });
-            if (!IsValidHttpUrl(request.TepHopDongUrl))
-                return Results.BadRequest(new { loi = "URL tệp hợp đồng không hợp lệ." });
-
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
             var contract = await db.HopDong.SingleOrDefaultAsync(
                 x => x.MaHopDong == id && x.MaKhachThue == customerId, ct);
             if (contract is null) return Results.NotFound();
@@ -182,21 +182,185 @@ public static class ContractEndpoints
             {
                 contract.TrangThai = "DA_HUY";
                 await db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
                 return Results.Conflict(new { loi = "Hợp đồng đã quá thời hạn ký và đã bị hủy." });
             }
-            contract.NgayKy = DateTime.Now;
-            contract.HinhThucKy = signingMethod;
+
+            var termsVersion = configuration.GetValue("ElectronicSignature:TermsVersion", "1.0")!;
+            var snapshotJson = await BuildContractSnapshotAsync(contract, db, termsVersion, ct);
+            var contentHash = signatureService.HashContent(snapshotJson);
+            var otp = signatureService.GenerateOtp();
+            var (otpHash, salt) = signatureService.HashOtp(otp);
+            var now = DateTime.Now;
+            var lifetimeMinutes = Math.Clamp(
+                configuration.GetValue("ElectronicSignature:OtpLifetimeMinutes", 5), 1, 15);
+
+            var pendingRows = await db.XacNhanKyHopDong
+                .Where(x => x.MaHopDong == id && x.TrangThai == "CHO_XAC_NHAN")
+                .ToListAsync(ct);
+            foreach (var pending in pendingRows) pending.TrangThai = "DA_HUY";
+
+            var confirmation = new XacNhanKyHopDong
+            {
+                MaXacNhan = ApiAccess.NewId("XK"),
+                MaHopDong = id,
+                MaOtpHash = otpHash,
+                MuoiOtp = salt,
+                TaoLuc = now,
+                HetHanLuc = now.AddMinutes(lifetimeMinutes),
+                SoLanThu = 0,
+                TrangThai = "CHO_XAC_NHAN",
+                DiaChiIp = GetClientIp(httpContext),
+                ThietBiKy = GetUserAgent(httpContext),
+                PhienBanDieuKhoan = termsVersion,
+                MaBamNoiDung = contentHash,
+                NoiDungHopDongJson = snapshotJson
+            };
+            db.XacNhanKyHopDong.Add(confirmation);
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+
+            var exposeOtp = configuration.GetValue("ElectronicSignature:ReturnOtpInResponse", false);
+            return Results.Accepted(value: new
+            {
+                confirmation.MaXacNhan,
+                confirmation.MaHopDong,
+                confirmation.HetHanLuc,
+                confirmation.PhienBanDieuKhoan,
+                confirmation.MaBamNoiDung,
+                maOtp = exposeOtp ? otp : null,
+                kenhGui = exposeOtp ? "RESPONSE_KIEM_THU" : "CAN_TICH_HOP_SMS_EMAIL",
+                thongBao = exposeOtp
+                    ? "Đã tạo OTP ký hợp đồng để kiểm thử."
+                    : "Đã tạo yêu cầu ký; cần dịch vụ SMS/email để gửi OTP."
+            });
+        }).RequireAuthorization("Customer").RequireRateLimiting("auth");
+
+        contracts.MapPut("/{id}/ky", async (
+            string id, SignContractRequest request, HttpContext httpContext,
+            ClaimsPrincipal principal, RentalCameraContext db,
+            ContractSignatureService signatureService, IConfiguration configuration,
+            CancellationToken ct) =>
+        {
+            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+            if (customerId is null) return Results.Forbid();
+            if (!request.DaDongYDieuKhoan)
+                return Results.BadRequest(new { loi = "Bạn phải đồng ý điều khoản tại thời điểm xác nhận OTP." });
+            if (string.IsNullOrWhiteSpace(request.MaXacNhan) ||
+                string.IsNullOrWhiteSpace(request.MaOtp) || request.MaOtp.Length != 6 ||
+                request.MaOtp.Any(x => !char.IsDigit(x)))
+                return Results.BadRequest(new { loi = "Mã xác nhận hoặc OTP không hợp lệ." });
+            if (!IsValidHttpUrl(request.TepHopDongUrl))
+                return Results.BadRequest(new { loi = "URL tệp hợp đồng không hợp lệ." });
+
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            var contract = await db.HopDong.SingleOrDefaultAsync(
+                x => x.MaHopDong == id && x.MaKhachThue == customerId, ct);
+            if (contract is null) return Results.NotFound();
+            if (contract.TrangThai != "CHO_KY")
+                return Results.Conflict(new { loi = "Hợp đồng không ở trạng thái chờ ký." });
+
+            var confirmation = await db.XacNhanKyHopDong.SingleOrDefaultAsync(
+                x => x.MaXacNhan == request.MaXacNhan.Trim() && x.MaHopDong == id, ct);
+            if (confirmation is null) return Results.BadRequest(new { loi = "Không tìm thấy yêu cầu ký." });
+            if (confirmation.TrangThai != "CHO_XAC_NHAN")
+                return Results.Conflict(new { loi = "Yêu cầu ký đã được xử lý hoặc bị hủy." });
+
+            var now = DateTime.Now;
+            if (confirmation.HetHanLuc <= now)
+            {
+                confirmation.TrangThai = "HET_HAN";
+                await db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
+                return Results.BadRequest(new { loi = "OTP ký hợp đồng đã hết hạn." });
+            }
+
+            var maxAttempts = Math.Clamp(
+                configuration.GetValue("ElectronicSignature:MaxAttempts", 5), 1, 10);
+            if (!signatureService.VerifyOtp(request.MaOtp, confirmation.MaOtpHash, confirmation.MuoiOtp))
+            {
+                confirmation.SoLanThu++;
+                if (confirmation.SoLanThu >= maxAttempts) confirmation.TrangThai = "KHOA";
+                await db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
+                return Results.BadRequest(new
+                {
+                    loi = confirmation.TrangThai == "KHOA"
+                        ? "OTP sai quá số lần cho phép; hãy tạo yêu cầu ký mới."
+                        : "OTP không đúng.",
+                    soLanConLai = Math.Max(0, maxAttempts - confirmation.SoLanThu)
+                });
+            }
+
+            confirmation.SoLanThu++;
+            confirmation.TrangThai = "DA_XAC_NHAN";
+            confirmation.XacNhanLuc = now;
+            confirmation.DiaChiIp = GetClientIp(httpContext);
+            confirmation.ThietBiKy = GetUserAgent(httpContext);
+
+            contract.NgayKy = now;
+            contract.HinhThucKy = "DIEN_TU";
             contract.TepHopDongUrl = request.TepHopDongUrl?.Trim();
+            contract.DaDongYDieuKhoan = true;
+            contract.PhienBanDieuKhoan = confirmation.PhienBanDieuKhoan;
+            contract.MaBamNoiDung = confirmation.MaBamNoiDung;
+            contract.NoiDungHopDongJson = confirmation.NoiDungHopDongJson;
             contract.TrangThai = "DA_KY";
             await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+
             return Results.Ok(new
             {
                 contract.MaHopDong, contract.NgayKy, contract.HinhThucKy,
                 contract.TrangThai, contract.TepHopDongUrl,
-                daDongYDieuKhoan = true,
-                thongBao = "Ký và xác nhận hợp đồng thành công."
+                contract.DaDongYDieuKhoan, contract.PhienBanDieuKhoan,
+                contract.MaBamNoiDung,
+                loaiKy = "XAC_NHAN_DIEN_TU_MO_PHONG",
+                thongBao = "Xác nhận hợp đồng bằng OTP thành công."
             });
-        }).RequireAuthorization("Customer");
+        }).RequireAuthorization("Customer").RequireRateLimiting("auth");
+
+        contracts.MapGet("/{id}/lich-su-ky", async (
+            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            if (!await ApiAccess.CanAccessContractAsync(id, principal, db, ct)) return Results.Forbid();
+            var rows = await db.XacNhanKyHopDong.AsNoTracking()
+                .Where(x => x.MaHopDong == id)
+                .OrderByDescending(x => x.TaoLuc)
+                .Select(x => new
+                {
+                    x.MaXacNhan, x.MaHopDong, x.TaoLuc, x.HetHanLuc,
+                    x.SoLanThu, x.TrangThai, x.XacNhanLuc,
+                    x.DiaChiIp, x.ThietBiKy, x.PhienBanDieuKhoan,
+                    x.MaBamNoiDung
+                }).ToListAsync(ct);
+            return Results.Ok(rows);
+        });
+
+        contracts.MapGet("/{id}/noi-dung-da-ky", async (
+            string id, ClaimsPrincipal principal, RentalCameraContext db,
+            ContractSignatureService signatureService, CancellationToken ct) =>
+        {
+            if (!await ApiAccess.CanAccessContractAsync(id, principal, db, ct)) return Results.Forbid();
+            var contract = await db.HopDong.AsNoTracking()
+                .SingleOrDefaultAsync(x => x.MaHopDong == id, ct);
+            if (contract is null) return Results.NotFound();
+            if (contract.TrangThai == "CHO_KY" || string.IsNullOrWhiteSpace(contract.NoiDungHopDongJson) ||
+                string.IsNullOrWhiteSpace(contract.MaBamNoiDung))
+                return Results.Conflict(new { loi = "Hợp đồng chưa có nội dung đã xác nhận." });
+
+            var calculatedHash = signatureService.HashContent(contract.NoiDungHopDongJson);
+            return Results.Ok(new
+            {
+                contract.MaHopDong,
+                contract.NgayKy,
+                contract.PhienBanDieuKhoan,
+                contract.MaBamNoiDung,
+                maBamHopLe = string.Equals(calculatedHash, contract.MaBamNoiDung,
+                    StringComparison.OrdinalIgnoreCase),
+                noiDung = JsonSerializer.Deserialize<JsonElement>(contract.NoiDungHopDongJson)
+            });
+        });
 
         contracts.MapPost("/{id}/huy", async (
             string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
@@ -493,6 +657,57 @@ public static class ContractEndpoints
                uri.Scheme is "http" or "https";
     }
 
+    private static string? GetClientIp(HttpContext context)
+    {
+        var value = context.Connection.RemoteIpAddress?.ToString();
+        return string.IsNullOrWhiteSpace(value) ? null : value[..Math.Min(value.Length, 45)];
+    }
+
+    private static string? GetUserAgent(HttpContext context)
+    {
+        var value = context.Request.Headers.UserAgent.ToString();
+        return string.IsNullOrWhiteSpace(value) ? null : value[..Math.Min(value.Length, 500)];
+    }
+
+    private static async Task<string> BuildContractSnapshotAsync(
+        HopDong contract, RentalCameraContext db, string termsVersion, CancellationToken ct)
+    {
+        var customer = await db.KhachThue.AsNoTracking()
+            .Where(x => x.MaKhachThue == contract.MaKhachThue)
+            .Select(x => new { x.MaKhachThue, x.HoTen, x.SoDienThoai, x.Email, x.CCCD, x.DiaChi })
+            .SingleAsync(ct);
+        var store = await db.CuaHang.AsNoTracking()
+            .Where(x => x.MaCuaHang == contract.MaCuaHang)
+            .Select(x => new { x.MaCuaHang, x.TenCuaHang, x.DiaChi, x.SoDienThoai, x.Email })
+            .SingleAsync(ct);
+        var items = await db.ChiTietGioHang.AsNoTracking()
+            .Where(x => x.MaGioHang == contract.MaGioHang)
+            .Join(db.DongMay.AsNoTracking(), x => x.MaDongMay, x => x.MaDongMay,
+                (line, model) => new
+                {
+                    line.MaDongMay, model.TenDongMay, line.SoLuong,
+                    line.NgayBatDau, line.NgayKetThuc,
+                    line.DonGia, line.TienCoc, line.ThanhTien
+                })
+            .OrderBy(x => x.MaDongMay)
+            .ToListAsync(ct);
+
+        return JsonSerializer.Serialize(new
+        {
+            schemaVersion = "1.0",
+            phienBanDieuKhoan = termsVersion,
+            hopDong = new
+            {
+                contract.MaHopDong, contract.NgayTaoHopDong,
+                contract.ThoiGianBanGiao, contract.ThoiGianTraDuKien,
+                contract.TongTien, contract.TongTienCoc
+            },
+            khachHang = customer,
+            cuaHang = store,
+            chiTietThue = items
+        }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+    }
+
     private static async Task<ExtensionQuote> CalculateExtensionQuoteAsync(
         HopDong contract,
         DateTime newReturnTime,
@@ -540,9 +755,11 @@ public static class ContractEndpoints
     }
 }
 
+public sealed record RequestContractSignatureRequest(bool DaDongYDieuKhoan);
 public sealed record SignContractRequest(
+    string MaXacNhan,
+    string MaOtp,
     bool DaDongYDieuKhoan,
-    string? HinhThucKy = null,
     string? TepHopDongUrl = null);
 public sealed record PrepareDevicesRequest(List<string> MaThietBi);
 public sealed record CreatePaymentRequest(string? PhuongThuc, string? NoiDungChuyenKhoan);

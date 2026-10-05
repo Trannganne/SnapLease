@@ -41,6 +41,7 @@ builder.Services.AddScoped<IPasswordHasher<TaiKhoan>, PasswordHasher<TaiKhoan>>(
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 100_000);
 builder.Services.AddSingleton<TokenIssuer>();
 builder.Services.AddSingleton<PasswordResetTokenService>();
+builder.Services.AddSingleton<ContractSignatureService>();
 builder.Services.AddScoped<AvailabilityService>();
 builder.Services.AddHostedService<ReservationExpirationService>();
 builder.Services.AddEndpointsApiExplorer();

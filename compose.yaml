@@ -97,7 +97,17 @@ services:
 
         case "$$DB_STATE" in
           READY)
-            echo "Database da khoi tao day du, bo qua buoc tao moi."
+            echo "Database da khoi tao, dang cap nhat cau truc ky dien tu..."
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/06_add_electronic_signature.sql
+            echo "Cap nhat database thanh cong."
             exit 0
             ;;
           MISSING)
@@ -138,6 +148,18 @@ services:
           -V 16 \
           -i /database/02_sample_data.sql
 
+        echo "Dang bo sung cau truc ky dien tu..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/06_add_electronic_signature.sql
+
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \
           -U sa \
@@ -166,6 +188,7 @@ services:
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.GiuCho', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietGiuCho', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.HopDong', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.XacNhanKyHopDong', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietHopDong', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ThanhToan', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.PhuLuc', N'U') IS NOT NULL
@@ -203,6 +226,10 @@ services:
       Rental__ContractSignMinutes: "30"
       PasswordReset__TokenLifetimeMinutes: "15"
       PasswordReset__ReturnTokenInResponse: "true"
+      ElectronicSignature__OtpLifetimeMinutes: "5"
+      ElectronicSignature__MaxAttempts: "5"
+      ElectronicSignature__TermsVersion: "1.0"
+      ElectronicSignature__ReturnOtpInResponse: "true"
     ports:
       - "5000:8080"
     volumes:
