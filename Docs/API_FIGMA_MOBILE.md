@@ -162,6 +162,43 @@ Content-Type: application/json
 
 Với chuyển khoản hoặc ví điện tử, `maGiaoDich` là bắt buộc khi xác nhận thành công.
 
+### Thanh toán cọc qua VNPAY-QR Sandbox
+
+Tạo khoản cọc với `phuongThuc` là `VI_DIEN_TU`, sau đó gọi:
+
+```http
+POST /api/thanh-toan/{maThanhToan}/vnpay
+Authorization: Bearer {accessToken}
+```
+
+Backend tự lấy số tiền từ database và trả về `paymentUrl`. Flutter mở URL này bằng trình duyệt hoặc WebView để khách quét VNPAY-QR. Không gửi số tiền từ Flutter.
+
+```json
+{
+  "maThanhToan": "TT...",
+  "maHopDong": "HD...",
+  "soTien": 500000,
+  "trangThai": "CHO_THANH_TOAN",
+  "nhaCungCap": "VNPAY",
+  "maThamChieu": "TT...",
+  "thoiGianHetHan": "2026-10-07T04:00:00Z",
+  "paymentUrl": "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?...",
+  "reused": false,
+  "phuongThuc": "VNPAYQR"
+}
+```
+
+VNPAY gọi hai endpoint công khai:
+
+```http
+GET /api/thanh-toan/vnpay/ipn
+GET /api/thanh-toan/vnpay/return
+```
+
+`ipn` là nguồn kết quả chính thức và tự cập nhật `THANH_CONG` hoặc `THAT_BAI`. `return` chỉ kiểm tra chữ ký và trả kết quả hiển thị; Flutter vẫn phải gọi `GET /api/thanh-toan/{maThanhToan}` để đọc trạng thái trong database.
+
+Hướng dẫn cấu hình và kiểm thử: `Docs/VNPAY_SANDBOX.md`.
+
 ## 4. Quên mật khẩu
 
 Yêu cầu token bằng email hoặc số điện thoại:

@@ -569,6 +569,14 @@ CREATE TABLE ThanhToan (
     ThoiGian DATETIME2 NULL,
     TrangThai VARCHAR(20) NOT NULL DEFAULT 'CHO_THANH_TOAN',
     NoiDungChuyenKhoan NVARCHAR(500) NULL,
+    NhaCungCap VARCHAR(20) NULL,
+    MaThamChieu VARCHAR(100) NULL,
+    MaNganHang VARCHAR(20) NULL,
+    LoaiThe VARCHAR(20) NULL,
+    MaPhanHoi VARCHAR(10) NULL,
+    DuongDanThanhToan VARCHAR(2000) NULL,
+    ThoiGianHetHan DATETIME2 NULL,
+    ThoiGianCapNhat DATETIME2 NULL,
 
     CONSTRAINT FK_ThanhToan_HopDong
         FOREIGN KEY (MaHopDong) REFERENCES HopDong(MaHopDong),
@@ -789,6 +797,11 @@ GO
 CREATE UNIQUE INDEX UX_ThanhToan_MaGiaoDich
 ON ThanhToan(MaGiaoDich)
 WHERE MaGiaoDich IS NOT NULL;
+GO
+
+CREATE UNIQUE INDEX UX_ThanhToan_MaThamChieu
+ON ThanhToan(MaThamChieu)
+WHERE MaThamChieu IS NOT NULL;
 GO
 
 CREATE INDEX IX_ThanhToan_HopDong

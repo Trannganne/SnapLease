@@ -45,6 +45,8 @@ Copy-Item .env.example .env
 
 File `.env` chỉ dùng trên máy cá nhân và không được commit lên GitHub.
 
+Để thử thanh toán VNPAY-QR Sandbox, điền thêm các biến `VNPAY_*` trong `.env` theo hướng dẫn tại [`Docs/VNPAY_SANDBOX.md`](./Docs/VNPAY_SANDBOX.md). Giữ `VNPAY_ENABLED=false` nếu chưa có tài khoản Sandbox; Health và các API khác vẫn hoạt động bình thường.
+
 ### 3. Khởi động hệ thống
 
 ```powershell

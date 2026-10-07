@@ -289,6 +289,13 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.PhuongThuc).HasMaxLength(30).IsUnicode(false);
             entity.Property(x => x.MaGiaoDich).HasMaxLength(100).IsUnicode(false);
             entity.Property(x => x.TrangThai).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.NhaCungCap).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaThamChieu).HasMaxLength(100).IsUnicode(false);
+            entity.Property(x => x.MaNganHang).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.LoaiThe).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaPhanHoi).HasMaxLength(10).IsUnicode(false);
+            entity.Property(x => x.DuongDanThanhToan).HasMaxLength(2000).IsUnicode(false);
+            entity.HasIndex(x => x.MaThamChieu).IsUnique().HasFilter("[MaThamChieu] IS NOT NULL");
             entity.HasOne<HopDong>().WithMany()
                 .HasForeignKey(x => x.MaHopDong).OnDelete(DeleteBehavior.Restrict);
         });
