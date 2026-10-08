@@ -97,7 +97,26 @@ services:
 
         case "$$DB_STATE" in
           READY)
-            echo "Database da khoi tao day du, bo qua buoc tao moi."
+            echo "Database da khoi tao, dang chay cac script cap nhat..."
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/06_add_electronic_signature.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/07_add_vnpay_payment.sql
+            echo "Cap nhat database thanh cong."
             exit 0
             ;;
           MISSING)
@@ -138,6 +157,30 @@ services:
           -V 16 \
           -i /database/02_sample_data.sql
 
+        echo "Dang bo sung cau truc ky dien tu..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/06_add_electronic_signature.sql
+
+        echo "Dang bo sung cau truc thanh toan VNPAY..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/07_add_vnpay_payment.sql
+
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \
           -U sa \
@@ -166,6 +209,7 @@ services:
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.GiuCho', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietGiuCho', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.HopDong', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.XacNhanKyHopDong', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietHopDong', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ThanhToan', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.PhuLuc', N'U') IS NOT NULL
@@ -203,11 +247,26 @@ services:
       Rental__ContractSignMinutes: "30"
       PasswordReset__TokenLifetimeMinutes: "15"
       PasswordReset__ReturnTokenInResponse: "true"
+      ElectronicSignature__OtpLifetimeMinutes: "5"
+      ElectronicSignature__MaxAttempts: "5"
+      ElectronicSignature__TermsVersion: "1.0"
+      ElectronicSignature__ReturnOtpInResponse: "true"
+      ContractFiles__Directory: "App_Data/contracts"
+      ContractFiles__MaximumMegabytes: "10"
+      Vnpay__Enabled: "${VNPAY_ENABLED:-false}"
+      Vnpay__TmnCode: "${VNPAY_TMN_CODE:-}"
+      Vnpay__HashSecret: "${VNPAY_HASH_SECRET:-}"
+      Vnpay__PaymentUrl: "${VNPAY_PAYMENT_URL:-https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}"
+      Vnpay__ReturnUrl: "${VNPAY_RETURN_URL:-http://localhost:5000/api/thanh-toan/vnpay/return}"
+      Vnpay__IpnUrl: "${VNPAY_IPN_URL:-}"
+      Vnpay__MobileCallbackUrl: "${VNPAY_MOBILE_CALLBACK_URL:-}"
+      Vnpay__ExpirationMinutes: "${VNPAY_EXPIRATION_MINUTES:-15}"
     ports:
       - "5000:8080"
     volumes:
       - rentalcamera-api-keys:/app/.keys
       - rentalcamera-api-storage:/app/Storage
+      - rentalcamera-contract-files:/app/App_Data/contracts
     depends_on:
       db-init:
         condition: service_completed_successfully
@@ -217,3 +276,4 @@ volumes:
   rentalcamera-sql-data:
   rentalcamera-api-keys:
   rentalcamera-api-storage:
+  rentalcamera-contract-files:

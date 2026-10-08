@@ -418,6 +418,11 @@ CREATE TABLE HopDong (
     HinhThucKy VARCHAR(20) NULL,
     TrangThai VARCHAR(30) NOT NULL DEFAULT 'CHO_KY',
     TepHopDongUrl NVARCHAR(500) NULL,
+    DaDongYDieuKhoan BIT NOT NULL DEFAULT 0,
+    PhienBanDieuKhoan VARCHAR(20) NULL,
+    MaBamNoiDung CHAR(64) NULL,
+    MaBamTepPdf CHAR(64) NULL,
+    NoiDungHopDongJson NVARCHAR(MAX) NULL,
 
     CONSTRAINT FK_HopDong_GioHang
         FOREIGN KEY (MaGioHang) REFERENCES GioHang(MaGioHang),
@@ -470,7 +475,50 @@ CREATE TABLE HopDong (
 GO
 
 /* ================================================================
-   16. CHI TIET HOP DONG
+   16. XAC NHAN KY HOP DONG
+   OTP chi luu dang bam; day la ky dien tu mo phong, khong phai chu ky
+   so duoc nha cung cap chung thu so chung thuc.
+================================================================ */
+CREATE TABLE XacNhanKyHopDong (
+    MaXacNhan VARCHAR(20) NOT NULL PRIMARY KEY,
+    MaHopDong VARCHAR(20) NOT NULL,
+    MaOtpHash CHAR(64) NOT NULL,
+    MuoiOtp CHAR(32) NOT NULL,
+    TaoLuc DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    HetHanLuc DATETIME2 NOT NULL,
+    SoLanThu INT NOT NULL DEFAULT 0,
+    TrangThai VARCHAR(20) NOT NULL DEFAULT 'CHO_XAC_NHAN',
+    XacNhanLuc DATETIME2 NULL,
+    DiaChiIp VARCHAR(45) NULL,
+    ThietBiKy NVARCHAR(500) NULL,
+    PhienBanDieuKhoan VARCHAR(20) NOT NULL,
+    MaBamNoiDung CHAR(64) NOT NULL,
+    MaBamTepPdf CHAR(64) NULL,
+    NoiDungHopDongJson NVARCHAR(MAX) NOT NULL,
+
+    CONSTRAINT FK_XacNhanKyHopDong_HopDong
+        FOREIGN KEY (MaHopDong) REFERENCES HopDong(MaHopDong),
+
+    CONSTRAINT CK_XacNhanKyHopDong_ThoiGian
+        CHECK (HetHanLuc > TaoLuc),
+
+    CONSTRAINT CK_XacNhanKyHopDong_SoLanThu
+        CHECK (SoLanThu >= 0),
+
+    CONSTRAINT CK_XacNhanKyHopDong_TrangThai
+        CHECK (TrangThai IN ('CHO_XAC_NHAN','DA_XAC_NHAN','HET_HAN','DA_HUY','KHOA')),
+
+    CONSTRAINT CK_XacNhanKyHopDong_Json
+        CHECK (ISJSON(NoiDungHopDongJson) = 1)
+);
+GO
+
+CREATE INDEX IX_XacNhanKyHopDong_HopDong_TrangThai
+    ON XacNhanKyHopDong(MaHopDong, TrangThai);
+GO
+
+/* ================================================================
+   17. CHI TIET HOP DONG
    Serial vat ly duoc gan sau.
 ================================================================ */
 CREATE TABLE ChiTietHopDong (
@@ -521,6 +569,14 @@ CREATE TABLE ThanhToan (
     ThoiGian DATETIME2 NULL,
     TrangThai VARCHAR(20) NOT NULL DEFAULT 'CHO_THANH_TOAN',
     NoiDungChuyenKhoan NVARCHAR(500) NULL,
+    NhaCungCap VARCHAR(20) NULL,
+    MaThamChieu VARCHAR(100) NULL,
+    MaNganHang VARCHAR(20) NULL,
+    LoaiThe VARCHAR(20) NULL,
+    MaPhanHoi VARCHAR(10) NULL,
+    DuongDanThanhToan VARCHAR(2000) NULL,
+    ThoiGianHetHan DATETIME2 NULL,
+    ThoiGianCapNhat DATETIME2 NULL,
 
     CONSTRAINT FK_ThanhToan_HopDong
         FOREIGN KEY (MaHopDong) REFERENCES HopDong(MaHopDong),
@@ -741,6 +797,11 @@ GO
 CREATE UNIQUE INDEX UX_ThanhToan_MaGiaoDich
 ON ThanhToan(MaGiaoDich)
 WHERE MaGiaoDich IS NOT NULL;
+GO
+
+CREATE UNIQUE INDEX UX_ThanhToan_MaThamChieu
+ON ThanhToan(MaThamChieu)
+WHERE MaThamChieu IS NOT NULL;
 GO
 
 CREATE INDEX IX_ThanhToan_HopDong

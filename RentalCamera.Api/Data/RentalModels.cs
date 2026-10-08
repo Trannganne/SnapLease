@@ -120,6 +120,30 @@ public sealed class HopDong
     public decimal TongTienCoc { get; set; }
     public string? HinhThucKy { get; set; }
     public string? TepHopDongUrl { get; set; }
+    public bool DaDongYDieuKhoan { get; set; }
+    public string? PhienBanDieuKhoan { get; set; }
+    public string? MaBamNoiDung { get; set; }
+    public string? MaBamTepPdf { get; set; }
+    public string? NoiDungHopDongJson { get; set; }
+}
+
+public sealed class XacNhanKyHopDong
+{
+    public string MaXacNhan { get; set; } = "";
+    public string MaHopDong { get; set; } = "";
+    public string MaOtpHash { get; set; } = "";
+    public string MuoiOtp { get; set; } = "";
+    public DateTime TaoLuc { get; set; }
+    public DateTime HetHanLuc { get; set; }
+    public int SoLanThu { get; set; }
+    public string TrangThai { get; set; } = "";
+    public DateTime? XacNhanLuc { get; set; }
+    public string? DiaChiIp { get; set; }
+    public string? ThietBiKy { get; set; }
+    public string PhienBanDieuKhoan { get; set; } = "";
+    public string MaBamNoiDung { get; set; } = "";
+    public string? MaBamTepPdf { get; set; }
+    public string NoiDungHopDongJson { get; set; } = "";
 }
 
 public sealed class ChiTietHopDong
@@ -159,6 +183,14 @@ public sealed class ThanhToan
     public DateTime? ThoiGian { get; set; }
     public string TrangThai { get; set; } = "";
     public string? NoiDungChuyenKhoan { get; set; }
+    public string? NhaCungCap { get; set; }
+    public string? MaThamChieu { get; set; }
+    public string? MaNganHang { get; set; }
+    public string? LoaiThe { get; set; }
+    public string? MaPhanHoi { get; set; }
+    public string? DuongDanThanhToan { get; set; }
+    public DateTime? ThoiGianHetHan { get; set; }
+    public DateTime? ThoiGianCapNhat { get; set; }
 }
 
 public sealed class PhieuPhat
