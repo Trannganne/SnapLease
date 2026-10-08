@@ -14,12 +14,17 @@ public sealed class KhachThue
 {
     public string MaKhachThue { get; set; } = "";
     public string MaTaiKhoan { get; set; } = "";
-    public string HoTen { get; set; } = "";
+    public string? HoTen { get; set; }
     public string SoDienThoai { get; set; } = "";
     public string? Email { get; set; }
     public string? CCCD { get; set; }
     public string? DiaChi { get; set; }
     public DateOnly? NgaySinh { get; set; }
+    public string? GioiTinh { get; set; }
+    public string? QuocTich { get; set; }
+    public DateOnly? NgayCap { get; set; }
+    public string? NoiCap { get; set; }
+    public bool DaXacNhanThongTin { get; set; }
 }
 
 public sealed class GiayToTuyThan
@@ -52,7 +57,6 @@ public sealed class GioHang
 {
     public string MaGioHang { get; set; } = "";
     public string MaKhachThue { get; set; } = "";
-    public string MaCuaHang { get; set; } = "";
     public DateTime NgayTao { get; set; }
     public DateTime NgayCapNhat { get; set; }
     public string TrangThai { get; set; } = "";
@@ -63,6 +67,8 @@ public sealed class ChiTietGioHang
 {
     public string MaChiTietGioHang { get; set; } = "";
     public string MaGioHang { get; set; } = "";
+    public string MaCuaHang { get; set; } = "";
+    public string NguonTao { get; set; } = "GIO_HANG";
     public string MaDongMay { get; set; } = "";
     public int SoLuong { get; set; }
     public DateTime NgayBatDau { get; set; }
@@ -89,6 +95,7 @@ public sealed class ChiTietGiuCho
 {
     public string MaChiTietGiuCho { get; set; } = "";
     public string MaGiuCho { get; set; } = "";
+    public string? MaChiTietGioHang { get; set; }
     public string MaDongMay { get; set; } = "";
     public int SoLuong { get; set; }
     public DateTime NgayBatDau { get; set; }
@@ -194,4 +201,14 @@ public sealed class ThongBao
     public string NoiDung { get; set; } = "";
     public DateTime ThoiGianGui { get; set; }
     public bool DaDoc { get; set; }
+}
+
+public sealed class IdempotencyKeyRecord
+{
+    public string IdempotencyKey { get; set; } = "";
+    public string MaKhachThue { get; set; } = "";
+    public string LoaiThaoTac { get; set; } = "";
+    public string PayloadHash { get; set; } = "";
+    public string MaThucThe { get; set; } = "";
+    public DateTime NgayTao { get; set; }
 }

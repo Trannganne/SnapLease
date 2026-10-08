@@ -33,7 +33,7 @@ public sealed class AvailabilityService(RentalCameraContext db)
                 WHERE gc.MaCuaHang = @store
                   AND ct.MaDongMay = @model
                   AND gc.TrangThai = 'DANG_GIU'
-                  AND gc.HetHanLuc > SYSDATETIME()
+                  AND gc.HetHanLuc > SYSUTCDATETIME()
                   AND (@excludeHold IS NULL OR gc.MaGiuCho <> @excludeHold)
                   AND ct.NgayBatDau < @toDate
                   AND ct.NgayKetThuc > @fromDate

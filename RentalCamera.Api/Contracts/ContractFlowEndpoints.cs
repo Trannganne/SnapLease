@@ -20,9 +20,9 @@ public static class ContractEndpoints
             var hold = await db.GiuCho.Include(x => x.ChiTiet)
                 .SingleOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
             if (hold is null) return Results.NotFound();
-            if (hold.TrangThai != "DANG_GIU" || hold.HetHanLuc <= DateTime.Now || hold.ChiTiet.Count == 0)
+            if (hold.TrangThai != "DANG_GIU" || hold.HetHanLuc <= DateTime.UtcNow || hold.ChiTiet.Count == 0)
             {
-                if (hold.TrangThai == "DANG_GIU" && hold.HetHanLuc <= DateTime.Now)
+                if (hold.TrangThai == "DANG_GIU" && hold.HetHanLuc <= DateTime.UtcNow)
                 {
                     hold.TrangThai = "HET_HAN";
                     await db.SaveChangesAsync(ct);

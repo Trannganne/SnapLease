@@ -207,6 +207,7 @@ services:
       - "5000:8080"
     volumes:
       - rentalcamera-api-keys:/app/.keys
+      - rentalcamera-api-storage:/app/Storage
     depends_on:
       db-init:
         condition: service_completed_successfully
@@ -215,3 +216,4 @@ services:
 volumes:
   rentalcamera-sql-data:
   rentalcamera-api-keys:
+  rentalcamera-api-storage:
