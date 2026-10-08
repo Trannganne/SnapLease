@@ -29,6 +29,48 @@ public static class RentalEndpoints
             });
         });
 
+        app.MapGet("/api/lich-trong/thang", async (
+            string maCuaHang, string maDongMay, int soLuong, int thang, int nam, string? maGiuCho,
+            AvailabilityService availability, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            if (string.IsNullOrWhiteSpace(maCuaHang) || string.IsNullOrWhiteSpace(maDongMay) || soLuong is < 1 or > 10 || thang is < 1 or > 12 || nam < 2020)
+                return Results.BadRequest(new { loi = "Tham số không hợp lệ." });
+                
+            if (!string.IsNullOrEmpty(maGiuCho))
+            {
+                var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+                if (customerId == null)
+                    return Results.Unauthorized();
+                
+                var giuCho = await db.GiuCho.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.MaGiuCho == maGiuCho && x.MaKhachThue == customerId, ct);
+                if (giuCho == null)
+                    return Results.Forbid();
+            }
+
+            var monthStart = new DateTime(nam, thang, 1);
+            var monthEnd = monthStart.AddMonths(1);
+            
+            // Allow looking up to 6 months ahead
+            if (monthStart < new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1) || monthStart > DateTime.Now.AddMonths(6))
+                return Results.BadRequest(new { loi = "Khoảng thời gian xem lịch không hợp lệ." });
+
+            var list = await availability.GetMonthlyAvailabilityAsync(
+                maCuaHang, maDongMay, soLuong, monthStart, monthEnd, maGiuCho, null, ct);
+                
+            return Results.Ok(new
+            {
+                maCuaHang, maDongMay, soLuong, thang, nam,
+                thoiGianServer = DateTime.UtcNow,
+                ngayList = list.Select(x => new
+                {
+                    ngay = x.Ngay.ToString("yyyy-MM-dd"),
+                    soLuongKhaDungMin = x.SoLuongKhaDungMin,
+                    trangThai = x.TrangThai
+                })
+            });
+        });
+
         app.MapGet("/api/tam-tinh", async (
             string maCuaHang, string maDongMay, int soLuong, DateTime ngayBatDau, DateTime ngayKetThuc,
             RentalCameraContext db, CancellationToken ct) =>
@@ -302,7 +344,7 @@ public static class RentalEndpoints
                         return Results.BadRequest(new { loi = "Giữ chỗ không còn hiệu lực để cập nhật." });
 
                     if (!await db.CuaHang.AnyAsync(x => x.MaCuaHang == request.MaCuaHang && x.TrangThai == "HOAT_DONG", ct))
-                        return Results.NotFound(new { loi = "Cửa hàng mới không tồn tại hoặc đang khóa." });
+                        return Results.NotFound(new { loi = "Cửa hàng mới không tồn tại hoặc đang khóa.", code = "BRANCH_NOT_FOUND" });
 
                     var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
                     if (model is null) return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
@@ -311,7 +353,7 @@ public static class RentalEndpoints
                     var available = await availability.GetAvailableAsync(request.MaCuaHang, request.MaDongMay,
                         request.NgayBatDau, request.NgayKetThuc, hold.MaGiuCho, null, ct);
                     if (available < request.SoLuong)
-                        return Results.Conflict(new { loi = "Không đủ thiết bị còn trống tại chi nhánh và thời gian này." });
+                        return Results.Conflict(new { loi = "Không đủ thiết bị còn trống tại chi nhánh và thời gian này.", code = "INSUFFICIENT_DEVICES" });
 
                     // Update GiuCho
                     hold.MaCuaHang = request.MaCuaHang;

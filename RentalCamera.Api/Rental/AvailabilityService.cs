@@ -97,4 +97,58 @@ public sealed class AvailabilityService(RentalCameraContext db)
             
         return result.Single();
     }
+
+    public sealed record DailyAvailability(DateTime Ngay, int SoLuongKhaDungMin, string TrangThai);
+
+    public async Task<List<DailyAvailability>> GetMonthlyAvailabilityAsync(
+        string storeId,
+        string modelId,
+        int requiredQuantity,
+        DateTime monthStart,
+        DateTime monthEnd,
+        string? excludeHoldId,
+        string? excludeContractId,
+        CancellationToken ct)
+    {
+        var capSql = """
+            SELECT COUNT(*) AS TongMay
+            FROM ThietBi WITH (NOLOCK)
+            WHERE MaCuaHang = @store
+              AND MaDongMay = @model
+              AND TrangThai IN ('SAN_SANG','DANG_GIU','DANG_THUE')
+            """;
+
+        var tongMayList = await db.Database.SqlQueryRaw<int>(capSql,
+            new SqlParameter("@store", storeId),
+            new SqlParameter("@model", modelId)).ToListAsync(ct);
+        int tongMay = tongMayList.FirstOrDefault();
+
+        var results = new List<DailyAvailability>();
+
+        if ((monthEnd - monthStart).TotalDays > 60)
+            monthEnd = monthStart.AddDays(60);
+
+        // Fetch each day's availability using the existing robust logic
+        for (var date = monthStart.Date; date < monthEnd.Date; date = date.AddDays(1))
+        {
+            var dayStart = date;
+            var dayEnd = date.AddDays(1);
+
+            int available = await GetAvailableAsync(storeId, modelId, dayStart, dayEnd, excludeHoldId, excludeContractId, ct);
+
+            string trangThai = "KHONG_DAU";
+            if (available < requiredQuantity)
+            {
+                trangThai = "DO";
+            }
+            else if (available < tongMay)
+            {
+                trangThai = "VANG";
+            }
+
+            results.Add(new DailyAvailability(date, available, trangThai));
+        }
+
+        return results;
+    }
 }
