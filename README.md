@@ -47,6 +47,8 @@ File `.env` chỉ dùng trên máy cá nhân và không được commit lên Git
 
 Để thử thanh toán VNPAY-QR Sandbox, điền thêm các biến `VNPAY_*` trong `.env` theo hướng dẫn tại [`Docs/VNPAY_SANDBOX.md`](./Docs/VNPAY_SANDBOX.md). Giữ `VNPAY_ENABLED=false` nếu chưa có tài khoản Sandbox; Health và các API khác vẫn hoạt động bình thường.
 
+Để gửi OTP ký hợp đồng qua Gmail, điền các biến `EMAIL_*` bằng App Password theo hướng dẫn tại [`Docs/GUI_OTP_KY_HOP_DONG_QUA_EMAIL.md`](./Docs/GUI_OTP_KY_HOP_DONG_QUA_EMAIL.md).
+
 ### 3. Khởi động hệ thống
 
 ```powershell

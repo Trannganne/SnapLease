@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
+using RentalCamera.Api.Email;
 using RentalCamera.Api.Infrastructure;
 using RentalCamera.Api.Rental;
 
@@ -214,13 +215,31 @@ public static class ContractEndpoints
             string id, RequestContractSignatureRequest request, HttpContext httpContext,
             ClaimsPrincipal principal, RentalCameraContext db,
             ContractSignatureService signatureService, ContractPdfService pdfService,
-            IConfiguration configuration,
+            IContractOtpEmailSender emailSender, IConfiguration configuration,
             CancellationToken ct) =>
         {
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customerId is null) return Results.Forbid();
             if (!request.DaDongYDieuKhoan)
                 return Results.BadRequest(new { loi = "Bạn phải đọc và đồng ý điều khoản hợp đồng trước khi ký." });
+
+            var allowTestResponse = configuration.GetValue(
+                "ElectronicSignature:ReturnOtpInResponse", false);
+            if (!emailSender.IsConfigured && !allowTestResponse)
+                return Results.Problem(
+                    title: "Dịch vụ gửi OTP qua email chưa được cấu hình.",
+                    statusCode: StatusCodes.Status503ServiceUnavailable);
+
+            var recipient = await db.KhachThue.AsNoTracking()
+                .Where(x => x.MaKhachThue == customerId)
+                .Select(x => new { x.HoTen, x.Email })
+                .SingleOrDefaultAsync(ct);
+            if (recipient is null) return Results.Forbid();
+            if (emailSender.IsConfigured && string.IsNullOrWhiteSpace(recipient.Email))
+                return Results.BadRequest(new
+                {
+                    loi = "Tài khoản khách hàng chưa có email để nhận OTP ký hợp đồng."
+                });
 
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
             var contract = await db.HopDong.SingleOrDefaultAsync(
@@ -275,7 +294,30 @@ public static class ContractEndpoints
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
 
-            var exposeOtp = configuration.GetValue("ElectronicSignature:ReturnOtpInResponse", false);
+            var emailSent = false;
+            if (emailSender.IsConfigured)
+            {
+                try
+                {
+                    await emailSender.SendAsync(
+                        recipient.Email!, recipient.HoTen, id, otp, confirmation.HetHanLuc, ct);
+                    emailSent = true;
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch
+                {
+                    confirmation.TrangThai = "DA_HUY";
+                    await db.SaveChangesAsync(ct);
+                    return Results.Problem(
+                        title: "Không thể gửi OTP qua email. Yêu cầu ký đã được hủy; vui lòng thử lại.",
+                        statusCode: StatusCodes.Status503ServiceUnavailable);
+                }
+            }
+
+            var exposeOtp = allowTestResponse && !emailSent;
             return Results.Accepted(value: new
             {
                 confirmation.MaXacNhan,
@@ -285,10 +327,11 @@ public static class ContractEndpoints
                 confirmation.MaBamNoiDung,
                 confirmation.MaBamTepPdf,
                 maOtp = exposeOtp ? otp : null,
-                kenhGui = exposeOtp ? "RESPONSE_KIEM_THU" : "CAN_TICH_HOP_SMS_EMAIL",
-                thongBao = exposeOtp
-                    ? "Đã tạo OTP ký hợp đồng để kiểm thử."
-                    : "Đã tạo yêu cầu ký; cần dịch vụ SMS/email để gửi OTP."
+                kenhGui = emailSent ? "EMAIL" : "RESPONSE_KIEM_THU",
+                emailNhan = emailSent ? MaskEmail(recipient.Email) : null,
+                thongBao = emailSent
+                    ? "Đã gửi OTP ký hợp đồng tới email của khách hàng."
+                    : "Đã tạo OTP ký hợp đồng để kiểm thử."
             });
         }).RequireAuthorization("Customer").RequireRateLimiting("auth");
 
@@ -723,6 +766,15 @@ public static class ContractEndpoints
     {
         var value = context.Request.Headers.UserAgent.ToString();
         return string.IsNullOrWhiteSpace(value) ? null : value[..Math.Min(value.Length, 500)];
+    }
+
+    private static string? MaskEmail(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return null;
+        var at = email.IndexOf('@');
+        if (at <= 0 || at == email.Length - 1) return "***";
+        if (at == 1) return $"***{email[at..]}";
+        return $"{email[0]}***{email[(at - 1)..]}";
     }
 
     private static async Task<string> BuildContractSnapshotAsync(
