@@ -27,6 +27,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<AnhBienBan> AnhBienBan => Set<AnhBienBan>();
     public DbSet<DanhGia> DanhGia => Set<DanhGia>();
     public DbSet<ThongBao> ThongBao => Set<ThongBao>();
+    public DbSet<IdempotencyKeyRecord> IdempotencyKey => Set<IdempotencyKeyRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -110,6 +111,9 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.MaKhachThue).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaTaiKhoan).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.CCCD).HasMaxLength(20).IsUnicode(false).IsRequired(false);
+            entity.Property(x => x.GioiTinh).HasMaxLength(10);
+            entity.Property(x => x.QuocTich).HasMaxLength(100);
+            entity.Property(x => x.NoiCap).HasMaxLength(200);
             entity.HasIndex(x => x.CCCD).IsUnique().HasFilter("[CCCD] IS NOT NULL");
             entity.HasOne<TaiKhoan>().WithOne()
                 .HasForeignKey<KhachThue>(x => x.MaTaiKhoan)
@@ -148,14 +152,12 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
         {
             entity.ToTable("GioHang");
             entity.HasKey(x => x.MaGioHang);
+            entity.HasAlternateKey(x => new { x.MaGioHang, x.MaKhachThue }); // for FK binding
             entity.Property(x => x.MaGioHang).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaKhachThue).HasMaxLength(20).IsUnicode(false);
-            entity.Property(x => x.MaCuaHang).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.TrangThai).HasMaxLength(25).IsUnicode(false);
             entity.HasOne<KhachThue>().WithMany()
                 .HasForeignKey(x => x.MaKhachThue).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<CuaHang>().WithMany()
-                .HasForeignKey(x => x.MaCuaHang).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<ChiTietGioHang>(entity =>
@@ -164,6 +166,8 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.HasKey(x => x.MaChiTietGioHang);
             entity.Property(x => x.MaChiTietGioHang).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaGioHang).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaCuaHang).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.NguonTao).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaDongMay).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.DonGia).HasPrecision(18, 2);
             entity.Property(x => x.TienCoc).HasPrecision(18, 2);
@@ -171,6 +175,8 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.HasOne(x => x.GioHang).WithMany(x => x.ChiTiet).HasForeignKey(x => x.MaGioHang);
             entity.HasOne<DongMay>().WithMany()
                 .HasForeignKey(x => x.MaDongMay).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<CuaHang>().WithMany()
+                .HasForeignKey(x => x.MaCuaHang).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<GiuCho>(entity =>
@@ -183,9 +189,9 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.MaCuaHang).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.TrangThai).HasMaxLength(30).IsUnicode(false);
             entity.HasOne<GioHang>().WithMany()
-                .HasForeignKey(x => x.MaGioHang).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<KhachThue>().WithMany()
-                .HasForeignKey(x => x.MaKhachThue).OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(x => new { x.MaGioHang, x.MaKhachThue })
+                .HasPrincipalKey(x => new { x.MaGioHang, x.MaKhachThue })
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CuaHang>().WithMany()
                 .HasForeignKey(x => x.MaCuaHang).OnDelete(DeleteBehavior.Restrict);
         });
@@ -197,10 +203,13 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.MaChiTietGiuCho).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaGiuCho).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaDongMay).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaChiTietGioHang).HasMaxLength(20).IsUnicode(false);
             entity.HasOne(x => x.GiuCho).WithMany(x => x.ChiTiet)
                 .HasForeignKey(x => x.MaGiuCho).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<DongMay>().WithMany()
                 .HasForeignKey(x => x.MaDongMay).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<ChiTietGioHang>().WithMany()
+                .HasForeignKey(x => x.MaChiTietGioHang).OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<HopDong>(entity =>
@@ -221,11 +230,11 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.TongTien).HasPrecision(18, 2);
             entity.Property(x => x.TongTienCoc).HasPrecision(18, 2);
             entity.HasOne<GioHang>().WithMany()
-                .HasForeignKey(x => x.MaGioHang).OnDelete(DeleteBehavior.Restrict);
+                .HasForeignKey(x => new { x.MaGioHang, x.MaKhachThue })
+                .HasPrincipalKey(x => new { x.MaGioHang, x.MaKhachThue })
+                .OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<GiuCho>().WithOne()
                 .HasForeignKey<HopDong>(x => x.MaGiuCho).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne<KhachThue>().WithMany()
-                .HasForeignKey(x => x.MaKhachThue).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<NhanVien>().WithMany()
                 .HasForeignKey(x => x.MaNhanVien).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CuaHang>().WithMany()
@@ -346,6 +355,19 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.Loai).HasMaxLength(30).IsUnicode(false);
             entity.HasOne<TaiKhoan>().WithMany()
                 .HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<IdempotencyKeyRecord>(entity =>
+        {
+            entity.ToTable("IdempotencyKey");
+            entity.HasKey(x => new { x.IdempotencyKey, x.MaKhachThue, x.LoaiThaoTac });
+            entity.Property(x => x.IdempotencyKey).HasMaxLength(100).IsUnicode(false);
+            entity.Property(x => x.MaKhachThue).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.LoaiThaoTac).HasMaxLength(50).IsUnicode(false);
+            entity.Property(x => x.PayloadHash).HasMaxLength(64).IsUnicode(false);
+            entity.Property(x => x.MaThucThe).HasMaxLength(50).IsUnicode(false);
+            entity.HasOne<KhachThue>().WithMany()
+                .HasForeignKey(x => x.MaKhachThue).OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

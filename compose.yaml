@@ -273,6 +273,7 @@ services:
       - "5000:8080"
     volumes:
       - rentalcamera-api-keys:/app/.keys
+      - rentalcamera-api-storage:/app/Storage
       - rentalcamera-contract-files:/app/App_Data/contracts
     depends_on:
       db-init:
@@ -282,4 +283,5 @@ services:
 volumes:
   rentalcamera-sql-data:
   rentalcamera-api-keys:
+  rentalcamera-api-storage:
   rentalcamera-contract-files:

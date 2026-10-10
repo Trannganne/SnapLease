@@ -48,8 +48,9 @@ public static class AuthEndpoints
             {
                 MaKhachThue = "KH" + Guid.NewGuid().ToString("N")[..17].ToUpperInvariant(),
                 MaTaiKhoan = account.MaTaiKhoan,
-                // Họ tên thật được cập nhật ở bước gửi giấy tờ xác minh.
-                HoTen = username,
+                // HoTen là bắt buộc trong database nhưng chỉ được người dùng cung cấp
+                // ở bước xác minh danh tính sau này.
+                HoTen = null,
                 SoDienThoai = phone,
                 Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim()
             };

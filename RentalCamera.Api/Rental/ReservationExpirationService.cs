@@ -38,19 +38,63 @@ public sealed class ReservationExpirationService(
         var signMinutes = Math.Clamp(configuration.GetValue("Rental:ContractSignMinutes", 30), 1, 1440);
         var signCutoff = now.AddMinutes(-signMinutes);
 
-        var holds = await db.GiuCho.Where(x =>
-            x.TrangThai == "DANG_GIU" && x.HetHanLuc <= now).ToListAsync(ct);
-        foreach (var hold in holds) hold.TrangThai = "HET_HAN";
+        var utcNow = DateTime.UtcNow;
+        var holds = await db.GiuCho.Include(x => x.ChiTiet).Where(x =>
+            x.TrangThai == "DANG_GIU" && x.HetHanLuc <= utcNow).ToListAsync(ct);
+        
+        int holdCount = 0;
+        foreach (var hold in holds) 
+        {
+            await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.ReadCommitted, ct);
+            try
+            {
+                hold.TrangThai = "HET_HAN";
+                var cartLineIds = hold.ChiTiet.Where(x => x.MaChiTietGioHang != null).Select(x => x.MaChiTietGioHang).ToList();
+                if (cartLineIds.Any())
+                {
+                    var cartLines = await db.ChiTietGioHang
+                        .Where(x => cartLineIds.Contains(x.MaChiTietGioHang) && x.NguonTao == "THUE_NGAY")
+                        .ToListAsync(ct);
+                    
+                    if (cartLines.Any())
+                    {
+                        db.ChiTietGioHang.RemoveRange(cartLines);
+                    }
+                }
+                await db.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
+                holdCount++;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to expire hold {MaGiuCho}", hold.MaGiuCho);
+                db.ChangeTracker.Clear();
+            }
+        }
 
         var contracts = await db.HopDong.Where(x =>
             x.TrangThai == "CHO_KY" && x.NgayTaoHopDong <= signCutoff).ToListAsync(ct);
-        foreach (var contract in contracts) contract.TrangThai = "DA_HUY";
-
-        if (holds.Count > 0 || contracts.Count > 0)
+        
+        int contractCount = 0;
+        foreach (var contract in contracts) 
         {
-            await db.SaveChangesAsync(ct);
+            try
+            {
+                contract.TrangThai = "DA_HUY";
+                await db.SaveChangesAsync(ct);
+                contractCount++;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to expire contract {MaHopDong}", contract.MaHopDong);
+                db.ChangeTracker.Clear();
+            }
+        }
+
+        if (holdCount > 0 || contractCount > 0)
+        {
             logger.LogInformation("Đã hết hạn {HoldCount} giữ chỗ và hủy {ContractCount} hợp đồng quá hạn ký.",
-                holds.Count, contracts.Count);
+                holdCount, contractCount);
         }
     }
 }

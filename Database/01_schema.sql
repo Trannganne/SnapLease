@@ -1,4 +1,4 @@
-﻿/*
+/*
 =====================================================================
 RENTCAM - DATABASE HOAN CHINH THEO FLOW NGHIEP VU MOI
 Nen tang: Microsoft SQL Server
@@ -162,7 +162,7 @@ GO
 CREATE TABLE KhachThue (
     MaKhachThue VARCHAR(20) NOT NULL PRIMARY KEY,
     MaTaiKhoan VARCHAR(20) NOT NULL UNIQUE,
-    HoTen NVARCHAR(150) NOT NULL,
+    HoTen NVARCHAR(150) NULL,
     SoDienThoai VARCHAR(15) NOT NULL UNIQUE,
     Email VARCHAR(255) NULL,
     CCCD VARCHAR(20) NULL,
