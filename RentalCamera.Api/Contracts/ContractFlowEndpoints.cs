@@ -367,7 +367,8 @@ public static class ContractEndpoints
                 try
                 {
                     await emailSender.SendAsync(
-                        recipient.Email!, recipient.HoTen, id, otp, confirmation.HetHanLuc, ct);
+                        recipient.Email!, recipient.HoTen ?? "khách hàng",
+                        id, otp, confirmation.HetHanLuc, ct);
                     emailSent = true;
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested)

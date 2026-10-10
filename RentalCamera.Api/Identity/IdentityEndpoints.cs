@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Security.Claims;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,13 @@ public static class IdentityEndpoints
                 }
             }
 
-            return Results.File(path, "image/jpeg");
+            var contentType = Path.GetExtension(path).ToLowerInvariant() switch
+            {
+                ".png" => "image/png",
+                ".webp" => "image/webp",
+                _ => "image/jpeg"
+            };
+            return Results.File(path, contentType);
         }).RequireAuthorization();
 
         group.MapPost("", async (IdentityDocumentRequest request, ClaimsPrincipal principal, RentalCameraContext db, IWebHostEnvironment env, CancellationToken ct) =>
@@ -71,14 +78,12 @@ public static class IdentityEndpoints
                     return (null, "Ảnh vượt quá dung lượng cho phép (10MB).");
                 }
 
-                try {
-                    var info = SixLabors.ImageSharp.Image.Identify(bytes);
-                    if (info == null) return (null, "Không thể giải mã định dạng ảnh.");
-                } catch {
+                var extension = GetVerifiedImageExtension(bytes);
+                if (extension is null) {
                     return (null, "Tệp không phải là hình ảnh hợp lệ hoặc bị hỏng.");
                 }
 
-                var filename = $"{Guid.NewGuid()}.jpg";
+                var filename = $"{Guid.NewGuid()}{extension}";
                 var storagePath = Path.Combine(env.ContentRootPath, "Storage");
                 Directory.CreateDirectory(storagePath);
                 var path = Path.Combine(storagePath, filename);
@@ -241,6 +246,26 @@ public static class IdentityEndpoints
                 daXacNhanThongTin = customer.DaXacNhanThongTin
             });
         }).RequireAuthorization("Customer");
+    }
+
+    private static string? GetVerifiedImageExtension(ReadOnlySpan<byte> bytes)
+    {
+        if (bytes.Length >= 4 && bytes[0] == 0xFF && bytes[1] == 0xD8 &&
+            bytes[^2] == 0xFF && bytes[^1] == 0xD9)
+            return ".jpg";
+
+        ReadOnlySpan<byte> pngSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+        ReadOnlySpan<byte> pngEnd = [0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44];
+        if (bytes.Length >= 20 && bytes[..8].SequenceEqual(pngSignature) &&
+            bytes.Slice(bytes.Length - 12, 8).SequenceEqual(pngEnd))
+            return ".png";
+
+        if (bytes.Length >= 12 && bytes[..4].SequenceEqual("RIFF"u8) &&
+            bytes.Slice(8, 4).SequenceEqual("WEBP"u8) &&
+            BinaryPrimitives.ReadUInt32LittleEndian(bytes.Slice(4, 4)) + 8 == bytes.Length)
+            return ".webp";
+
+        return null;
     }
 }
 
