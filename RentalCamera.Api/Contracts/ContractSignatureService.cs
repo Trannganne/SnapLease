@@ -10,7 +10,12 @@ public sealed class ContractSignatureService
 
     public ContractSignatureService(IConfiguration configuration)
     {
-        _pepper = configuration.GetValue<string>("ElectronicSignature:Pepper") ?? "default_pepper_change_me_in_prod";
+        var pepper = configuration.GetValue<string>("ElectronicSignature:Pepper");
+        if (string.IsNullOrWhiteSpace(pepper))
+        {
+            throw new InvalidOperationException("Cấu hình ElectronicSignature:Pepper chưa được thiết lập. Vui lòng cung cấp khóa bí mật qua biến môi trường ELECTRONIC_SIGNATURE_PEPPER.");
+        }
+        _pepper = pepper;
     }
 
     public string GenerateOtp() => RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");

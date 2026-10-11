@@ -251,7 +251,7 @@ services:
       ElectronicSignature__MaxAttempts: "5"
       ElectronicSignature__TermsVersion: "1.0"
       ElectronicSignature__ReturnOtpInResponse: "true"
-      ElectronicSignature__Pepper: "${ELECTRONIC_SIGNATURE_PEPPER:-default_pepper_change_me_in_prod}"
+      ElectronicSignature__Pepper: "${ELECTRONIC_SIGNATURE_PEPPER:-}"
       ContractFiles__Directory: "App_Data/contracts"
       ContractFiles__MaximumMegabytes: "10"
       Vnpay__Enabled: "${VNPAY_ENABLED:-false}"
