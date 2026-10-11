@@ -205,7 +205,7 @@ public static class RentalEndpoints
 
                     // Lấy hoặc tạo GioHang cho Khách
                     var cart = await db.GioHang
-                        .Where(x => x.MaKhachThue == customerId)
+                        .Where(x => x.MaKhachThue == customerId && x.TrangThai == "DANG_CHON")
                         .FirstOrDefaultAsync(ct);
                     
                     var now = DateTime.Now;

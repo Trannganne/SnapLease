@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Data.SqlClient;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
 using RentalCamera.Api.Rental;
@@ -17,10 +18,24 @@ public static class ContractEndpoints
             string id, ClaimsPrincipal principal, RentalCameraContext db, ILoggerFactory loggerFactory, HttpContext httpContext, CancellationToken ct) =>
         {
             var logger = loggerFactory.CreateLogger("ContractFlow");
+            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+            if (customerId is null) return Results.Forbid();
+
+            var existingContract = await db.HopDong.FirstOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
+            if (existingContract != null)
+            {
+                return Results.Ok(new
+                {
+                    existingContract.MaHopDong, existingContract.MaGioHang, existingContract.MaGiuCho,
+                    existingContract.MaKhachThue, existingContract.MaNhanVien, existingContract.MaCuaHang,
+                    existingContract.NgayTaoHopDong, existingContract.NgayKy,
+                    existingContract.ThoiGianBanGiao, existingContract.ThoiGianTraDuKien,
+                    existingContract.TongTien, existingContract.TongTienCoc, existingContract.TrangThai
+                });
+            }
+
             try
             {
-                var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
-                if (customerId is null) return Results.Forbid();
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
             var hold = await db.GiuCho.Include(x => x.ChiTiet)
                 .SingleOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
@@ -35,9 +50,6 @@ public static class ContractEndpoints
                 }
                 return Results.Conflict(new { loi = "Giữ chỗ không còn hiệu lực." });
             }
-            var existingContract = await db.HopDong.FirstOrDefaultAsync(x => x.MaGiuCho == id, ct);
-            if (existingContract != null)
-                return Results.Conflict(new { loi = "Giữ chỗ đã được chuyển thành hợp đồng.", maHopDong = existingContract.MaHopDong });
             var khachThue = await db.KhachThue.SingleOrDefaultAsync(x => x.MaKhachThue == customerId, ct);
             if (khachThue is null) return Results.NotFound();
 
@@ -110,8 +122,6 @@ public static class ContractEndpoints
             };
             db.HopDong.Add(contract);
             hold.TrangThai = "DA_CHUYEN_HOP_DONG";
-            cart.TrangThai = "DA_CHUYEN_HOP_DONG";
-            cart.NgayCapNhat = DateTime.Now;
 
             var accountId = await db.KhachThue.AsNoTracking().Where(x => x.MaKhachThue == customerId)
                 .Select(x => x.MaTaiKhoan).SingleAsync(ct);
@@ -125,6 +135,24 @@ public static class ContractEndpoints
                 contract.MaHopDong, contract.MaGiuCho, contract.TongTien,
                 contract.TongTienCoc, contract.TrangThai, contract.NgayTaoHopDong
             });
+            }
+            catch (DbUpdateException dbEx) when (dbEx.InnerException is SqlException sqlEx && (sqlEx.Number == 2601 || sqlEx.Number == 2627))
+            {
+                logger.LogWarning("Xung đột tạo hợp đồng (MaGiuCho unique): {Id}", id);
+                var recoveredContract = await db.HopDong.FirstOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
+                if (recoveredContract != null)
+                {
+                    return Results.Ok(new
+                    {
+                        recoveredContract.MaHopDong, recoveredContract.MaGioHang, recoveredContract.MaGiuCho,
+                        recoveredContract.MaKhachThue, recoveredContract.MaNhanVien, recoveredContract.MaCuaHang,
+                        recoveredContract.NgayTaoHopDong, recoveredContract.NgayKy,
+                        recoveredContract.ThoiGianBanGiao, recoveredContract.ThoiGianTraDuKien,
+                        recoveredContract.TongTien, recoveredContract.TongTienCoc, recoveredContract.TrangThai
+                    });
+                }
+                logger.LogError(dbEx, "Lỗi CSDL (Unique) khi tạo hợp đồng cho giữ chỗ {MaGiuCho}. TraceId: {TraceId}", id, httpContext.TraceIdentifier);
+                return Results.Json(new { loi = "Lỗi hệ thống khi tạo hợp đồng.", traceId = httpContext.TraceIdentifier }, statusCode: 500);
             }
             catch (DbUpdateException dbEx)
             {
@@ -581,9 +609,11 @@ public static class ContractEndpoints
                     contract.ThoiGianTraDuKien > h.ThoiGianBanGiao), ct);
             if (overlap) return Results.Conflict(new { loi = "Có thiết bị vật lý đã được gán cho lịch thuê khác." });
 
-            var prices = await db.ChiTietGioHang.AsNoTracking()
+            var cartLines = await db.ChiTietGioHang.AsNoTracking()
                 .Where(x => x.MaGioHang == contract.MaGioHang)
-                .ToDictionaryAsync(x => x.MaDongMay, x => x.DonGia, ct);
+                .ToListAsync(ct);
+            var prices = cartLines.GroupBy(x => x.MaDongMay)
+                .ToDictionary(x => x.Key, x => x.First().DonGia);
             foreach (var device in devices)
             {
                 device.TrangThai = "DANG_GIU";
