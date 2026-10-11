@@ -26,9 +26,9 @@ IF NOT EXISTS (
     WHERE name = 'UX_ThanhToan_MaThamChieu'
       AND object_id = OBJECT_ID('dbo.ThanhToan')
 )
-    CREATE UNIQUE INDEX UX_ThanhToan_MaThamChieu
+    EXEC('SET QUOTED_IDENTIFIER ON; CREATE UNIQUE INDEX UX_ThanhToan_MaThamChieu
         ON dbo.ThanhToan(MaThamChieu)
-        WHERE MaThamChieu IS NOT NULL;
+        WHERE MaThamChieu IS NOT NULL;');
 
 COMMIT TRANSACTION;
 GO
