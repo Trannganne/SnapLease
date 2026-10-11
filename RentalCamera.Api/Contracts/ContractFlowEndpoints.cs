@@ -180,7 +180,17 @@ public static class ContractEndpoints
                 {
                     x.MaHopDong, x.MaGiuCho, x.MaCuaHang, x.NgayTaoHopDong, x.NgayKy,
                     x.ThoiGianBanGiao, x.ThoiGianTraDuKien,
-                    x.TongTien, x.TongTienCoc, x.TrangThai
+                    x.TongTien, x.TongTienCoc, x.TrangThai,
+                    TenCuaHang = db.CuaHang.Where(c => c.MaCuaHang == x.MaCuaHang).Select(c => c.TenCuaHang).FirstOrDefault() ?? "",
+                    ThietBi = db.ChiTietGiuCho.Where(ct => ct.MaGiuCho == x.MaGiuCho)
+                        .Join(db.DongMay, ct => ct.MaDongMay, dm => dm.MaDongMay, (ct, dm) => dm)
+                        .Select(dm => new
+                        {
+                            TenDongMay = dm.TenDongMay,
+                            HinhAnh = dm.AnhThietBi.Where(a => a.LaAnhDaiDien).Select(a => a.DuongDanAnh).FirstOrDefault()
+                                      ?? dm.AnhThietBi.Select(a => a.DuongDanAnh).FirstOrDefault() ?? ""
+                        }).FirstOrDefault(),
+                    SoLuongThietBi = db.ChiTietGiuCho.Count(ct => ct.MaGiuCho == x.MaGiuCho)
                 }).ToListAsync(ct);
             return Results.Ok(data);
         }).RequireAuthorization("Customer");
