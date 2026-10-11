@@ -1,0 +1,109 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/catalog_repository.dart';
+
+enum CatalogStatus { loading, ready, failure }
+
+class CatalogState {
+  const CatalogState({
+    this.status = CatalogStatus.loading,
+    this.data,
+    this.query = '',
+    this.filter = const CatalogFilter(),
+    this.descending = false,
+    this.homeBranch = 'CN01',
+  });
+  final CatalogStatus status;
+  final CatalogData? data;
+  final String query, homeBranch;
+  final CatalogFilter filter;
+  final bool descending;
+  List<CameraModel> get results =>
+      data?.search(query, filter, descending: descending) ?? [];
+  CatalogState copy({
+    CatalogStatus? status,
+    CatalogData? data,
+    String? query,
+    CatalogFilter? filter,
+    bool? descending,
+    String? homeBranch,
+  }) => CatalogState(
+    status: status ?? this.status,
+    data: data ?? this.data,
+    query: query ?? this.query,
+    filter: filter ?? this.filter,
+    descending: descending ?? this.descending,
+    homeBranch: homeBranch ?? this.homeBranch,
+  );
+}
+
+sealed class CatalogEvent {}
+
+class CatalogRequested extends CatalogEvent {}
+
+class QueryChanged extends CatalogEvent {
+  QueryChanged(this.query);
+  final String query;
+}
+
+class FiltersApplied extends CatalogEvent {
+  FiltersApplied(this.filter);
+  final CatalogFilter filter;
+}
+
+class CatalogReset extends CatalogEvent {}
+
+class SortChanged extends CatalogEvent {
+  SortChanged(this.descending);
+  final bool descending;
+}
+
+class HomeBranchChanged extends CatalogEvent {
+  HomeBranchChanged(this.id);
+  final String id;
+}
+
+class CatalogBloc extends Bloc<CatalogEvent, CatalogState> {
+  CatalogBloc(this.repository) : super(const CatalogState()) {
+    on<CatalogRequested>((event, emit) async {
+      if (_loading) return;
+      _loading = true;
+      emit(state.copy(status: CatalogStatus.loading));
+      try {
+        final data = await repository.load();
+        emit(state.copy(status: CatalogStatus.ready, data: data));
+      } catch (_) {
+        emit(state.copy(status: CatalogStatus.failure));
+      } finally {
+        _loading = false;
+      }
+    });
+    on<QueryChanged>((e, emit) => emit(state.copy(query: e.query)));
+    on<FiltersApplied>((e, emit) {
+      if (e.filter.isValid) emit(state.copy(filter: e.filter));
+    });
+    on<CatalogReset>(
+      (e, emit) => emit(state.copy(query: '', filter: const CatalogFilter())),
+    );
+    on<SortChanged>((e, emit) => emit(state.copy(descending: e.descending)));
+    on<HomeBranchChanged>((e, emit) => emit(state.copy(homeBranch: e.id)));
+  }
+  bool _loading = false;
+  final CatalogRepository repository;
+}
+
+sealed class FilterEvent {}
+
+class FilterChanged extends FilterEvent {
+  FilterChanged(this.filter);
+  final CatalogFilter filter;
+}
+
+class FilterReset extends FilterEvent {}
+
+/// Independent draft: closing the modal never commits changes to the catalog.
+class FilterBloc extends Bloc<FilterEvent, CatalogFilter> {
+  FilterBloc(super.initial) {
+    on<FilterChanged>((e, emit) => emit(e.filter));
+    on<FilterReset>((e, emit) => emit(const CatalogFilter()));
+  }
+}

@@ -1,0 +1,66 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Visual Studio Code related
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+*.dill
+*.cache
+*.part
+
+# Android related
+**/android/.gradle/
+**/android/.kotlin/
+**/android/captures/
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/hs_err_pid*.log
+
+# Coverage
+coverage/
+
+# Symbols
+app.*.symbols
+
+# Environment, keys and secrets
+.env*
+!.env.example
+key.properties
+*.jks
+*.keystore
+*.p12
+*.key
+*.pem
+credentials.json
+
+# Scratch and ad-hoc root scripts
+scratch/
+test_500.dart
+test_api.dart
+test_concurrency.dart
+test_dia.dart
+test_noi_cap.dart

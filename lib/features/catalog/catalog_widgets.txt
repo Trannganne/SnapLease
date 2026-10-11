@@ -1,0 +1,217 @@
+import 'package:rentcam/core/constants/app_colors.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/format.dart';
+import '../../core/theme.dart';
+import '../../core/widgets.dart';
+import '../../data/catalog_repository.dart';
+import '../cart/cart_bloc.dart';
+
+class EquipmentImage extends StatelessWidget {
+  const EquipmentImage({super.key, required this.asset, this.height = 120});
+  final String asset;
+  final double height;
+  @override
+  Widget build(BuildContext context) => Image.asset(
+    asset,
+    height: height,
+    width: double.infinity,
+    fit: BoxFit.contain,
+    errorBuilder:
+        (_, error, stack) => SizedBox(
+          height: height,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.image_not_supported_outlined,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                Text(
+                  'Chưa có ảnh thiết bị',
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ),
+          ),
+        ),
+  );
+}
+
+class EquipmentCard extends StatelessWidget {
+  const EquipmentCard({super.key, required this.model, this.availability});
+  final CameraModel model;
+  final int? availability;
+  @override
+  Widget build(BuildContext context) => AppPanel(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        EquipmentImage(asset: model.asset),
+        SizedBox(height: 12),
+        Text(
+          model.name,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          model.description,
+          style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          money(model.dailyPrice),
+          style: TextStyle(
+            fontSize: 18,
+            color: Theme.of(context).colorScheme.primary,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          '/ ngày',
+          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Cọc ${money(model.deposit)}',
+          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        if (availability != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            availability! > 0
+                ? 'Còn $availability thiết bị'
+                : 'Hết lịch đã chọn',
+            style: TextStyle(
+              fontSize: 12,
+              color: availability! > 0 ? Theme.of(context).extension<AppColorsExtension>()!.success : Theme.of(context).colorScheme.error,
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                ),
+                onPressed: () => _showDetails(context),
+                child: const Text('Chi tiết', textAlign: TextAlign.center),
+              ),
+            ),
+            const SizedBox(width: 6),
+            SizedBox(
+              width: 48,
+              height: 50,
+              child: IconButton.filled(
+                tooltip: 'Thêm ${model.name} vào giỏ',
+                style: IconButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed:
+                    availability == 0
+                        ? null
+                        : () {
+                          context.read<CartBloc>().add(CartModelAdded(model));
+                          showMessage(
+                            context,
+                            'Đã thêm ${model.name} vào giỏ.',
+                          );
+                        },
+                icon: const Icon(Icons.add),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+  void _showDetails(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder:
+          (_) => SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                EquipmentImage(asset: model.asset, height: 180),
+                SizedBox(height: 16),
+                Text(model.name, style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                Text(model.description),
+                const SizedBox(height: 12),
+                Text('Giá thuê: ${money(model.dailyPrice)} / ngày'),
+                Text('Cọc bảo đảm: ${money(model.deposit)}'),
+                const SizedBox(height: 16),
+                PrimaryButton(text: 
+                  label: 'Đóng',
+                  outlined: true,
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+    );
+  }
+}
+
+class EquipmentGrid extends StatelessWidget {
+  const EquipmentGrid({super.key, required this.models, this.availability});
+  final List<CameraModel> models;
+  final int Function(CameraModel)? availability;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, constraints) {
+      final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+      final columns =
+          constraints.maxWidth < 330 || scale > 1.25
+              ? 1
+              : constraints.maxWidth > 700
+              ? 3
+              : 2;
+      final width = (constraints.maxWidth - 12 * (columns - 1)) / columns;
+      return Wrap(
+        spacing: 12,
+        runSpacing: 12,
+        children:
+            models
+                .map(
+                  (m) => SizedBox(
+                    width: width,
+                    child: EquipmentCard(
+                      model: m,
+                      availability: availability?.call(m),
+                    ),
+                  ),
+                )
+                .toList(),
+      );
+    },
+  );
+}
+
+class CartAction extends StatelessWidget {
+  const CartAction({super.key});
+  @override
+  Widget build(BuildContext context) => BlocBuilder<CartBloc, CartState>(
+    builder:
+        (context, state) => IconButton(
+          tooltip: 'Giỏ hàng: ${state.count} thiết bị',
+          onPressed: () => context.push('/cart'),
+          icon: Badge(
+            isLabelVisible: state.count > 0,
+            label: Text('${state.count}'),
+            child: const Icon(Icons.shopping_bag),
+          ),
+        ),
+  );
+}

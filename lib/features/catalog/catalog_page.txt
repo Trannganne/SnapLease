@@ -1,0 +1,355 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/theme.dart';
+import '../../core/widgets.dart';
+import '../../data/catalog_repository.dart';
+import 'catalog_bloc.dart';
+import 'catalog_widgets.dart';
+import 'filter_sheet.dart';
+
+class CatalogPage extends StatefulWidget {
+  const CatalogPage({super.key, this.explore = false});
+  final bool explore;
+  @override
+  State<CatalogPage> createState() => _CatalogPageState();
+}
+
+class _CatalogPageState extends State<CatalogPage> {
+  late final TextEditingController _search = TextEditingController(
+    text: context.read<CatalogBloc>().state.query,
+  );
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => BlocConsumer<CatalogBloc, CatalogState>(
+    listener: (context, state) {
+      if (_search.text != state.query) {
+        _search.value = TextEditingValue(
+          text: state.query,
+          selection: TextSelection.collapsed(offset: state.query.length),
+        );
+      }
+    },
+    builder: (context, state) {
+      if (state.status == CatalogStatus.loading) {
+        return const Center(
+          child: CircularProgressIndicator(semanticsLabel: 'Đang tải thiết bị'),
+        );
+      }
+      if (state.status == CatalogStatus.failure) {
+        return Center(
+          child: EmptyView(
+            title: 'Chưa tải được thiết bị',
+            message: 'Vui lòng thử lại.',
+            action: AppButton(
+              label: 'Thử lại',
+              onPressed:
+                  () => context.read<CatalogBloc>().add(CatalogRequested()),
+            ),
+          ),
+        );
+      }
+      final data = state.data!;
+      final items =
+          widget.explore
+              ? state.results
+              : data.models
+                  .where(
+                    (m) => data.devices.any(
+                      (d) =>
+                          d.modelId == m.id && d.branchId == state.homeBranch,
+                    ),
+                  )
+                  .toList();
+      return ListView(
+        key: PageStorageKey(widget.explore ? 'explore-list' : 'home-list'),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        padding: const EdgeInsets.fromLTRB(12, 16, 12, 24),
+        children: [
+          if (!widget.explore) ...[
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Chào bạn, hôm nay\nmình chụp gì?',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+                const CartAction(),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const Text('Cửa hàng đang xem'),
+            const SizedBox(height: 8),
+            _BranchSelect(
+              value: state.homeBranch,
+              branches: data.branches,
+              onChanged: (v) {
+                if (v != null) {
+                  context.read<CatalogBloc>().add(HomeBranchChanged(v));
+                }
+              },
+            ),
+            const SizedBox(height: 18),
+            const _HomeBanner(),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Thiết bị nổi bật',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Tìm và lọc thiết bị',
+                  onPressed: () => context.go('/explore'),
+                  icon: const Icon(Icons.filter_list),
+                ),
+              ],
+            ),
+          ] else ...[
+            TextField(
+              controller: _search,
+              textInputAction: TextInputAction.search,
+              onChanged:
+                  (v) => context.read<CatalogBloc>().add(QueryChanged(v)),
+              decoration: InputDecoration(
+                hintText: 'Tìm dòng máy, ống kính…',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (state.query.isNotEmpty)
+                      IconButton(
+                        tooltip: 'Xóa tìm kiếm',
+                        onPressed:
+                            () => context.read<CatalogBloc>().add(
+                              QueryChanged(''),
+                            ),
+                        icon: const Icon(Icons.close),
+                      ),
+                    IconButton(
+                      tooltip: 'Mở bộ lọc',
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        openFilters(context);
+                      },
+                      icon: Badge(
+                        isLabelVisible: state.filter.count > 0,
+                        label: Text('${state.filter.count}'),
+                        child: const Icon(Icons.tune),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () {
+                FocusScope.of(context).unfocus();
+                openFilters(context);
+              },
+              icon: const Icon(Icons.calendar_month_outlined),
+              label: Text(
+                state.filter.hasDates
+                    ? 'Đã chọn thời gian thuê · Chỉnh sửa'
+                    : 'Chọn thời gian, chi nhánh và giá thuê',
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final c in ['Tất cả', 'Máy ảnh', 'Ống kính'])
+                  ChoiceChip(
+                    label: Text(c),
+                    selected: (state.filter.category ?? 'Tất cả') == c,
+                    onSelected: (_) {
+                      final f = state.filter;
+                      context.read<CatalogBloc>().add(
+                        FiltersApplied(
+                          CatalogFilter(
+                            minPrice: f.minPrice,
+                            maxPrice: f.maxPrice,
+                            branchId: f.branchId,
+                            category: c == 'Tất cả' ? null : c,
+                            brands: f.brands,
+                            start: f.start,
+                            end: f.end,
+                            availableOnly: f.availableOnly,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    '${items.length} dòng máy',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                PopupMenuButton<bool>(
+                  tooltip: 'Sắp xếp giá',
+                  initialValue: state.descending,
+                  onSelected:
+                      (v) => context.read<CatalogBloc>().add(SortChanged(v)),
+                  itemBuilder:
+                      (_) => [
+                        const PopupMenuItem(
+                          value: false,
+                          child: Text('Giá tăng dần'),
+                        ),
+                        const PopupMenuItem(
+                          value: true,
+                          child: Text('Giá giảm dần'),
+                        ),
+                      ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.swap_vert, size: 20),
+                        Text(
+                          state.descending ? 'Giá giảm dần' : 'Giá tăng dần',
+                        ),
+                        const Icon(Icons.arrow_drop_down),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            if (state.filter.count > 0)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(
+                  onPressed:
+                      () => context.read<CatalogBloc>().add(CatalogReset()),
+                  child: const Text('Xóa bộ lọc và từ khóa'),
+                ),
+              ),
+          ],
+          const SizedBox(height: 8),
+          if (items.isEmpty)
+            EmptyView(
+              title: 'Không tìm thấy thiết bị',
+              message: 'Thử từ khóa khác hoặc mở rộng bộ lọc.',
+              action: AppButton(
+                label: 'Xóa bộ lọc',
+                outlined: true,
+                onPressed:
+                    () => context.read<CatalogBloc>().add(CatalogReset()),
+              ),
+            )
+          else
+            EquipmentGrid(
+              models: items,
+              availability:
+                  widget.explore && state.filter.hasDates
+                      ? (m) => data.available(m, state.filter)
+                      : null,
+            ),
+          if (widget.explore) ...[
+            const SizedBox(height: 16),
+            const InfoBanner(
+              'Chọn thời gian thuê để kiểm tra lịch trống. Giá hiển thị theo ngày, chưa bao gồm tiền cọc.',
+            ),
+          ],
+        ],
+      );
+    },
+  );
+}
+
+class _BranchSelect extends StatelessWidget {
+  const _BranchSelect({
+    required this.value,
+    required this.branches,
+    required this.onChanged,
+  });
+  final String value;
+  final List<Branch> branches;
+  final ValueChanged<String?> onChanged;
+  @override
+  Widget build(BuildContext context) => DropdownButtonFormField<String>(
+    initialValue: value,
+    isExpanded: true,
+    items:
+        branches
+            .map((b) => DropdownMenuItem(value: b.id, child: Text(b.name)))
+            .toList(),
+    onChanged: onChanged,
+  );
+}
+
+class _HomeBanner extends StatelessWidget {
+  const _HomeBanner();
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: BorderRadius.circular(18),
+    child: Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            'assets/images/banner.png',
+            fit: BoxFit.cover,
+            alignment: Alignment.bottomRight,
+            errorBuilder:
+                (_, error, stack) => ColoredBox(color: Color(0xFF091A46)),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'SÁNG TẠO KHÔNG GIỚI HẠN',
+                style: TextStyle(color: Color(0xFFCED8FF), fontSize: 12),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Thiết bị phù hợp.\nKhoảnh khắc của bạn.',
+                style: TextStyle(
+                  fontSize: 26,
+                  height: 1.25,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Xem lịch trống, chọn thiết bị và gửi yêu cầu đến cửa hàng.',
+                style: TextStyle(color: Color(0xFFDCE3FF)),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.text,
+                  ),
+                  onPressed: () => context.go('/explore'),
+                  icon: const Icon(Icons.search),
+                  label: const Text('Tìm thiết bị'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
