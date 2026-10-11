@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Infrastructure.Email;
 using RentalCamera.Api.Rental;
 
 namespace RentalCamera.Api.Contracts;
@@ -309,13 +310,17 @@ public static class ContractEndpoints
             string id, RequestContractSignatureRequest request, HttpContext httpContext,
             ClaimsPrincipal principal, RentalCameraContext db,
             ContractSignatureService signatureService, ContractPdfService pdfService,
-            IConfiguration configuration,
+            IConfiguration configuration, IEmailService emailService, ILoggerFactory loggerFactory,
             CancellationToken ct) =>
         {
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customerId is null) return Results.Forbid();
             if (!request.DaDongYDieuKhoan)
                 return Results.BadRequest(new { loi = "Bạn phải đọc và đồng ý điều khoản hợp đồng trước khi ký." });
+
+            var khachThue = await db.KhachThue.AsNoTracking().SingleOrDefaultAsync(x => x.MaKhachThue == customerId, ct);
+            if (khachThue is null || string.IsNullOrWhiteSpace(khachThue.Email))
+                return Results.BadRequest(new { loi = "Tài khoản của bạn chưa cấu hình địa chỉ email hợp lệ để nhận OTP." });
 
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
             var contract = await db.HopDong.SingleOrDefaultAsync(
@@ -327,7 +332,8 @@ public static class ContractEndpoints
                 !await pdfService.VerifyAsync(id, contract.MaBamTepPdf, ct))
                 return Results.Conflict(new { loi = "Hợp đồng chưa có PDF hợp lệ để ký." });
             var timeout = Math.Clamp(configuration.GetValue("Rental:ContractSignMinutes", 30), 1, 1440);
-            if (contract.NgayTaoHopDong.AddMinutes(timeout) <= DateTime.Now)
+            var now = DateTime.Now;
+            if (contract.NgayTaoHopDong.AddMinutes(timeout) <= now)
             {
                 contract.TrangThai = "DA_HUY";
                 await db.SaveChangesAsync(ct);
@@ -335,19 +341,31 @@ public static class ContractEndpoints
                 return Results.Conflict(new { loi = "Hợp đồng đã quá thời hạn ký và đã bị hủy." });
             }
 
+            var recentRequests = await db.XacNhanKyHopDong.AsNoTracking()
+                .Where(x => x.MaHopDong == id && x.TrangThai == "CHO_XAC_NHAN")
+                .OrderByDescending(x => x.TaoLuc)
+                .ToListAsync(ct);
+
+            if (recentRequests.Count > 0 && (now - recentRequests[0].TaoLuc).TotalSeconds < 60)
+                return Results.Conflict(new { loi = "Vui lòng đợi 60 giây trước khi yêu cầu gửi lại OTP." });
+
+            if (recentRequests.Count >= 5)
+                return Results.Conflict(new { loi = "Bạn đã yêu cầu gửi mã quá 5 lần cho hợp đồng này. Vui lòng liên hệ hỗ trợ." });
+
             var termsVersion = configuration.GetValue("ElectronicSignature:TermsVersion", "1.0")!;
             var snapshotJson = await BuildContractSnapshotAsync(contract, db, termsVersion, ct);
             var contentHash = signatureService.HashContent(snapshotJson);
             var otp = signatureService.GenerateOtp();
             var (otpHash, salt) = signatureService.HashOtp(otp);
-            var now = DateTime.Now;
             var lifetimeMinutes = Math.Clamp(
                 configuration.GetValue("ElectronicSignature:OtpLifetimeMinutes", 5), 1, 15);
 
-            var pendingRows = await db.XacNhanKyHopDong
-                .Where(x => x.MaHopDong == id && x.TrangThai == "CHO_XAC_NHAN")
-                .ToListAsync(ct);
-            foreach (var pending in pendingRows) pending.TrangThai = "DA_HUY";
+            foreach (var pending in recentRequests)
+            {
+                // We need to fetch tracking entity since recentRequests is AsNoTracking
+                var entityToCancel = await db.XacNhanKyHopDong.FindAsync(new object[] { pending.MaXacNhan }, ct);
+                if (entityToCancel != null) entityToCancel.TrangThai = "DA_HUY";
+            }
 
             var confirmation = new XacNhanKyHopDong
             {
@@ -367,10 +385,35 @@ public static class ContractEndpoints
                 NoiDungHopDongJson = snapshotJson
             };
             db.XacNhanKyHopDong.Add(confirmation);
+
+            try
+            {
+                var subject = $"Mã xác nhận ký hợp đồng - SnapLease";
+                var htmlMessage = $@"
+                    <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                        <h2>Xác nhận chữ ký điện tử</h2>
+                        <p>Mã OTP của bạn cho hợp đồng <strong>{contract.MaHopDong}</strong> là:</p>
+                        <h1 style='color: #4CAF50; letter-spacing: 5px;'>{otp}</h1>
+                        <p>Mã này có hiệu lực trong {lifetimeMinutes} phút.</p>
+                        <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
+                    </div>";
+                await emailService.SendEmailAsync(khachThue.Email, subject, htmlMessage);
+            }
+            catch (Exception ex)
+            {
+                var logger = loggerFactory.CreateLogger("ContractFlow");
+                logger.LogError(ex, "Failed to send OTP email to {Email}", khachThue.Email);
+                return Results.StatusCode(StatusCodes.Status502BadGateway);
+            }
+
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
 
-            var exposeOtp = configuration.GetValue("ElectronicSignature:ReturnOtpInResponse", false);
+            var parts = khachThue.Email.Split('@');
+            var maskedEmail = parts[0].Length > 3 
+                ? $"{parts[0][..3]}***@{parts[1]}" 
+                : $"***@{parts[1]}";
+
             return Results.Accepted(value: new
             {
                 confirmation.MaXacNhan,
@@ -379,11 +422,8 @@ public static class ContractEndpoints
                 confirmation.PhienBanDieuKhoan,
                 confirmation.MaBamNoiDung,
                 confirmation.MaBamTepPdf,
-                maOtp = exposeOtp ? otp : null,
-                kenhGui = exposeOtp ? "RESPONSE_KIEM_THU" : "CAN_TICH_HOP_SMS_EMAIL",
-                thongBao = exposeOtp
-                    ? "Đã tạo OTP ký hợp đồng để kiểm thử."
-                    : "Đã tạo yêu cầu ký; cần dịch vụ SMS/email để gửi OTP."
+                emailMask = maskedEmail,
+                thongBao = "Mã xác nhận đã được gửi đến email của bạn."
             });
         }).RequireAuthorization("Customer").RequireRateLimiting("auth");
 
