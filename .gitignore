@@ -16,3 +16,8 @@ TestResults/
 **/.keys/*.xml
 **/appsettings.Development.json
 **/appsettings.Local.json
+
+# Local VNPay test build and runtime evidence
+.vnpay-test-build/
+vnpay-evidence/
+__pycache__/

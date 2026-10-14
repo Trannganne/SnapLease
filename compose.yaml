@@ -268,6 +268,10 @@ services:
       Smtp__Password: "${SMTP_PASSWORD:-}"
       Smtp__SenderEmail: "${SMTP_SENDER_EMAIL:-}"
       Smtp__SenderName: "${SMTP_SENDER_NAME:-SnapLease}"
+      BankTransfer__NganHang: "${BANK_TRANSFER_NGAN_HANG:-}"
+      BankTransfer__MaBin: "${BANK_TRANSFER_MA_BIN:-}"
+      BankTransfer__SoTaiKhoan: "${BANK_TRANSFER_SO_TAI_KHOAN:-}"
+      BankTransfer__ChuTaiKhoan: "${BANK_TRANSFER_CHU_TAI_KHOAN:-}"
     ports:
       - "5000:8080"
     volumes:

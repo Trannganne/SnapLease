@@ -47,6 +47,8 @@ builder.Services.AddSingleton<ContractSignatureService>();
 builder.Services.AddSingleton<ContractPdfService>();
 builder.Services.AddSingleton<IEmailService, SmtpEmailService>();
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
+builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
+builder.Services.AddHttpClient();
 builder.Services.AddSingleton<VnpayService>();
 builder.Services.AddScoped<AvailabilityService>();
 builder.Services.AddHostedService<ReservationExpirationService>();
@@ -87,6 +89,14 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("vnpay-query", context => RateLimitPartition.GetFixedWindowLimiter(
+        $"{context.Connection.RemoteIpAddress}|{context.Request.RouteValues["id"]}",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 1,
+            Window = TimeSpan.FromMinutes(5),
+            QueueLimit = 0
+        }));
     options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions

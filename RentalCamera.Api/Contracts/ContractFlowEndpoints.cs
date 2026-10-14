@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Microsoft.Data.SqlClient;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
@@ -691,7 +692,7 @@ public static class ContractEndpoints
 
         contracts.MapPost("/{id}/thanh-toan-coc", async (
             string id, CreatePaymentRequest request, ClaimsPrincipal principal,
-            RentalCameraContext db, CancellationToken ct) =>
+            RentalCameraContext db, IOptions<BankTransferOptions> bankOptions, CancellationToken ct) =>
         {
             if (!await ApiAccess.CanAccessContractAsync(id, principal, db, ct)) return Results.Forbid();
             var paymentMethod = request.PhuongThuc?.Trim().ToUpperInvariant();
@@ -701,9 +702,17 @@ public static class ContractEndpoints
             if (contract is null) return Results.NotFound();
             if (contract.TrangThai is "CHO_KY" or "DA_HUY" or "HOAN_THANH")
                 return Results.Conflict(new { loi = "Trạng thái hợp đồng chưa cho phép thanh toán cọc." });
+            var bank = bankOptions.Value;
+            if (paymentMethod == "CHUYEN_KHOAN" && !bank.IsValid)
+            {
+                return Results.Problem("Cấu hình tài khoản ngân hàng thụ hưởng chưa đầy đủ hoặc không hợp lệ.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
             if (await db.ThanhToan.AnyAsync(x => x.MaHopDong == id && x.LoaiThanhToan == "TIEN_COC" &&
                 (x.TrangThai == "CHO_THANH_TOAN" || x.TrangThai == "THANH_CONG"), ct))
                 return Results.Conflict(new { loi = "Khoản thanh toán cọc đã tồn tại." });
+
             var payment = new ThanhToan
             {
                 MaThanhToan = ApiAccess.NewId("TT"), MaHopDong = id, SoTien = contract.TongTienCoc,
@@ -711,23 +720,25 @@ public static class ContractEndpoints
                 TrangThai = "CHO_THANH_TOAN",
                 NoiDungChuyenKhoan = string.IsNullOrWhiteSpace(request.NoiDungChuyenKhoan)
                     ? $"COC {contract.MaHopDong}"
-                    : request.NoiDungChuyenKhoan.Trim()
+                    : request.NoiDungChuyenKhoan.Trim(),
+                MaNganHang = paymentMethod == "CHUYEN_KHOAN" ? bank.NganHang : null,
+                MaThamChieu = null,
+                DuongDanThanhToan = paymentMethod == "CHUYEN_KHOAN"
+                    ? JsonSerializer.Serialize(new { nganHang = bank.NganHang, maBin = bank.MaBin, soTaiKhoan = bank.SoTaiKhoan, chuTaiKhoan = bank.ChuTaiKhoan })
+                    : null
             };
             db.ThanhToan.Add(payment);
             await db.SaveChangesAsync(ct);
-            return Results.Created($"/api/thanh-toan/{payment.MaThanhToan}", new
-            {
-                payment.MaThanhToan, payment.MaHopDong, payment.SoTien,
-                payment.LoaiThanhToan, payment.PhuongThuc, payment.TrangThai,
-                payment.NoiDungChuyenKhoan,
-                thongBao = paymentMethod == "TIEN_MAT"
+            await tx.CommitAsync(ct);
+            return Results.Created($"/api/thanh-toan/{payment.MaThanhToan}", ToPaymentDto(payment, bank,
+                paymentMethod == "TIEN_MAT"
                     ? "Đã tạo yêu cầu thanh toán tiền mặt; vui lòng chờ cửa hàng xác nhận."
-                    : "Đã tạo giao dịch; vui lòng thanh toán theo nội dung chuyển khoản."
-            });
+                    : "Đã tạo giao dịch; vui lòng thanh toán theo nội dung chuyển khoản."));
         });
 
         contracts.MapGet("/{id}/thanh-toan", async (
-            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+            string id, ClaimsPrincipal principal, RentalCameraContext db,
+            IOptions<BankTransferOptions> bankOptions, CancellationToken ct) =>
         {
             if (!await ApiAccess.CanAccessContractAsync(id, principal, db, ct)) return Results.Forbid();
             if (!await db.HopDong.AsNoTracking().AnyAsync(x => x.MaHopDong == id, ct))
@@ -738,7 +749,7 @@ public static class ContractEndpoints
                 .OrderByDescending(x => x.ThoiGian)
                 .ThenByDescending(x => x.MaThanhToan)
                 .ToListAsync(ct);
-            return Results.Ok(data);
+            return Results.Ok(data.Select(p => ToPaymentDto(p, bankOptions.Value)));
         });
 
         contracts.MapGet("/{id}/du-kien-gia-han", async (
@@ -802,12 +813,13 @@ public static class ContractEndpoints
 
         var payments = app.MapGroup("/api/thanh-toan").RequireAuthorization();
         payments.MapGet("/{id}", async (
-            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+            string id, ClaimsPrincipal principal, RentalCameraContext db,
+            IOptions<BankTransferOptions> bankOptions, CancellationToken ct) =>
         {
             var payment = await db.ThanhToan.AsNoTracking().SingleOrDefaultAsync(x => x.MaThanhToan == id, ct);
             if (payment is null) return Results.NotFound();
             if (!await ApiAccess.CanAccessContractAsync(payment.MaHopDong, principal, db, ct)) return Results.Forbid();
-            return Results.Ok(payment);
+            return Results.Ok(ToPaymentDto(payment, bankOptions.Value));
         });
 
         payments.MapPost("/{id}/xac-nhan", async (
@@ -981,6 +993,67 @@ public static class ContractEndpoints
         var estimatedCost = Math.Round(dailyRental * extensionDays, 2);
         return new ExtensionQuote(true, null, currentReturnTime, newReturnTime,
             extensionDays, estimatedCost);
+    }
+
+    private static object ToPaymentDto(ThanhToan p, BankTransferOptions bankOptions, string? thongBao = null)
+    {
+        string? nganHang = null;
+        string? maBin = null;
+        string? soTaiKhoan = null;
+        string? chuTaiKhoan = null;
+
+        if (p.PhuongThuc == "CHUYEN_KHOAN")
+        {
+            if (!string.IsNullOrWhiteSpace(p.DuongDanThanhToan) && p.DuongDanThanhToan.StartsWith("{"))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(p.DuongDanThanhToan);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("nganHang", out var nh)) nganHang = nh.GetString();
+                    if (root.TryGetProperty("maBin", out var mb)) maBin = mb.GetString();
+                    if (root.TryGetProperty("soTaiKhoan", out var stk)) soTaiKhoan = stk.GetString();
+                    if (root.TryGetProperty("chuTaiKhoan", out var ctk)) chuTaiKhoan = ctk.GetString();
+                }
+                catch
+                {
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(nganHang) && bankOptions.IsValid)
+            {
+                nganHang = bankOptions.NganHang;
+                maBin = bankOptions.MaBin;
+                soTaiKhoan = bankOptions.SoTaiKhoan;
+                chuTaiKhoan = bankOptions.ChuTaiKhoan;
+            }
+        }
+
+        return new
+        {
+            p.MaThanhToan,
+            p.MaHopDong,
+            p.SoTien,
+            p.LoaiThanhToan,
+            p.PhuongThuc,
+            p.MaGiaoDich,
+            p.ThoiGian,
+            p.TrangThai,
+            p.NoiDungChuyenKhoan,
+            p.NhaCungCap,
+            p.MaThamChieu,
+            p.MaNganHang,
+            p.LoaiThe,
+            p.MaPhanHoi,
+            p.DuongDanThanhToan,
+            p.ThoiGianHetHan,
+            p.ThoiGianCapNhat,
+            nganHang,
+            maBin,
+            soTaiKhoan,
+            chuTaiKhoan,
+            thongBao
+        };
     }
 }
 

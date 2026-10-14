@@ -193,6 +193,26 @@ public sealed class ThanhToan
     public DateTime? ThoiGianCapNhat { get; set; }
 }
 
+public sealed class YeuCauThanhToanVnpay
+{
+    public string MaYeuCau { get; set; } = "";
+    public string MaThanhToan { get; set; } = "";
+    public string MaThamChieu { get; set; } = "";
+    public decimal SoTien { get; set; }
+    public string TienTe { get; set; } = "VND";
+    public string DuongDanThanhToan { get; set; } = "";
+    public DateTime ThoiGianHetHan { get; set; }
+    public string TrangThai { get; set; } = "CHO_THANH_TOAN";
+    public bool LaThuThua { get; set; }
+    public string? MaGiaoDich { get; set; }
+    public string? MaNganHang { get; set; }
+    public string? LoaiThe { get; set; }
+    public string? MaPhanHoi { get; set; }
+    public string? GhiChu { get; set; }
+    public DateTime ThoiGianTao { get; set; } = DateTime.UtcNow;
+    public DateTime? ThoiGianCapNhat { get; set; }
+}
+
 public sealed class PhieuPhat
 {
     public string MaPhieuPhat { get; set; } = "";
@@ -243,4 +263,18 @@ public sealed class IdempotencyKeyRecord
     public string PayloadHash { get; set; } = "";
     public string MaThucThe { get; set; } = "";
     public DateTime NgayTao { get; set; }
+}
+
+public sealed class BankTransferOptions
+{
+    public string NganHang { get; set; } = "";
+    public string MaBin { get; set; } = "";
+    public string SoTaiKhoan { get; set; } = "";
+    public string ChuTaiKhoan { get; set; } = "";
+
+    public bool IsValid =>
+        !string.IsNullOrWhiteSpace(NganHang) &&
+        !string.IsNullOrWhiteSpace(MaBin) &&
+        !string.IsNullOrWhiteSpace(SoTaiKhoan) &&
+        !string.IsNullOrWhiteSpace(ChuTaiKhoan);
 }
