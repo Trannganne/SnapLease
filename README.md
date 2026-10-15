@@ -98,6 +98,8 @@ upload file JPEG, PNG hoặc WEBP (tối đa 10 MB) lên Cloudinary rồi lưu U
 Cấu hình các biến `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và
 `CLOUDINARY_API_SECRET` trong `.env`, sau đó build lại dịch vụ API.
 
+Hướng dẫn cấu hình, chạy và kiểm thử từng bước: [`UPLOAD_ANH_BIEN_BAN_CLOUDINARY.md`](./Docs/UPLOAD_ANH_BIEN_BAN_CLOUDINARY.md).
+
 ## Base URL cho Web và Mobile
 
 | Môi trường | Base URL |
