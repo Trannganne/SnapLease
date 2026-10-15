@@ -88,6 +88,16 @@ Mật khẩu phải có 8–128 ký tự, gồm chữ hoa, chữ thường, ch�
 
 Sao chép `accessToken`, mở nút **Authorize** trong Swagger và dán token trực tiếp.
 
+## Upload ảnh biên bản bàn giao
+
+`POST /api/chi-tiet-hop-dong/{id}/anh-bien-ban` dành cho nhân viên/admin và nhận
+`multipart/form-data` gồm `loai`, file `anh` và `moTa` không bắt buộc. Backend tự
+upload file JPEG, PNG hoặc WEBP (tối đa 10 MB) lên Cloudinary rồi lưu URL HTTPS vào
+`AnhBienBan.DuongDanAnh`. Mobile không nhập URL và không giữ khóa Cloudinary.
+
+Cấu hình các biến `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và
+`CLOUDINARY_API_SECRET` trong `.env`, sau đó build lại dịch vụ API.
+
 ## Base URL cho Web và Mobile
 
 | Môi trường | Base URL |

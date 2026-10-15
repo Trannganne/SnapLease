@@ -400,7 +400,7 @@ GO
 ================================================================ */
 CREATE TABLE HopDong (
     MaHopDong VARCHAR(20) NOT NULL PRIMARY KEY,
-    MaGioHang VARCHAR(20) NOT NULL UNIQUE,
+    MaGioHang VARCHAR(20) NOT NULL,
     MaGiuCho VARCHAR(20) NOT NULL UNIQUE,
     MaKhachThue VARCHAR(20) NOT NULL,
     MaNhanVien VARCHAR(20) NULL,

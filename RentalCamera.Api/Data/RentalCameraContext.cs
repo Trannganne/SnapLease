@@ -23,6 +23,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<PhuLuc> PhuLuc => Set<PhuLuc>();
     public DbSet<GiayToTuyThan> GiayToTuyThan => Set<GiayToTuyThan>();
     public DbSet<ThanhToan> ThanhToan => Set<ThanhToan>();
+    public DbSet<YeuCauThanhToanVnpay> YeuCauThanhToanVnpay => Set<YeuCauThanhToanVnpay>();
     public DbSet<PhieuPhat> PhieuPhat => Set<PhieuPhat>();
     public DbSet<AnhBienBan> AnhBienBan => Set<AnhBienBan>();
     public DbSet<DanhGia> DanhGia => Set<DanhGia>();
@@ -307,6 +308,28 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.HasIndex(x => x.MaThamChieu).IsUnique().HasFilter("[MaThamChieu] IS NOT NULL");
             entity.HasOne<HopDong>().WithMany()
                 .HasForeignKey(x => x.MaHopDong).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<YeuCauThanhToanVnpay>(entity =>
+        {
+            entity.ToTable("YeuCauThanhToanVnpay");
+            entity.HasKey(x => x.MaYeuCau);
+            entity.Property(x => x.MaYeuCau).HasMaxLength(50).IsUnicode(false);
+            entity.Property(x => x.MaThanhToan).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaThamChieu).HasMaxLength(100).IsUnicode(false);
+            entity.Property(x => x.SoTien).HasPrecision(18, 2);
+            entity.Property(x => x.TienTe).HasMaxLength(10).IsUnicode(false);
+            entity.Property(x => x.DuongDanThanhToan).HasMaxLength(2000).IsUnicode(false);
+            entity.Property(x => x.TrangThai).HasMaxLength(30).IsUnicode(false);
+            entity.Property(x => x.MaGiaoDich).HasMaxLength(100).IsUnicode(false);
+            entity.Property(x => x.MaNganHang).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.LoaiThe).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaPhanHoi).HasMaxLength(10).IsUnicode(false);
+            entity.Property(x => x.GhiChu).HasMaxLength(500);
+            entity.HasIndex(x => x.MaThamChieu).IsUnique();
+            entity.HasIndex(x => x.MaThanhToan);
+            entity.HasOne<ThanhToan>().WithMany()
+                .HasForeignKey(x => x.MaThanhToan).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<PhieuPhat>(entity =>

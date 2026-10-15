@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Media;
 
 namespace RentalCamera.Api.Handover;
 
@@ -89,23 +91,61 @@ public static class HandoverEndpoints
         }).RequireAuthorization("Staff");
 
         app.MapPost("/api/chi-tiet-hop-dong/{id}/anh-bien-ban", async (
-            string id, EvidenceImageRequest request, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+            string id,
+            [FromForm] string loai,
+            IFormFile anh,
+            [FromForm] string? moTa,
+            ClaimsPrincipal principal,
+            RentalCameraContext db,
+            CloudinaryImageStorage imageStorage,
+            ILoggerFactory loggerFactory,
+            CancellationToken ct) =>
         {
-            if (request.Loai is not ("BAN_GIAO" or "NHAN_LAI" or "HU_HONG") || string.IsNullOrWhiteSpace(request.DuongDanAnh))
-                return Results.BadRequest(new { loi = "Loại hoặc đường dẫn ảnh không hợp lệ." });
-            var contractId = await db.ChiTietHopDong.Where(x => x.MaChiTietHopDong == id)
-                .Select(x => x.MaHopDong).SingleOrDefaultAsync(ct);
-            if (contractId is null) return Results.NotFound();
-            if (!await ApiAccess.CanAccessContractAsync(contractId, principal, db, ct)) return Results.Forbid();
+            if (loai is not ("BAN_GIAO" or "NHAN_LAI" or "HU_HONG"))
+                return Results.BadRequest(new { loi = "Loại ảnh phải là BAN_GIAO, NHAN_LAI hoặc HU_HONG." });
+            if (anh.Length == 0)
+                return Results.BadRequest(new { loi = "Chưa chọn file ảnh." });
+            if (anh.Length > imageStorage.MaximumBytes)
+                return Results.BadRequest(new { loi = $"Ảnh không được vượt quá {imageStorage.MaximumBytes / 1024 / 1024} MB." });
+            if (anh.ContentType is not ("image/jpeg" or "image/png" or "image/webp"))
+                return Results.BadRequest(new { loi = "Chỉ chấp nhận ảnh JPEG, PNG hoặc WEBP." });
+
+            var contract = await db.ChiTietHopDong
+                .Where(x => x.MaChiTietHopDong == id)
+                .Join(db.HopDong, detail => detail.MaHopDong, item => item.MaHopDong,
+                    (_, item) => new { item.MaHopDong, item.MaCuaHang })
+                .SingleOrDefaultAsync(ct);
+            if (contract is null) return Results.NotFound();
+
+            var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
+            if (scope is null || (!scope.IsAdmin && contract.MaCuaHang != scope.StoreId))
+                return Results.Forbid();
+
+            CloudinaryUploadResult upload;
+            try
+            {
+                upload = await imageStorage.UploadEvidenceAsync(anh, id, ct);
+            }
+            catch (InvalidOperationException ex)
+            {
+                loggerFactory.CreateLogger("Cloudinary").LogError(ex, "Thiếu cấu hình Cloudinary.");
+                return Results.Problem(ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+            catch (HttpRequestException ex)
+            {
+                loggerFactory.CreateLogger("Cloudinary").LogError(ex, "Upload ảnh biên bản thất bại.");
+                return Results.Problem("Không thể tải ảnh lên Cloudinary.", statusCode: StatusCodes.Status502BadGateway);
+            }
+
             var image = new AnhBienBan
             {
-                MaAnhBienBan = ApiAccess.NewId("BB"), MaChiTietHopDong = id, Loai = request.Loai,
-                DuongDanAnh = request.DuongDanAnh.Trim(), MoTa = request.MoTa?.Trim(), ThoiGianChup = DateTime.Now
+                MaAnhBienBan = ApiAccess.NewId("BB"), MaChiTietHopDong = id, Loai = loai,
+                DuongDanAnh = upload.SecureUrl, MoTa = moTa?.Trim(), ThoiGianChup = DateTime.Now
             };
             db.AnhBienBan.Add(image);
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/chi-tiet-hop-dong/{id}/anh-bien-ban", image);
-        });
+        }).DisableAntiforgery().RequireAuthorization("Staff");
     }
 
     private static async Task<List<object>> ContractDetails(string id, RentalCameraContext db, CancellationToken ct) =>
@@ -123,4 +163,3 @@ public sealed record HandoverRequest(List<HandoverItemRequest> ThietBi);
 public sealed record HandoverItemRequest(string MaChiTietHopDong, string TinhTrang);
 public sealed record ReturnRequest(List<ReturnItemRequest> ThietBi);
 public sealed record ReturnItemRequest(string MaChiTietHopDong, string TinhTrang, bool CoHuHong);
-public sealed record EvidenceImageRequest(string Loai, string DuongDanAnh, string? MoTa);

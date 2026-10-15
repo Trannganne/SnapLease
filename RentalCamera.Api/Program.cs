@@ -8,10 +8,11 @@ using RentalCamera.Api.Auth;
 using RentalCamera.Api.Catalog;
 using RentalCamera.Api.Contracts;
 using RentalCamera.Api.Data;
-using RentalCamera.Api.Equipment;
 using RentalCamera.Api.Email;
+using RentalCamera.Api.Equipment;
 using RentalCamera.Api.Handover;
 using RentalCamera.Api.Identity;
+using RentalCamera.Api.Media;
 using RentalCamera.Api.Notifications;
 using RentalCamera.Api.Payments;
 using RentalCamera.Api.Penalties;
@@ -48,6 +49,10 @@ builder.Services.AddSingleton<ContractPdfService>();
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
 builder.Services.AddSingleton<IContractOtpEmailSender, SmtpContractOtpEmailSender>();
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
+builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
+builder.Services.AddHttpClient();
+builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("Cloudinary"));
+builder.Services.AddHttpClient<CloudinaryImageStorage>();
 builder.Services.AddSingleton<VnpayService>();
 builder.Services.AddScoped<AvailabilityService>();
 builder.Services.AddHostedService<ReservationExpirationService>();
@@ -88,6 +93,14 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("vnpay-query", context => RateLimitPartition.GetFixedWindowLimiter(
+        $"{context.Connection.RemoteIpAddress}|{context.Request.RouteValues["id"]}",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 1,
+            Window = TimeSpan.FromMinutes(5),
+            QueueLimit = 0
+        }));
     options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions

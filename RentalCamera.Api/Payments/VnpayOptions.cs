@@ -11,5 +11,7 @@ public sealed class VnpayOptions
     public string MobileCallbackUrl { get; set; } = "";
     public string Version { get; set; } = "2.1.0";
     public string OrderType { get; set; } = "other";
+    public string? BankCode { get; set; }
     public int ExpirationMinutes { get; set; } = 15;
+    public string QueryDrUrl { get; set; } = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
 }
