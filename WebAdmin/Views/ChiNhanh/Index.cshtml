@@ -1,0 +1,11 @@
+@model List<CuaHang>
+@{ ViewData["Title"]="Quản lý chi nhánh";
+   var deviceCounts=ViewBag.DeviceCounts as Dictionary<string,int> ?? new();
+   var staffCounts=ViewBag.StaffCounts as Dictionary<string,int> ?? new(); }
+<div class="page-head"><div><h1>Quản lý chi nhánh</h1><p>Danh sách cửa hàng và nguồn lực thực tế trong hệ thống</p></div></div>
+<form method="get" class="panel sl-admin-filter"><label for="branch-q">Tìm chi nhánh</label><div class="sl-inline-filter"><input id="branch-q" class="form-control" name="q" value="@ViewBag.Q" placeholder="Tên, mã hoặc địa chỉ cửa hàng"/><button class="btn btn-primary" type="submit">Tìm kiếm</button><a asp-action="Index" class="btn btn-outline-primary">Đặt lại</a></div></form>
+<div class="sl-admin-grid">
+@foreach(var b in Model){<article class="panel sl-admin-card"><div class="sl-admin-card-top"><span class="sl-admin-icon"><i class="bi bi-shop"></i></span><span class="badge-soft">@b.TrangThai.Replace("_"," ")</span></div><h3>@b.TenCuaHang</h3><p class="sl-admin-sub">@b.MaCuaHang</p><p><i class="bi bi-geo-alt"></i> @b.DiaChi</p><p><i class="bi bi-telephone"></i> @b.SoDienThoai</p><div class="sl-admin-card-bottom"><span><b>@(deviceCounts.GetValueOrDefault(b.MaCuaHang))</b> thiết bị</span><span><b>@(staffCounts.GetValueOrDefault(b.MaCuaHang))</b> nhân viên</span></div><a class="btn btn-outline-primary mt-3" asp-action="Details" asp-route-id="@b.MaCuaHang">Xem thiết bị tại chi nhánh</a></article>}
+</div>
+@if(Model.Count==0){<div class="panel text-center py-4 text-muted">Không tìm thấy chi nhánh phù hợp.</div>}
+<div class="sl-admin-note">Thông tin lấy từ SQL Server. Thao tác tạo/sửa chi nhánh chỉ nên bật khi Backend có API kiểm tra quyền và lưu thay đổi.</div>

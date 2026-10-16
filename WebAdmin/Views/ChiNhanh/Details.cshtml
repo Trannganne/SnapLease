@@ -1,0 +1,4 @@
+@model CuaHang
+@{ViewData["Title"]="Thiết bị tại chi nhánh";var devices=ViewBag.Devices as List<ThietBi> ?? new();}
+<div class="page-head"><div><h1>@Model.TenCuaHang</h1><p>@Model.DiaChi · @Model.SoDienThoai</p></div><a asp-action="Index" class="btn btn-outline-primary">Quay lại chi nhánh</a></div>
+<div class="panel"><h3>Danh sách thiết bị (@devices.Count)</h3><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Mã</th><th>Dòng máy</th><th>Serial</th><th>Tình trạng</th><th>Trạng thái</th><th></th></tr></thead><tbody>@foreach(var d in devices){<tr><td>@d.MaThietBi</td><td>@d.DongMay?.TenDongMay</td><td>@d.SoSerial</td><td>@d.TinhTrang</td><td>@d.TrangThai.Replace("_"," ")</td><td><a asp-controller="ThietBi" asp-action="Details" asp-route-id="@d.MaThietBi" class="btn btn-sm btn-outline-primary">Chi tiết</a></td></tr>}@if(!devices.Any()){<tr><td colspan="6">Chi nhánh chưa có thiết bị.</td></tr>}</tbody></table></div></div>

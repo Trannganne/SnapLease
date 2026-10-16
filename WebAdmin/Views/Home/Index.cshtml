@@ -1,0 +1,65 @@
+@model DashboardVM
+@{
+    ViewData["Title"] = "Tổng quan";
+    string StatusLabel(string s) => s switch {
+        "SAN_SANG" => "Sẵn sàng", "DANG_GIU" => "Đang giữ", "DANG_THUE" => "Đang thuê",
+        "BAO_TRI" => "Bảo trì", "HONG" => "Hỏng", "NGUNG_KINH_DOANH" => "Ngừng kinh doanh", _ => s.Replace("_", " ")
+    };
+    string OrderLabel(string s) => s switch {
+        "DANG_THUE" => "Đang thuê", "DA_HOAN_THANH" => "Hoàn thành", "HOAN_THANH" => "Hoàn thành",
+        "DA_HUY" => "Đã hủy", "CHO_BAN_GIAO" => "Chờ bàn giao", "CHO_COC" => "Chờ cọc",
+        "CHO_THANH_TOAN_COC" => "Chờ cọc", _ => s.Replace("_", " ")
+    };
+    string StatusClass(string s) => s switch {
+        "DANG_THUE" => "info", "DA_HOAN_THANH" or "HOAN_THANH" => "success", "DA_HUY" => "danger", _ => "warning"
+    };
+    var stateTotal = Model.TrangThai.Values.Sum();
+    var availablePct = stateTotal == 0 ? 0 : 100.0 * Model.TrangThai.GetValueOrDefault("SAN_SANG") / stateTotal;
+    var rentingPct = stateTotal == 0 ? 0 : 100.0 * Model.TrangThai.GetValueOrDefault("DANG_THUE") / stateTotal;
+    var pct1 = availablePct.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
+    var pct2 = (availablePct + rentingPct).ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
+    var maxRevenue = Math.Max(1m, Model.DoanhThuTheoThang.DefaultIfEmpty(0).Max());
+}
+<link rel="stylesheet" href="~/css/pages/dashboard-modern.css" asp-append-version="true" />
+<div class="dash-modern">
+  <div class="dash-heading">
+    <div><h1>Tổng quan</h1><p>Theo dõi hoạt động thuê thiết bị, doanh thu và tình trạng cửa hàng</p></div>
+    <div class="dash-period"><i class="bi bi-calendar3"></i><span>Tháng @DateTime.Today.ToString("MM/yyyy")</span></div>
+  </div>
+  <div class="dash-kpis">
+    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Tổng thiết bị</span><i class="bi bi-camera dash-icon"></i></div><strong>@Model.TongThietBi <small>máy</small></strong><p>Thiết bị toàn hệ thống</p></div>
+    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Đang cho thuê</span><i class="bi bi-camera-video dash-icon"></i></div><strong>@Model.DangThue <small>máy</small></strong><p>Trạng thái hiện tại</p></div>
+    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Đơn thuê hôm nay</span><i class="bi bi-calendar-check dash-icon"></i></div><strong>@Model.DonHomNay <small>đơn</small></strong><p>Hợp đồng ký trong ngày</p></div>
+    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Doanh thu tháng</span><i class="bi bi-cash-stack dash-icon"></i></div><strong>@Model.DoanhThuThang.ToString("N0") <small>đ</small></strong><p>Không tính tiền cọc</p></div>
+  </div>
+  <div class="dash-grid dash-grid-charts">
+    <section class="dash-card dash-revenue"><div class="dash-section-head"><h2><i class="bi bi-bar-chart-line"></i> Doanh thu theo tháng</h2><form method="get" asp-action="Index"><label class="visually-hidden" for="dash-year">Năm báo cáo</label><select id="dash-year" name="nam" class="form-select form-select-sm" onchange="this.form.submit()"><option value="@Model.NamBaoCao">Năm @Model.NamBaoCao</option>@if(Model.NamBaoCao>2000){<option value="@(Model.NamBaoCao-1)">Năm @(Model.NamBaoCao-1)</option>}</select></form></div>
+      <div class="dash-chart" role="img" aria-label="Biểu đồ doanh thu từng tháng của năm @Model.NamBaoCao">
+        @for(var i=0;i<12;i++){var value=Model.DoanhThuTheoThang.ElementAtOrDefault(i);var height=(double)(value/maxRevenue)*100; <div class="dash-chart-col"><div class="dash-bar-track"><div class="dash-bar" style="--bar-height:@(height.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="Tháng @(i+1): @value.ToString("N0") đ"></div></div><span>T@(i+1)</span></div>}
+      </div><div class="dash-chart-foot">Doanh thu thực nhận từ thanh toán thành công · Đơn vị: VNĐ</div>
+    </section>
+    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-pie-chart"></i> Tình trạng thiết bị</h2><a asp-controller="ThietBi" asp-action="Index">Chi tiết <i class="bi bi-arrow-right"></i></a></div>
+      @if(stateTotal==0){<div class="dash-empty">Chưa có dữ liệu thiết bị.</div>}
+      else {<div class="dash-status-layout"><div class="dash-donut" style="--donut-p1:@pct1;--donut-p2:@pct2" role="img" aria-label="Tổng cộng @stateTotal thiết bị, phân theo trạng thái"><div><strong>@stateTotal</strong><span>thiết bị</span></div></div><div class="dash-status-legend">@foreach(var st in Model.TrangThai.OrderByDescending(x=>x.Value)){<div class="dash-legend-row"><span class="dash-dot"></span><span>@StatusLabel(st.Key)</span><strong>@st.Value máy</strong><small>@(Math.Round(st.Value*100.0/stateTotal))%</small></div>}</div></div>}
+    </section>
+  </div>
+  <div class="dash-grid dash-grid-work">
+    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-list-ul"></i> Đơn thuê gần đây</h2><a asp-controller="DonThue" asp-action="Index">Xem tất cả <i class="bi bi-arrow-right"></i></a></div>
+      @if(!Model.DonGanDay.Any()){<div class="dash-empty"><i class="bi bi-inbox"></i> Chưa có hợp đồng nào.</div>}
+      else{<div class="table-responsive"><table class="dash-table"><thead><tr><th>Mã hợp đồng</th><th>Khách hàng</th><th>Ngày nhận</th><th>Ngày trả</th><th>Tiền thuê</th><th>Trạng thái</th><th></th></tr></thead><tbody>@foreach(var h in Model.DonGanDay){<tr><td><strong>@h.MaHopDong</strong></td><td>@(h.KhachThue?.HoTen ?? h.MaKhachThue)</td><td>@h.ThoiGianBanGiao.ToString("dd/MM/yyyy")</td><td>@h.ThoiGianTraDuKien.ToString("dd/MM/yyyy")</td><td>@h.TongTien.ToString("N0") đ</td><td><span class="dash-badge dash-badge-@StatusClass(h.TrangThai)">@OrderLabel(h.TrangThai)</span></td><td><a asp-controller="DonThue" asp-action="Details" asp-route-id="@h.MaHopDong">Chi tiết</a></td></tr>}</tbody></table></div>}
+    </section>
+    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-clipboard-check"></i> Công việc cần xử lý</h2><a asp-controller="DonThue" asp-action="Index">Xem đơn thuê <i class="bi bi-arrow-right"></i></a></div>
+      <div class="dash-tasks">
+      @foreach(var task in new[]{(Key:"coc",Label:"Chờ xác nhận tiền cọc",Icon:"bi-wallet2"),(Key:"phanbo",Label:"Chờ phân bổ thiết bị",Icon:"bi-box-seam"),(Key:"bangiao",Label:"Chờ bàn giao thiết bị",Icon:"bi-camera"),(Key:"quahan",Label:"Hợp đồng quá hạn trả",Icon:"bi-clock-history")}){<a asp-controller="DonThue" asp-action="Index" class="dash-task"><i class="bi @task.Icon"></i><span>@task.Label</span><strong>@Model.ViecCanXuLy.GetValueOrDefault(task.Key)</strong><i class="bi bi-chevron-right"></i></a>}
+      </div><p class="dash-footnote">Số lượng theo trạng thái hợp đồng hiện có.</p>
+    </section>
+  </div>
+  <div class="dash-grid dash-grid-bottom">
+    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-trophy"></i> Thiết bị được thuê nhiều</h2><a asp-controller="ThietBi" asp-action="Index">Xem thiết bị <i class="bi bi-arrow-right"></i></a></div>
+      @if(!Model.PhoBien.Any()){<div class="dash-empty">Chưa có lượt thuê được ghi nhận.</div>}else{<div class="dash-popular">@{var rank=0;}@foreach(var item in Model.PhoBien){rank++;<div class="dash-popular-item"><span class="dash-rank">@rank</span><span>@item.Ten</span><strong>@item.Luot lượt</strong></div>}</div>}
+    </section>
+    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-calendar-event"></i> Lịch bàn giao / nhận trả sắp tới</h2><a asp-controller="LichThue" asp-action="Index">Xem lịch <i class="bi bi-arrow-right"></i></a></div>
+      @if(!Model.LichSapToi.Any()){<div class="dash-empty"><i class="bi bi-calendar-check"></i> Chưa có lịch sắp tới.</div>}else{<div class="dash-upcoming">@foreach(var h in Model.LichSapToi){var isHandover=h.ThoiGianBanGiao>=DateTime.Now;var when=isHandover?h.ThoiGianBanGiao:h.ThoiGianTraDuKien;<a asp-controller="DonThue" asp-action="Details" asp-route-id="@h.MaHopDong"><i class="bi @(isHandover?"bi-box-arrow-up-right":"bi-box-arrow-in-down-left")"></i><span><strong>@(isHandover?"Bàn giao":"Nhận trả") · @h.MaHopDong</strong><small>@when.ToString("dd/MM/yyyy HH:mm") · @(h.KhachThue?.HoTen??h.MaKhachThue)</small></span><i class="bi bi-chevron-right"></i></a>}</div>}
+    </section>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+.topbar .top-actions { margin-left: auto; }
+.sl-orders-filter { margin-bottom: 18px; }
+.sl-orders-filter-grid { display:grid; grid-template-columns: 1.35fr 1fr 0.85fr 0.85fr auto; gap:12px; align-items:end; }
+.sl-orders-filter-grid label { display:flex; flex-direction:column; gap:8px; font-weight:500; font-size:13px; }
+.sl-orders-filter-actions { display:flex; gap:8px; padding-bottom:1px; }
+.sl-orders-filter-actions .btn { white-space:nowrap; }
+.sl-orders-panel h3 { display:flex; align-items:center; gap:10px; }
+.sl-orders-panel h3 i { color:var(--color-primary, var(--geekblue-6)); }
+.sl-orders-count { font-size:12px; font-weight:600; border-radius:20px; padding:3px 9px; background:var(--geekblue-1); color:var(--geekblue-7); }
+.sl-orders-panel .table thead th { white-space:nowrap; }
+.sl-orders-panel .table tbody td { vertical-align:middle; }
+.sl-orders-branch { display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
+.sl-orders-branch i { color:var(--geekblue-6); }
+@media(max-width:1250px){ .sl-orders-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+@media(max-width:650px){ .sl-orders-filter-grid{grid-template-columns:1fr;} .sl-orders-filter-actions{justify-content:flex-start;} }
