@@ -6,15 +6,21 @@ BEGIN TRANSACTION;
 
 IF COL_LENGTH('dbo.DanhGia', 'TrangThaiKiemDuyet') IS NULL
 BEGIN
-    ALTER TABLE dbo.DanhGia ADD TrangThaiKiemDuyet VARCHAR(20) NULL;
-    UPDATE dbo.DanhGia SET TrangThaiKiemDuyet = 'DA_DUYET';
-    ALTER TABLE dbo.DanhGia ALTER COLUMN TrangThaiKiemDuyet VARCHAR(20) NOT NULL;
+    EXEC(N'ALTER TABLE dbo.DanhGia ADD TrangThaiKiemDuyet VARCHAR(20) NULL;');
 END;
+
+EXEC(N'UPDATE dbo.DanhGia
+       SET TrangThaiKiemDuyet = ''DA_DUYET''
+       WHERE TrangThaiKiemDuyet IS NULL;');
+
+EXEC(N'ALTER TABLE dbo.DanhGia
+       ALTER COLUMN TrangThaiKiemDuyet VARCHAR(20) NOT NULL;');
 
 IF OBJECT_ID('dbo.DF_DanhGia_TrangThaiKiemDuyet', 'D') IS NULL
 BEGIN
-    ALTER TABLE dbo.DanhGia ADD CONSTRAINT DF_DanhGia_TrangThaiKiemDuyet
-        DEFAULT 'CHO_DUYET' FOR TrangThaiKiemDuyet;
+    EXEC(N'ALTER TABLE dbo.DanhGia
+           ADD CONSTRAINT DF_DanhGia_TrangThaiKiemDuyet
+           DEFAULT ''CHO_DUYET'' FOR TrangThaiKiemDuyet;');
 END;
 
 IF COL_LENGTH('dbo.DanhGia', 'GhiChuKiemDuyet') IS NULL
@@ -31,8 +37,9 @@ ALTER TABLE dbo.DanhGia ALTER COLUMN NhanXet NVARCHAR(500) NULL;
 
 IF OBJECT_ID('dbo.CK_DanhGia_TrangThaiKiemDuyet', 'C') IS NULL
 BEGIN
-    ALTER TABLE dbo.DanhGia ADD CONSTRAINT CK_DanhGia_TrangThaiKiemDuyet
-        CHECK (TrangThaiKiemDuyet IN ('CHO_DUYET', 'DA_DUYET', 'TU_CHOI'));
+    EXEC(N'ALTER TABLE dbo.DanhGia
+           ADD CONSTRAINT CK_DanhGia_TrangThaiKiemDuyet
+           CHECK (TrangThaiKiemDuyet IN (''CHO_DUYET'', ''DA_DUYET'', ''TU_CHOI''));');
 END;
 
 IF OBJECT_ID('dbo.DanhGiaDiemNoiBat', 'U') IS NULL
