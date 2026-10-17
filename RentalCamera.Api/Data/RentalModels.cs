@@ -253,6 +253,23 @@ public sealed class ThongBao
     public string NoiDung { get; set; } = "";
     public DateTime ThoiGianGui { get; set; }
     public bool DaDoc { get; set; }
+
+    public string? EventCode { get; set; }
+    public string? TargetType { get; set; }
+    public string? TargetId { get; set; }
+}
+
+public sealed class FcmDeviceToken
+{
+    public string Id { get; set; } = "";
+    public string MaTaiKhoan { get; set; } = "";
+    public string Token { get; set; } = "";
+    public string TokenHash { get; set; } = "";
+    public string Platform { get; set; } = "";
+    public string? DeviceId { get; set; }
+    public bool IsActive { get; set; } = true;
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 
 public sealed class IdempotencyKeyRecord

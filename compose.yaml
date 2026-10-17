@@ -116,6 +116,15 @@ services:
               -b \
               -V 16 \
               -i /database/07_add_vnpay_payment.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/08_add_firebase_notifications.sql
             echo "Cap nhat database thanh cong."
             exit 0
             ;;
@@ -180,6 +189,18 @@ services:
           -b \
           -V 16 \
           -i /database/07_add_vnpay_payment.sql
+
+        echo "Dang bo sung cau truc thong bao Firebase..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/08_add_firebase_notifications.sql
 
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \
@@ -279,12 +300,16 @@ services:
       BankTransfer__MaBin: "${BANK_TRANSFER_MA_BIN:-}"
       BankTransfer__SoTaiKhoan: "${BANK_TRANSFER_SO_TAI_KHOAN:-}"
       BankTransfer__ChuTaiKhoan: "${BANK_TRANSFER_CHU_TAI_KHOAN:-}"
+      Firebase__ProjectId: "${FIREBASE_PROJECT_ID:-}"
+      GOOGLE_APPLICATION_CREDENTIALS: "/run/secrets/firebase_admin"
     ports:
       - "5000:8080"
     volumes:
       - rentalcamera-api-keys:/app/.keys
       - rentalcamera-api-storage:/app/Storage
       - rentalcamera-contract-files:/app/App_Data/contracts
+    secrets:
+      - firebase_admin
     depends_on:
       db-init:
         condition: service_completed_successfully
@@ -295,3 +320,7 @@ volumes:
   rentalcamera-api-keys:
   rentalcamera-api-storage:
   rentalcamera-contract-files:
+
+secrets:
+  firebase_admin:
+    file: "${FIREBASE_ADMIN_CREDENTIALS_FILE}"

@@ -1,3 +1,5 @@
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -26,6 +28,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
+var firebaseProjectId = builder.Configuration["Firebase:ProjectId"];
+if (string.IsNullOrWhiteSpace(firebaseProjectId))
+{
+    throw new InvalidOperationException("Thiếu cấu hình Firebase:ProjectId.");
+}
+
+builder.Services.AddSingleton(_ =>
+    FirebaseApp.Create(new AppOptions
+    {
+        Credential = GoogleCredential.GetApplicationDefault(),
+        ProjectId = firebaseProjectId
+    }));
+
 var connectionString = builder.Configuration.GetConnectionString("RentalCamera")
     ?? throw new InvalidOperationException("Thiếu ConnectionStrings:RentalCamera.");
 builder.Services.AddDbContext<RentalCameraContext>(options => options.UseSqlServer(connectionString));
@@ -51,6 +66,7 @@ builder.Services.AddSingleton<IContractOtpEmailSender, SmtpContractOtpEmailSende
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
 builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<FirebaseNotificationSender>();
 builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddHttpClient<CloudinaryImageStorage>();
 builder.Services.AddSingleton<VnpayService>();
@@ -112,6 +128,10 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+var firebaseApp = app.Services.GetRequiredService<FirebaseApp>();
+app.Logger.LogInformation(
+    "Firebase Admin đã khởi tạo cho project {ProjectId}.",
+    firebaseApp.Options.ProjectId);
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("Frontend");
@@ -156,6 +176,7 @@ if (args.Length == 2 && args[0] == "set-password")
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapNotificationEndpoints();
+app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
 app.MapEquipmentEndpoints();
 app.MapRentalEndpoints();

@@ -49,10 +49,17 @@ public static class ApiAccess
             .AnyAsync(x => x.MaHopDong == contractId && x.MaCuaHang == scope.StoreId, ct);
     }
 
-    public static void AddNotification(
-        RentalCameraContext db, string accountId, string type, string title, string content)
+    public static ThongBao AddNotification(
+        RentalCameraContext db,
+        string accountId,
+        string type,
+        string title,
+        string content,
+        string? eventCode = null,
+        string? targetType = null,
+        string? targetId = null)
     {
-        db.ThongBao.Add(new ThongBao
+        var notification = new ThongBao
         {
             MaThongBao = NewId("TB"),
             MaTaiKhoan = accountId,
@@ -60,8 +67,20 @@ public static class ApiAccess
             TieuDe = title,
             NoiDung = content,
             ThoiGianGui = DateTime.Now,
-            DaDoc = false
-        });
+            DaDoc = false,
+            EventCode = string.IsNullOrWhiteSpace(eventCode)
+                ? type
+                : eventCode.Trim(),
+            TargetType = string.IsNullOrWhiteSpace(targetType)
+                ? null
+                : targetType.Trim(),
+            TargetId = string.IsNullOrWhiteSpace(targetId)
+                ? null
+                : targetId.Trim()
+        };
+
+        db.ThongBao.Add(notification);
+        return notification;
     }
 }
 

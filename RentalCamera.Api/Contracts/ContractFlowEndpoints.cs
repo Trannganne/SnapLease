@@ -8,6 +8,7 @@ using Microsoft.Data.SqlClient;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Email;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Notifications;
 using RentalCamera.Api.Rental;
 
 namespace RentalCamera.Api.Contracts;
@@ -17,7 +18,9 @@ public static class ContractEndpoints
     public static void MapContractEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("/api/giu-cho/{id}/xac-nhan-thue", async (
-            string id, ClaimsPrincipal principal, RentalCameraContext db, ILoggerFactory loggerFactory, HttpContext httpContext, CancellationToken ct) =>
+            string id, ClaimsPrincipal principal, RentalCameraContext db,
+            FirebaseNotificationSender notificationSender, ILoggerFactory loggerFactory,
+            HttpContext httpContext, CancellationToken ct) =>
         {
             var logger = loggerFactory.CreateLogger("ContractFlow");
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
@@ -125,13 +128,20 @@ public static class ContractEndpoints
             db.HopDong.Add(contract);
             hold.TrangThai = "DA_CHUYEN_HOP_DONG";
 
-            var accountId = await db.KhachThue.AsNoTracking().Where(x => x.MaKhachThue == customerId)
+            var accountId = await db.KhachThue.AsNoTracking()
+                .Where(x => x.MaKhachThue == customerId)
                 .Select(x => x.MaTaiKhoan).SingleAsync(ct);
-            ApiAccess.AddNotification(db, accountId, "HOP_DONG", "Hợp đồng chờ ký",
-                $"Hợp đồng {contract.MaHopDong} đã được tạo và đang chờ ký.");
+            const string notificationTitle = "Hợp đồng chờ ký";
+            var notificationBody = $"Hợp đồng {contract.MaHopDong} đã được tạo và đang chờ ký.";
+            ApiAccess.AddNotification(db, accountId, "HOP_DONG", notificationTitle, notificationBody,
+                eventCode: "CONTRACT_CREATED", targetType: "HOP_DONG", targetId: contract.MaHopDong);
 
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
+            await notificationSender.SendToAccountAsync(
+                accountId, notificationTitle, notificationBody,
+                eventCode: "CONTRACT_CREATED", targetType: "HOP_DONG",
+                targetId: contract.MaHopDong, ct);
             return Results.Created($"/api/hop-dong/{contract.MaHopDong}", new
             {
                 contract.MaHopDong, contract.MaGiuCho, contract.TongTien,

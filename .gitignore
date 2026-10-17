@@ -12,6 +12,10 @@ TestResults/
 **/.env
 !.env.example
 
+# Firebase Admin service-account keys must stay outside the repository.
+*-firebase-admin.json
+firebase-admin*.json
+
 # Khong dua khoa Data Protection va cau hinh cuc bo len Git
 **/.keys/*.xml
 **/appsettings.Development.json

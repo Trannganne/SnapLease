@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Notifications;
 
 namespace RentalCamera.Api.Identity;
 
@@ -141,7 +142,8 @@ public static class IdentityEndpoints
 
         group.MapPut("/{id}/xac-minh", async (
             string id, VerifyIdentityRequest request, ClaimsPrincipal principal,
-            RentalCameraContext db, CancellationToken ct) =>
+            RentalCameraContext db, FirebaseNotificationSender notificationSender,
+            CancellationToken ct) =>
         {
             if (request.KetQua is not ("HOP_LE" or "TU_CHOI")) return Results.BadRequest();
             var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
@@ -163,8 +165,14 @@ public static class IdentityEndpoints
                     return Results.Conflict(new { loi = "CCCD đã được sử dụng bởi khách thuê khác." });
                 customer.CCCD = cccd;
             }
-            ApiAccess.AddNotification(db, customer.MaTaiKhoan, "XAC_MINH_GIAY_TO", "Kết quả xác minh giấy tờ",
-                request.KetQua == "HOP_LE" ? "Giấy tờ của bạn đã được xác minh." : $"Giấy tờ bị từ chối. {request.GhiChu}");
+            const string notificationTitle = "Kết quả xác minh giấy tờ";
+            var notificationBody = request.KetQua == "HOP_LE"
+                ? "Giấy tờ của bạn đã được xác minh."
+                : $"Giấy tờ bị từ chối. {request.GhiChu}";
+            ApiAccess.AddNotification(
+                db, customer.MaTaiKhoan, "XAC_MINH_GIAY_TO", notificationTitle, notificationBody,
+                eventCode: "IDENTITY_VERIFICATION_RESULT", targetType: "GIAY_TO_TUY_THAN",
+                targetId: document.MaGiayTo);
             try
             {
                 await db.SaveChangesAsync(ct);
@@ -173,6 +181,10 @@ public static class IdentityEndpoints
             {
                 return Results.Conflict(new { loi = "CCCD đã được sử dụng bởi khách thuê khác." });
             }
+            await notificationSender.SendToAccountAsync(
+                customer.MaTaiKhoan, notificationTitle, notificationBody,
+                eventCode: "IDENTITY_VERIFICATION_RESULT", targetType: "GIAY_TO_TUY_THAN",
+                targetId: document.MaGiayTo, ct);
             return Results.Ok(new { document.MaGiayTo, document.TrangThaiXacMinh, document.GhiChu });
         }).RequireAuthorization("Staff");
 

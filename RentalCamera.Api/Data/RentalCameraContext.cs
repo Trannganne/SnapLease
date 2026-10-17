@@ -28,6 +28,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<AnhBienBan> AnhBienBan => Set<AnhBienBan>();
     public DbSet<DanhGia> DanhGia => Set<DanhGia>();
     public DbSet<ThongBao> ThongBao => Set<ThongBao>();
+    public DbSet<FcmDeviceToken> FcmDeviceToken => Set<FcmDeviceToken>();
     public DbSet<IdempotencyKeyRecord> IdempotencyKey => Set<IdempotencyKeyRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -376,8 +377,48 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.MaThongBao).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaTaiKhoan).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.Loai).HasMaxLength(30).IsUnicode(false);
+            entity.Property(x => x.EventCode).HasMaxLength(50).IsUnicode(false);
+            entity.Property(x => x.TargetType).HasMaxLength(30).IsUnicode(false);
+            entity.Property(x => x.TargetId).HasMaxLength(50).IsUnicode(false);
             entity.HasOne<TaiKhoan>().WithMany()
                 .HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<FcmDeviceToken>(entity =>
+        {
+            entity.ToTable("FcmDeviceToken");
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Id)
+                .HasMaxLength(36)
+                .IsUnicode(false);
+
+            entity.Property(x => x.MaTaiKhoan)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+
+            entity.Property(x => x.Token)
+                .HasMaxLength(2048);
+
+            entity.Property(x => x.TokenHash)
+                .HasMaxLength(64)
+                .IsUnicode(false);
+
+            entity.Property(x => x.Platform)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+
+            entity.Property(x => x.DeviceId)
+                .HasMaxLength(200);
+
+            entity.HasIndex(x => x.TokenHash)
+                .IsUnique();
+
+            entity.HasIndex(x => new { x.MaTaiKhoan, x.IsActive });
+
+            entity.HasOne<TaiKhoan>().WithMany()
+                .HasForeignKey(x => x.MaTaiKhoan)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<IdempotencyKeyRecord>(entity =>
