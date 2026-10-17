@@ -4,15 +4,18 @@ Thư mục này chứa database cuối dùng chung cho Backend, Web và Mobile.
 
 ## File sử dụng
 
-1. `01_schema.sql`: tạo database `RentalCameraDb20` và cấu trúc 23 bảng.
+1. `01_schema.sql`: tạo database `RentalCameraDb20` và cấu trúc database hiện hành.
 2. `02_sample_data.sql`: nạp dữ liệu mẫu tương thích với cấu trúc trên.
 3. `03_update_cloudinary_images.sql`: cập nhật URL Cloudinary cho database đã khởi tạo bằng dữ liệu mẫu cũ.
 4. `04_add_home_contract_test_data.sql`: bổ sung dữ liệu kiểm thử contract Home cho database demo đã tồn tại; script có thể chạy lại an toàn.
 5. `06_add_electronic_signature.sql`: bổ sung bảng và các cột xác nhận hợp đồng bằng OTP; script có thể chạy lại an toàn.
+6. `07_add_vnpay_payment.sql`: bổ sung dữ liệu thanh toán VNPAY; script có thể chạy lại an toàn.
+7. `08_add_firebase_notifications.sql`: bổ sung token thiết bị và định tuyến thông báo FCM; script có thể chạy lại an toàn.
+8. `09_add_review_details.sql`: bổ sung kiểm duyệt, chip điểm nổi bật và ảnh đánh giá; script có thể chạy lại an toàn.
 
-Docker Compose tự chạy hai file theo đúng thứ tự. Thành viên không cần import SQL thủ công.
+Docker Compose tự chạy schema, dữ liệu mẫu và các migration cần thiết theo đúng thứ tự. Thành viên không cần import SQL thủ công.
 
-Khi database đã tồn tại, Docker Compose tự chạy `06_add_electronic_signature.sql` và không xóa dữ liệu cũ.
+Khi database đã tồn tại, Docker Compose tự chạy các migration từ `06` đến `09` và không xóa dữ liệu cũ.
 
 Máy đã có database trước khi URL Cloudinary được cập nhật chỉ chạy `03_update_cloudinary_images.sql`; không chạy lại schema hoặc seed.
 

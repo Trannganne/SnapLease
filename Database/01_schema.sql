@@ -700,9 +700,13 @@ CREATE TABLE DanhGia (
     MaDanhGia VARCHAR(20) NOT NULL PRIMARY KEY,
     MaChiTietHopDong VARCHAR(20) NOT NULL UNIQUE,
     MaKhachThue VARCHAR(20) NOT NULL,
-    NhanXet NVARCHAR(1000) NULL,
+    NhanXet NVARCHAR(500) NULL,
     SoSao TINYINT NOT NULL,
     NgayDanhGia DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    TrangThaiKiemDuyet VARCHAR(20) NOT NULL
+        CONSTRAINT DF_DanhGia_TrangThaiKiemDuyet DEFAULT 'CHO_DUYET',
+    GhiChuKiemDuyet NVARCHAR(500) NULL,
+    NgayKiemDuyet DATETIME2 NULL,
 
     CONSTRAINT FK_DanhGia_ChiTietHopDong
         FOREIGN KEY (MaChiTietHopDong) REFERENCES ChiTietHopDong(MaChiTietHopDong),
@@ -711,7 +715,48 @@ CREATE TABLE DanhGia (
         FOREIGN KEY (MaKhachThue) REFERENCES KhachThue(MaKhachThue),
 
     CONSTRAINT CK_DanhGia_SoSao
-        CHECK (SoSao BETWEEN 1 AND 5)
+        CHECK (SoSao BETWEEN 1 AND 5),
+
+    CONSTRAINT CK_DanhGia_TrangThaiKiemDuyet
+        CHECK (TrangThaiKiemDuyet IN ('CHO_DUYET','DA_DUYET','TU_CHOI'))
+);
+GO
+
+CREATE TABLE DanhGiaDiemNoiBat (
+    MaDanhGia VARCHAR(20) NOT NULL,
+    MaDiemNoiBat VARCHAR(50) NOT NULL,
+
+    CONSTRAINT PK_DanhGiaDiemNoiBat
+        PRIMARY KEY (MaDanhGia, MaDiemNoiBat),
+
+    CONSTRAINT FK_DanhGiaDiemNoiBat_DanhGia
+        FOREIGN KEY (MaDanhGia) REFERENCES DanhGia(MaDanhGia) ON DELETE CASCADE,
+
+    CONSTRAINT CK_DanhGiaDiemNoiBat_Ma
+        CHECK (MaDiemNoiBat IN (
+            'CHAT_LUONG_HINH_ANH_TOT',
+            'THIET_BI_HOAT_DONG_ON_DINH',
+            'NGOAI_HINH_CON_MOI',
+            'PIN_SU_DUNG_TOT',
+            'DE_SU_DUNG',
+            'PHU_KIEN_DAY_DU'
+        ))
+);
+GO
+
+CREATE TABLE AnhDanhGia (
+    MaAnhDanhGia VARCHAR(20) NOT NULL PRIMARY KEY,
+    MaDanhGia VARCHAR(20) NOT NULL,
+    DuongDanAnh NVARCHAR(500) NOT NULL,
+    PublicId NVARCHAR(200) NOT NULL,
+    ThuTu TINYINT NOT NULL,
+    NgayTao DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT FK_AnhDanhGia_DanhGia
+        FOREIGN KEY (MaDanhGia) REFERENCES DanhGia(MaDanhGia) ON DELETE CASCADE,
+
+    CONSTRAINT UQ_AnhDanhGia_ThuTu UNIQUE (MaDanhGia, ThuTu),
+    CONSTRAINT CK_AnhDanhGia_ThuTu CHECK (ThuTu BETWEEN 1 AND 4)
 );
 GO
 

@@ -17,7 +17,7 @@ Backend dùng chung cho ứng dụng Web và Mobile của hệ thống đặt/th
 Backend_Api/
 ├── RentalCamera.Api/                 Mã nguồn API
 ├── Database/
-│   ├── 01_schema.sql                 Cấu trúc database chính thức (22 bảng)
+│   ├── 01_schema.sql                 Cấu trúc database chính thức
 │   ├── 02_sample_data.sql            Dữ liệu mẫu
 │   └── README.md                      Mô tả database và flow đặt thuê
 ├── Docs/                              Tài liệu bàn giao/tích hợp
@@ -99,6 +99,15 @@ Cấu hình các biến `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và
 `CLOUDINARY_API_SECRET` trong `.env`, sau đó build lại dịch vụ API.
 
 Hướng dẫn cấu hình, chạy và kiểm thử từng bước: [`UPLOAD_ANH_BIEN_BAN_CLOUDINARY.md`](./Docs/UPLOAD_ANH_BIEN_BAN_CLOUDINARY.md).
+
+## Đánh giá thiết bị
+
+Luồng đánh giá hỗ trợ dữ liệu biểu mẫu theo Figma, 1–5 sao, nhận xét tối đa 500 ký
+tự, 6 chip điểm nổi bật cố định, tối đa 4 ảnh thực tế và trạng thái kiểm duyệt.
+Ảnh được backend tải lên Cloudinary; Mobile không giữ khóa Cloudinary.
+
+Danh sách endpoint, request/response và thứ tự tích hợp Mobile:
+[`API_DANH_GIA.md`](./Docs/API_DANH_GIA.md).
 
 ## Base URL cho Web và Mobile
 

@@ -27,6 +27,8 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<PhieuPhat> PhieuPhat => Set<PhieuPhat>();
     public DbSet<AnhBienBan> AnhBienBan => Set<AnhBienBan>();
     public DbSet<DanhGia> DanhGia => Set<DanhGia>();
+    public DbSet<DanhGiaDiemNoiBat> DanhGiaDiemNoiBat => Set<DanhGiaDiemNoiBat>();
+    public DbSet<AnhDanhGia> AnhDanhGia => Set<AnhDanhGia>();
     public DbSet<ThongBao> ThongBao => Set<ThongBao>();
     public DbSet<FcmDeviceToken> FcmDeviceToken => Set<FcmDeviceToken>();
     public DbSet<IdempotencyKeyRecord> IdempotencyKey => Set<IdempotencyKeyRecord>();
@@ -364,10 +366,36 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.MaDanhGia).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaChiTietHopDong).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.MaKhachThue).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.NhanXet).HasMaxLength(500);
+            entity.Property(x => x.TrangThaiKiemDuyet).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.GhiChuKiemDuyet).HasMaxLength(500);
             entity.HasOne<ChiTietHopDong>().WithOne()
                 .HasForeignKey<DanhGia>(x => x.MaChiTietHopDong).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<KhachThue>().WithMany()
                 .HasForeignKey(x => x.MaKhachThue).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<DanhGiaDiemNoiBat>(entity =>
+        {
+            entity.ToTable("DanhGiaDiemNoiBat");
+            entity.HasKey(x => new { x.MaDanhGia, x.MaDiemNoiBat });
+            entity.Property(x => x.MaDanhGia).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaDiemNoiBat).HasMaxLength(50).IsUnicode(false);
+            entity.HasOne<DanhGia>().WithMany()
+                .HasForeignKey(x => x.MaDanhGia).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<AnhDanhGia>(entity =>
+        {
+            entity.ToTable("AnhDanhGia");
+            entity.HasKey(x => x.MaAnhDanhGia);
+            entity.Property(x => x.MaAnhDanhGia).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaDanhGia).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.DuongDanAnh).HasMaxLength(500);
+            entity.Property(x => x.PublicId).HasMaxLength(200);
+            entity.HasIndex(x => new { x.MaDanhGia, x.ThuTu }).IsUnique();
+            entity.HasOne<DanhGia>().WithMany()
+                .HasForeignKey(x => x.MaDanhGia).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<ThongBao>(entity =>

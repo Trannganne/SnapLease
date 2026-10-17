@@ -19,13 +19,26 @@ public sealed class CloudinaryImageStorage(
         IFormFile file,
         string contractDetailId,
         CancellationToken ct)
+        => await UploadAsync(file, _options.EvidenceFolder, contractDetailId, ct);
+
+    public async Task<CloudinaryUploadResult> UploadReviewImageAsync(
+        IFormFile file,
+        string reviewId,
+        CancellationToken ct)
+        => await UploadAsync(file, _options.ReviewFolder, reviewId, ct);
+
+    private async Task<CloudinaryUploadResult> UploadAsync(
+        IFormFile file,
+        string configuredFolder,
+        string ownerId,
+        CancellationToken ct)
     {
         EnsureConfigured();
 
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             .ToString(CultureInfo.InvariantCulture);
-        var folder = _options.EvidenceFolder.Trim().Trim('/');
-        var publicId = $"{contractDetailId}-{Guid.NewGuid():N}";
+        var folder = configuredFolder.Trim().Trim('/');
+        var publicId = $"{ownerId}-{Guid.NewGuid():N}";
         var signature = Sign(new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             ["folder"] = folder,

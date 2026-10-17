@@ -119,8 +119,8 @@ INSERT INTO AnhBienBan (MaAnhBienBan, MaChiTietHopDong, Loai, DuongDanAnh, MoTa,
 ('ABB002','CTHD001','HU_HONG',N'/handover/hd001-tb002-xuoc.jpg',N'Ảnh vết xước khi nhận lại','2026-08-07T18:19:00'),
 ('ABB003','CTHD002','NHAN_LAI',N'/handover/hd001-tb004-nhan.jpg',N'Ảnh nhận lại ống kính','2026-08-07T18:20:00');
 
-INSERT INTO DanhGia (MaDanhGia, MaChiTietHopDong, MaKhachThue, NhanXet, SoSao, NgayDanhGia) VALUES
-('DG001','CTHD001','KH001',N'Thiết bị tốt, giao nhận nhanh',5,'2026-08-08T09:00:00');
+INSERT INTO DanhGia (MaDanhGia, MaChiTietHopDong, MaKhachThue, NhanXet, SoSao, NgayDanhGia, TrangThaiKiemDuyet, NgayKiemDuyet) VALUES
+('DG001','CTHD001','KH001',N'Thiết bị tốt, giao nhận nhanh',5,'2026-08-08T09:00:00','DA_DUYET','2026-08-08T09:30:00');
 
 INSERT INTO ThongBao (MaThongBao, MaTaiKhoan, Loai, TieuDe, NoiDung, ThoiGianGui, DaDoc) VALUES
 ('TBao001','TK004','HOP_DONG',N'Hợp đồng đã hoàn thành',N'Hợp đồng HD001 đã hoàn thành','2026-08-07T19:00:00',1),

@@ -242,6 +242,25 @@ public sealed class DanhGia
     public string? NhanXet { get; set; }
     public byte SoSao { get; set; }
     public DateTime NgayDanhGia { get; set; }
+    public string TrangThaiKiemDuyet { get; set; } = "CHO_DUYET";
+    public string? GhiChuKiemDuyet { get; set; }
+    public DateTime? NgayKiemDuyet { get; set; }
+}
+
+public sealed class DanhGiaDiemNoiBat
+{
+    public string MaDanhGia { get; set; } = "";
+    public string MaDiemNoiBat { get; set; } = "";
+}
+
+public sealed class AnhDanhGia
+{
+    public string MaAnhDanhGia { get; set; } = "";
+    public string MaDanhGia { get; set; } = "";
+    public string DuongDanAnh { get; set; } = "";
+    public string PublicId { get; set; } = "";
+    public byte ThuTu { get; set; }
+    public DateTime NgayTao { get; set; }
 }
 
 public sealed class ThongBao
