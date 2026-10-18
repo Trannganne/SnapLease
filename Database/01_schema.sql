@@ -704,7 +704,7 @@ CREATE TABLE DanhGia (
     SoSao TINYINT NOT NULL,
     NgayDanhGia DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     TrangThaiKiemDuyet VARCHAR(20) NOT NULL
-        CONSTRAINT DF_DanhGia_TrangThaiKiemDuyet DEFAULT 'CHO_DUYET',
+        CONSTRAINT DF_DanhGia_TrangThaiKiemDuyet DEFAULT 'DA_DUYET',
     GhiChuKiemDuyet NVARCHAR(500) NULL,
     NgayKiemDuyet DATETIME2 NULL,
 

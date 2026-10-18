@@ -103,11 +103,18 @@ Hướng dẫn cấu hình, chạy và kiểm thử từng bước: [`UPLOAD_ANH
 ## Đánh giá thiết bị
 
 Luồng đánh giá hỗ trợ dữ liệu biểu mẫu theo Figma, 1–5 sao, nhận xét tối đa 500 ký
-tự, 6 chip điểm nổi bật cố định, tối đa 4 ảnh thực tế và trạng thái kiểm duyệt.
-Ảnh được backend tải lên Cloudinary; Mobile không giữ khóa Cloudinary.
+tự, 6 chip điểm nổi bật cố định và tối đa 4 ảnh thực tế. Đánh giá được công khai
+ngay; chỉ Admin được ẩn nội dung vi phạm. Ảnh được backend tải lên Cloudinary;
+Mobile không giữ khóa Cloudinary.
 
 Danh sách endpoint, request/response và thứ tự tích hợp Mobile:
 [`API_DANH_GIA.md`](./Docs/API_DANH_GIA.md).
+
+## Giỏ hàng
+
+Backend hỗ trợ thêm, xem, cập nhật số lượng/thời gian/chi nhánh, xóa dòng và tính
+tổng tiền thuê/cọc của giỏ. Mỗi lần ghi đều kiểm tra lại khả dụng và tính giá phía
+server. Chi tiết request/response: [`API_GIO_HANG.md`](./Docs/API_GIO_HANG.md).
 
 ## Base URL cho Web và Mobile
 

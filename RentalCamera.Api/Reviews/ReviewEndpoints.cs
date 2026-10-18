@@ -152,7 +152,9 @@ public static class ReviewEndpoints
                 SoSao = request.SoSao,
                 NhanXet = comment,
                 NgayDanhGia = DateTime.Now,
-                TrangThaiKiemDuyet = "CHO_DUYET"
+                // Đánh giá được công khai ngay. Chỉ ADMIN mới có thể ẩn khi nội dung vi phạm.
+                TrangThaiKiemDuyet = "DA_DUYET",
+                NgayKiemDuyet = DateTime.Now
             };
             db.DanhGia.Add(review);
             db.DanhGiaDiemNoiBat.AddRange(highlightCodes.Select(code => new DanhGiaDiemNoiBat
@@ -190,8 +192,8 @@ public static class ReviewEndpoints
             var review = await db.DanhGia.SingleOrDefaultAsync(
                 x => x.MaDanhGia == id && x.MaKhachThue == customerId, ct);
             if (review is null) return Results.NotFound();
-            if (review.TrangThaiKiemDuyet != "CHO_DUYET")
-                return Results.Conflict(new { loi = "Chỉ được thêm ảnh khi đánh giá đang chờ kiểm duyệt." });
+            if (review.TrangThaiKiemDuyet == "TU_CHOI")
+                return Results.Conflict(new { loi = "Đánh giá đã bị ẩn nên không thể thêm ảnh." });
 
             var imageCount = await db.AnhDanhGia.CountAsync(x => x.MaDanhGia == id, ct);
             if (imageCount >= MaximumImageCount)
@@ -291,42 +293,47 @@ public static class ReviewEndpoints
             return Results.Ok(reviews);
         }).RequireAuthorization("Customer");
 
-        app.MapPut("/api/danh-gia/{id}/kiem-duyet", async (
+        app.MapPut("/api/danh-gia/{id}/an", async (
             string id,
-            ModerateReviewRequest request,
-            ClaimsPrincipal principal,
+            HideReviewRequest request,
             RentalCameraContext db,
             CancellationToken ct) =>
         {
-            var status = request.TrangThai?.Trim().ToUpperInvariant();
-            if (status is not ("DA_DUYET" or "TU_CHOI"))
-                return Results.BadRequest(new { loi = "Trạng thái phải là DA_DUYET hoặc TU_CHOI." });
-
-            var moderationNote = string.IsNullOrWhiteSpace(request.GhiChu)
+            var moderationNote = string.IsNullOrWhiteSpace(request.LyDo)
                 ? null
-                : request.GhiChu.Trim();
+                : request.LyDo.Trim();
+            if (moderationNote is null)
+                return Results.BadRequest(new { loi = "Cần nhập lý do ẩn đánh giá vi phạm." });
             if (moderationNote?.Length > MaximumModerationNoteLength)
                 return Results.BadRequest(new
                 {
-                    loi = $"Ghi chú kiểm duyệt không được vượt quá {MaximumModerationNoteLength} ký tự."
+                    loi = $"Lý do ẩn không được vượt quá {MaximumModerationNoteLength} ký tự."
                 });
 
             var review = await db.DanhGia.SingleOrDefaultAsync(x => x.MaDanhGia == id, ct);
             if (review is null) return Results.NotFound();
-            var storeId = await db.ChiTietHopDong.AsNoTracking()
-                .Where(x => x.MaChiTietHopDong == review.MaChiTietHopDong)
-                .Join(db.HopDong.AsNoTracking(), detail => detail.MaHopDong, contract => contract.MaHopDong,
-                    (_, contract) => contract.MaCuaHang)
-                .SingleAsync(ct);
-            var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
-            if (scope is null || (!scope.IsAdmin && scope.StoreId != storeId)) return Results.Forbid();
 
-            review.TrangThaiKiemDuyet = status;
+            review.TrangThaiKiemDuyet = "TU_CHOI";
             review.GhiChuKiemDuyet = moderationNote;
             review.NgayKiemDuyet = DateTime.Now;
             await db.SaveChangesAsync(ct);
             return Results.Ok(await GetReviewAsync(db, id, ct));
-        }).RequireAuthorization("Staff");
+        }).RequireAuthorization("Admin");
+
+        app.MapPut("/api/danh-gia/{id}/khoi-phuc", async (
+            string id,
+            RentalCameraContext db,
+            CancellationToken ct) =>
+        {
+            var review = await db.DanhGia.SingleOrDefaultAsync(x => x.MaDanhGia == id, ct);
+            if (review is null) return Results.NotFound();
+
+            review.TrangThaiKiemDuyet = "DA_DUYET";
+            review.GhiChuKiemDuyet = null;
+            review.NgayKiemDuyet = DateTime.Now;
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(await GetReviewAsync(db, id, ct));
+        }).RequireAuthorization("Admin");
     }
 
     private static async Task<ReviewResponse?> GetReviewAsync(
@@ -416,7 +423,7 @@ public sealed record CreateReviewRequest(
     string? NhanXet,
     List<string>? DiemNoiBat);
 
-public sealed record ModerateReviewRequest(string TrangThai, string? GhiChu);
+public sealed record HideReviewRequest(string LyDo);
 
 public sealed record ReviewHighlightOption(string Ma, string Ten);
 

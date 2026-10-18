@@ -11,11 +11,13 @@ Thư mục này chứa database cuối dùng chung cho Backend, Web và Mobile.
 5. `06_add_electronic_signature.sql`: bổ sung bảng và các cột xác nhận hợp đồng bằng OTP; script có thể chạy lại an toàn.
 6. `07_add_vnpay_payment.sql`: bổ sung dữ liệu thanh toán VNPAY; script có thể chạy lại an toàn.
 7. `08_add_firebase_notifications.sql`: bổ sung token thiết bị và định tuyến thông báo FCM; script có thể chạy lại an toàn.
-8. `09_add_review_details.sql`: bổ sung kiểm duyệt, chip điểm nổi bật và ảnh đánh giá; script có thể chạy lại an toàn.
+8. `09_add_review_details.sql`: bổ sung trạng thái hiển thị, chip điểm nổi bật và ảnh đánh giá; đánh giá mới công khai ngay; script có thể chạy lại an toàn.
+9. `10_add_cart_review_test_data.sql`: bổ sung dữ liệu kiểm thử giỏ hàng, tồn kho và đánh giá với ngày động; script có thể chạy lại an toàn.
 
 Docker Compose tự chạy schema, dữ liệu mẫu và các migration cần thiết theo đúng thứ tự. Thành viên không cần import SQL thủ công.
 
-Khi database đã tồn tại, Docker Compose tự chạy các migration từ `06` đến `09` và không xóa dữ liệu cũ.
+Khi database đã tồn tại, Docker Compose tự chạy migration thuê ngay, các migration
+từ `06` đến `09`, rồi bổ sung dữ liệu kiểm thử `10`; không xóa dữ liệu cũ.
 
 Máy đã có database trước khi URL Cloudinary được cập nhật chỉ chạy `03_update_cloudinary_images.sql`; không chạy lại schema hoặc seed.
 

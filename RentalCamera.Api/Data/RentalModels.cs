@@ -242,7 +242,7 @@ public sealed class DanhGia
     public string? NhanXet { get; set; }
     public byte SoSao { get; set; }
     public DateTime NgayDanhGia { get; set; }
-    public string TrangThaiKiemDuyet { get; set; } = "CHO_DUYET";
+    public string TrangThaiKiemDuyet { get; set; } = "DA_DUYET";
     public string? GhiChuKiemDuyet { get; set; }
     public DateTime? NgayKiemDuyet { get; set; }
 }

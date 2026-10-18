@@ -106,6 +106,15 @@ services:
               -I \
               -b \
               -V 16 \
+              -i /database/migration_thue_ngay_final.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
               -i /database/06_add_electronic_signature.sql
             "$$SQLCMD" \
               -S sqlserver \
@@ -134,6 +143,15 @@ services:
               -b \
               -V 16 \
               -i /database/09_add_review_details.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/10_add_cart_review_test_data.sql
             echo "Cap nhat database thanh cong."
             exit 0
             ;;
@@ -185,6 +203,16 @@ services:
           -I \
           -b \
           -V 16 \
+          -i /database/migration_thue_ngay_final.sql
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
           -i /database/06_add_electronic_signature.sql
 
         echo "Dang bo sung cau truc thanh toan VNPAY..."
@@ -222,6 +250,18 @@ services:
           -b \
           -V 16 \
           -i /database/09_add_review_details.sql
+
+        echo "Dang nap du lieu kiem thu gio hang va danh gia..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/10_add_cart_review_test_data.sql
 
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \

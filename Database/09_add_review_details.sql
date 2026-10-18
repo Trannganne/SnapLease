@@ -11,17 +11,27 @@ END;
 
 EXEC(N'UPDATE dbo.DanhGia
        SET TrangThaiKiemDuyet = ''DA_DUYET''
-       WHERE TrangThaiKiemDuyet IS NULL;');
+       WHERE TrangThaiKiemDuyet IS NULL
+          OR TrangThaiKiemDuyet = ''CHO_DUYET'';');
 
 EXEC(N'ALTER TABLE dbo.DanhGia
        ALTER COLUMN TrangThaiKiemDuyet VARCHAR(20) NOT NULL;');
 
-IF OBJECT_ID('dbo.DF_DanhGia_TrangThaiKiemDuyet', 'D') IS NULL
-BEGIN
-    EXEC(N'ALTER TABLE dbo.DanhGia
-           ADD CONSTRAINT DF_DanhGia_TrangThaiKiemDuyet
-           DEFAULT ''CHO_DUYET'' FOR TrangThaiKiemDuyet;');
-END;
+DECLARE @DefaultDanhGia SYSNAME;
+SELECT @DefaultDanhGia = dc.name
+FROM sys.default_constraints dc
+JOIN sys.columns c
+  ON c.object_id = dc.parent_object_id
+ AND c.column_id = dc.parent_column_id
+WHERE dc.parent_object_id = OBJECT_ID('dbo.DanhGia')
+  AND c.name = 'TrangThaiKiemDuyet';
+
+IF @DefaultDanhGia IS NOT NULL
+    EXEC(N'ALTER TABLE dbo.DanhGia DROP CONSTRAINT [' + @DefaultDanhGia + N'];');
+
+EXEC(N'ALTER TABLE dbo.DanhGia
+       ADD CONSTRAINT DF_DanhGia_TrangThaiKiemDuyet
+       DEFAULT ''DA_DUYET'' FOR TrangThaiKiemDuyet;');
 
 IF COL_LENGTH('dbo.DanhGia', 'GhiChuKiemDuyet') IS NULL
     ALTER TABLE dbo.DanhGia ADD GhiChuKiemDuyet NVARCHAR(500) NULL;

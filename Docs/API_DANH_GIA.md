@@ -10,8 +10,8 @@ Tài liệu này mô tả luồng đánh giá thiết bị theo giao diện Figm
 2. Gọi `POST /api/danh-gia` để tạo đánh giá gồm số sao, nhận xét và các mã chip.
 3. Lấy `maDanhGia` từ response rồi gọi `POST /api/danh-gia/{id}/anh` cho từng ảnh.
    Mỗi đánh giá được tải tối đa 4 ảnh.
-4. Đánh giá mới có trạng thái `CHO_DUYET`; chỉ đánh giá `DA_DUYET` xuất hiện trong
-   danh sách công khai.
+4. Đánh giá mới được công khai ngay, không qua bước cửa hàng duyệt. Chỉ Admin mới
+   được ẩn nội dung vi phạm và có thể khôi phục khi cần.
 
 Tất cả endpoint của khách hàng yêu cầu Bearer token có quyền `Customer`.
 
@@ -73,25 +73,25 @@ Content-Type: multipart/form-data
 Form chỉ có một trường file tên `anh`. Chấp nhận JPEG, PNG, WEBP; dung lượng tối đa
 lấy theo cấu hình Cloudinary (mặc định 10 MB). Gọi endpoint một lần cho mỗi ảnh.
 
-## Danh sách và kiểm duyệt
+## Danh sách và xử lý nội dung vi phạm
 
 | Endpoint | Quyền | Ý nghĩa |
 |---|---|---|
-| `GET /api/dong-may/{id}/danh-gia?trang=1&kichThuocTrang=20` | Công khai | Chỉ trả đánh giá đã duyệt |
-| `GET /api/danh-gia/cua-toi` | Customer | Trả mọi đánh giá của khách và trạng thái kiểm duyệt |
-| `PUT /api/danh-gia/{id}/kiem-duyet` | Staff/Admin | Duyệt hoặc từ chối đánh giá thuộc cửa hàng |
+| `GET /api/dong-may/{id}/danh-gia?trang=1&kichThuocTrang=20` | Công khai | Trả các đánh giá đang hiển thị |
+| `GET /api/danh-gia/cua-toi` | Customer | Trả mọi đánh giá của khách |
+| `PUT /api/danh-gia/{id}/an` | Admin | Ẩn đánh giá vi phạm, bắt buộc có lý do |
+| `PUT /api/danh-gia/{id}/khoi-phuc` | Admin | Khôi phục đánh giá đã ẩn |
 
-Body kiểm duyệt:
+Body ẩn đánh giá:
 
 ```json
 {
-  "trangThai": "DA_DUYET",
-  "ghiChu": null
+  "lyDo": "Nội dung chứa thông tin cá nhân không phù hợp."
 }
 ```
 
-`trangThai` nhận `DA_DUYET` hoặc `TU_CHOI`. Ghi chú kiểm duyệt tối đa 500 ký tự và
-không được trả trong API danh sách công khai.
+Lý do tối đa 500 ký tự và không được trả trong API danh sách công khai. Nhân viên
+cửa hàng không có quyền ẩn đánh giá, tránh việc che các phản hồi không tích cực.
 
 ## Cấu hình ảnh
 
