@@ -103,6 +103,7 @@ services:
               -U sa \
               -P "$$MSSQL_SA_PASSWORD" \
               -C \
+              -d RentalCameraDb20 \
               -I \
               -b \
               -V 16 \
@@ -152,6 +153,15 @@ services:
               -b \
               -V 16 \
               -i /database/10_add_cart_review_test_data.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/11_add_large_test_dataset.sql
             echo "Cap nhat database thanh cong."
             exit 0
             ;;
@@ -200,6 +210,7 @@ services:
           -U sa \
           -P "$$MSSQL_SA_PASSWORD" \
           -C \
+          -d RentalCameraDb20 \
           -I \
           -b \
           -V 16 \
@@ -262,6 +273,18 @@ services:
           -b \
           -V 16 \
           -i /database/10_add_cart_review_test_data.sql
+
+        echo "Dang nap bo du lieu kiem thu mo rong..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/11_add_large_test_dataset.sql
 
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \
