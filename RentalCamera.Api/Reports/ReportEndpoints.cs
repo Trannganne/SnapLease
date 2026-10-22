@@ -96,6 +96,133 @@ public static class ReportEndpoints
                 .OrderBy(x => x.TrangThai).ThenBy(x => x.TinhTrang).ToListAsync(ct);
             return Results.Ok(new { filter.StoreId, duLieu = data });
         });
+
+        reports.MapGet("/tien-coc-dang-giu", async (
+            string? maCuaHang, DateTime? tuNgay, DateTime? denNgay,
+            ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var filter = await ResolveFilter(maCuaHang, tuNgay, denNgay, principal, db, ct);
+            if (filter is null) return Results.Forbid();
+
+            var deposits = await db.ThanhToan.AsNoTracking()
+                .Join(db.HopDong.AsNoTracking(), payment => payment.MaHopDong, contract => contract.MaHopDong,
+                    (payment, contract) => new { payment, contract })
+                .Where(x => x.contract.MaCuaHang == filter.StoreId &&
+                    x.payment.LoaiThanhToan == "TIEN_COC" &&
+                    x.payment.TrangThai == "THANH_CONG" &&
+                    x.payment.ThoiGian >= filter.From && x.payment.ThoiGian < filter.To)
+                .GroupBy(x => x.payment.MaHopDong)
+                .Select(x => new
+                {
+                    MaHopDong = x.Key,
+                    TienCocDaThu = x.Sum(y => y.payment.SoTien),
+                    LanThuGanNhat = x.Max(y => y.payment.ThoiGian)
+                })
+                .ToListAsync(ct);
+
+            var contractIds = deposits.Select(x => x.MaHopDong).ToList();
+            var refunds = await db.ThanhToan.AsNoTracking()
+                .Where(x => contractIds.Contains(x.MaHopDong) &&
+                    x.LoaiThanhToan == "HOAN_COC" && x.TrangThai == "DA_HOAN")
+                .GroupBy(x => x.MaHopDong)
+                .Select(x => new { MaHopDong = x.Key, TienDaHoan = x.Sum(y => y.SoTien) })
+                .ToDictionaryAsync(x => x.MaHopDong, x => x.TienDaHoan, ct);
+
+            var contracts = await db.HopDong.AsNoTracking()
+                .Where(x => contractIds.Contains(x.MaHopDong))
+                .ToDictionaryAsync(x => x.MaHopDong, ct);
+
+            var data = deposits
+                .Select(x =>
+                {
+                    var refunded = refunds.GetValueOrDefault(x.MaHopDong);
+                    var held = Math.Max(x.TienCocDaThu - refunded, 0);
+                    var contract = contracts[x.MaHopDong];
+                    return new DepositHoldingItem(x.MaHopDong, contract.MaKhachThue, contract.TrangThai,
+                        x.TienCocDaThu, refunded, held, x.LanThuGanNhat);
+                })
+                .Where(x => x.TienCocDangGiu > 0)
+                .OrderByDescending(x => x.LanThuGanNhat)
+                .ThenBy(x => x.MaHopDong)
+                .ToList();
+
+            return Results.Ok(new
+            {
+                filter.StoreId,
+                filter.From,
+                filter.To,
+                soHopDong = data.Count,
+                tongTienCocDangGiu = data.Sum(x => x.TienCocDangGiu),
+                duLieu = data
+            });
+        });
+
+        reports.MapGet("/hop-dong-tre-han", async (
+            string? maCuaHang, DateTime? tuNgay, DateTime? denNgay, int? trang, int? kichThuocTrang,
+            ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var filter = await ResolveFilter(maCuaHang, tuNgay, denNgay, principal, db, ct);
+            if (filter is null) return Results.Forbid();
+            var page = Math.Max(trang ?? 1, 1);
+            var pageSize = Math.Clamp(kichThuocTrang ?? 20, 1, 100);
+            var now = DateTime.Now;
+
+            var query =
+                from contract in db.HopDong.AsNoTracking()
+                join customer in db.KhachThue.AsNoTracking()
+                    on contract.MaKhachThue equals customer.MaKhachThue
+                let extendedDue = db.PhuLuc
+                    .Where(x => x.MaHopDong == contract.MaHopDong && x.TrangThai == "DA_XAC_NHAN")
+                    .Max(x => (DateTime?)x.ThoiHanTraMoi)
+                let effectiveDue = extendedDue != null && extendedDue > contract.ThoiGianTraDuKien
+                    ? extendedDue.Value
+                    : contract.ThoiGianTraDuKien
+                where contract.MaCuaHang == filter.StoreId &&
+                    (contract.TrangThai == "DANG_THUE" || contract.TrangThai == "CHO_HOAN_TRA") &&
+                    effectiveDue >= filter.From && effectiveDue < filter.To && effectiveDue < now
+                orderby effectiveDue
+                select new
+                {
+                    contract.MaHopDong,
+                    contract.MaKhachThue,
+                    customer.HoTen,
+                    customer.SoDienThoai,
+                    contract.MaCuaHang,
+                    contract.TrangThai,
+                    HanTra = effectiveDue,
+                    contract.TongTien,
+                    contract.TongTienCoc
+                };
+
+            var total = await query.CountAsync(ct);
+            var rows = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(ct);
+            var data = rows.Select(x => new
+            {
+                x.MaHopDong,
+                x.MaKhachThue,
+                x.HoTen,
+                x.SoDienThoai,
+                x.MaCuaHang,
+                x.TrangThai,
+                x.HanTra,
+                soGioTre = Math.Max((int)Math.Floor((now - x.HanTra).TotalHours), 0),
+                soNgayTre = Math.Max((int)Math.Floor((now - x.HanTra).TotalDays), 0),
+                x.TongTien,
+                x.TongTienCoc
+            }).ToList();
+
+            return Results.Ok(new
+            {
+                filter.StoreId,
+                filter.From,
+                filter.To,
+                tongSo = total,
+                trang = page,
+                kichThuocTrang = pageSize,
+                tongTrang = total == 0 ? 0 : (int)Math.Ceiling(total / (double)pageSize),
+                duLieu = data
+            });
+        });
     }
 
     private static IQueryable<HopDong> ContractQuery(RentalCameraContext db, ReportFilter filter) =>
@@ -119,4 +246,6 @@ public static class ReportEndpoints
 
     private sealed record ReportFilter(string StoreId, DateTime From, DateTime To);
     private sealed record RevenueItem(int Nam, int Thang, string LoaiThanhToan, int SoGiaoDich, decimal TongTien);
+    private sealed record DepositHoldingItem(string MaHopDong, string MaKhachThue, string TrangThai,
+        decimal TienCocDaThu, decimal TienCocDaHoan, decimal TienCocDangGiu, DateTime? LanThuGanNhat);
 }
