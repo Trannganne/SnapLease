@@ -45,7 +45,9 @@ services:
       ASPNETCORE_URLS: "http://+:8080"
       ConnectionStrings__RentalCamera: "Server=sqlserver,1433;Database=${DATABASE_NAME:-RentalCameraDb20};User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True"
       Cors__AllowedOrigins__0: http://localhost:5173
-      Cors__AllowedOrigins__1: http://localhost:3000
+      Cors__AllowedOrigins__1: http://127.0.0.1:5173
+      Cors__AllowedOrigins__2: http://localhost:3000
+      Cors__AllowedOrigins__3: http://localhost:4200
       Rental__HoldMinutes: "20"
       Rental__ContractSignMinutes: "30"
       Rental__BackgroundJobsEnabled: "false"
