@@ -178,6 +178,7 @@ if (args.Length == 2 && args[0] == "set-password")
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
 app.MapEmployeeEndpoints();
+app.MapAccountStatusEndpoints();
 app.MapNotificationEndpoints();
 app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();

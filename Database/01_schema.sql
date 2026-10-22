@@ -156,6 +156,45 @@ CREATE TABLE TaiKhoan (
 );
 GO
 
+CREATE TABLE LichSuTrangThaiTaiKhoan (
+    MaLichSu VARCHAR(20) NOT NULL PRIMARY KEY,
+    MaTaiKhoan VARCHAR(20) NOT NULL,
+    TrangThaiCu VARCHAR(20) NOT NULL,
+    TrangThaiMoi VARCHAR(20) NOT NULL,
+    LyDo NVARCHAR(500) NULL,
+    NguoiThaoTac VARCHAR(20) NOT NULL,
+    ThoiGian DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+
+    CONSTRAINT FK_LichSuTrangThaiTaiKhoan_TaiKhoan
+        FOREIGN KEY (MaTaiKhoan) REFERENCES TaiKhoan(MaTaiKhoan),
+    CONSTRAINT FK_LichSuTrangThaiTaiKhoan_NguoiThaoTac
+        FOREIGN KEY (NguoiThaoTac) REFERENCES TaiKhoan(MaTaiKhoan),
+    CONSTRAINT CK_LichSuTrangThaiTaiKhoan_TrangThaiCu
+        CHECK (TrangThaiCu IN ('HOAT_DONG','TAM_KHOA')),
+    CONSTRAINT CK_LichSuTrangThaiTaiKhoan_TrangThaiMoi
+        CHECK (TrangThaiMoi IN ('HOAT_DONG','TAM_KHOA'))
+);
+GO
+
+CREATE INDEX IX_LichSuTrangThaiTaiKhoan_TaiKhoan_ThoiGian
+ON LichSuTrangThaiTaiKhoan(MaTaiKhoan, ThoiGian DESC);
+GO
+
+CREATE TABLE ThuHoiBearerToken (
+    TokenHash CHAR(64) NOT NULL PRIMARY KEY,
+    MaTaiKhoan VARCHAR(20) NOT NULL,
+    ThuHoiLuc DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    HetHanLuc DATETIME2 NOT NULL,
+
+    CONSTRAINT FK_ThuHoiBearerToken_TaiKhoan
+        FOREIGN KEY (MaTaiKhoan) REFERENCES TaiKhoan(MaTaiKhoan)
+);
+GO
+
+CREATE INDEX IX_ThuHoiBearerToken_HetHanLuc
+ON ThuHoiBearerToken(HetHanLuc);
+GO
+
 /* ================================================================
    7. KHACH THUE
 ================================================================ */

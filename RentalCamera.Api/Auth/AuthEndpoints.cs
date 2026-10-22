@@ -166,6 +166,35 @@ public static class AuthEndpoints
             });
         }).RequireRateLimiting("auth");
 
+        group.MapPost("/logout", async (
+            ClaimsPrincipal principal,
+            RentalCameraContext db,
+            CancellationToken ct) =>
+        {
+            var accountId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var tokenHash = principal.FindFirstValue(BearerTokenHandler.TokenHashClaim);
+            var expiresAtText = principal.FindFirstValue(BearerTokenHandler.TokenExpiresAtClaim);
+
+            if (string.IsNullOrWhiteSpace(accountId) ||
+                string.IsNullOrWhiteSpace(tokenHash) ||
+                !long.TryParse(expiresAtText, out var expiresAtUnix))
+                return Results.Unauthorized();
+
+            if (!await db.ThuHoiBearerToken.AnyAsync(x => x.TokenHash == tokenHash, ct))
+            {
+                db.ThuHoiBearerToken.Add(new ThuHoiBearerToken
+                {
+                    TokenHash = tokenHash,
+                    MaTaiKhoan = accountId,
+                    ThuHoiLuc = DateTime.UtcNow,
+                    HetHanLuc = DateTimeOffset.FromUnixTimeSeconds(expiresAtUnix).UtcDateTime
+                });
+                await db.SaveChangesAsync(ct);
+            }
+
+            return Results.NoContent();
+        }).RequireAuthorization();
+
         group.MapGet("/me", async (ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
             var accountId = principal.FindFirstValue(ClaimTypes.NameIdentifier)!;

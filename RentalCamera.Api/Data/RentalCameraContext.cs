@@ -11,6 +11,8 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<CuaHang> CuaHang => Set<CuaHang>();
     public DbSet<ThietBi> ThietBi => Set<ThietBi>();
     public DbSet<TaiKhoan> TaiKhoan => Set<TaiKhoan>();
+    public DbSet<LichSuTrangThaiTaiKhoan> LichSuTrangThaiTaiKhoan => Set<LichSuTrangThaiTaiKhoan>();
+    public DbSet<ThuHoiBearerToken> ThuHoiBearerToken => Set<ThuHoiBearerToken>();
     public DbSet<KhachThue> KhachThue => Set<KhachThue>();
     public DbSet<NhanVien> NhanVien => Set<NhanVien>();
     public DbSet<GioHang> GioHang => Set<GioHang>();
@@ -106,6 +108,34 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.MatKhauHash).HasMaxLength(500).IsUnicode(false);
             entity.Property(x => x.VaiTro).HasMaxLength(20).IsUnicode(false);
             entity.Property(x => x.TrangThai).HasMaxLength(20).IsUnicode(false);
+        });
+
+        modelBuilder.Entity<LichSuTrangThaiTaiKhoan>(entity =>
+        {
+            entity.ToTable("LichSuTrangThaiTaiKhoan");
+            entity.HasKey(x => x.MaLichSu);
+            entity.Property(x => x.MaLichSu).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaTaiKhoan).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.TrangThaiCu).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.TrangThaiMoi).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.LyDo).HasMaxLength(500);
+            entity.Property(x => x.NguoiThaoTac).HasMaxLength(20).IsUnicode(false);
+            entity.HasIndex(x => new { x.MaTaiKhoan, x.ThoiGian });
+            entity.HasOne<TaiKhoan>().WithMany()
+                .HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<TaiKhoan>().WithMany()
+                .HasForeignKey(x => x.NguoiThaoTac).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ThuHoiBearerToken>(entity =>
+        {
+            entity.ToTable("ThuHoiBearerToken");
+            entity.HasKey(x => x.TokenHash);
+            entity.Property(x => x.TokenHash).HasMaxLength(64).IsUnicode(false);
+            entity.Property(x => x.MaTaiKhoan).HasMaxLength(20).IsUnicode(false);
+            entity.HasIndex(x => x.HetHanLuc);
+            entity.HasOne<TaiKhoan>().WithMany()
+                .HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<KhachThue>(entity =>

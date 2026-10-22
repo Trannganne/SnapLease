@@ -10,6 +10,25 @@ public sealed class TaiKhoan
     public DateTime NgayTao { get; set; }
 }
 
+public sealed class LichSuTrangThaiTaiKhoan
+{
+    public string MaLichSu { get; set; } = "";
+    public string MaTaiKhoan { get; set; } = "";
+    public string TrangThaiCu { get; set; } = "";
+    public string TrangThaiMoi { get; set; } = "";
+    public string? LyDo { get; set; }
+    public string NguoiThaoTac { get; set; } = "";
+    public DateTime ThoiGian { get; set; }
+}
+
+public sealed class ThuHoiBearerToken
+{
+    public string TokenHash { get; set; } = "";
+    public string MaTaiKhoan { get; set; } = "";
+    public DateTime ThuHoiLuc { get; set; }
+    public DateTime HetHanLuc { get; set; }
+}
+
 public sealed class KhachThue
 {
     public string MaKhachThue { get; set; } = "";

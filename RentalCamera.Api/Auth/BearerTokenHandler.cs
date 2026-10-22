@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -18,6 +19,9 @@ public sealed class BearerTokenHandler(
     RentalCameraContext db)
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
+    public const string TokenHashClaim = "rental_token_hash";
+    public const string TokenExpiresAtClaim = "rental_token_expires_at";
+
     private readonly ITimeLimitedDataProtector _protector = protectionProvider
         .CreateProtector("RentalCamera.Api", "BearerToken", "v1")
         .ToTimeLimitedDataProtector();
@@ -33,14 +37,19 @@ public sealed class BearerTokenHandler(
             return AuthenticateResult.Fail("Token không hợp lệ.");
 
         string accountId;
+        DateTimeOffset expiresAt;
         try
         {
-            accountId = _protector.Unprotect(token);
+            accountId = _protector.Unprotect(token, out expiresAt);
         }
         catch (Exception ex) when (ex is CryptographicException or FormatException or ArgumentException)
         {
             return AuthenticateResult.Fail("Token hết hạn hoặc không hợp lệ.");
         }
+
+        var tokenHash = BearerTokenFingerprint.Hash(token);
+        if (await db.ThuHoiBearerToken.AsNoTracking().AnyAsync(x => x.TokenHash == tokenHash))
+            return AuthenticateResult.Fail("Token đã được thu hồi.");
 
         var account = await db.TaiKhoan.AsNoTracking()
             .SingleOrDefaultAsync(x => x.MaTaiKhoan == accountId && x.TrangThai == "HOAT_DONG");
@@ -51,7 +60,9 @@ public sealed class BearerTokenHandler(
         {
             new Claim(ClaimTypes.NameIdentifier, account.MaTaiKhoan),
             new Claim(ClaimTypes.Name, account.TenDangNhap),
-            new Claim(ClaimTypes.Role, account.VaiTro)
+            new Claim(ClaimTypes.Role, account.VaiTro),
+            new Claim(TokenHashClaim, tokenHash),
+            new Claim(TokenExpiresAtClaim, expiresAt.ToUnixTimeSeconds().ToString())
         };
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name));
         return AuthenticateResult.Success(new AuthenticationTicket(principal, Scheme.Name));
@@ -65,4 +76,10 @@ public sealed class TokenIssuer(IDataProtectionProvider protectionProvider)
         .ToTimeLimitedDataProtector();
 
     public string Issue(string accountId) => _protector.Protect(accountId, TimeSpan.FromHours(1));
+}
+
+internal static class BearerTokenFingerprint
+{
+    public static string Hash(string token) =>
+        Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
 }

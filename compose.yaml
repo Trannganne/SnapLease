@@ -162,6 +162,24 @@ services:
               -b \
               -V 16 \
               -i /database/11_add_large_test_dataset.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/12_add_account_status_audit.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/13_add_bearer_token_revocation.sql
             echo "Cap nhat database thanh cong."
             exit 0
             ;;
@@ -286,6 +304,30 @@ services:
           -V 16 \
           -i /database/11_add_large_test_dataset.sql
 
+        echo "Dang bo sung lich su khoa/mo tai khoan..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/12_add_account_status_audit.sql
+
+        echo "Dang bo sung thu hoi token dang nhap..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/13_add_bearer_token_revocation.sql
+
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \
           -U sa \
@@ -322,6 +364,8 @@ services:
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.AnhBienBan', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.DanhGia', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ThongBao', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.LichSuTrangThaiTaiKhoan', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThuHoiBearerToken', N'U') IS NOT NULL
                 THEN 'READY' ELSE 'INCOMPLETE'
               END;")"
 
