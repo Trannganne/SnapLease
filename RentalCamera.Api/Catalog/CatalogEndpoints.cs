@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
@@ -82,12 +83,20 @@ public static class CatalogEndpoints
 
         var models = app.MapGroup("/api/dong-may");
         models.MapGet("", async (
-            RentalCameraContext db, string? tuKhoa, string? maDanhMuc, string? maThuongHieu,
-            string? maCuaHang, int? trang, int? kichThuocTrang, CancellationToken ct) =>
+            ClaimsPrincipal principal, RentalCameraContext db, string? tuKhoa, string? maDanhMuc, string? maThuongHieu,
+            string? maCuaHang, string? trangThai, int? trang, int? kichThuocTrang, CancellationToken ct) =>
         {
             var page = Math.Max(1, trang ?? 1);
             var pageSize = Math.Clamp(kichThuocTrang ?? 20, 1, 100);
             var query = db.DongMay.AsNoTracking().AsQueryable();
+            var normalizedState = string.IsNullOrWhiteSpace(trangThai)
+                ? "HOAT_DONG"
+                : trangThai.Trim().ToUpperInvariant();
+            if (normalizedState is not ("HOAT_DONG" or "NGUNG_KINH_DOANH" or "TAT_CA"))
+                return Results.BadRequest(new { loi = "Trạng thái dòng máy không hợp lệ." });
+            if (normalizedState != "HOAT_DONG" && !principal.IsInRole("ADMIN"))
+                return Results.Forbid();
+            if (normalizedState != "TAT_CA") query = query.Where(x => x.TrangThai == normalizedState);
             if (!string.IsNullOrWhiteSpace(tuKhoa))
             {
                 var keyword = tuKhoa.Trim();
@@ -101,7 +110,7 @@ public static class CatalogEndpoints
             var items = await query.OrderBy(x => x.TenDongMay).Skip((page - 1) * pageSize).Take(pageSize)
                 .Select(x => new
                 {
-                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia,
+                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia, x.TrangThai,
                     x.MaDanhMuc, x.DanhMuc.TenDanhMuc, x.MaThuongHieu, x.ThuongHieu.TenThuongHieu,
                     AnhDaiDien = x.AnhThietBi.Where(a => a.LaAnhDaiDien)
                         .Select(a => a.DuongDanAnh).FirstOrDefault(),
@@ -119,12 +128,15 @@ public static class CatalogEndpoints
                 }).ToListAsync(ct);
             return Results.Ok(new { trang = page, kichThuocTrang = pageSize, tongSo = total, duLieu = items });
         });
-        models.MapGet("/{id}", async (string id, RentalCameraContext db, CancellationToken ct) =>
+        models.MapGet("/{id}", async (
+            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
-            var result = await db.DongMay.AsNoTracking().Where(x => x.MaDongMay == id)
+            var query = db.DongMay.AsNoTracking().Where(x => x.MaDongMay == id);
+            if (!principal.IsInRole("ADMIN")) query = query.Where(x => x.TrangThai == "HOAT_DONG");
+            var result = await query
                 .Select(x => new
                 {
-                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia,
+                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia, x.TrangThai,
                     x.MaDanhMuc, x.DanhMuc.TenDanhMuc, x.MaThuongHieu, x.ThuongHieu.TenThuongHieu,
                     Anh = x.AnhThietBi.OrderBy(a => a.ThuTuHienThi)
                         .Select(a => new
@@ -154,11 +166,32 @@ public static class CatalogEndpoints
                 MaDongMay = ApiAccess.NewId("DONG"), MaDanhMuc = request.MaDanhMuc,
                 MaThuongHieu = request.MaThuongHieu, TenDongMay = request.TenDongMay.Trim(),
                 MoTa = request.MoTa?.Trim(), GiaThueNgay = request.GiaThueNgay,
-                TienCoc = request.TienCoc, PhanTramGiamGia = request.PhanTramGiamGia
+                TienCoc = request.TienCoc, PhanTramGiamGia = request.PhanTramGiamGia,
+                TrangThai = "HOAT_DONG"
             };
             db.DongMay.Add(entity);
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/dong-may/{entity.MaDongMay}", entity);
+        }).RequireAuthorization("Admin");
+        models.MapPut("/{id}/trang-thai", async (
+            string id, ModelStateRequest request, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var state = request.TrangThai?.Trim().ToUpperInvariant();
+            if (state is not ("HOAT_DONG" or "NGUNG_KINH_DOANH"))
+                return Results.BadRequest(new { loi = "Trạng thái phải là HOAT_DONG hoặc NGUNG_KINH_DOANH." });
+
+            var entity = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == id, ct);
+            if (entity is null) return Results.NotFound();
+            if (entity.TrangThai == state)
+                return Results.Ok(new { entity.MaDongMay, entity.TrangThai, thayDoi = false });
+
+            if (state == "HOAT_DONG" && !await db.DanhMuc.AnyAsync(
+                    x => x.MaDanhMuc == entity.MaDanhMuc && x.TrangThai == "HOAT_DONG", ct))
+                return Results.Conflict(new { loi = "Không thể mở kinh doanh khi danh mục đang tạm ẩn." });
+
+            entity.TrangThai = state;
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(new { entity.MaDongMay, entity.TrangThai, thayDoi = true });
         }).RequireAuthorization("Admin");
         models.MapPut("/{id}", async (string id, ModelRequest request, RentalCameraContext db, CancellationToken ct) =>
         {
@@ -223,4 +256,5 @@ public sealed record BrandRequest(string TenThuongHieu, string? QuocGia);
 public sealed record ModelRequest(
     string MaDanhMuc, string MaThuongHieu, string TenDongMay, string? MoTa,
     decimal GiaThueNgay, decimal TienCoc, decimal PhanTramGiamGia);
+public sealed record ModelStateRequest(string TrangThai);
 public sealed record ImageRequest(string DuongDanAnh, bool LaAnhDaiDien, int ThuTuHienThi);

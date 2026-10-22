@@ -265,6 +265,8 @@ public static class CartEndpoints
         var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == modelId, ct);
         if (model is null)
             return new(null, Results.NotFound(new { loi = "Dòng máy không tồn tại." }));
+        if (model.TrangThai != "HOAT_DONG")
+            return new(null, Results.Conflict(new { loi = "Dòng máy đã ngừng kinh doanh." }));
 
         if (!await db.ThietBi.AnyAsync(
                 x => x.MaCuaHang == storeId && x.MaDongMay == modelId, ct))

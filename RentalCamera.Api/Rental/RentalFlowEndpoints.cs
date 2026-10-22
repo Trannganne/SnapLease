@@ -85,6 +85,8 @@ public static class RentalEndpoints
             var model = await db.DongMay.AsNoTracking().SingleOrDefaultAsync(x => x.MaDongMay == maDongMay, ct);
             if (model is null)
                 return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+            if (model.TrangThai != "HOAT_DONG")
+                return Results.Conflict(new { loi = "Dòng máy đã ngừng kinh doanh." });
 
             var quote = CalculatePrice(model, soLuong, ngayBatDau, ngayKetThuc);
             return Results.Ok(quote);
@@ -193,6 +195,8 @@ public static class RentalEndpoints
                     var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
                     if (model is null)
                         return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+                    if (model.TrangThai != "HOAT_DONG")
+                        return Results.Conflict(new { loi = "Dòng máy đã ngừng kinh doanh." });
 
                     var available = await availability.GetAvailableAsync(request.MaCuaHang, request.MaDongMay,
                         request.NgayBatDau, request.NgayKetThuc, null, null, ct);
@@ -348,6 +352,8 @@ public static class RentalEndpoints
 
                     var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
                     if (model is null) return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+                    if (model.TrangThai != "HOAT_DONG")
+                        return Results.Conflict(new { loi = "Dòng máy đã ngừng kinh doanh." });
 
                     // Bỏ qua giữ chỗ hiện tại của chính nó khi kiểm tra số lượng trống
                     var available = await availability.GetAvailableAsync(request.MaCuaHang, request.MaDongMay,

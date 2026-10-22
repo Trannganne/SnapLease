@@ -184,6 +184,7 @@ app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
 app.MapCartEndpoints();
 app.MapEquipmentEndpoints();
+app.MapAssetOperationsEndpoints();
 app.MapRentalEndpoints();
 app.MapIdentityEndpoints();
 app.MapContractEndpoints();

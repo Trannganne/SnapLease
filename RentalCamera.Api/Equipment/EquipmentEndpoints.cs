@@ -67,9 +67,9 @@ public static class EquipmentEndpoints
             var storeId = scope.IsAdmin ? request.MaCuaHang : scope.StoreId!;
             var error = ValidateDevice(request, storeId);
             if (error is not null) return Results.BadRequest(new { loi = error });
-            if (!await db.CuaHang.AnyAsync(x => x.MaCuaHang == storeId, ct) ||
-                !await db.DongMay.AnyAsync(x => x.MaDongMay == request.MaDongMay, ct))
-                return Results.BadRequest(new { loi = "Cửa hàng hoặc dòng máy không tồn tại." });
+            if (!await db.CuaHang.AnyAsync(x => x.MaCuaHang == storeId && x.TrangThai == "HOAT_DONG", ct) ||
+                !await db.DongMay.AnyAsync(x => x.MaDongMay == request.MaDongMay && x.TrangThai == "HOAT_DONG", ct))
+                return Results.BadRequest(new { loi = "Cửa hàng hoặc dòng máy không tồn tại/đã ngừng hoạt động." });
             if (await db.ThietBi.AnyAsync(x => x.SoSerial == request.SoSerial.Trim(), ct))
                 return Results.Conflict(new { loi = "Số serial đã tồn tại." });
             var entity = new ThietBi

@@ -25,3 +25,7 @@ Máy đã có database trước khi URL Cloudinary được cập nhật chỉ c
 Máy đã có database demo và cần kiểm thử `rating`, `reviewCount`, `available`, `branchIds` cùng trường hợp ảnh `null` thì chạy thêm `04_add_home_contract_test_data.sql`.
 
 Không dùng các script của cấu trúc `DonThue` cũ với database này.
+
+### 14_add_asset_operations.sql
+
+Bổ sung trạng thái kinh doanh cho dòng máy, phiếu bảo trì, ghi nhận/lịch sử hư hỏng và lịch sử điều chuyển thiết bị giữa các chi nhánh.

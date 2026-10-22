@@ -10,6 +10,10 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<AnhThietBi> AnhThietBi => Set<AnhThietBi>();
     public DbSet<CuaHang> CuaHang => Set<CuaHang>();
     public DbSet<ThietBi> ThietBi => Set<ThietBi>();
+    public DbSet<PhieuBaoTri> PhieuBaoTri => Set<PhieuBaoTri>();
+    public DbSet<HuHongThietBi> HuHongThietBi => Set<HuHongThietBi>();
+    public DbSet<LichSuCapNhatHuHong> LichSuCapNhatHuHong => Set<LichSuCapNhatHuHong>();
+    public DbSet<LichSuDieuChuyenThietBi> LichSuDieuChuyenThietBi => Set<LichSuDieuChuyenThietBi>();
     public DbSet<TaiKhoan> TaiKhoan => Set<TaiKhoan>();
     public DbSet<LichSuTrangThaiTaiKhoan> LichSuTrangThaiTaiKhoan => Set<LichSuTrangThaiTaiKhoan>();
     public DbSet<ThuHoiBearerToken> ThuHoiBearerToken => Set<ThuHoiBearerToken>();
@@ -65,6 +69,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.GiaThueNgay).HasPrecision(18, 2);
             entity.Property(x => x.TienCoc).HasPrecision(18, 2);
             entity.Property(x => x.PhanTramGiamGia).HasPrecision(5, 2);
+            entity.Property(x => x.TrangThai).HasMaxLength(30).IsUnicode(false);
             entity.HasOne(x => x.DanhMuc).WithMany().HasForeignKey(x => x.MaDanhMuc);
             entity.HasOne(x => x.ThuongHieu).WithMany().HasForeignKey(x => x.MaThuongHieu);
         });
@@ -97,6 +102,71 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.HasOne(x => x.DongMay).WithMany().HasForeignKey(x => x.MaDongMay);
             entity.HasOne(x => x.CuaHang).WithMany().HasForeignKey(x => x.MaCuaHang);
             entity.Property(x => x.RowVersion).IsRowVersion();
+        });
+
+        modelBuilder.Entity<PhieuBaoTri>(entity =>
+        {
+            entity.ToTable("PhieuBaoTri");
+            entity.HasKey(x => x.MaPhieuBaoTri);
+            entity.Property(x => x.MaPhieuBaoTri).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaThietBi).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaCuaHang).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.TrangThai).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.NguoiTao).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.ChiPhiDuKien).HasPrecision(18, 2);
+            entity.Property(x => x.ChiPhiThucTe).HasPrecision(18, 2);
+            entity.HasIndex(x => new { x.MaThietBi, x.TrangThai });
+            entity.HasOne<ThietBi>().WithMany()
+                .HasForeignKey(x => x.MaThietBi).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<CuaHang>().WithMany()
+                .HasForeignKey(x => x.MaCuaHang).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<HuHongThietBi>(entity =>
+        {
+            entity.ToTable("HuHongThietBi");
+            entity.HasKey(x => x.MaHuHong);
+            entity.Property(x => x.MaHuHong).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaThietBi).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaPhieuBaoTri).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MucDo).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.TrangThai).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.NguoiGhiNhan).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.ChiPhiSuaChua).HasPrecision(18, 2);
+            entity.HasIndex(x => new { x.MaThietBi, x.ThoiGianGhiNhan });
+            entity.HasOne<ThietBi>().WithMany()
+                .HasForeignKey(x => x.MaThietBi).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PhieuBaoTri>().WithMany()
+                .HasForeignKey(x => x.MaPhieuBaoTri).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LichSuCapNhatHuHong>(entity =>
+        {
+            entity.ToTable("LichSuCapNhatHuHong");
+            entity.HasKey(x => x.MaLichSu);
+            entity.Property(x => x.MaLichSu).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaHuHong).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.TrangThaiCu).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.TrangThaiMoi).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.NguoiThaoTac).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.ChiPhiCu).HasPrecision(18, 2);
+            entity.Property(x => x.ChiPhiMoi).HasPrecision(18, 2);
+            entity.HasOne<HuHongThietBi>().WithMany()
+                .HasForeignKey(x => x.MaHuHong).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LichSuDieuChuyenThietBi>(entity =>
+        {
+            entity.ToTable("LichSuDieuChuyenThietBi");
+            entity.HasKey(x => x.MaDieuChuyen);
+            entity.Property(x => x.MaDieuChuyen).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaThietBi).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaCuaHangCu).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaCuaHangMoi).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.NguoiThaoTac).HasMaxLength(20).IsUnicode(false);
+            entity.HasIndex(x => new { x.MaThietBi, x.ThoiGian });
+            entity.HasOne<ThietBi>().WithMany()
+                .HasForeignKey(x => x.MaThietBi).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TaiKhoan>(entity =>
@@ -519,6 +589,7 @@ public sealed class DongMay
     public decimal GiaThueNgay { get; set; }
     public decimal TienCoc { get; set; }
     public decimal PhanTramGiamGia { get; set; }
+    public string TrangThai { get; set; } = "HOAT_DONG";
     public DanhMuc DanhMuc { get; set; } = null!;
     public ThuongHieu ThuongHieu { get; set; } = null!;
     public ICollection<AnhThietBi> AnhThietBi { get; set; } = new List<AnhThietBi>();
@@ -557,4 +628,59 @@ public sealed class ThietBi
     public byte[] RowVersion { get; set; } = [];
     public DongMay DongMay { get; set; } = null!;
     public CuaHang CuaHang { get; set; } = null!;
+}
+
+public sealed class PhieuBaoTri
+{
+    public string MaPhieuBaoTri { get; set; } = "";
+    public string MaThietBi { get; set; } = "";
+    public string MaCuaHang { get; set; } = "";
+    public string MoTaLoi { get; set; } = "";
+    public string TrangThai { get; set; } = "MOI_TAO";
+    public decimal? ChiPhiDuKien { get; set; }
+    public decimal? ChiPhiThucTe { get; set; }
+    public string? GhiChu { get; set; }
+    public string NguoiTao { get; set; } = "";
+    public DateTime ThoiGianTao { get; set; }
+    public DateTime? ThoiGianBatDau { get; set; }
+    public DateTime? ThoiGianHoanTat { get; set; }
+}
+
+public sealed class HuHongThietBi
+{
+    public string MaHuHong { get; set; } = "";
+    public string MaThietBi { get; set; } = "";
+    public string? MaPhieuBaoTri { get; set; }
+    public string MoTa { get; set; } = "";
+    public string MucDo { get; set; } = "NHE";
+    public decimal ChiPhiSuaChua { get; set; }
+    public string TrangThai { get; set; } = "CHUA_SUA";
+    public string? TinhTrangSauSuaChua { get; set; }
+    public string NguoiGhiNhan { get; set; } = "";
+    public DateTime ThoiGianGhiNhan { get; set; }
+    public DateTime? ThoiGianCapNhat { get; set; }
+}
+
+public sealed class LichSuCapNhatHuHong
+{
+    public string MaLichSu { get; set; } = "";
+    public string MaHuHong { get; set; } = "";
+    public string TrangThaiCu { get; set; } = "";
+    public string TrangThaiMoi { get; set; } = "";
+    public decimal ChiPhiCu { get; set; }
+    public decimal ChiPhiMoi { get; set; }
+    public string NguoiThaoTac { get; set; } = "";
+    public string? GhiChu { get; set; }
+    public DateTime ThoiGian { get; set; }
+}
+
+public sealed class LichSuDieuChuyenThietBi
+{
+    public string MaDieuChuyen { get; set; } = "";
+    public string MaThietBi { get; set; } = "";
+    public string MaCuaHangCu { get; set; } = "";
+    public string MaCuaHangMoi { get; set; } = "";
+    public string? LyDo { get; set; }
+    public string NguoiThaoTac { get; set; } = "";
+    public DateTime ThoiGian { get; set; }
 }

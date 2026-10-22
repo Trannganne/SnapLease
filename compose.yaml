@@ -180,6 +180,15 @@ services:
               -b \
               -V 16 \
               -i /database/13_add_bearer_token_revocation.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/14_add_asset_operations.sql
             echo "Cap nhat database thanh cong."
             exit 0
             ;;
@@ -328,6 +337,18 @@ services:
           -V 16 \
           -i /database/13_add_bearer_token_revocation.sql
 
+        echo "Dang bo sung nghiep vu tai san va chi nhanh..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/14_add_asset_operations.sql
+
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \
           -U sa \
@@ -366,6 +387,11 @@ services:
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ThongBao', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.LichSuTrangThaiTaiKhoan', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.ThuHoiBearerToken', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.PhieuBaoTri', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.HuHongThietBi', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.LichSuCapNhatHuHong', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.LichSuDieuChuyenThietBi', N'U') IS NOT NULL
+                 AND COL_LENGTH(N'RentalCameraDb20.dbo.DongMay', N'TrangThai') IS NOT NULL
                 THEN 'READY' ELSE 'INCOMPLETE'
               END;")"
 
