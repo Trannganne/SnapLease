@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
+using RentalCamera.Api.Admin;
 using RentalCamera.Api.Auth;
 using RentalCamera.Api.Catalog;
 using RentalCamera.Api.Cart;
@@ -176,6 +177,7 @@ if (args.Length == 2 && args[0] == "set-password")
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 app.MapAuthEndpoints();
+app.MapEmployeeEndpoints();
 app.MapNotificationEndpoints();
 app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
