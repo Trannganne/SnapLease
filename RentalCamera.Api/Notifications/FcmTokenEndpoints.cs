@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
+using RentalCamera.Api.Infrastructure;
 
 namespace RentalCamera.Api.Notifications;
 
@@ -59,6 +60,9 @@ public static class FcmTokenEndpoints
 
             var now = DateTime.UtcNow;
 
+            await using var tx = await db.Database.BeginTransactionAsync(ct);
+            await TransactionLock.AcquireAsync(db, "fcm:" + fidHash, ct);
+
             var deviceToken = await db.FcmDeviceToken
                 .SingleOrDefaultAsync(x => x.TokenHash == fidHash, ct);
 
@@ -93,6 +97,7 @@ public static class FcmTokenEndpoints
             }
 
             await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
 
             return Results.Ok(new
             {
@@ -111,6 +116,13 @@ public static class FcmTokenEndpoints
             var accountId =
                 principal.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
+            var hash = await db.FcmDeviceToken.AsNoTracking()
+                .Where(x => x.Id == id && x.MaTaiKhoan == accountId && x.IsActive)
+                .Select(x => x.TokenHash).SingleOrDefaultAsync(ct);
+            if (hash is null) return Results.NotFound();
+            await using var tx = await db.Database.BeginTransactionAsync(ct);
+            await TransactionLock.AcquireAsync(db, "fcm:" + hash, ct);
+            // Re-read after the same lock used by registration and scoped transport.
             var deviceToken = await db.FcmDeviceToken
                 .SingleOrDefaultAsync(
                     x => x.Id == id &&
@@ -127,6 +139,7 @@ public static class FcmTokenEndpoints
             deviceToken.UpdatedAt = DateTime.UtcNow;
 
             await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
             return Results.NoContent();
         });
     }

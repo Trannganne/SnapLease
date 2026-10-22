@@ -181,10 +181,6 @@ public static class IdentityEndpoints
             {
                 return Results.Conflict(new { loi = "CCCD đã được sử dụng bởi khách thuê khác." });
             }
-            await notificationSender.SendToAccountAsync(
-                customer.MaTaiKhoan, notificationTitle, notificationBody,
-                eventCode: "IDENTITY_VERIFICATION_RESULT", targetType: "GIAY_TO_TUY_THAN",
-                targetId: document.MaGiayTo, ct);
             return Results.Ok(new { document.MaGiayTo, document.TrangThaiXacMinh, document.GhiChu });
         }).RequireAuthorization("Staff");
 

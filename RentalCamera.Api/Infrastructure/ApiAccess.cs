@@ -66,7 +66,8 @@ public static class ApiAccess
             Loai = type,
             TieuDe = title,
             NoiDung = content,
-            ThoiGianGui = DateTime.Now,
+            ThoiGianGui = DateTime.UtcNow,
+            EventKey = $"{eventCode ?? type}:{targetType}:{targetId}",
             DaDoc = false,
             EventCode = string.IsNullOrWhiteSpace(eventCode)
                 ? type

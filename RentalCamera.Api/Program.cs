@@ -23,6 +23,7 @@ using RentalCamera.Api.Reports;
 using RentalCamera.Api.Reviews;
 using RentalCamera.Api.Settlement;
 using System.Threading.RateLimiting;
+using RentalCamera.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
@@ -61,6 +62,7 @@ builder.Services.AddSingleton<TokenIssuer>();
 builder.Services.AddSingleton<PasswordResetTokenService>();
 builder.Services.AddSingleton<ContractSignatureService>();
 builder.Services.AddSingleton<ContractPdfService>();
+builder.Services.AddScoped<BranchWorkingHours>();
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
 builder.Services.AddSingleton<IContractOtpEmailSender, SmtpContractOtpEmailSender>();
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
@@ -72,6 +74,8 @@ builder.Services.AddHttpClient<CloudinaryImageStorage>();
 builder.Services.AddSingleton<VnpayService>();
 builder.Services.AddScoped<AvailabilityService>();
 builder.Services.AddHostedService<ReservationExpirationService>();
+builder.Services.AddHostedService<NotificationDeliveryWorker>();
+builder.Services.AddHostedService<ReturnReminderWorker>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -128,6 +132,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+app.UseConcurrencyResponse();
 var firebaseApp = app.Services.GetRequiredService<FirebaseApp>();
 app.Logger.LogInformation(
     "Firebase Admin đã khởi tạo cho project {ProjectId}.",
@@ -174,14 +179,24 @@ if (args.Length == 2 && args[0] == "set-password")
 }
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/api/dieu-khoan/hien-hanh", () => Results.Ok(new {
+    phienBan=RentalPolicy.TermsVersion, noiDung=RentalPolicy.Terms, muiGio="Asia/Ho_Chi_Minh"
+}));
 app.MapAuthEndpoints();
 app.MapNotificationEndpoints();
 app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
 app.MapEquipmentEndpoints();
 app.MapRentalEndpoints();
+app.MapCartEndpoints();
 app.MapIdentityEndpoints();
 app.MapContractEndpoints();
+app.MapRenewalEndpoints();
+app.MapCancellationEndpoints();
+BranchWorkingHours.MapWorkingHoursEndpoints(app);
+app.MapNoShowEndpoints();
+LateReturnService.MapLateReturnEndpoints(app);
+app.MapReturnTimeCorrectionEndpoints();
 app.MapVnpayEndpoints();
 app.MapPenaltyEndpoints();
 app.MapHandoverEndpoints();

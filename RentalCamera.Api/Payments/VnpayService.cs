@@ -123,17 +123,28 @@ public sealed class VnpayService
             !long.TryParse(query["vnp_Amount"].ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out var amountTimes100))
             return false;
 
+        var transactionNumber = query["vnp_TransactionNo"].ToString();
+        if (responseCode == "00" && transactionStatus == "00" && !IsValidTransactionNumber(transactionNumber))
+            return false;
+
         callback = new VnpayCallbackData(
             transactionReference,
             amountTimes100,
             responseCode,
             transactionStatus,
-            NullIfEmpty(query["vnp_TransactionNo"].ToString()),
+            NullIfEmpty(transactionNumber),
             NullIfEmpty(query["vnp_BankCode"].ToString()),
             NullIfEmpty(query["vnp_CardType"].ToString()),
             ParseVnpayDate(query["vnp_PayDate"].ToString()));
         return true;
     }
+
+    // VNPAY 2.1.0 TransactionNo is Numeric[1,15]. A successful collection
+    // must identify an actual transaction, never a missing/zero placeholder.
+    public static bool IsValidTransactionNumber(string? value) =>
+        value is { Length: >= 1 and <= 15 } &&
+        value.All(c => c is >= '0' and <= '9') &&
+        value.Any(c => c != '0');
 
     private static string BuildQuery(IEnumerable<KeyValuePair<string, string>> parameters) =>
         string.Join("&", parameters.Select(item => $"{WebUtility.UrlEncode(item.Key)}={WebUtility.UrlEncode(item.Value)}"));
@@ -285,6 +296,9 @@ public sealed class VnpayService
 
             // Giao dịch thành công chỉ khi ResponseCode == "00" VÀ TransactionStatus == "00"
             var isSuccess = responseCode == "00" && transactionStatus == "00";
+            if (isSuccess && !IsValidTransactionNumber(resTransactionNo))
+                return new VnpayQueryDrResult(false, responseCode, transactionStatus,
+                    "Mã giao dịch VNPAY không hợp lệ.", null, null, null, null, null, "InvalidTransactionNumber");
 
             return new VnpayQueryDrResult(
                 isSuccess,

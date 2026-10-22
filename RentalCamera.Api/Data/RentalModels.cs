@@ -69,6 +69,8 @@ public sealed class ChiTietGioHang
     public string MaGioHang { get; set; } = "";
     public string MaCuaHang { get; set; } = "";
     public string NguonTao { get; set; } = "GIO_HANG";
+    public Guid PhienBan { get; set; } = Guid.NewGuid();
+    public bool DaChuyenHopDong { get; set; }
     public string MaDongMay { get; set; } = "";
     public int SoLuong { get; set; }
     public DateTime NgayBatDau { get; set; }
@@ -93,6 +95,7 @@ public sealed class GiuCho
 
 public sealed class ChiTietGiuCho
 {
+    public Guid? PhienBanGioHang { get; set; }
     public string MaChiTietGiuCho { get; set; } = "";
     public string MaGiuCho { get; set; } = "";
     public string? MaChiTietGioHang { get; set; }
@@ -101,6 +104,16 @@ public sealed class ChiTietGiuCho
     public DateTime NgayBatDau { get; set; }
     public DateTime NgayKetThuc { get; set; }
     public GiuCho GiuCho { get; set; } = null!;
+}
+
+// One model occupies one hold line; selected cart versions are retained independently.
+public sealed class LuaChonGioHangGiuCho
+{
+    public string MaGiuCho { get; set; } = "";
+    public string MaChiTietGioHang { get; set; } = "";
+    public string MaDongMay { get; set; } = "";
+    public Guid PhienBanGioHang { get; set; }
+    public int SoLuong { get; set; }
 }
 
 public sealed class HopDong
@@ -161,6 +174,26 @@ public sealed class ChiTietHopDong
 
 public sealed class PhuLuc
 {
+    public DateTime? HanXuLyUtc { get; set; }
+    public DateTime? HanKyUtc { get; set; }
+    public DateTime? DuyetLucUtc { get; set; }
+    public DateTime? KyLucUtc { get; set; }
+    public DateTime? DongLucUtc { get; set; }
+    public string? LyDoDong { get; set; }
+    public DateTime? HieuLucTu { get; set; }
+    public string? NguoiXuLy { get; set; }
+    public string? MaBamNoiDung { get; set; }
+    public string? MaBamTepPdf { get; set; }
+    public string? NoiDungJson { get; set; }
+    public string? PhienBanDieuKhoan { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore] public string? MaOtpHash { get; set; }
+    [System.Text.Json.Serialization.JsonIgnore] public string? MuoiOtp { get; set; }
+    public DateTime? OtpHetHanUtc { get; set; }
+    public DateTime? OtpGuiLucUtc { get; set; }
+    public int SoLanThuOtp { get; set; }
+    public int SoLanGuiOtp { get; set; }
+    public string? MaXacNhanKy { get; set; }
+    public string? DiaChiIpKy { get; set; }
     public string MaPhuLuc { get; set; } = "";
     public string MaHopDong { get; set; } = "";
     public DateTime NgayLap { get; set; }
@@ -174,6 +207,7 @@ public sealed class PhuLuc
 
 public sealed class ThanhToan
 {
+    public string? MaYeuCauHuy { get; set; }
     public string MaThanhToan { get; set; } = "";
     public string MaHopDong { get; set; } = "";
     public decimal SoTien { get; set; }
@@ -191,6 +225,65 @@ public sealed class ThanhToan
     public string? DuongDanThanhToan { get; set; }
     public DateTime? ThoiGianHetHan { get; set; }
     public DateTime? ThoiGianCapNhat { get; set; }
+}
+
+public sealed class YeuCauHuyHopDong
+{
+    public string LoaiYeuCau { get; set; } = "KHACH_YEU_CAU";
+    public string? BangChung { get; set; }
+    public bool CanAdminXuLy { get; set; }
+    public string Id { get; set; } = "";
+    public string MaHopDong { get; set; } = "";
+    public string TrangThai { get; set; } = "CHO_XAC_NHAN";
+    public DateTime YeuCauLucUtc { get; set; }
+    public string LyDo { get; set; } = "";
+    public string? NguoiXuLy { get; set; }
+    public DateTime? XuLyLucUtc { get; set; }
+    public string? LyDoXuLy { get; set; }
+    public bool MienKhauTru { get; set; }
+    public decimal TyLeKhauTru { get; set; }
+    public decimal TienCocDaThu { get; set; }
+    public decimal TienThueDaThu { get; set; }
+    public decimal TienThuThuaDaThu { get; set; }
+    public decimal TienKhauTru { get; set; }
+    public decimal TienCocPhaiHoan { get; set; }
+    public decimal TienThuePhaiHoan { get; set; }
+    public decimal TienThuThuaPhaiHoan { get; set; }
+}
+
+public sealed class LichLamViec
+{
+    public string MaCuaHang { get; set; } = "*";
+    public int NgayTrongTuan { get; set; }
+    public TimeOnly GioMoCua { get; set; }
+    public TimeOnly GioDongCua { get; set; }
+}
+public sealed class LichLamViecDacBiet
+{
+    public string MaCuaHang { get; set; } = "";
+    public DateOnly Ngay { get; set; }
+    public TimeOnly? GioMoCua { get; set; }
+    public TimeOnly? GioDongCua { get; set; }
+    public string LyDo { get; set; } = "";
+}
+public sealed class NhatKyNghiepVu
+{
+    public string Id { get; set; } = "";
+    public string HanhDong { get; set; } = "";
+    public string DoiTuongId { get; set; } = "";
+    public string MaTaiKhoan { get; set; } = "";
+    public DateTime ThoiGianUtc { get; set; }
+    public string LyDo { get; set; } = "";
+    public string DuLieuJson { get; set; } = "";
+}
+
+public sealed class HoanTienAudit
+{
+    public string Id { get; set; } = "";
+    public string MaThanhToan { get; set; } = "";
+    public string MaTaiKhoan { get; set; } = "";
+    public string ChungTu { get; set; } = "";
+    public DateTime ThoiGianUtc { get; set; }
 }
 
 public sealed class YeuCauThanhToanVnpay
@@ -242,9 +335,21 @@ public sealed class DanhGia
     public string? NhanXet { get; set; }
     public byte SoSao { get; set; }
     public DateTime NgayDanhGia { get; set; }
-    public string TrangThaiKiemDuyet { get; set; } = "CHO_DUYET";
+    // Visibility, not an endorsement or prior approval by staff.
+    public string? TrangThaiKiemDuyet { get; set; } = "CONG_KHAI";
     public string? GhiChuKiemDuyet { get; set; }
     public DateTime? NgayKiemDuyet { get; set; }
+}
+
+public sealed class LichSuHienThiDanhGia
+{
+    public string Id { get; set; } = "";
+    public string MaDanhGia { get; set; } = "";
+    public string MaTaiKhoan { get; set; } = "";
+    public string? TrangThaiTruoc { get; set; }
+    public string TrangThaiSau { get; set; } = "";
+    public string LyDo { get; set; } = "";
+    public DateTime ThoiGianUtc { get; set; }
 }
 
 public sealed class DanhGiaDiemNoiBat
@@ -265,6 +370,8 @@ public sealed class AnhDanhGia
 
 public sealed class ThongBao
 {
+    public DateTime? HanTraNhac { get; set; }
+    public string? EventKey { get; set; }
     public string MaThongBao { get; set; } = "";
     public string MaTaiKhoan { get; set; } = "";
     public string Loai { get; set; } = "";
@@ -276,6 +383,18 @@ public sealed class ThongBao
     public string? EventCode { get; set; }
     public string? TargetType { get; set; }
     public string? TargetId { get; set; }
+}
+
+public sealed class NotificationDelivery
+{
+    public string Id { get; set; } = "";
+    public string MaThongBao { get; set; } = "";
+    public string DeviceTokenId { get; set; } = "";
+    public string State { get; set; } = "PENDING";
+    public int Attempts { get; set; }
+    public DateTime NextAttemptUtc { get; set; }
+    public DateTime? LeaseUntilUtc { get; set; }
+    public string? LastErrorCode { get; set; }
 }
 
 public sealed class FcmDeviceToken

@@ -1,3 +1,4 @@
+using RentalCamera.Api.Contracts;
 using System.Data;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -52,7 +53,7 @@ public static class RentalEndpoints
             var monthEnd = monthStart.AddMonths(1);
             
             // Allow looking up to 6 months ahead
-            if (monthStart < new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1) || monthStart > DateTime.Now.AddMonths(6))
+            if (monthStart < new DateTime(RentalPolicy.LocalNow.Year, RentalPolicy.LocalNow.Month, 1) || monthStart > RentalPolicy.LocalNow.AddMonths(6))
                 return Results.BadRequest(new { loi = "Khoảng thời gian xem lịch không hợp lệ." });
 
             var list = await availability.GetMonthlyAvailabilityAsync(
@@ -142,7 +143,7 @@ public static class RentalEndpoints
 
             if (string.IsNullOrWhiteSpace(request.MaCuaHang) || string.IsNullOrWhiteSpace(request.MaDongMay) ||
                 request.SoLuong is < 1 or > 10 || !ValidPeriod(request.NgayBatDau, request.NgayKetThuc) ||
-                request.NgayBatDau <= DateTime.Now)
+                request.NgayBatDau <= RentalPolicy.LocalNow)
                 return Results.BadRequest(new { loi = "Thông tin thuê không hợp lệ." });
 
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
@@ -208,7 +209,7 @@ public static class RentalEndpoints
                         .Where(x => x.MaKhachThue == customerId && x.TrangThai == "DANG_CHON")
                         .FirstOrDefaultAsync(ct);
                     
-                    var now = DateTime.Now;
+                    var now = RentalPolicy.LocalNow;
                     if (cart == null)
                     {
                         cart = new GioHang
@@ -292,7 +293,8 @@ public static class RentalEndpoints
         {
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customerId is null) return Results.Forbid();
-            
+            await using var tx=await db.Database.BeginTransactionAsync(ct);
+            await TransactionLock.AcquireAsync(db,"cart:"+customerId,ct);
             var hold = await db.GiuCho.Include(x => x.ChiTiet)
                 .SingleOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
             
@@ -303,6 +305,11 @@ public static class RentalEndpoints
                 hold.TrangThai = "HET_HAN";
                 await db.SaveChangesAsync(ct);
             }
+            if(hold.ChiTiet.Any(x=>x.PhienBanGioHang!=null)||await db.LuaChonGioHangGiuCho.AnyAsync(x=>x.MaGiuCho==id,ct)) {
+                var cart=await CartEndpoints.HoldDtoAsync(id,customerId,db,ct);
+                await tx.CommitAsync(ct);return Results.Ok(cart);
+            }
+            await tx.CommitAsync(ct);
             return Results.Ok(new
             {
                 hold.MaGiuCho, hold.MaGioHang, hold.MaCuaHang, 
@@ -324,7 +331,7 @@ public static class RentalEndpoints
         {
             if (string.IsNullOrWhiteSpace(request.MaCuaHang) || string.IsNullOrWhiteSpace(request.MaDongMay) ||
                 request.SoLuong is < 1 or > 10 || !ValidPeriod(request.NgayBatDau, request.NgayKetThuc) ||
-                request.NgayBatDau <= DateTime.Now)
+                request.NgayBatDau <= RentalPolicy.LocalNow)
                 return Results.BadRequest(new { loi = "Thông tin cập nhật không hợp lệ." });
 
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
@@ -333,12 +340,14 @@ public static class RentalEndpoints
             try
             {
                 await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-
+                await TransactionLock.AcquireAsync(db,"cart:"+customerId,ct);
                     var hold = await db.GiuCho
                         .Include(x => x.ChiTiet)
                         .SingleOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
 
                     if (hold is null) return Results.NotFound(new { loi = "Không tìm thấy giữ chỗ." });
+                    if(hold.ChiTiet.Any(x=>x.PhienBanGioHang!=null)||await db.LuaChonGioHangGiuCho.AnyAsync(x=>x.MaGiuCho==id,ct))
+                        return Results.Conflict(new{loi="Giữ chỗ checkout là tập mục cố định; sửa giỏ hàng trước một checkout mới."});
 
                     if (hold.TrangThai != "DANG_GIU" || hold.HetHanLuc <= DateTime.UtcNow)
                         return Results.BadRequest(new { loi = "Giữ chỗ không còn hiệu lực để cập nhật." });
@@ -355,6 +364,12 @@ public static class RentalEndpoints
                     if (available < request.SoLuong)
                         return Results.Conflict(new { loi = "Không đủ thiết bị còn trống tại chi nhánh và thời gian này.", code = "INSUFFICIENT_DEVICES" });
 
+                    // Check the original deadline, including at commit; never revive an expired hold.
+                    var originalExpiry = hold.HetHanLuc;
+                    var updatedAt = DateTime.UtcNow;
+                    if (originalExpiry <= updatedAt)
+                        return Results.Conflict(new { code = "HOLD_NOT_EDITABLE", loi = "Giữ chỗ đã hết hạn trong lúc kiểm tra." });
+                    var editedExpiry = CartHoldEditing.ExpiryAfterEdit(hold, request.NgayBatDau, request.NgayKetThuc, updatedAt);
                     // Update GiuCho
                     hold.MaCuaHang = request.MaCuaHang;
                     
@@ -364,6 +379,7 @@ public static class RentalEndpoints
                     holdLine.SoLuong = request.SoLuong;
                     holdLine.NgayBatDau = request.NgayBatDau;
                     holdLine.NgayKetThuc = request.NgayKetThuc;
+                    hold.HetHanLuc = editedExpiry;
 
                     // Update ChiTietGioHang
                     if (holdLine.MaChiTietGioHang != null)
@@ -377,6 +393,8 @@ public static class RentalEndpoints
                     }
 
                     await db.SaveChangesAsync(ct);
+                    if (originalExpiry <= DateTime.UtcNow)
+                        return Results.Conflict(new { code = "HOLD_NOT_EDITABLE", loi = "Giữ chỗ đã hết hạn; cập nhật chưa được áp dụng." });
                     await tx.CommitAsync(ct);
 
                     var customerCheck = await db.KhachThue.AsNoTracking().FirstOrDefaultAsync(x => x.MaKhachThue == customerId, ct);
@@ -415,7 +433,7 @@ public static class RentalEndpoints
             if (customerId is null) return Results.Forbid();
 
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, ct);
-
+            await TransactionLock.AcquireAsync(db,"cart:"+customerId,ct);
             var hold = await db.GiuCho.Include(x => x.ChiTiet)
                 .SingleOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
             
@@ -438,7 +456,7 @@ public static class RentalEndpoints
                 
                 if (cartLines.Any())
                 {
-                    db.ChiTietGioHang.RemoveRange(cartLines);
+                    foreach(var line in cartLines)line.DaChuyenHopDong=true;
                 }
             }
 
@@ -453,7 +471,7 @@ public static class RentalEndpoints
         int SoNgayTinhPhi, decimal GiaThueNgay, decimal PhanTramGiamGia, decimal DonGiaSauGiam,
         decimal TongTienThue, decimal TienCocMotDonVi, decimal TongTienCoc);
 
-    private static PriceQuote CalculatePrice(DongMay model, int quantity, DateTime from, DateTime to)
+    internal static PriceQuote CalculatePrice(DongMay model, int quantity, DateTime from, DateTime to)
     {
         var days = (int)Math.Ceiling((to - from).TotalDays);
         var unitPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
@@ -464,7 +482,7 @@ public static class RentalEndpoints
         );
     }
 
-    private static void ApplyServerPrice(
+    internal static void ApplyServerPrice(
         ChiTietGioHang item, DongMay model, int quantity, DateTime from, DateTime to)
     {
         var quote = CalculatePrice(model, quantity, from, to);
@@ -477,7 +495,7 @@ public static class RentalEndpoints
         item.ThanhTien = quote.TongTienThue;
     }
 
-    private static bool ValidPeriod(DateTime from, DateTime to) =>
+    internal static bool ValidPeriod(DateTime from, DateTime to) =>
         from.Kind == DateTimeKind.Unspecified && to.Kind == DateTimeKind.Unspecified &&
         to > from && to - from <= TimeSpan.FromDays(90);
 }

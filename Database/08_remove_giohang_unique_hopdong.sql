@@ -1,3 +1,5 @@
+IF DB_NAME() COLLATE Latin1_General_100_BIN2 <> N'$(TargetDatabase)' THROW 51800,'Wrong explicitly selected database.',1;
+SET XACT_ABORT ON;
 -- Database/08_remove_giohang_unique_hopdong.sql
 -- Migration to allow multiple HopDong to share the same MaGioHang
 -- but keeping MaGiuCho unique

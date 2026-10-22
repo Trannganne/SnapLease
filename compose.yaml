@@ -1,33 +1,29 @@
 name: rental-camera
-
 services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: rentalcamera-sql
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?Configure a private SQL password}"
     ports:
-      - "14330:1433"
+      - "${SQL_PORT:-14330}:1433"
     volumes:
       - rentalcamera-sql-data:/var/opt/mssql
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q \"SELECT 1\" || exit 1"
-        ]
+      test: ["CMD-SHELL", "SQLCMDPASSWORD=$$MSSQL_SA_PASSWORD /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -Q 'SELECT 1' || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 20
       start_period: 20s
     restart: unless-stopped
-
+  # Readiness gate only. Provision/migrate explicitly using Database/README.md.
+  # No automatic seed, legacy backfill or schema replay on an existing database.
   db-init:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: rentalcamera-db-init
     environment:
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
+      SQLCMDPASSWORD: "${MSSQL_SA_PASSWORD:?Configure a private SQL password}"
+      DATABASE_NAME: "${DATABASE_NAME:-RentalCameraDb20}"
     depends_on:
       sqlserver:
         condition: service_healthy
@@ -36,242 +32,9 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command:
       - |
-        set -Eeuo pipefail
-
-        SQLCMD="/opt/mssql-tools18/bin/sqlcmd"
-
-        echo "Dang cho SQL Server san sang..."
-
-        until "$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -Q "SELECT 1" >/dev/null 2>&1
-        do
-          sleep 2
-        done
-
-        echo "SQL Server da san sang."
-
-        DB_STATE="$$("$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -b \
-          -V 16 \
-          -r 1 \
-          -h -1 \
-          -W \
-          -Q "SET NOCOUNT ON;
-              SELECT CASE
-                WHEN DB_ID(N'RentalCameraDb20') IS NULL THEN 'MISSING'
-                WHEN OBJECT_ID(N'RentalCameraDb20.dbo.DanhMuc', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThuongHieu', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.DongMay', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.AnhThietBi', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.CuaHang', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.TaiKhoan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.KhachThue', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.GiayToTuyThan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.NhanVien', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThietBi', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.GioHang', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietGioHang', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.GiuCho', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietGiuCho', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.HopDong', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietHopDong', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThanhToan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.PhuLuc', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.PhieuPhat', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.AnhBienBan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.DanhGia', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThongBao', N'U') IS NOT NULL
-                THEN 'READY'
-                ELSE 'INCOMPLETE'
-              END;")"
-
-        DB_STATE="$$(printf '%s' "$$DB_STATE" | tr -d '\r' | xargs)"
-
-        case "$$DB_STATE" in
-          READY)
-            echo "Database da khoi tao, dang chay cac script cap nhat..."
-            "$$SQLCMD" \
-              -S sqlserver \
-              -U sa \
-              -P "$$MSSQL_SA_PASSWORD" \
-              -C \
-              -I \
-              -b \
-              -V 16 \
-              -i /database/06_add_electronic_signature.sql
-            "$$SQLCMD" \
-              -S sqlserver \
-              -U sa \
-              -P "$$MSSQL_SA_PASSWORD" \
-              -C \
-              -I \
-              -b \
-              -V 16 \
-              -i /database/07_add_vnpay_payment.sql
-            "$$SQLCMD" \
-              -S sqlserver \
-              -U sa \
-              -P "$$MSSQL_SA_PASSWORD" \
-              -C \
-              -I \
-              -b \
-              -V 16 \
-              -i /database/08_add_firebase_notifications.sql
-            "$$SQLCMD" \
-              -S sqlserver \
-              -U sa \
-              -P "$$MSSQL_SA_PASSWORD" \
-              -C \
-              -I \
-              -b \
-              -V 16 \
-              -i /database/09_add_review_details.sql
-            echo "Cap nhat database thanh cong."
-            exit 0
-            ;;
-          MISSING)
-            echo "Database chua ton tai, bat dau khoi tao."
-            ;;
-          INCOMPLETE)
-            echo "LOI: RentalCameraDb20 ton tai nhung thieu bang bat buoc." >&2
-            echo "Khong tu dong chay lai schema/seed de tranh mat hoac trung du lieu." >&2
-            exit 1
-            ;;
-          *)
-            echo "LOI: Khong doc duoc trang thai database: '$$DB_STATE'." >&2
-            exit 1
-            ;;
-        esac
-
-        echo "Dang tao cau truc database..."
-
-        "$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -I \
-          -b \
-          -V 16 \
-          -i /database/01_schema.sql
-
-        echo "Dang nap du lieu mau..."
-
-        "$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -I \
-          -b \
-          -V 16 \
-          -i /database/02_sample_data.sql
-
-        echo "Dang bo sung cau truc ky dien tu..."
-
-        "$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -I \
-          -b \
-          -V 16 \
-          -i /database/06_add_electronic_signature.sql
-
-        echo "Dang bo sung cau truc thanh toan VNPAY..."
-
-        "$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -I \
-          -b \
-          -V 16 \
-          -i /database/07_add_vnpay_payment.sql
-
-        echo "Dang bo sung cau truc thong bao Firebase..."
-
-        "$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -I \
-          -b \
-          -V 16 \
-          -i /database/08_add_firebase_notifications.sql
-
-        echo "Dang bo sung cau truc danh gia..."
-
-        "$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -I \
-          -b \
-          -V 16 \
-          -i /database/09_add_review_details.sql
-
-        VERIFY_STATE="$$("$$SQLCMD" \
-          -S sqlserver \
-          -U sa \
-          -P "$$MSSQL_SA_PASSWORD" \
-          -C \
-          -b \
-          -V 16 \
-          -r 1 \
-          -h -1 \
-          -W \
-          -Q "SET NOCOUNT ON;
-              SELECT CASE
-                WHEN DB_ID(N'RentalCameraDb20') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.DanhMuc', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThuongHieu', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.DongMay', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.AnhThietBi', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.CuaHang', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.TaiKhoan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.KhachThue', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.GiayToTuyThan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.NhanVien', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThietBi', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.GioHang', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietGioHang', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.GiuCho', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietGiuCho', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.HopDong', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.XacNhanKyHopDong', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ChiTietHopDong', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThanhToan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.PhuLuc', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.PhieuPhat', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.AnhBienBan', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.DanhGia', N'U') IS NOT NULL
-                 AND OBJECT_ID(N'RentalCameraDb20.dbo.ThongBao', N'U') IS NOT NULL
-                THEN 'READY' ELSE 'INCOMPLETE'
-              END;")"
-
-        VERIFY_STATE="$$(printf '%s' "$$VERIFY_STATE" | tr -d '\r' | xargs)"
-
-        if [ "$$VERIFY_STATE" != "READY" ]; then
-          echo "LOI: Kiem tra sau khoi tao that bai: '$$VERIFY_STATE'." >&2
-          exit 1
-        fi
-
-        echo "Khoi tao database thanh cong."
+        set -eu
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -C -I -b -d "$$DATABASE_NAME" -Q "IF OBJECT_ID('dbo.LuaChonGioHangGiuCho','U') IS NULL OR OBJECT_ID('dbo.NotificationDelivery','U') IS NULL OR OBJECT_ID('dbo.LichSuHienThiDanhGia','U') IS NULL OR COL_LENGTH('dbo.PhuLuc','HanKyUtc') IS NULL THROW 51900,'Apply the reviewed deployment migrations first; no automatic changes were made.',1;"
     restart: "no"
-
   api:
     build:
       context: .
@@ -280,52 +43,46 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: "http://+:8080"
-      ConnectionStrings__RentalCamera: "Server=sqlserver,1433;Database=RentalCameraDb20;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True"
-      Cors__AllowedOrigins__0: "http://localhost:5173"
-      Cors__AllowedOrigins__1: "http://127.0.0.1:5173"
-      Cors__AllowedOrigins__2: "http://localhost:3000"
-      Cors__AllowedOrigins__3: "http://localhost:4200"
+      ConnectionStrings__RentalCamera: "Server=sqlserver,1433;Database=${DATABASE_NAME:-RentalCameraDb20};User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=True;TrustServerCertificate=True"
+      Cors__AllowedOrigins__0: http://localhost:5173
+      Cors__AllowedOrigins__1: http://localhost:3000
       Rental__HoldMinutes: "20"
       Rental__ContractSignMinutes: "30"
-      PasswordReset__TokenLifetimeMinutes: "15"
-      PasswordReset__ReturnTokenInResponse: "true"
-      ElectronicSignature__OtpLifetimeMinutes: "5"
-      ElectronicSignature__MaxAttempts: "5"
-      ElectronicSignature__TermsVersion: "1.0"
-      ElectronicSignature__ReturnOtpInResponse: "${ELECTRONIC_SIGNATURE_RETURN_OTP_IN_RESPONSE:-false}"
+      Rental__BackgroundJobsEnabled: "false"
+      Rental__ProtectedContractIds: "${RENTAL_PROTECTED_CONTRACT_IDS:-}"
+      Notifications__PushEnabled: "false"
+      PasswordReset__ReturnTokenInResponse: "false"
+      ElectronicSignature__TermsVersion: "2026-10-20"
+      ElectronicSignature__ReturnOtpInResponse: "false"
       ElectronicSignature__Pepper: "${ELECTRONIC_SIGNATURE_PEPPER:-}"
       Email__Enabled: "${EMAIL_ENABLED:-false}"
-      Email__Host: "${EMAIL_HOST:-smtp.gmail.com}"
+      Email__Host: "${EMAIL_HOST:-}"
       Email__Port: "${EMAIL_PORT:-587}"
       Email__UseSsl: "${EMAIL_USE_SSL:-true}"
       Email__Username: "${EMAIL_USERNAME:-}"
       Email__Password: "${EMAIL_PASSWORD:-}"
       Email__FromAddress: "${EMAIL_FROM_ADDRESS:-}"
-      Email__FromName: "${EMAIL_FROM_NAME:-Rental Camera}"
-      ContractFiles__Directory: "App_Data/contracts"
-      ContractFiles__MaximumMegabytes: "10"
+      Email__FromName: "${EMAIL_FROM_NAME:-SNAPLEASE}"
+      Firebase__ProjectId: "${FIREBASE_PROJECT_ID:?Configure Firebase project}"
+      GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase_admin
       Cloudinary__CloudName: "${CLOUDINARY_CLOUD_NAME:-}"
       Cloudinary__ApiKey: "${CLOUDINARY_API_KEY:-}"
       Cloudinary__ApiSecret: "${CLOUDINARY_API_SECRET:-}"
       Cloudinary__EvidenceFolder: "${CLOUDINARY_EVIDENCE_FOLDER:-rental-camera/bien-ban}"
       Cloudinary__ReviewFolder: "${CLOUDINARY_REVIEW_FOLDER:-rental-camera/danh-gia}"
-      Cloudinary__MaximumMegabytes: "${CLOUDINARY_MAXIMUM_MEGABYTES:-10}"
       Vnpay__Enabled: "${VNPAY_ENABLED:-false}"
       Vnpay__TmnCode: "${VNPAY_TMN_CODE:-}"
       Vnpay__HashSecret: "${VNPAY_HASH_SECRET:-}"
       Vnpay__PaymentUrl: "${VNPAY_PAYMENT_URL:-https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}"
-      Vnpay__ReturnUrl: "${VNPAY_RETURN_URL:-http://localhost:5000/api/thanh-toan/vnpay/return}"
+      Vnpay__ReturnUrl: "${VNPAY_RETURN_URL:-}"
       Vnpay__IpnUrl: "${VNPAY_IPN_URL:-}"
-      Vnpay__MobileCallbackUrl: "${VNPAY_MOBILE_CALLBACK_URL:-}"
-      Vnpay__ExpirationMinutes: "${VNPAY_EXPIRATION_MINUTES:-15}"
+      Vnpay__MobileCallbackUrl: "${VNPAY_MOBILE_CALLBACK_URL:-rentalcamera://payment-result}"
       BankTransfer__NganHang: "${BANK_TRANSFER_NGAN_HANG:-}"
       BankTransfer__MaBin: "${BANK_TRANSFER_MA_BIN:-}"
       BankTransfer__SoTaiKhoan: "${BANK_TRANSFER_SO_TAI_KHOAN:-}"
       BankTransfer__ChuTaiKhoan: "${BANK_TRANSFER_CHU_TAI_KHOAN:-}"
-      Firebase__ProjectId: "${FIREBASE_PROJECT_ID:-}"
-      GOOGLE_APPLICATION_CREDENTIALS: "/run/secrets/firebase_admin"
     ports:
-      - "5000:8080"
+      - "${API_PORT:-5000}:8080"
     volumes:
       - rentalcamera-api-keys:/app/.keys
       - rentalcamera-api-storage:/app/Storage
@@ -336,13 +93,11 @@ services:
       db-init:
         condition: service_completed_successfully
     restart: unless-stopped
-
 volumes:
   rentalcamera-sql-data:
   rentalcamera-api-keys:
   rentalcamera-api-storage:
   rentalcamera-contract-files:
-
 secrets:
   firebase_admin:
-    file: "${FIREBASE_ADMIN_CREDENTIALS_FILE}"
+    file: "${FIREBASE_ADMIN_CREDENTIALS_FILE:?Configure a private Firebase service-account file}"

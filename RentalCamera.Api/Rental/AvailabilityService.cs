@@ -50,7 +50,8 @@ public sealed class AvailabilityService(RentalCameraContext db)
                 OUTER APPLY (
                     SELECT MAX(p.ThoiHanTraMoi) AS ThoiHanGiaHan
                     FROM PhuLuc p
-                    WHERE p.MaHopDong = hd.MaHopDong AND p.TrangThai = 'DA_XAC_NHAN'
+                    WHERE p.MaHopDong = hd.MaHopDong AND (p.TrangThai IN ('DA_XAC_NHAN','DA_HIEU_LUC')
+                        OR (p.TrangThai='CHO_KY' AND p.HanKyUtc>SYSUTCDATETIME()))
                 ) pl
                 WHERE hd.MaCuaHang = @store
                   AND ct.MaDongMay = @model

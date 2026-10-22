@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
 using RentalCamera.Api.Media;
+using RentalCamera.Api.Contracts;
+using System.Text.Json;
 
 namespace RentalCamera.Api.Handover;
 
@@ -25,8 +27,13 @@ public static class HandoverEndpoints
         contracts.MapPost("/{id}/ban-giao", async (
             string id, HandoverRequest request, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
+            if(request.ThietBi is not { Count: >0 }||request.ThietBi.Any(x=>x is null||string.IsNullOrWhiteSpace(x.MaChiTietHopDong)||string.IsNullOrWhiteSpace(x.TinhTrang))||
+                request.ThietBi.Select(x=>x.MaChiTietHopDong).Distinct(StringComparer.OrdinalIgnoreCase).Count()!=request.ThietBi.Count)return Results.BadRequest(new{loi="Cần danh sách thiết bị không trùng và tình trạng bàn giao."});
             var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
             if (scope is null) return Results.Forbid();
+            await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+            await TransactionLock.AcquireAsync(db, "contract:" + id, ct);
+            if(RentalPolicy.ProtectedContracts.Contains(id))return Results.Conflict();
             var contract = await db.HopDong.SingleOrDefaultAsync(x => x.MaHopDong == id, ct);
             if (contract is null) return Results.NotFound();
             if (!scope.IsAdmin && contract.MaCuaHang != scope.StoreId) return Results.Forbid();
@@ -40,7 +47,7 @@ public static class HandoverEndpoints
             if (details.Any(x => !supplied.ContainsKey(x.MaChiTietHopDong)))
                 return Results.BadRequest(new { loi = "Phải ghi nhận tình trạng của tất cả thiết bị." });
 
-            var now = DateTime.Now;
+            var now = RentalPolicy.LocalNow;
             foreach (var detail in details)
             {
                 detail.TinhTrangLucGiao = supplied[detail.MaChiTietHopDong].TinhTrang.Trim();
@@ -51,33 +58,44 @@ public static class HandoverEndpoints
             foreach (var device in devices) device.TrangThai = "DANG_THUE";
             contract.TrangThai = "DANG_THUE";
             await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
             return Results.Ok(new { contract.MaHopDong, contract.TrangThai, thoiGianBanGiao = now });
         }).RequireAuthorization("Staff");
 
         contracts.MapPost("/{id}/nhan-lai", async (
             string id, ReturnRequest request, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
+            if(request.ThietBi is not { Count: >0 }||request.ThietBi.Any(x=>x is null||string.IsNullOrWhiteSpace(x.MaChiTietHopDong)||string.IsNullOrWhiteSpace(x.TinhTrang))||
+                request.ThietBi.Select(x=>x.MaChiTietHopDong).Distinct(StringComparer.OrdinalIgnoreCase).Count()!=request.ThietBi.Count)return Results.BadRequest(new{loi="Cần danh sách thiết bị không trùng và tình trạng nhận lại."});
             var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
             if (scope is null) return Results.Forbid();
+            await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+            await TransactionLock.AcquireAsync(db, "contract:" + id, ct);
+            if(RentalPolicy.ProtectedContracts.Contains(id))return Results.Conflict();
             var contract = await db.HopDong.SingleOrDefaultAsync(x => x.MaHopDong == id, ct);
             if (contract is null) return Results.NotFound();
             if (!scope.IsAdmin && contract.MaCuaHang != scope.StoreId) return Results.Forbid();
             if (contract.TrangThai != "DANG_THUE") return Results.Conflict(new { loi = "Hợp đồng chưa ở trạng thái đang thuê." });
 
             var details = await db.ChiTietHopDong.Where(x => x.MaHopDong == id).ToListAsync(ct);
+            if(request.ThietBi.Count==0||request.ThietBi.Select(x=>x.MaChiTietHopDong).Distinct().Count()!=request.ThietBi.Count)return Results.BadRequest();
             var supplied = request.ThietBi.ToDictionary(x => x.MaChiTietHopDong, StringComparer.OrdinalIgnoreCase);
-            if (details.Count == 0 || details.Any(x => !supplied.ContainsKey(x.MaChiTietHopDong)))
-                return Results.BadRequest(new { loi = "Phải ghi nhận tình trạng của tất cả thiết bị." });
-
-            var now = DateTime.Now;
-            foreach (var detail in details)
+            if (details.Count == 0 || supplied.Keys.Any(key=>!details.Any(d=>d.MaChiTietHopDong==key)))
+                return Results.BadRequest(new { loi = "Thiết bị không thuộc hợp đồng." });
+            var selected=details.Where(d=>supplied.ContainsKey(d.MaChiTietHopDong)).ToList();
+            if(selected.Any(d=>d.NgayNhanThucTe!=null))return Results.Conflict(new{loi="Một thiết bị đã được nhận lại; dùng API sửa sai có audit nếu cần."});
+            var now = RentalPolicy.LocalNow;
+            foreach (var detail in selected)
             {
                 var item = supplied[detail.MaChiTietHopDong];
-                detail.TinhTrangLucNhan = item.TinhTrang.Trim();
-                detail.NgayNhanThucTe = now;
-                detail.CoHuHong = item.CoHuHong;
+                var received=item.NgayNhanThucTe??now;
+                if(received.Kind!=DateTimeKind.Unspecified||received>now||received<detail.NgayGiaoThucTe||
+                    item.NgayNhanThucTe.HasValue&&string.IsNullOrWhiteSpace(item.LyDoGhiNhanMuon))return Results.BadRequest(new{loi="Thời điểm thực tế/lý do ghi nhận muộn không hợp lệ."});
+                detail.TinhTrangLucNhan = item.TinhTrang.Trim();detail.NgayNhanThucTe = received;detail.CoHuHong = item.CoHuHong;
+                db.NhatKyNghiepVu.Add(new(){Id=ApiAccess.NewId("AU"),HanhDong="DEVICE_RECEIVED",DoiTuongId=detail.MaChiTietHopDong,
+                    MaTaiKhoan=ApiAccess.AccountId(principal)!,ThoiGianUtc=DateTime.UtcNow,LyDo=item.LyDoGhiNhanMuon??"Ghi nhận nhận máy tại thời điểm hiện tại",DuLieuJson=JsonSerializer.Serialize(new{received})});
             }
-            var deviceIds = details.Select(x => x.MaThietBi).ToList();
+            var deviceIds = selected.Select(x => x.MaThietBi).ToList();
             var devices = await db.ThietBi.Where(x => deviceIds.Contains(x.MaThietBi)).ToListAsync(ct);
             foreach (var device in devices)
             {
@@ -85,8 +103,9 @@ public static class HandoverEndpoints
                 device.TrangThai = detail.CoHuHong ? "BAO_TRI" : "SAN_SANG";
                 if (detail.TinhTrangLucNhan is not null) device.TinhTrang = detail.TinhTrangLucNhan;
             }
-            contract.TrangThai = "CHO_HOAN_TRA";
+            contract.TrangThai = details.All(d=>d.NgayNhanThucTe!=null)?"CHO_HOAN_TRA":"DANG_THUE";
             await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
             return Results.Ok(new { contract.MaHopDong, contract.TrangThai, thoiGianNhanLai = now });
         }).RequireAuthorization("Staff");
 
@@ -140,7 +159,7 @@ public static class HandoverEndpoints
             var image = new AnhBienBan
             {
                 MaAnhBienBan = ApiAccess.NewId("BB"), MaChiTietHopDong = id, Loai = loai,
-                DuongDanAnh = upload.SecureUrl, MoTa = moTa?.Trim(), ThoiGianChup = DateTime.Now
+                DuongDanAnh = upload.SecureUrl, MoTa = moTa?.Trim(), ThoiGianChup = RentalPolicy.LocalNow
             };
             db.AnhBienBan.Add(image);
             await db.SaveChangesAsync(ct);
@@ -162,4 +181,4 @@ public static class HandoverEndpoints
 public sealed record HandoverRequest(List<HandoverItemRequest> ThietBi);
 public sealed record HandoverItemRequest(string MaChiTietHopDong, string TinhTrang);
 public sealed record ReturnRequest(List<ReturnItemRequest> ThietBi);
-public sealed record ReturnItemRequest(string MaChiTietHopDong, string TinhTrang, bool CoHuHong);
+public sealed record ReturnItemRequest(string MaChiTietHopDong, string TinhTrang, bool CoHuHong,DateTime? NgayNhanThucTe=null,string? LyDoGhiNhanMuon=null);

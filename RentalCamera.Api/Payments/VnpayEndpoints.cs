@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Contracts;
 
 namespace RentalCamera.Api.Payments;
 
@@ -26,8 +27,10 @@ public static class VnpayEndpoints
                     detail: "Cần cấu hình Vnpay__Enabled, Vnpay__TmnCode, Vnpay__HashSecret và Vnpay__ReturnUrl.",
                     statusCode: StatusCodes.Status503ServiceUnavailable);
 
+            var contractId=await db.ThanhToan.AsNoTracking().Where(p=>p.MaThanhToan==id).Select(p=>p.MaHopDong).SingleOrDefaultAsync(ct);
+            if(contractId is null)return Results.NotFound();
             await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-
+            await TransactionLock.AcquireAsync(db,"contract:"+contractId,ct);
             var payment = await db.ThanhToan
                 .FromSqlInterpolated($"SELECT * FROM dbo.ThanhToan WITH (UPDLOCK, ROWLOCK) WHERE MaThanhToan = {id}")
                 .SingleOrDefaultAsync(ct);
@@ -39,7 +42,7 @@ public static class VnpayEndpoints
                 return Results.Conflict(new { loi = "Giao dịch không còn ở trạng thái chờ thanh toán." });
             if (payment.PhuongThuc != "VI_DIEN_TU")
                 return Results.Conflict(new { loi = "Giao dịch phải có phương thức VI_DIEN_TU để thanh toán qua VNPAY." });
-            if (payment.LoaiThanhToan == "HOAN_COC")
+            if (payment.LoaiThanhToan.StartsWith("HOAN_"))
                 return Results.Conflict(new { loi = "Hoàn cọc không được xử lý bằng luồng thu tiền VNPAY." });
             if (payment.NhaCungCap is not null && payment.NhaCungCap != "VNPAY")
                 return Results.Conflict(new { loi = "Giao dịch đã được khởi tạo với nhà cung cấp khác." });
@@ -199,7 +202,7 @@ public static class VnpayEndpoints
                 });
             }
 
-            if (initialPayment.NhaCungCap != "VNPAY" || initialPayment.PhuongThuc != "VI_DIEN_TU" || initialPayment.LoaiThanhToan == "HOAN_COC")
+            if (initialPayment.NhaCungCap != "VNPAY" || initialPayment.PhuongThuc != "VI_DIEN_TU" || initialPayment.LoaiThanhToan.StartsWith("HOAN_"))
                 return Results.BadRequest(new { loi = "Giao dịch không thuộc luồng thu tiền VNPAY." });
 
             var latestAttempt = await db.YeuCauThanhToanVnpay.AsNoTracking()
@@ -230,6 +233,7 @@ public static class VnpayEndpoints
 
             // 3. Sau khi QueryDR trả về, mở transaction Serializable để đối chiếu và xử lý đồng thời
             await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            await TransactionLock.AcquireAsync(db,"contract:"+initialPayment.MaHopDong,ct);
 
             var payment = await db.ThanhToan
                 .FromSqlInterpolated($"SELECT * FROM dbo.ThanhToan WITH (UPDLOCK, ROWLOCK) WHERE MaThanhToan = {id}")
@@ -352,9 +356,16 @@ public static class VnpayEndpoints
             if (!VnpayService.TryReadCallback(request.Query, out var callback) || callback is null)
                 return Results.Ok(new { RspCode = "99", Message = "Invalid request" });
 
+            // Discover immutable parent before opening the serializable transaction. All monetary
+            // workflows lock contract first, then payment/attempt, including cancellation approval.
+            var initialAttempt = await db.YeuCauThanhToanVnpay.AsNoTracking().SingleOrDefaultAsync(
+                x => x.MaThamChieu == callback.TransactionReference, ct);
+            var parent=initialAttempt is not null
+                ? await db.ThanhToan.AsNoTracking().Where(p=>p.MaThanhToan==initialAttempt.MaThanhToan).Select(p=>p.MaHopDong).SingleOrDefaultAsync(ct)
+                : await db.ThanhToan.AsNoTracking().Where(p=>p.MaThamChieu==callback.TransactionReference).Select(p=>p.MaHopDong).SingleOrDefaultAsync(ct);
+            if(parent is null)return Results.Ok(new {RspCode="01",Message="Order not found"});
             await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-
-            // 1. Tra cứu attempt theo MaThamChieu chính xác 1-1
+            await TransactionLock.AcquireAsync(db,"contract:"+parent,ct);
             var attempt = await db.YeuCauThanhToanVnpay.SingleOrDefaultAsync(
                 x => x.MaThamChieu == callback.TransactionReference, ct);
 
@@ -449,19 +460,22 @@ public static class VnpayEndpoints
         CancellationToken ct)
     {
         var expectedAmount = attempt?.SoTien ?? payment.SoTien;
+        if(payment.LoaiThanhToan.StartsWith("HOAN_"))return ("99","Refund is not a collection order");
         var callbackAmount = callback.AmountTimes100 / 100m;
         if (expectedAmount != callbackAmount)
         {
             return ("04", "Invalid amount");
         }
 
+        var success = callback.ResponseCode == "00" && callback.TransactionStatus == "00";
+        if (success && !VnpayService.IsValidTransactionNumber(callback.TransactionNumber))
+            return ("99", "Invalid VNPAY transaction number");
+
         // Idempotency: Giao dịch này đã được xác nhận thành công trước đó
         if (attempt?.TrangThai == "THANH_CONG" || (attempt is null && payment.TrangThai == "THANH_CONG"))
         {
             return ("02", "Order already confirmed");
         }
-
-        var success = callback.ResponseCode == "00" && callback.TransactionStatus == "00";
 
         if (attempt is not null)
         {
@@ -505,6 +519,11 @@ public static class VnpayEndpoints
             }
         }
 
+        if(success && !RentalPolicy.ProtectedContracts.Contains(payment.MaHopDong))
+        {
+            var cancellation=await db.YeuCauHuyHopDong.SingleOrDefaultAsync(x=>x.MaHopDong==payment.MaHopDong&&x.TrangThai=="DA_DUYET",ct);
+            if(cancellation is not null)await CancellationEndpoints.ReconcileAsync(cancellation,db,ct,true);
+        }
         await db.SaveChangesAsync(ct);
         return ("00", "Confirm Success");
     }

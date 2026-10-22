@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Contracts;
 
 namespace RentalCamera.Api.Penalties;
 
@@ -74,6 +75,8 @@ public static class PenaltyEndpoints
                 .SingleOrDefaultAsync(x => x.c.MaChiTietHopDong == request.MaChiTietHopDong, ct);
             if (detail is null) return Results.NotFound();
             if (!scope.IsAdmin && detail.h.MaCuaHang != scope.StoreId) return Results.Forbid();
+            if(request.LoaiViPham=="TRA_TRE"&&detail.h.PhienBanDieuKhoan==RentalPolicy.TermsVersion)
+                return Results.Conflict(new{loi="Tiền trả trễ theo phiên bản mới được Backend tính từ thời điểm nhận từng thiết bị và đơn giá gốc; không nhập tùy ý hoặc miễn/giảm."});
             var entity = new PhieuPhat
             {
                 MaPhieuPhat = ApiAccess.NewId("PP"), MaChiTietHopDong = request.MaChiTietHopDong,
@@ -101,6 +104,8 @@ public static class PenaltyEndpoints
             .SingleOrDefaultAsync(x => x.p.MaPhieuPhat == id, ct);
         if (row is null) return Results.NotFound();
         if (!scope.IsAdmin && row.h.MaCuaHang != scope.StoreId) return Results.Forbid();
+        if(row.p.LoaiViPham=="TRA_TRE"&&row.h.PhienBanDieuKhoan==RentalPolicy.TermsVersion)
+            return Results.Conflict(new{loi="Không xác nhận/hủy phiếu trả trễ thủ công cho chính sách mới; sửa sai thời điểm nhận qua API có audit."});
         if (row.p.TrangThai != "CHO_XAC_NHAN") return Results.Conflict(new { loi = "Phiếu phạt đã được xử lý." });
         row.p.TrangThai = state;
         await db.SaveChangesAsync(ct);

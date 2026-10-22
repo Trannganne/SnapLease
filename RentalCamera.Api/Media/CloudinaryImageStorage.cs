@@ -27,6 +27,27 @@ public sealed class CloudinaryImageStorage(
         CancellationToken ct)
         => await UploadAsync(file, _options.ReviewFolder, reviewId, ct);
 
+    // Only call after a fresh primary DB read proves the unique public ID was not committed.
+    public async Task DeleteReviewImageAsync(string publicId, CancellationToken ct)
+    {
+        EnsureConfigured();
+        var parameters = new SortedDictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["invalidate"] = "true", ["public_id"] = publicId,
+            ["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture)
+        };
+        var signature = Sign(parameters);
+        parameters["api_key"] = _options.ApiKey;
+        parameters["signature"] = signature;
+        using var form = new FormUrlEncodedContent(parameters);
+        using var response = await httpClient.PostAsync(
+            $"https://api.cloudinary.com/v1_1/{Uri.EscapeDataString(_options.CloudName)}/image/destroy", form, ct);
+        response.EnsureSuccessStatusCode();
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+        if (body.RootElement.GetProperty("result").GetString() is not ("ok" or "not found"))
+            throw new HttpRequestException("Cloudinary did not confirm image cleanup.");
+    }
+
     private async Task<CloudinaryUploadResult> UploadAsync(
         IFormFile file,
         string configuredFolder,

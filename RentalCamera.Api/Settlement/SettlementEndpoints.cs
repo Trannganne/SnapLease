@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Contracts;
 
 namespace RentalCamera.Api.Settlement;
 
@@ -56,6 +57,7 @@ public static class SettlementEndpoints
             if (!scope.IsAdmin && contract.MaCuaHang != scope.StoreId) return Results.Forbid();
             if (payment.LoaiThanhToan != "HOAN_COC" || payment.TrangThai != "CHO_THANH_TOAN")
                 return Results.Conflict(new { loi = "Giao dịch không thể xác nhận hoàn cọc." });
+            if(payment.MaYeuCauHuy!=null)return Results.Conflict(new{loi="Dùng xác nhận hoàn hủy có chứng từ; không chuyển hợp đồng đã hủy sang hoàn thành."});
             payment.TrangThai = "DA_HOAN";
             payment.ThoiGian = DateTime.Now;
             contract.TrangThai = "HOAN_THANH";
@@ -68,23 +70,26 @@ public static class SettlementEndpoints
     {
         var contract = await db.HopDong.AsNoTracking().SingleOrDefaultAsync(x => x.MaHopDong == id, ct);
         if (contract is null) return null;
-        var extensionCost = await db.PhuLuc.Where(x => x.MaHopDong == id && x.TrangThai == "DA_XAC_NHAN")
+        var extensionCost = await db.PhuLuc.Where(x => x.MaHopDong == id && (x.TrangThai == "DA_XAC_NHAN" || x.TrangThai == "DA_HIEU_LUC"))
             .SumAsync(x => (decimal?)x.ChiPhiPhatSinh, ct) ?? 0;
         var fine = await db.PhieuPhat
             .Where(x => db.ChiTietHopDong.Any(d => d.MaChiTietHopDong == x.MaChiTietHopDong && d.MaHopDong == id)
                 && (x.TrangThai == "DA_XAC_NHAN" || x.TrangThai == "DA_THANH_TOAN"))
+            .Where(x=>contract.PhienBanDieuKhoan!=RentalPolicy.TermsVersion||x.LoaiViPham!="TRA_TRE")
             .SumAsync(x => (decimal?)x.SoTien, ct) ?? 0;
         var deposit = await db.ThanhToan.Where(x => x.MaHopDong == id && x.LoaiThanhToan == "TIEN_COC" && x.TrangThai == "THANH_CONG")
             .SumAsync(x => (decimal?)x.SoTien, ct) ?? 0;
-        var otherPaid = await db.ThanhToan.Where(x => x.MaHopDong == id && x.TrangThai == "THANH_CONG" && x.LoaiThanhToan != "TIEN_COC")
+        var otherPaid = await db.ThanhToan.Where(x => x.MaHopDong == id && x.TrangThai == "THANH_CONG" && x.LoaiThanhToan != "TIEN_COC" && !x.LoaiThanhToan.StartsWith("HOAN_"))
             .SumAsync(x => (decimal?)x.SoTien, ct) ?? 0;
         var payable = contract.TongTien + extensionCost + fine;
+        var late=await LateReturnService.QuoteAsync(id,db,ct);
+        if(late?.ApDungChinhSachMoi==true) { fine+=late.TongTien??0;payable+=late.TongTien??0; }
         var balance = payable - deposit - otherPaid;
         return new SettlementResult(contract.MaHopDong, contract.TongTien, extensionCost, fine, deposit, otherPaid,
-            payable, Math.Max(balance, 0), Math.Max(-balance, 0));
+            payable, Math.Max(balance, 0), Math.Max(-balance, 0),late?.ApDungChinhSachMoi==true?late.TongTien:null,late?.LaDuKien??false);
     }
 }
 
 public sealed record RefundRequest(string PhuongThuc, string? MaGiaoDich, string? NoiDung);
 public sealed record SettlementResult(string MaHopDong, decimal TienThue, decimal PhiGiaHan, decimal TienPhat,
-    decimal TienCocDaThu, decimal KhoanKhacDaThu, decimal TongPhaiTra, decimal TienConPhaiThu, decimal TienHoanCoc);
+    decimal TienCocDaThu, decimal KhoanKhacDaThu, decimal TongPhaiTra, decimal TienConPhaiThu, decimal TienHoanCoc,decimal? PhiTraTre=null,bool LaDuKien=false);
