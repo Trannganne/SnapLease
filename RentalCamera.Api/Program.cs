@@ -76,6 +76,7 @@ builder.Services.AddHttpClient<CloudinaryImageStorage>();
 builder.Services.AddSingleton<VnpayService>();
 builder.Services.AddScoped<AvailabilityService>();
 builder.Services.AddHostedService<ReservationExpirationService>();
+builder.Services.AddHostedService<ContractReturnReminderService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

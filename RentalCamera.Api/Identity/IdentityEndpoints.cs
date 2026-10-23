@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
@@ -258,6 +259,79 @@ public static class IdentityEndpoints
                 daXacNhanThongTin = customer.DaXacNhanThongTin
             });
         }).RequireAuthorization("Customer");
+
+        app.MapPut("/api/khach-thue/cua-toi", async (
+            UpdateCustomerProfileRequest request,
+            ClaimsPrincipal principal,
+            RentalCameraContext db,
+            CancellationToken ct) =>
+        {
+            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+            if (customerId is null) return Results.Forbid();
+
+            var fullName = request.HoTen?.Trim();
+            var phone = request.SoDienThoai?.Trim();
+            var email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
+            var address = string.IsNullOrWhiteSpace(request.DiaChi) ? null : request.DiaChi.Trim();
+            var gender = string.IsNullOrWhiteSpace(request.GioiTinh)
+                ? null
+                : request.GioiTinh.Trim().ToUpperInvariant();
+            var nationality = string.IsNullOrWhiteSpace(request.QuocTich)
+                ? null
+                : request.QuocTich.Trim();
+
+            if (string.IsNullOrWhiteSpace(fullName) || fullName.Length > 150)
+                return Results.BadRequest(new { loi = "Họ tên phải có từ 1 đến 150 ký tự." });
+            if (string.IsNullOrWhiteSpace(phone) || !Regex.IsMatch(phone, "^[0-9]{9,15}$"))
+                return Results.BadRequest(new { loi = "Số điện thoại phải có từ 9 đến 15 chữ số." });
+            if (email is not null && (email.Length > 255 ||
+                !Regex.IsMatch(email, "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")))
+                return Results.BadRequest(new { loi = "Email không hợp lệ." });
+            if (address?.Length > 500 || nationality?.Length > 100)
+                return Results.BadRequest(new { loi = "Địa chỉ hoặc quốc tịch vượt quá độ dài cho phép." });
+            if (gender is not null && gender is not ("NAM" or "NU" or "KHAC"))
+                return Results.BadRequest(new { loi = "Giới tính phải là NAM, NU hoặc KHAC." });
+            if (request.NgaySinh.HasValue && request.NgaySinh.Value > DateOnly.FromDateTime(DateTime.Today))
+                return Results.BadRequest(new { loi = "Ngày sinh không được ở tương lai." });
+
+            var customer = await db.KhachThue.SingleOrDefaultAsync(x => x.MaKhachThue == customerId, ct);
+            if (customer is null) return Results.NotFound(new { loi = "Không tìm thấy hồ sơ khách thuê." });
+            if (customer.DaXacNhanThongTin &&
+                (!string.Equals(customer.HoTen?.Trim(), fullName, StringComparison.OrdinalIgnoreCase) ||
+                 customer.NgaySinh != request.NgaySinh ||
+                 !string.Equals(customer.GioiTinh, gender, StringComparison.OrdinalIgnoreCase) ||
+                 !string.Equals(customer.QuocTich?.Trim(), nationality, StringComparison.OrdinalIgnoreCase)))
+                return Results.Conflict(new
+                {
+                    loi = "Họ tên, ngày sinh, giới tính và quốc tịch đã xác minh không thể tự thay đổi. Vui lòng liên hệ hỗ trợ."
+                });
+            if (await db.KhachThue.AnyAsync(x => x.MaKhachThue != customerId && x.SoDienThoai == phone, ct))
+                return Results.Conflict(new { loi = "Số điện thoại đã được sử dụng bởi tài khoản khác." });
+            if (email is not null && await db.KhachThue.AnyAsync(x =>
+                    x.MaKhachThue != customerId && x.Email == email, ct))
+                return Results.Conflict(new { loi = "Email đã được sử dụng bởi tài khoản khác." });
+
+            customer.HoTen = fullName;
+            customer.SoDienThoai = phone;
+            customer.Email = email;
+            customer.DiaChi = address;
+            customer.NgaySinh = request.NgaySinh;
+            customer.GioiTinh = gender;
+            customer.QuocTich = nationality;
+            await db.SaveChangesAsync(ct);
+
+            return Results.Ok(new
+            {
+                customer.HoTen,
+                customer.SoDienThoai,
+                customer.Email,
+                diaChiThuongTru = customer.DiaChi,
+                customer.NgaySinh,
+                customer.GioiTinh,
+                customer.QuocTich,
+                customer.DaXacNhanThongTin
+            });
+        }).RequireAuthorization("Customer");
     }
 
     private static string? GetVerifiedImageExtension(ReadOnlySpan<byte> bytes)
@@ -288,3 +362,12 @@ public sealed record VerifyIdentityRequest(string KetQua, string? GhiChu);
 public sealed record CustomerIdentityConfirmRequest(
     string MaGiayTo, string Cccd, string HoTen, DateOnly NgaySinh, string GioiTinh,
     string QuocTich, string DiaChiThuongTru, DateOnly NgayCap, string NoiCap);
+
+public sealed record UpdateCustomerProfileRequest(
+    string HoTen,
+    string SoDienThoai,
+    string? Email,
+    string? DiaChi,
+    DateOnly? NgaySinh,
+    string? GioiTinh,
+    string? QuocTich);

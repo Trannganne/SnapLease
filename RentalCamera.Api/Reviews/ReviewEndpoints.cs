@@ -293,6 +293,84 @@ public static class ReviewEndpoints
             return Results.Ok(reviews);
         }).RequireAuthorization("Customer");
 
+        app.MapPut("/api/danh-gia/{id}", async (
+            string id,
+            UpdateReviewRequest request,
+            ClaimsPrincipal principal,
+            RentalCameraContext db,
+            CancellationToken ct) =>
+        {
+            if (request.SoSao is < 1 or > 5)
+                return Results.BadRequest(new { loi = "Số sao phải từ 1 đến 5." });
+            var comment = string.IsNullOrWhiteSpace(request.NhanXet) ? null : request.NhanXet.Trim();
+            if (comment?.Length > MaximumCommentLength)
+                return Results.BadRequest(new { loi = $"Nhận xét không được vượt quá {MaximumCommentLength} ký tự." });
+            var highlightCodes = (request.DiemNoiBat ?? [])
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim().ToUpperInvariant())
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+            var invalidCodes = highlightCodes.Where(x => !DefaultHighlightCodes.Contains(x)).ToArray();
+            if (invalidCodes.Length > 0)
+                return Results.BadRequest(new { loi = "Có mã điểm nổi bật không hợp lệ.", maKhongHopLe = invalidCodes });
+
+            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+            if (customerId is null) return Results.Forbid();
+            var review = await db.DanhGia.SingleOrDefaultAsync(
+                x => x.MaDanhGia == id && x.MaKhachThue == customerId, ct);
+            if (review is null) return Results.NotFound();
+            if (review.TrangThaiKiemDuyet == "TU_CHOI")
+                return Results.Conflict(new { loi = "Đánh giá đã bị Admin ẩn nên không thể chỉnh sửa." });
+
+            review.SoSao = request.SoSao;
+            review.NhanXet = comment;
+            var oldHighlights = await db.DanhGiaDiemNoiBat.Where(x => x.MaDanhGia == id).ToListAsync(ct);
+            db.DanhGiaDiemNoiBat.RemoveRange(oldHighlights);
+            db.DanhGiaDiemNoiBat.AddRange(highlightCodes.Select(code => new DanhGiaDiemNoiBat
+            {
+                MaDanhGia = id,
+                MaDiemNoiBat = code
+            }));
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(await GetReviewAsync(db, id, ct));
+        }).RequireAuthorization("Customer");
+
+        app.MapDelete("/api/danh-gia/{id}", async (
+            string id,
+            ClaimsPrincipal principal,
+            RentalCameraContext db,
+            CloudinaryImageStorage imageStorage,
+            ILoggerFactory loggerFactory,
+            CancellationToken ct) =>
+        {
+            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+            if (customerId is null) return Results.Forbid();
+            var review = await db.DanhGia.SingleOrDefaultAsync(
+                x => x.MaDanhGia == id && x.MaKhachThue == customerId, ct);
+            if (review is null) return Results.NotFound();
+            var images = await db.AnhDanhGia.Where(x => x.MaDanhGia == id).ToListAsync(ct);
+            try
+            {
+                foreach (var image in images)
+                    await imageStorage.DeleteReviewImageAsync(image.PublicId, ct);
+            }
+            catch (InvalidOperationException ex)
+            {
+                loggerFactory.CreateLogger("Cloudinary").LogError(ex, "Thiếu cấu hình Cloudinary khi xóa đánh giá {ReviewId}.", id);
+                return Results.Problem(ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
+            }
+            catch (HttpRequestException ex)
+            {
+                loggerFactory.CreateLogger("Cloudinary").LogError(ex, "Xóa ảnh đánh giá {ReviewId} thất bại.", id);
+                return Results.Problem("Không thể xóa ảnh đánh giá trên Cloudinary.",
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+
+            db.DanhGia.Remove(review);
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).RequireAuthorization("Customer");
+
         app.MapPut("/api/danh-gia/{id}/an", async (
             string id,
             HideReviewRequest request,
@@ -419,6 +497,11 @@ public static class ReviewEndpoints
 
 public sealed record CreateReviewRequest(
     string MaChiTietHopDong,
+    byte SoSao,
+    string? NhanXet,
+    List<string>? DiemNoiBat);
+
+public sealed record UpdateReviewRequest(
     byte SoSao,
     string? NhanXet,
     List<string>? DiemNoiBat);

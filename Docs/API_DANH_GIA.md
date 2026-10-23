@@ -79,6 +79,8 @@ lấy theo cấu hình Cloudinary (mặc định 10 MB). Gọi endpoint một l�
 |---|---|---|
 | `GET /api/dong-may/{id}/danh-gia?trang=1&kichThuocTrang=20` | Công khai | Trả các đánh giá đang hiển thị |
 | `GET /api/danh-gia/cua-toi` | Customer | Trả mọi đánh giá của khách |
+| `PUT /api/danh-gia/{id}` | Customer | Chủ đánh giá sửa số sao, nhận xét và điểm nổi bật; không sửa được đánh giá đã bị Admin ẩn |
+| `DELETE /api/danh-gia/{id}` | Customer | Chủ đánh giá xóa đánh giá và ảnh Cloudinary liên quan |
 | `PUT /api/danh-gia/{id}/an` | Admin | Ẩn đánh giá vi phạm, bắt buộc có lý do |
 | `PUT /api/danh-gia/{id}/khoi-phuc` | Admin | Khôi phục đánh giá đã ẩn |
 

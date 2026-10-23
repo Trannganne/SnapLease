@@ -84,7 +84,8 @@ public static class CatalogEndpoints
         var models = app.MapGroup("/api/dong-may");
         models.MapGet("", async (
             ClaimsPrincipal principal, RentalCameraContext db, string? tuKhoa, string? maDanhMuc, string? maThuongHieu,
-            string? maCuaHang, string? trangThai, int? trang, int? kichThuocTrang, CancellationToken ct) =>
+            string? maCuaHang, string? trangThai, decimal? giaTu, decimal? giaDen, string? sapXep,
+            int? trang, int? kichThuocTrang, CancellationToken ct) =>
         {
             var page = Math.Max(1, trang ?? 1);
             var pageSize = Math.Clamp(kichThuocTrang ?? 20, 1, 100);
@@ -96,6 +97,14 @@ public static class CatalogEndpoints
                 return Results.BadRequest(new { loi = "Trạng thái dòng máy không hợp lệ." });
             if (normalizedState != "HOAT_DONG" && !principal.IsInRole("ADMIN"))
                 return Results.Forbid();
+            if (giaTu is < 0 || giaDen is < 0 ||
+                (giaTu.HasValue && giaDen.HasValue && giaTu > giaDen))
+                return Results.BadRequest(new { loi = "Khoảng giá không hợp lệ." });
+            var normalizedSort = string.IsNullOrWhiteSpace(sapXep)
+                ? "TEN_A_Z"
+                : sapXep.Trim().ToUpperInvariant();
+            if (normalizedSort is not ("TEN_A_Z" or "GIA_TANG" or "GIA_GIAM" or "DANH_GIA_CAO"))
+                return Results.BadRequest(new { loi = "Sắp xếp phải là TEN_A_Z, GIA_TANG, GIA_GIAM hoặc DANH_GIA_CAO." });
             if (normalizedState != "TAT_CA") query = query.Where(x => x.TrangThai == normalizedState);
             if (!string.IsNullOrWhiteSpace(tuKhoa))
             {
@@ -104,21 +113,35 @@ public static class CatalogEndpoints
             }
             if (!string.IsNullOrWhiteSpace(maDanhMuc)) query = query.Where(x => x.MaDanhMuc == maDanhMuc);
             if (!string.IsNullOrWhiteSpace(maThuongHieu)) query = query.Where(x => x.MaThuongHieu == maThuongHieu);
+            if (giaTu.HasValue) query = query.Where(x => x.GiaThueNgay >= giaTu.Value);
+            if (giaDen.HasValue) query = query.Where(x => x.GiaThueNgay <= giaDen.Value);
             if (!string.IsNullOrWhiteSpace(maCuaHang))
                 query = query.Where(x => db.ThietBi.Any(t => t.MaDongMay == x.MaDongMay && t.MaCuaHang == maCuaHang && t.TrangThai == "SAN_SANG"));
             var total = await query.CountAsync(ct);
-            var items = await query.OrderBy(x => x.TenDongMay).Skip((page - 1) * pageSize).Take(pageSize)
+            var orderedQuery = normalizedSort switch
+            {
+                "GIA_TANG" => query.OrderBy(x => x.GiaThueNgay).ThenBy(x => x.TenDongMay),
+                "GIA_GIAM" => query.OrderByDescending(x => x.GiaThueNgay).ThenBy(x => x.TenDongMay),
+                "DANH_GIA_CAO" => query.OrderByDescending(x => db.DanhGia
+                        .Where(r => r.TrangThaiKiemDuyet == "DA_DUYET" && db.ChiTietHopDong.Any(d =>
+                            d.MaChiTietHopDong == r.MaChiTietHopDong && db.ThietBi.Any(t =>
+                                t.MaThietBi == d.MaThietBi && t.MaDongMay == x.MaDongMay)))
+                        .Average(r => (double?)r.SoSao) ?? 0d)
+                    .ThenBy(x => x.TenDongMay),
+                _ => query.OrderBy(x => x.TenDongMay)
+            };
+            var items = await orderedQuery.Skip((page - 1) * pageSize).Take(pageSize)
                 .Select(x => new
                 {
                     x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia, x.TrangThai,
                     x.MaDanhMuc, x.DanhMuc.TenDanhMuc, x.MaThuongHieu, x.ThuongHieu.TenThuongHieu,
                     AnhDaiDien = x.AnhThietBi.Where(a => a.LaAnhDaiDien)
                         .Select(a => a.DuongDanAnh).FirstOrDefault(),
-                    Rating = db.DanhGia.Where(r => db.ChiTietHopDong.Any(d =>
+                    Rating = db.DanhGia.Where(r => r.TrangThaiKiemDuyet == "DA_DUYET" && db.ChiTietHopDong.Any(d =>
                             d.MaChiTietHopDong == r.MaChiTietHopDong && db.ThietBi.Any(t =>
                                 t.MaThietBi == d.MaThietBi && t.MaDongMay == x.MaDongMay)))
                         .Average(r => (double?)r.SoSao) ?? 0d,
-                    ReviewCount = db.DanhGia.Count(r => db.ChiTietHopDong.Any(d =>
+                    ReviewCount = db.DanhGia.Count(r => r.TrangThaiKiemDuyet == "DA_DUYET" && db.ChiTietHopDong.Any(d =>
                         d.MaChiTietHopDong == r.MaChiTietHopDong && db.ThietBi.Any(t =>
                             t.MaThietBi == d.MaThietBi && t.MaDongMay == x.MaDongMay))),
                     Available = db.ThietBi.Any(t =>

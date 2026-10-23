@@ -27,6 +27,32 @@ public sealed class CloudinaryImageStorage(
         CancellationToken ct)
         => await UploadAsync(file, _options.ReviewFolder, reviewId, ct);
 
+    public async Task DeleteReviewImageAsync(string publicId, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(publicId)) return;
+        EnsureConfigured();
+
+        var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            .ToString(CultureInfo.InvariantCulture);
+        var signature = Sign(new SortedDictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["public_id"] = publicId,
+            ["timestamp"] = timestamp
+        });
+        using var form = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["public_id"] = publicId,
+            ["timestamp"] = timestamp,
+            ["api_key"] = _options.ApiKey,
+            ["signature"] = signature
+        });
+        var endpoint = $"https://api.cloudinary.com/v1_1/{Uri.EscapeDataString(_options.CloudName)}/image/destroy";
+        using var response = await httpClient.PostAsync(endpoint, form, ct);
+        var body = await response.Content.ReadAsStringAsync(ct);
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"Cloudinary từ chối xóa ảnh ({(int)response.StatusCode}): {ReadError(body)}");
+    }
+
     private async Task<CloudinaryUploadResult> UploadAsync(
         IFormFile file,
         string configuredFolder,

@@ -96,12 +96,13 @@ Thông báo FCM và bản ghi `ThongBao` có thể chứa:
 | `targetType` | Loại đối tượng cần mở |
 | `targetId` | Mã đối tượng cần mở |
 
-Các sự kiện hiện đã nối FCM:
-
 | Sự kiện | `eventCode` | `targetType` |
 | --- | --- | --- |
 | Tạo hợp đồng chờ ký | `CONTRACT_CREATED` | `HOP_DONG` |
 | Kết quả xác minh giấy tờ | `IDENTITY_VERIFICATION_RESULT` | `GIAY_TO_TUY_THAN` |
+| Thiết bị sẵn sàng bàn giao | `CONTRACT_READY_FOR_HANDOVER` | `HOP_DONG` |
+| Hợp đồng sắp đến hạn trả | `CONTRACT_RETURN_DUE_SOON` | `HOP_DONG` |
+| Hợp đồng đã quá hạn trả | `CONTRACT_RETURN_OVERDUE` | `HOP_DONG` |
 
 ## 6. Phối hợp với mobile
 

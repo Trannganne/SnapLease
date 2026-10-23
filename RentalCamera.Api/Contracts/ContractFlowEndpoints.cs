@@ -669,7 +669,7 @@ public static class ContractEndpoints
 
         contracts.MapPut("/{id}/thiet-bi", async (
             string id, PrepareDevicesRequest request, ClaimsPrincipal principal,
-            RentalCameraContext db, CancellationToken ct) =>
+            RentalCameraContext db, FirebaseNotificationSender notificationSender, CancellationToken ct) =>
         {
             if (request.MaThietBi.Count == 0 ||
                 request.MaThietBi.Distinct(StringComparer.OrdinalIgnoreCase).Count() != request.MaThietBi.Count)
@@ -739,8 +739,17 @@ public static class ContractEndpoints
             ApiAccess.AddContractStatusHistory(
                 db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
                 "Staff/Admin hoàn tất chuẩn bị thiết bị.");
+            var accountId = await db.KhachThue.AsNoTracking()
+                .Where(x => x.MaKhachThue == contract.MaKhachThue)
+                .Select(x => x.MaTaiKhoan).SingleAsync(ct);
+            const string notificationTitle = "Thiết bị đã sẵn sàng bàn giao";
+            var notificationBody = $"Thiết bị của hợp đồng {contract.MaHopDong} đã được chuẩn bị. Vui lòng đến cửa hàng nhận thiết bị đúng lịch.";
+            ApiAccess.AddNotification(db, accountId, "BAN_GIAO", notificationTitle, notificationBody,
+                eventCode: "CONTRACT_READY_FOR_HANDOVER", targetType: "HOP_DONG", targetId: contract.MaHopDong);
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
+            await notificationSender.SendToAccountAsync(accountId, notificationTitle, notificationBody,
+                "CONTRACT_READY_FOR_HANDOVER", "HOP_DONG", contract.MaHopDong, ct);
             return Results.Ok(new
             {
                 contract.MaHopDong, contract.TrangThai,
