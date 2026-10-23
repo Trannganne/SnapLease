@@ -153,6 +153,7 @@ finally {
             if ($id -and $id -notmatch "^[A-Za-z0-9]+$") { throw "Unsafe cleanup id." }
         }
         $cleanup = @"
+DELETE FROM dbo.NhatKyHeThong WHERE MaTaiKhoan='$accountId';
 DELETE FROM dbo.LichSuTrangThaiHopDong WHERE MaHopDong IN ('$contract1Id','$contract2Id');
 DELETE FROM dbo.HopDong WHERE MaHopDong IN ('$contract1Id','$contract2Id');
 DELETE FROM dbo.ChiTietGiuCho WHERE MaGiuCho IN ('$activeHoldId','$expiredHoldId','$convertedHold1Id','$convertedHold2Id');

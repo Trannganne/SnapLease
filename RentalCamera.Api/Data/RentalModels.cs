@@ -309,6 +309,21 @@ public sealed class ThongBao
     public string? TargetId { get; set; }
 }
 
+public sealed class NhatKyHeThong
+{
+    public string MaNhatKy { get; set; } = "";
+    public string? MaTaiKhoan { get; set; }
+    public string? VaiTro { get; set; }
+    public string HanhDong { get; set; } = "";
+    public string DuongDan { get; set; } = "";
+    public string? DoiTuong { get; set; }
+    public string? MaDoiTuong { get; set; }
+    public string? MaCuaHang { get; set; }
+    public int TrangThaiHttp { get; set; }
+    public string? DiaChiIp { get; set; }
+    public DateTime ThoiGian { get; set; }
+}
+
 public sealed class FcmDeviceToken
 {
     public string Id { get; set; } = "";

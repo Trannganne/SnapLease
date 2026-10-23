@@ -33,3 +33,7 @@ Bổ sung trạng thái kinh doanh cho dòng máy, phiếu bảo trì, ghi nhậ
 ### 15_add_contract_status_history.sql
 
 Bổ sung bảng `LichSuTrangThaiHopDong` để lưu trạng thái cũ/mới, thời gian, người thực hiện, vai trò và lý do thay đổi. Migration tự tạo một mốc trạng thái ban đầu cho hợp đồng cũ chưa có lịch sử và có thể chạy lặp lại an toàn.
+
+### 16_add_operations_audit.sql
+
+Bổ sung bảng `NhatKyHeThong` cho lịch sử thao tác có phân quyền và đồng bộ loại phí `THIEU_PHU_KIEN` với API hoàn trả. Migration có thể chạy lặp lại an toàn.

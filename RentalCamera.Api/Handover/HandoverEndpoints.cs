@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
 using RentalCamera.Api.Media;
+using RentalCamera.Api.Notifications;
 
 namespace RentalCamera.Api.Handover;
 
@@ -59,7 +60,8 @@ public static class HandoverEndpoints
         }).RequireAuthorization("Staff");
 
         contracts.MapPost("/{id}/nhan-lai", async (
-            string id, ReturnRequest request, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+            string id, ReturnRequest request, ClaimsPrincipal principal, RentalCameraContext db,
+            FirebaseNotificationSender notificationSender, CancellationToken ct) =>
         {
             var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
             if (scope is null) return Results.Forbid();
@@ -94,7 +96,16 @@ public static class HandoverEndpoints
             ApiAccess.AddContractStatusHistory(
                 db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
                 "Staff/Admin nhận lại thiết bị từ khách hàng.");
+            var accountId = await db.KhachThue.AsNoTracking()
+                .Where(x => x.MaKhachThue == contract.MaKhachThue)
+                .Select(x => x.MaTaiKhoan).SingleAsync(ct);
+            const string notificationTitle = "Đã tiếp nhận thiết bị hoàn trả";
+            var notificationBody = $"Cửa hàng đã nhận thiết bị của hợp đồng {contract.MaHopDong} và đang quyết toán.";
+            ApiAccess.AddNotification(db, accountId, "HOAN_TRA", notificationTitle, notificationBody,
+                eventCode: "CONTRACT_RETURN_RECEIVED", targetType: "HOP_DONG", targetId: contract.MaHopDong);
             await db.SaveChangesAsync(ct);
+            await notificationSender.SendToAccountAsync(accountId, notificationTitle, notificationBody,
+                "CONTRACT_RETURN_RECEIVED", "HOP_DONG", contract.MaHopDong, ct);
             return Results.Ok(new { contract.MaHopDong, contract.TrangThai, thoiGianNhanLai = now });
         }).RequireAuthorization("Staff");
 

@@ -11,6 +11,7 @@ using RentalCamera.Api.Auth;
 using RentalCamera.Api.Catalog;
 using RentalCamera.Api.Cart;
 using RentalCamera.Api.Contracts;
+using RentalCamera.Api.Customers;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Email;
 using RentalCamera.Api.Equipment;
@@ -24,6 +25,7 @@ using RentalCamera.Api.Rental;
 using RentalCamera.Api.Reports;
 using RentalCamera.Api.Reviews;
 using RentalCamera.Api.Settlement;
+using RentalCamera.Api.Operations;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -140,6 +142,7 @@ app.UseCors("Frontend");
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseBusinessAudit();
 
 if (args.Length == 2 && args[0] == "set-password")
 {
@@ -192,8 +195,12 @@ app.MapReservationContractManagementEndpoints();
 app.MapVnpayEndpoints();
 app.MapPenaltyEndpoints();
 app.MapHandoverEndpoints();
+app.MapReturnManagementEndpoints();
 app.MapSettlementEndpoints();
 app.MapReviewEndpoints();
 app.MapReportEndpoints();
+app.MapOperationalReportEndpoints();
+app.MapCustomerManagementEndpoints();
+app.MapAuditEndpoints();
 
 app.Run();

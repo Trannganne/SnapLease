@@ -173,6 +173,7 @@ finally {
         $ids = @($damageId, $maintenanceId, $deviceId, $modelId, $branch1, $branch2, $customerId, $accountId) |
             ForEach-Object { if ($_ -and $_ -notmatch "^[A-Za-z0-9]+$") { throw "Unsafe cleanup id." }; $_ }
         $cleanup = @"
+DELETE FROM dbo.NhatKyHeThong WHERE MaTaiKhoan='$accountId';
 DELETE FROM dbo.LichSuCapNhatHuHong WHERE MaHuHong='$damageId';
 DELETE FROM dbo.HuHongThietBi WHERE MaHuHong='$damageId';
 DELETE FROM dbo.PhieuBaoTri WHERE MaPhieuBaoTri='$maintenanceId';

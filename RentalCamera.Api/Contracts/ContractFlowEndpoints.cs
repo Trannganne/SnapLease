@@ -920,7 +920,8 @@ public static class ContractEndpoints
 
         extensions.MapPut("/{id}/xu-ly", async (
             string id, ProcessExtensionRequest request, ClaimsPrincipal principal,
-            RentalCameraContext db, AvailabilityService availability, CancellationToken ct) =>
+            RentalCameraContext db, AvailabilityService availability,
+            FirebaseNotificationSender notificationSender, CancellationToken ct) =>
         {
             if (request.QuyetDinh is not ("DUYET" or "TU_CHOI"))
                 return Results.BadRequest(new { loi = "Quyết định phải là DUYET hoặc TU_CHOI." });
@@ -950,8 +951,21 @@ public static class ContractEndpoints
             else row.p.TrangThai = "TU_CHOI";
 
             if (!string.IsNullOrWhiteSpace(request.GhiChu)) row.p.GhiChu = request.GhiChu.Trim();
+            var accountId = await db.KhachThue.AsNoTracking()
+                .Where(x => x.MaKhachThue == row.h.MaKhachThue)
+                .Select(x => x.MaTaiKhoan).SingleAsync(ct);
+            var notificationTitle = request.QuyetDinh == "DUYET"
+                ? "Yêu cầu gia hạn đã được duyệt"
+                : "Yêu cầu gia hạn bị từ chối";
+            var notificationBody = request.QuyetDinh == "DUYET"
+                ? $"Hợp đồng {row.h.MaHopDong} được gia hạn đến {row.p.ThoiHanTraMoi:dd/MM/yyyy HH:mm}."
+                : $"Yêu cầu gia hạn hợp đồng {row.h.MaHopDong} không được chấp thuận.";
+            ApiAccess.AddNotification(db, accountId, "GIA_HAN", notificationTitle, notificationBody,
+                eventCode: "CONTRACT_EXTENSION_RESULT", targetType: "HOP_DONG", targetId: row.h.MaHopDong);
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
+            await notificationSender.SendToAccountAsync(accountId, notificationTitle, notificationBody,
+                "CONTRACT_EXTENSION_RESULT", "HOP_DONG", row.h.MaHopDong, ct);
             return Results.Ok(row.p);
         });
     }

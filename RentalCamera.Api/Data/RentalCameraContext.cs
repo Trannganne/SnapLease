@@ -37,6 +37,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<DanhGiaDiemNoiBat> DanhGiaDiemNoiBat => Set<DanhGiaDiemNoiBat>();
     public DbSet<AnhDanhGia> AnhDanhGia => Set<AnhDanhGia>();
     public DbSet<ThongBao> ThongBao => Set<ThongBao>();
+    public DbSet<NhatKyHeThong> NhatKyHeThong => Set<NhatKyHeThong>();
     public DbSet<FcmDeviceToken> FcmDeviceToken => Set<FcmDeviceToken>();
     public DbSet<IdempotencyKeyRecord> IdempotencyKey => Set<IdempotencyKeyRecord>();
 
@@ -524,6 +525,25 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.EventCode).HasMaxLength(50).IsUnicode(false);
             entity.Property(x => x.TargetType).HasMaxLength(30).IsUnicode(false);
             entity.Property(x => x.TargetId).HasMaxLength(50).IsUnicode(false);
+            entity.HasOne<TaiKhoan>().WithMany()
+                .HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<NhatKyHeThong>(entity =>
+        {
+            entity.ToTable("NhatKyHeThong");
+            entity.HasKey(x => x.MaNhatKy);
+            entity.Property(x => x.MaNhatKy).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaTaiKhoan).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.VaiTro).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.HanhDong).HasMaxLength(10).IsUnicode(false);
+            entity.Property(x => x.DuongDan).HasMaxLength(500);
+            entity.Property(x => x.DoiTuong).HasMaxLength(100);
+            entity.Property(x => x.MaDoiTuong).HasMaxLength(100);
+            entity.Property(x => x.MaCuaHang).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.DiaChiIp).HasMaxLength(45).IsUnicode(false);
+            entity.HasIndex(x => x.ThoiGian);
+            entity.HasIndex(x => new { x.MaTaiKhoan, x.ThoiGian });
             entity.HasOne<TaiKhoan>().WithMany()
                 .HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.Restrict);
         });
