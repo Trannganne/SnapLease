@@ -24,6 +24,7 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<GiuCho> GiuCho => Set<GiuCho>();
     public DbSet<ChiTietGiuCho> ChiTietGiuCho => Set<ChiTietGiuCho>();
     public DbSet<HopDong> HopDong => Set<HopDong>();
+    public DbSet<LichSuTrangThaiHopDong> LichSuTrangThaiHopDong => Set<LichSuTrangThaiHopDong>();
     public DbSet<XacNhanKyHopDong> XacNhanKyHopDong => Set<XacNhanKyHopDong>();
     public DbSet<ChiTietHopDong> ChiTietHopDong => Set<ChiTietHopDong>();
     public DbSet<PhuLuc> PhuLuc => Set<PhuLuc>();
@@ -343,6 +344,21 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
                 .HasForeignKey(x => x.MaNhanVien).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne<CuaHang>().WithMany()
                 .HasForeignKey(x => x.MaCuaHang).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<LichSuTrangThaiHopDong>(entity =>
+        {
+            entity.ToTable("LichSuTrangThaiHopDong");
+            entity.HasKey(x => x.MaLichSu);
+            entity.Property(x => x.MaLichSu).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.MaHopDong).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.TrangThaiCu).HasMaxLength(30).IsUnicode(false);
+            entity.Property(x => x.TrangThaiMoi).HasMaxLength(30).IsUnicode(false);
+            entity.Property(x => x.NguoiThaoTac).HasMaxLength(20).IsUnicode(false);
+            entity.Property(x => x.VaiTroNguoiThaoTac).HasMaxLength(20).IsUnicode(false);
+            entity.HasIndex(x => new { x.MaHopDong, x.ThoiGian });
+            entity.HasOne<HopDong>().WithMany()
+                .HasForeignKey(x => x.MaHopDong).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<XacNhanKyHopDong>(entity =>

@@ -58,7 +58,11 @@ public static class SettlementEndpoints
                 return Results.Conflict(new { loi = "Giao dịch không thể xác nhận hoàn cọc." });
             payment.TrangThai = "DA_HOAN";
             payment.ThoiGian = DateTime.Now;
+            var oldStatus = contract.TrangThai;
             contract.TrangThai = "HOAN_THANH";
+            ApiAccess.AddContractStatusHistory(
+                db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
+                "Staff/Admin xác nhận hoàn cọc và hoàn tất hợp đồng.");
             await db.SaveChangesAsync(ct);
             return Results.Ok(new { payment.MaThanhToan, payment.TrangThai, contract.MaHopDong, trangThaiHopDong = contract.TrangThai });
         }).RequireAuthorization("Staff");

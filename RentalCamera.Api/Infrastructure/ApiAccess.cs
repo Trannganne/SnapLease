@@ -82,6 +82,40 @@ public static class ApiAccess
         db.ThongBao.Add(notification);
         return notification;
     }
+
+    public static LichSuTrangThaiHopDong AddContractStatusHistory(
+        RentalCameraContext db,
+        string contractId,
+        string? oldStatus,
+        string newStatus,
+        ClaimsPrincipal? principal = null,
+        string? reason = null,
+        string? actorId = null,
+        string? actorRole = null)
+    {
+        actorId ??= principal is null ? null : AccountId(principal);
+        actorRole ??= principal?.IsInRole("ADMIN") == true
+            ? "ADMIN"
+            : principal?.IsInRole("NHAN_VIEN") == true
+                ? "NHAN_VIEN"
+                : principal?.IsInRole("KHACH_HANG") == true
+                    ? "KHACH_HANG"
+                    : "HE_THONG";
+
+        var history = new LichSuTrangThaiHopDong
+        {
+            MaLichSu = NewId("LSH"),
+            MaHopDong = contractId,
+            TrangThaiCu = oldStatus,
+            TrangThaiMoi = newStatus,
+            NguoiThaoTac = actorId,
+            VaiTroNguoiThaoTac = actorRole,
+            LyDo = string.IsNullOrWhiteSpace(reason) ? null : reason.Trim(),
+            ThoiGian = DateTime.UtcNow
+        };
+        db.LichSuTrangThaiHopDong.Add(history);
+        return history;
+    }
 }
 
 public sealed record StaffScope(string? EmployeeId, string? StoreId, bool IsAdmin);

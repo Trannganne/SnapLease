@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
+using RentalCamera.Api.Infrastructure;
 
 namespace RentalCamera.Api.Rental;
 
@@ -81,6 +82,10 @@ public sealed class ReservationExpirationService(
             try
             {
                 contract.TrangThai = "DA_HUY";
+                ApiAccess.AddContractStatusHistory(
+                    db, contract.MaHopDong, "CHO_KY", contract.TrangThai,
+                    reason: "Hệ thống tự hủy hợp đồng quá hạn ký.",
+                    actorRole: "HE_THONG");
                 await db.SaveChangesAsync(ct);
                 contractCount++;
             }

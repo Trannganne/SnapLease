@@ -188,6 +188,7 @@ app.MapAssetOperationsEndpoints();
 app.MapRentalEndpoints();
 app.MapIdentityEndpoints();
 app.MapContractEndpoints();
+app.MapReservationContractManagementEndpoints();
 app.MapVnpayEndpoints();
 app.MapPenaltyEndpoints();
 app.MapHandoverEndpoints();

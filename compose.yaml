@@ -189,6 +189,15 @@ services:
               -b \
               -V 16 \
               -i /database/14_add_asset_operations.sql
+            "$$SQLCMD" \
+              -S sqlserver \
+              -U sa \
+              -P "$$MSSQL_SA_PASSWORD" \
+              -C \
+              -I \
+              -b \
+              -V 16 \
+              -i /database/15_add_contract_status_history.sql
             echo "Cap nhat database thanh cong."
             exit 0
             ;;
@@ -349,6 +358,18 @@ services:
           -V 16 \
           -i /database/14_add_asset_operations.sql
 
+        echo "Dang bo sung lich su trang thai hop dong..."
+
+        "$$SQLCMD" \
+          -S sqlserver \
+          -U sa \
+          -P "$$MSSQL_SA_PASSWORD" \
+          -C \
+          -I \
+          -b \
+          -V 16 \
+          -i /database/15_add_contract_status_history.sql
+
         VERIFY_STATE="$$("$$SQLCMD" \
           -S sqlserver \
           -U sa \
@@ -391,6 +412,7 @@ services:
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.HuHongThietBi', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.LichSuCapNhatHuHong', N'U') IS NOT NULL
                  AND OBJECT_ID(N'RentalCameraDb20.dbo.LichSuDieuChuyenThietBi', N'U') IS NOT NULL
+                 AND OBJECT_ID(N'RentalCameraDb20.dbo.LichSuTrangThaiHopDong', N'U') IS NOT NULL
                  AND COL_LENGTH(N'RentalCameraDb20.dbo.DongMay', N'TrangThai') IS NOT NULL
                 THEN 'READY' ELSE 'INCOMPLETE'
               END;")"

@@ -126,6 +126,9 @@ public static class ContractEndpoints
                 MaBamNoiDung = null, MaBamTepPdf = null, NoiDungHopDongJson = null
             };
             db.HopDong.Add(contract);
+            ApiAccess.AddContractStatusHistory(
+                db, contract.MaHopDong, null, contract.TrangThai, principal,
+                "Khách hàng xác nhận thuê từ giữ chỗ.");
             hold.TrangThai = "DA_CHUYEN_HOP_DONG";
 
             var accountId = await db.KhachThue.AsNoTracking()
@@ -532,6 +535,7 @@ public static class ContractEndpoints
             confirmation.DiaChiIp = GetClientIp(httpContext);
             confirmation.ThietBiKy = GetUserAgent(httpContext);
 
+            var oldStatus = contract.TrangThai;
             contract.NgayKy = now;
             contract.HinhThucKy = "DIEN_TU";
             contract.DaDongYDieuKhoan = true;
@@ -539,6 +543,9 @@ public static class ContractEndpoints
             contract.MaBamNoiDung = confirmation.MaBamNoiDung;
             contract.NoiDungHopDongJson = confirmation.NoiDungHopDongJson;
             contract.TrangThai = "DA_KY";
+            ApiAccess.AddContractStatusHistory(
+                db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
+                "Khách hàng ký hợp đồng điện tử bằng OTP.");
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
 
@@ -601,14 +608,25 @@ public static class ContractEndpoints
         });
 
         contracts.MapPost("/{id}/huy", async (
-            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+            string id, string? lyDo, ClaimsPrincipal principal,
+            RentalCameraContext db, CancellationToken ct) =>
         {
-            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
-            if (customerId is null) return Results.Forbid();
+            var isCustomer = principal.IsInRole("KHACH_HANG");
+            var customerId = isCustomer
+                ? await ApiAccess.CustomerIdAsync(principal, db, ct)
+                : null;
+            var staffScope = isCustomer
+                ? null
+                : await ApiAccess.StaffScopeAsync(principal, db, ct);
+            if (isCustomer && customerId is null) return Results.Forbid();
+            if (!isCustomer && staffScope is null) return Results.Forbid();
+
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-            var contract = await db.HopDong.SingleOrDefaultAsync(
-                x => x.MaHopDong == id && x.MaKhachThue == customerId, ct);
+            var contract = await db.HopDong.SingleOrDefaultAsync(x => x.MaHopDong == id, ct);
             if (contract is null) return Results.NotFound();
+            if (isCustomer && contract.MaKhachThue != customerId) return Results.Forbid();
+            if (!isCustomer && staffScope is { IsAdmin: false } &&
+                contract.MaCuaHang != staffScope.StoreId) return Results.Forbid();
             
             if (contract.TrangThai == "DA_HUY")
                 return Results.Ok(new { contract.MaHopDong, contract.TrangThai });
@@ -616,10 +634,18 @@ public static class ContractEndpoints
             var hasPayment = await db.ThanhToan.AnyAsync(x => x.MaHopDong == id && (x.TrangThai == "THANH_CONG" || x.TrangThai == "CHO_THANH_TOAN"), ct);
             if (hasPayment) return Results.Conflict(new { loi = "Hợp đồng đã có thanh toán hoặc giao dịch đang xử lý, không thể tự hủy." });
 
-            if (contract.TrangThai != "CHO_KY")
-                return Results.Conflict(new { loi = "Chỉ được tự hủy hợp đồng đang chờ ký." });
+            if (isCustomer && contract.TrangThai != "CHO_KY")
+                return Results.Conflict(new { loi = "Khách hàng chỉ được tự hủy hợp đồng đang chờ ký." });
+            if (!isCustomer && contract.TrangThai is not ("CHO_KY" or "DA_KY" or "CHO_BAN_GIAO"))
+                return Results.Conflict(new { loi = "Staff/Admin chỉ được hủy hợp đồng chưa bàn giao thiết bị." });
             
+            var oldStatus = contract.TrangThai;
             contract.TrangThai = "DA_HUY";
+            ApiAccess.AddContractStatusHistory(
+                db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
+                string.IsNullOrWhiteSpace(lyDo)
+                    ? (isCustomer ? "Khách hàng tự hủy hợp đồng." : "Staff/Admin hủy hợp đồng.")
+                    : lyDo);
 
             // Cleanup ChiTietGioHang neu thuoc THUE_NGAY
             var holdLines = await db.ChiTietGiuCho.Where(x => x.MaGiuCho == contract.MaGiuCho).ToListAsync(ct);
@@ -639,7 +665,7 @@ public static class ContractEndpoints
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
             return Results.Ok(new { contract.MaHopDong, contract.TrangThai });
-        }).RequireAuthorization("Customer");
+        });
 
         contracts.MapPut("/{id}/thiet-bi", async (
             string id, PrepareDevicesRequest request, ClaimsPrincipal principal,
@@ -708,7 +734,11 @@ public static class ContractEndpoints
                 .Select(x => x.MaNhanVien).FirstOrDefaultAsync(ct);
             if (contract.MaNhanVien is null)
                 return Results.Conflict(new { loi = "Cửa hàng chưa có nhân viên phụ trách." });
+            var oldStatus = contract.TrangThai;
             contract.TrangThai = "CHO_BAN_GIAO";
+            ApiAccess.AddContractStatusHistory(
+                db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
+                "Staff/Admin hoàn tất chuẩn bị thiết bị.");
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
             return Results.Ok(new

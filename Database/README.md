@@ -29,3 +29,7 @@ Không dùng các script của cấu trúc `DonThue` cũ với database này.
 ### 14_add_asset_operations.sql
 
 Bổ sung trạng thái kinh doanh cho dòng máy, phiếu bảo trì, ghi nhận/lịch sử hư hỏng và lịch sử điều chuyển thiết bị giữa các chi nhánh.
+
+### 15_add_contract_status_history.sql
+
+Bổ sung bảng `LichSuTrangThaiHopDong` để lưu trạng thái cũ/mới, thời gian, người thực hiện, vai trò và lý do thay đổi. Migration tự tạo một mốc trạng thái ban đầu cho hợp đồng cũ chưa có lịch sử và có thể chạy lặp lại an toàn.

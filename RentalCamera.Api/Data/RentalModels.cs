@@ -165,6 +165,18 @@ public sealed class XacNhanKyHopDong
     public string NoiDungHopDongJson { get; set; } = "";
 }
 
+public sealed class LichSuTrangThaiHopDong
+{
+    public string MaLichSu { get; set; } = "";
+    public string MaHopDong { get; set; } = "";
+    public string? TrangThaiCu { get; set; }
+    public string TrangThaiMoi { get; set; } = "";
+    public string? NguoiThaoTac { get; set; }
+    public string VaiTroNguoiThaoTac { get; set; } = "HE_THONG";
+    public string? LyDo { get; set; }
+    public DateTime ThoiGian { get; set; }
+}
+
 public sealed class ChiTietHopDong
 {
     public string MaChiTietHopDong { get; set; } = "";

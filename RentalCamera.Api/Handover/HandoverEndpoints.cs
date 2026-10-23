@@ -49,7 +49,11 @@ public static class HandoverEndpoints
             var deviceIds = details.Select(x => x.MaThietBi).ToList();
             var devices = await db.ThietBi.Where(x => deviceIds.Contains(x.MaThietBi)).ToListAsync(ct);
             foreach (var device in devices) device.TrangThai = "DANG_THUE";
+            var oldStatus = contract.TrangThai;
             contract.TrangThai = "DANG_THUE";
+            ApiAccess.AddContractStatusHistory(
+                db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
+                "Staff/Admin bàn giao thiết bị cho khách hàng.");
             await db.SaveChangesAsync(ct);
             return Results.Ok(new { contract.MaHopDong, contract.TrangThai, thoiGianBanGiao = now });
         }).RequireAuthorization("Staff");
@@ -85,7 +89,11 @@ public static class HandoverEndpoints
                 device.TrangThai = detail.CoHuHong ? "BAO_TRI" : "SAN_SANG";
                 if (detail.TinhTrangLucNhan is not null) device.TinhTrang = detail.TinhTrangLucNhan;
             }
+            var oldStatus = contract.TrangThai;
             contract.TrangThai = "CHO_HOAN_TRA";
+            ApiAccess.AddContractStatusHistory(
+                db, contract.MaHopDong, oldStatus, contract.TrangThai, principal,
+                "Staff/Admin nhận lại thiết bị từ khách hàng.");
             await db.SaveChangesAsync(ct);
             return Results.Ok(new { contract.MaHopDong, contract.TrangThai, thoiGianNhanLai = now });
         }).RequireAuthorization("Staff");
