@@ -18,7 +18,6 @@ public static class AssetOperationsEndpoints
         MapBranchEndpoints(app);
         MapMaintenanceEndpoints(app);
         MapDamageEndpoints(app);
-        MapTransferEndpoints(app);
     }
 
     private static void MapBranchEndpoints(IEndpointRouteBuilder app)
@@ -359,62 +358,6 @@ public static class AssetOperationsEndpoints
         }).RequireAuthorization("Staff");
     }
 
-    private static void MapTransferEndpoints(IEndpointRouteBuilder app)
-    {
-        app.MapPost("/api/thiet-bi/{id}/dieu-chuyen", async (
-            string id, DeviceTransferRequest request, ClaimsPrincipal principal,
-            RentalCameraContext db, CancellationToken ct) =>
-        {
-            if (string.IsNullOrWhiteSpace(request.MaCuaHangMoi) || NormalizeOptional(request.LyDo)?.Length > 500)
-                return Results.BadRequest(new { loi = "Thiếu chi nhánh nhận." });
-            var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
-            if (scope is null) return Results.Forbid();
-            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-            var device = await db.ThietBi.SingleOrDefaultAsync(x => x.MaThietBi == id, ct);
-            if (device is null) return Results.NotFound();
-            if (!scope.IsAdmin && device.MaCuaHang != scope.StoreId) return Results.Forbid();
-            if (device.MaCuaHang == request.MaCuaHangMoi)
-                return Results.Conflict(new { loi = "Thiết bị đã ở chi nhánh nhận." });
-            if (device.TrangThai is "DANG_GIU" or "DANG_THUE")
-                return Results.Conflict(new { loi = "Không thể điều chuyển thiết bị đang giữ hoặc đang thuê." });
-            if (await db.ChiTietHopDong.Join(db.HopDong,
-                    d => d.MaHopDong, h => h.MaHopDong, (d, h) => new { d, h })
-                .AnyAsync(x => x.d.MaThietBi == id && x.d.NgayNhanThucTe == null &&
-                    x.h.TrangThai != "DA_HUY" && x.h.TrangThai != "HOAN_THANH", ct))
-                return Results.Conflict(new { loi = "Thiết bị đang thuộc hợp đồng chưa kết thúc." });
-            if (!await db.CuaHang.AnyAsync(x => x.MaCuaHang == request.MaCuaHangMoi &&
-                    x.TrangThai == "HOAT_DONG", ct))
-                return Results.BadRequest(new { loi = "Chi nhánh nhận không tồn tại hoặc đang khóa." });
-
-            var oldStore = device.MaCuaHang;
-            device.MaCuaHang = request.MaCuaHangMoi;
-            var history = new LichSuDieuChuyenThietBi
-            {
-                MaDieuChuyen = ApiAccess.NewId("DC"),
-                MaThietBi = id,
-                MaCuaHangCu = oldStore,
-                MaCuaHangMoi = request.MaCuaHangMoi,
-                LyDo = NormalizeOptional(request.LyDo),
-                NguoiThaoTac = ApiAccess.AccountId(principal) ?? "SYSTEM",
-                ThoiGian = DateTime.UtcNow
-            };
-            db.LichSuDieuChuyenThietBi.Add(history);
-            await db.SaveChangesAsync(ct);
-            await tx.CommitAsync(ct);
-            return Results.Ok(history);
-        }).RequireAuthorization("Staff");
-
-        app.MapGet("/api/thiet-bi/{id}/lich-su-dieu-chuyen", async (
-            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
-        {
-            var access = await GetAccessibleDeviceAsync(id, principal, db, ct);
-            if (access.Error is not null) return access.Error;
-            var data = await db.LichSuDieuChuyenThietBi.AsNoTracking()
-                .Where(x => x.MaThietBi == id).OrderByDescending(x => x.ThoiGian).ToListAsync(ct);
-            return Results.Ok(data);
-        }).RequireAuthorization("Staff");
-    }
-
     private static async Task<DeviceAccessResult> GetAccessibleDeviceAsync(
         string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct)
     {
@@ -459,4 +402,3 @@ public sealed record DamageCreateRequest(
     string MoTa, string MucDo, decimal ChiPhiSuaChua, string? MaPhieuBaoTri);
 public sealed record DamageUpdateRequest(
     string TrangThai, decimal ChiPhiSuaChua, string? TinhTrangSauSuaChua, string? GhiChu);
-public sealed record DeviceTransferRequest(string MaCuaHangMoi, string? LyDo);

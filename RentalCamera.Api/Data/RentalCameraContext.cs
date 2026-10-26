@@ -13,7 +13,6 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<PhieuBaoTri> PhieuBaoTri => Set<PhieuBaoTri>();
     public DbSet<HuHongThietBi> HuHongThietBi => Set<HuHongThietBi>();
     public DbSet<LichSuCapNhatHuHong> LichSuCapNhatHuHong => Set<LichSuCapNhatHuHong>();
-    public DbSet<LichSuDieuChuyenThietBi> LichSuDieuChuyenThietBi => Set<LichSuDieuChuyenThietBi>();
     public DbSet<TaiKhoan> TaiKhoan => Set<TaiKhoan>();
     public DbSet<LichSuTrangThaiTaiKhoan> LichSuTrangThaiTaiKhoan => Set<LichSuTrangThaiTaiKhoan>();
     public DbSet<ThuHoiBearerToken> ThuHoiBearerToken => Set<ThuHoiBearerToken>();
@@ -155,20 +154,6 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
             entity.Property(x => x.ChiPhiMoi).HasPrecision(18, 2);
             entity.HasOne<HuHongThietBi>().WithMany()
                 .HasForeignKey(x => x.MaHuHong).OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<LichSuDieuChuyenThietBi>(entity =>
-        {
-            entity.ToTable("LichSuDieuChuyenThietBi");
-            entity.HasKey(x => x.MaDieuChuyen);
-            entity.Property(x => x.MaDieuChuyen).HasMaxLength(20).IsUnicode(false);
-            entity.Property(x => x.MaThietBi).HasMaxLength(20).IsUnicode(false);
-            entity.Property(x => x.MaCuaHangCu).HasMaxLength(20).IsUnicode(false);
-            entity.Property(x => x.MaCuaHangMoi).HasMaxLength(20).IsUnicode(false);
-            entity.Property(x => x.NguoiThaoTac).HasMaxLength(20).IsUnicode(false);
-            entity.HasIndex(x => new { x.MaThietBi, x.ThoiGian });
-            entity.HasOne<ThietBi>().WithMany()
-                .HasForeignKey(x => x.MaThietBi).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<TaiKhoan>(entity =>
@@ -707,16 +692,5 @@ public sealed class LichSuCapNhatHuHong
     public decimal ChiPhiMoi { get; set; }
     public string NguoiThaoTac { get; set; } = "";
     public string? GhiChu { get; set; }
-    public DateTime ThoiGian { get; set; }
-}
-
-public sealed class LichSuDieuChuyenThietBi
-{
-    public string MaDieuChuyen { get; set; } = "";
-    public string MaThietBi { get; set; } = "";
-    public string MaCuaHangCu { get; set; } = "";
-    public string MaCuaHangMoi { get; set; } = "";
-    public string? LyDo { get; set; }
-    public string NguoiThaoTac { get; set; } = "";
     public DateTime ThoiGian { get; set; }
 }

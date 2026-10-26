@@ -8,7 +8,6 @@ $phone = "08" + $suffix.Substring($suffix.Length - 8)
 $accountId = $null
 $customerId = $null
 $branch1 = $null
-$branch2 = $null
 $modelId = $null
 $deviceId = $null
 $maintenanceId = $null
@@ -82,15 +81,7 @@ try {
         moTa = "Synthetic smoke-test branch"
     } $token
     $branch1 = $branch1Result.maCuaHang
-    $branch2Result = Invoke-Api POST "/api/cua-hang" @{
-        tenCuaHang = "Smoke Branch B $suffix"
-        diaChi = "2 Test Street"
-        soDienThoai = "07" + $suffix.Substring($suffix.Length - 8)
-        email = "branch-b-$suffix@example.test"
-        moTa = "Synthetic smoke-test branch"
-    } $token
-    $branch2 = $branch2Result.maCuaHang
-    Check ($branch1 -ne $branch2) "create two branches"
+    Check ($null -ne $branch1) "create branch"
 
     $model = Invoke-Api POST "/api/dong-may" @{
         maDanhMuc = $category.maDanhMuc
@@ -157,30 +148,21 @@ try {
     } $token
     Check ($completed.phieu.trangThai -eq "HOAN_TAT" -and $completed.trangThai -eq "SAN_SANG") "complete maintenance"
 
-    $transfer = Invoke-Api POST "/api/thiet-bi/$deviceId/dieu-chuyen" @{
-        maCuaHangMoi = $branch2
-        lyDo = "Smoke-test stock balancing"
-    } $token
-    Check ($transfer.maCuaHangCu -eq $branch1 -and $transfer.maCuaHangMoi -eq $branch2) "transfer device between branches"
-    $history = Invoke-Api GET "/api/thiet-bi/$deviceId/lich-su-dieu-chuyen" $null $token
-    Check ($history.Count -eq 1) "persist transfer history"
-
     $damageHistory = Invoke-Api GET "/api/thiet-bi/$deviceId/hu-hong" $null $token
     Check ($damageHistory[0].lichSu.Count -eq 1) "persist damage update history"
 }
 finally {
     if ($accountId) {
-        $ids = @($damageId, $maintenanceId, $deviceId, $modelId, $branch1, $branch2, $customerId, $accountId) |
+        $ids = @($damageId, $maintenanceId, $deviceId, $modelId, $branch1, $customerId, $accountId) |
             ForEach-Object { if ($_ -and $_ -notmatch "^[A-Za-z0-9]+$") { throw "Unsafe cleanup id." }; $_ }
         $cleanup = @"
 DELETE FROM dbo.NhatKyHeThong WHERE MaTaiKhoan='$accountId';
 DELETE FROM dbo.LichSuCapNhatHuHong WHERE MaHuHong='$damageId';
 DELETE FROM dbo.HuHongThietBi WHERE MaHuHong='$damageId';
 DELETE FROM dbo.PhieuBaoTri WHERE MaPhieuBaoTri='$maintenanceId';
-DELETE FROM dbo.LichSuDieuChuyenThietBi WHERE MaThietBi='$deviceId';
 DELETE FROM dbo.ThietBi WHERE MaThietBi='$deviceId';
 DELETE FROM dbo.DongMay WHERE MaDongMay='$modelId';
-DELETE FROM dbo.CuaHang WHERE MaCuaHang IN ('$branch1','$branch2');
+DELETE FROM dbo.CuaHang WHERE MaCuaHang='$branch1';
 DELETE FROM dbo.KhachThue WHERE MaKhachThue='$customerId';
 DELETE FROM dbo.TaiKhoan WHERE MaTaiKhoan='$accountId';
 "@

@@ -88,24 +88,5 @@ BEGIN
     );
 END;
 
-IF OBJECT_ID('dbo.LichSuDieuChuyenThietBi', 'U') IS NULL
-BEGIN
-    CREATE TABLE dbo.LichSuDieuChuyenThietBi (
-        MaDieuChuyen VARCHAR(20) NOT NULL PRIMARY KEY,
-        MaThietBi VARCHAR(20) NOT NULL,
-        MaCuaHangCu VARCHAR(20) NOT NULL,
-        MaCuaHangMoi VARCHAR(20) NOT NULL,
-        LyDo NVARCHAR(500) NULL,
-        NguoiThaoTac VARCHAR(20) NOT NULL,
-        ThoiGian DATETIME2 NOT NULL CONSTRAINT DF_DieuChuyen_ThoiGian DEFAULT SYSUTCDATETIME(),
-        CONSTRAINT FK_DieuChuyen_ThietBi FOREIGN KEY (MaThietBi) REFERENCES dbo.ThietBi(MaThietBi),
-        CONSTRAINT FK_DieuChuyen_CuaHangCu FOREIGN KEY (MaCuaHangCu) REFERENCES dbo.CuaHang(MaCuaHang),
-        CONSTRAINT FK_DieuChuyen_CuaHangMoi FOREIGN KEY (MaCuaHangMoi) REFERENCES dbo.CuaHang(MaCuaHang),
-        CONSTRAINT CK_DieuChuyen_KhacChiNhanh CHECK (MaCuaHangCu <> MaCuaHangMoi)
-    );
-    CREATE INDEX IX_DieuChuyen_ThietBi_ThoiGian
-        ON dbo.LichSuDieuChuyenThietBi(MaThietBi, ThoiGian DESC);
-END;
-
 COMMIT TRANSACTION;
 GO

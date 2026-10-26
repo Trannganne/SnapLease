@@ -1,0 +1,13 @@
+USE RentalCameraDb20;
+GO
+
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+
+IF OBJECT_ID('dbo.LichSuDieuChuyenThietBi', 'U') IS NOT NULL
+BEGIN
+    DROP TABLE dbo.LichSuDieuChuyenThietBi;
+END;
+
+COMMIT TRANSACTION;
+GO

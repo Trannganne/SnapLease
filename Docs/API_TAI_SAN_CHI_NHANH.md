@@ -44,20 +44,6 @@ Khi tạo phiếu, thiết bị chuyển sang `BAO_TRI`. Khi hoàn tất, ngư�
 Mức độ: `NHE`, `TRUNG_BINH`, `NANG`. Trạng thái xử lý: `CHUA_SUA`, `DANG_SUA`, `DA_SUA`, `KHONG_SUA`.
 Mỗi lần cập nhật trạng thái hoặc chi phí đều được lưu trong `LichSuCapNhatHuHong`.
 
-## Chuyển kho nội bộ
-
-- `POST /api/thiet-bi/{id}/dieu-chuyen`
-- `GET /api/thiet-bi/{id}/lich-su-dieu-chuyen`
-
-```json
-{
-  "maCuaHangMoi": "CH002",
-  "lyDo": "Cân đối tồn kho"
-}
-```
-
-Không thể điều chuyển thiết bị đang giữ, đang thuê hoặc còn thuộc hợp đồng chưa kết thúc. Nhân viên chỉ được chuyển thiết bị từ chi nhánh của mình; Admin không bị giới hạn chi nhánh.
-
 ## Database
 
-Migration: `Database/14_add_asset_operations.sql`. Script có thể chạy lại an toàn và đã được thêm vào `compose.yaml`.
+Migration: `Database/14_add_asset_operations.sql`. Chức năng điều chuyển thiết bị ngoài phạm vi đã được gỡ bằng `Database/17_remove_internal_device_transfer.sql`. Các script có thể chạy lại an toàn và đã được thêm vào `compose.yaml`.
