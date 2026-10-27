@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using RentalCamera.Api.Auth;
 using RentalCamera.Api.Catalog;
+using RentalCamera.Api.Chatbot;
 using RentalCamera.Api.Contracts;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Email;
@@ -29,22 +30,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 
-var firebaseProjectId = builder.Configuration["Firebase:ProjectId"];
-if (string.IsNullOrWhiteSpace(firebaseProjectId))
-{
-    throw new InvalidOperationException("Thiếu cấu hình Firebase:ProjectId.");
-}
-
-builder.Services.AddSingleton(_ =>
-    FirebaseApp.Create(new AppOptions
-    {
-        Credential = GoogleCredential.GetApplicationDefault(),
-        ProjectId = firebaseProjectId
-    }));
-
-var connectionString = builder.Configuration.GetConnectionString("RentalCamera")
-    ?? throw new InvalidOperationException("Thiếu ConnectionStrings:RentalCamera.");
-builder.Services.AddDbContext<RentalCameraContext>(options => options.UseSqlServer(connectionString));
+// Fail before service creation, network access or any database open.
+var trialGuard = new Schema33TrialGuard(builder.Configuration, builder.Environment);
+builder.Services.AddSingleton(trialGuard);
+var connectionString = builder.Configuration.GetConnectionString("RentalCamera")!;
+builder.Services.AddDbContext<RentalCameraContext>(options => options.UseSqlServer(connectionString).AddInterceptors(trialGuard));
 builder.Services.AddCors(options => options.AddPolicy("Frontend", policy =>
 {
     var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
@@ -60,22 +50,28 @@ builder.Services.AddScoped<IPasswordHasher<TaiKhoan>, PasswordHasher<TaiKhoan>>(
 builder.Services.Configure<PasswordHasherOptions>(options => options.IterationCount = 100_000);
 builder.Services.AddSingleton<TokenIssuer>();
 builder.Services.AddSingleton<PasswordResetTokenService>();
+builder.Services.AddSingleton<AuthLinkService>();
 builder.Services.AddSingleton<ContractSignatureService>();
 builder.Services.AddSingleton<ContractPdfService>();
 builder.Services.AddScoped<BranchWorkingHours>();
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
-builder.Services.AddSingleton<IContractOtpEmailSender, SmtpContractOtpEmailSender>();
+builder.Services.AddSingleton<FakeTrialSender>();
+builder.Services.AddSingleton<IContractOtpEmailSender>(sp => sp.GetRequiredService<FakeTrialSender>());
+builder.Services.AddSingleton<IAuthEmailSender>(sp => sp.GetRequiredService<FakeTrialSender>());
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
 builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient().ConfigureHttpClientDefaults(b => b.ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler()));
+builder.Services.AddChatbot(builder.Configuration);
+builder.Services.ConfigureAll<Microsoft.Extensions.Http.HttpClientFactoryOptions>(o =>
+    o.HttpMessageHandlerBuilderActions.Add(b => b.PrimaryHandler = new DenyExternalHttpHandler()));
 builder.Services.AddScoped<FirebaseNotificationSender>();
 builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("Cloudinary"));
-builder.Services.AddHttpClient<CloudinaryImageStorage>();
+builder.Services.AddHttpClient<CloudinaryImageStorage>().ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler());
 builder.Services.AddSingleton<VnpayService>();
 builder.Services.AddScoped<AvailabilityService>();
-builder.Services.AddHostedService<ReservationExpirationService>();
-builder.Services.AddHostedService<NotificationDeliveryWorker>();
-builder.Services.AddHostedService<ReturnReminderWorker>();
+// ReservationExpirationService is not started by this guarded preparation runtime.
+// NotificationDeliveryWorker is not started by this guarded preparation runtime.
+// ReturnReminderWorker is not started by this guarded preparation runtime.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -129,14 +125,13 @@ builder.Services.AddRateLimiter(options =>
             Window = TimeSpan.FromMinutes(1),
             QueueLimit = 0
         }));
+    options.AddPolicy("chatbot", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 3, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
 });
 
 var app = builder.Build();
 app.UseConcurrencyResponse();
-var firebaseApp = app.Services.GetRequiredService<FirebaseApp>();
-app.Logger.LogInformation(
-    "Firebase Admin đã khởi tạo cho project {ProjectId}.",
-    firebaseApp.Options.ProjectId);
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("Frontend");
@@ -173,6 +168,7 @@ if (args.Length == 2 && args[0] == "set-password")
         return;
     }
     account.MatKhauHash = hasher.HashPassword(account, password.ToString());
+    account.PhienBanBaoMat=checked(account.PhienBanBaoMat+1);
     await db.SaveChangesAsync();
     Console.WriteLine("Đã đặt mật khẩu cho tài khoản. Không dùng lại mật khẩu mẫu.");
     return;
@@ -186,6 +182,7 @@ app.MapAuthEndpoints();
 app.MapNotificationEndpoints();
 app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
+app.MapChatbotEndpoints(); // Gate remains disabled; external HTTP is blocked for every named client.
 app.MapEquipmentEndpoints();
 app.MapRentalEndpoints();
 app.MapCartEndpoints();
@@ -198,6 +195,8 @@ app.MapNoShowEndpoints();
 LateReturnService.MapLateReturnEndpoints(app);
 app.MapReturnTimeCorrectionEndpoints();
 app.MapVnpayEndpoints();
+app.MapRefundEndpoints();
+app.MapTrialMedia();
 app.MapPenaltyEndpoints();
 app.MapHandoverEndpoints();
 app.MapSettlementEndpoints();

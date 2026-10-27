@@ -133,12 +133,12 @@ public static class CartEndpoints
             var now = DateTime.UtcNow;
             var hold = new GiuCho { MaGiuCho = ApiAccess.NewId("GC"), MaGioHang = first.MaGioHang, MaKhachThue = customer,
                 MaCuaHang = first.MaCuaHang, NgayTao = now, HetHanLuc = now.AddMinutes(Math.Clamp(config.GetValue("Rental:HoldMinutes",20),1,120)), TrangThai = "DANG_GIU" };
-            foreach (var group in HoldQuantities(lines)) hold.ChiTiet.Add(new ChiTietGiuCho { MaChiTietGiuCho = ApiAccess.NewId("GC"),
-                MaGiuCho = hold.MaGiuCho, MaDongMay = group.Key, SoLuong = group.Value,
-                NgayBatDau = first.NgayBatDau, NgayKetThuc = first.NgayKetThuc });
+            foreach (var line in lines) hold.ChiTiet.Add(new ChiTietGiuCho {
+                MaChiTietGiuCho = ApiAccess.NewId("GC"), MaGiuCho = hold.MaGiuCho,
+                MaChiTietGioHang = line.MaChiTietGioHang, PhienBanGioHang = line.PhienBan,
+                MaDongMay = line.MaDongMay, SoLuong = line.SoLuong,
+                NgayBatDau = line.NgayBatDau, NgayKetThuc = line.NgayKetThuc });
             db.GiuCho.Add(hold);
-            foreach(var line in lines)db.LuaChonGioHangGiuCho.Add(new(){MaGiuCho=hold.MaGiuCho,
-                MaChiTietGioHang=line.MaChiTietGioHang,PhienBanGioHang=line.PhienBan,MaDongMay=line.MaDongMay,SoLuong=line.SoLuong});
             db.IdempotencyKey.Add(new IdempotencyKeyRecord { IdempotencyKey=key, MaKhachThue=customer,
                 LoaiThaoTac="CART_CHECKOUT", PayloadHash=hash, MaThucThe=hold.MaGiuCho, NgayTao=now });
             await db.SaveChangesAsync(ct);
@@ -149,7 +149,7 @@ public static class CartEndpoints
 
     public static Dictionary<string,int> HoldQuantities(IEnumerable<ChiTietGioHang> lines)=>
         lines.GroupBy(x=>x.MaDongMay).ToDictionary(x=>x.Key,x=>x.Sum(l=>l.SoLuong));
-    public static bool SameSelectedVersion(LuaChonGioHangGiuCho selection,ChiTietGioHang line)=>
+    public static bool SameSelectedVersion(ChiTietGiuCho selection,ChiTietGioHang line)=>
         selection.MaChiTietGioHang==line.MaChiTietGioHang&&selection.PhienBanGioHang==line.PhienBan;
 
     private static IQueryable<ChiTietGioHang> ActiveLines(RentalCameraContext db, string customer) =>
@@ -173,7 +173,6 @@ public static class CartEndpoints
         var hold = await db.GiuCho.AsNoTracking().SingleAsync(x => x.MaGiuCho == id && x.MaKhachThue == customer, ct);
         var confirmed = await db.KhachThue.AnyAsync(x => x.MaKhachThue == customer && x.DaXacNhanThongTin, ct);
         var lines = await db.ChiTietGiuCho.AsNoTracking().Where(x => x.MaGiuCho == id).ToListAsync(ct);
-        var selections=await db.LuaChonGioHangGiuCho.AsNoTracking().Where(x=>x.MaGiuCho==id).ToListAsync(ct);
         var quotes = new List<RentalEndpoints.PriceQuote>();
         var items=new List<object>();
         var store=await db.CuaHang.AsNoTracking().SingleAsync(s=>s.MaCuaHang==hold.MaCuaHang,ct);
@@ -181,11 +180,7 @@ public static class CartEndpoints
             var model = await db.DongMay.AsNoTracking().SingleAsync(x => x.MaDongMay == line.MaDongMay, ct);
             var quote=RentalEndpoints.CalculatePrice(model, line.SoLuong, line.NgayBatDau, line.NgayKetThuc);
             quotes.Add(quote);
-            var selected=selections.Where(s=>s.MaDongMay==line.MaDongMay).ToArray();
-            if(selected.Length>0)foreach(var item in selected)items.Add(new{maChiTietGioHang=item.MaChiTietGioHang,phienBan=(Guid?)item.PhienBanGioHang,
-                hold.MaCuaHang,store.TenCuaHang,line.MaDongMay,model.TenDongMay,item.SoLuong,line.NgayBatDau,line.NgayKetThuc,
-                baoGia=RentalEndpoints.CalculatePrice(model,item.SoLuong,line.NgayBatDau,line.NgayKetThuc),khaDung=true,soLuongConTrong=item.SoLuong});
-            else items.Add(new{maChiTietGioHang=line.MaChiTietGioHang,phienBan=line.PhienBanGioHang,
+            items.Add(new{maChiTietGioHang=line.MaChiTietGioHang,phienBan=line.PhienBanGioHang,
                 hold.MaCuaHang,store.TenCuaHang,line.MaDongMay,model.TenDongMay,line.SoLuong,line.NgayBatDau,line.NgayKetThuc,
                 baoGia=quote,khaDung=true,soLuongConTrong=line.SoLuong});
         }

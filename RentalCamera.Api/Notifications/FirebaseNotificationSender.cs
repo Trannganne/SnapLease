@@ -8,16 +8,19 @@ namespace RentalCamera.Api.Notifications;
 public sealed class FirebaseNotificationSender
 {
     private readonly RentalCameraContext db;
-    private readonly FirebaseMessaging messaging;
+    private readonly FirebaseMessaging? messaging;
+    private readonly bool fake;
     private readonly ILogger<FirebaseNotificationSender> logger;
 
     public FirebaseNotificationSender(
         RentalCameraContext db,
-        FirebaseApp firebaseApp,
+        IServiceProvider services,
+        IConfiguration configuration,
         ILogger<FirebaseNotificationSender> logger)
     {
         this.db = db;
-        messaging = FirebaseMessaging.GetMessaging(firebaseApp);
+        fake = configuration["Schema33Trial:ProviderMode"] == "Fake";
+        messaging = fake ? null : FirebaseMessaging.GetMessaging(services.GetRequiredService<FirebaseApp>());
         this.logger = logger;
     }
 
@@ -30,6 +33,8 @@ public sealed class FirebaseNotificationSender
         string? targetId,
         CancellationToken ct)
     {
+        if (fake) return new FcmSendResult(0,0,0); // Inbox/outbox remain authoritative; no transport delivery claim.
+        var transport = messaging ?? throw new InvalidOperationException("FCM transport chua san sang.");
         var tokenRows = await db.FcmDeviceToken
             .Where(x => x.MaTaiKhoan == accountId && x.IsActive)
             .OrderBy(x => x.CreatedAt)
@@ -76,7 +81,7 @@ public sealed class FirebaseNotificationSender
 
             try
             {
-                var response = await messaging
+                var response = await transport
                     .SendEachForMulticastAsync(message, ct);
 
                 successCount += response.SuccessCount;

@@ -247,7 +247,7 @@ public static class RentalEndpoints
                     var holdLine = new ChiTietGiuCho
                     {
                         MaChiTietGiuCho = ApiAccess.NewId("GC"), MaGiuCho = hold.MaGiuCho,
-                        MaChiTietGioHang = cartLine.MaChiTietGioHang,
+                        MaChiTietGioHang = cartLine.MaChiTietGioHang, PhienBanGioHang = cartLine.PhienBan,
                         MaDongMay = cartLine.MaDongMay, SoLuong = cartLine.SoLuong,
                         NgayBatDau = cartLine.NgayBatDau, NgayKetThuc = cartLine.NgayKetThuc
                     };
@@ -305,7 +305,7 @@ public static class RentalEndpoints
                 hold.TrangThai = "HET_HAN";
                 await db.SaveChangesAsync(ct);
             }
-            if(hold.ChiTiet.Any(x=>x.PhienBanGioHang!=null)||await db.LuaChonGioHangGiuCho.AnyAsync(x=>x.MaGiuCho==id,ct)) {
+            if(hold.ChiTiet.Count > 0) {
                 var cart=await CartEndpoints.HoldDtoAsync(id,customerId,db,ct);
                 await tx.CommitAsync(ct);return Results.Ok(cart);
             }
@@ -346,7 +346,7 @@ public static class RentalEndpoints
                         .SingleOrDefaultAsync(x => x.MaGiuCho == id && x.MaKhachThue == customerId, ct);
 
                     if (hold is null) return Results.NotFound(new { loi = "Không tìm thấy giữ chỗ." });
-                    if(hold.ChiTiet.Any(x=>x.PhienBanGioHang!=null)||await db.LuaChonGioHangGiuCho.AnyAsync(x=>x.MaGiuCho==id,ct))
+                    if(hold.ChiTiet.Count > 0)
                         return Results.Conflict(new{loi="Giữ chỗ checkout là tập mục cố định; sửa giỏ hàng trước một checkout mới."});
 
                     if (hold.TrangThai != "DANG_GIU" || hold.HetHanLuc <= DateTime.UtcNow)

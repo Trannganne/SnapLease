@@ -33,9 +33,19 @@ public sealed class VnpayService
             ? uri.ToString()
             : null;
 
+    public bool SettlementSandboxReady => IsConfigured && _options.SettlementEnabled && (_options.FakeTrial &&
+        Uri.TryCreate(_options.PaymentUrl,UriKind.Absolute,out var fakePay) && fakePay.IsLoopback ||
+        !_options.FakeTrial &&
+        Uri.TryCreate(_options.PaymentUrl,UriKind.Absolute,out var pay) && pay.Scheme=="https" && pay.Host=="sandbox.vnpayment.vn" &&
+        Uri.TryCreate(_options.ReturnUrl,UriKind.Absolute,out var ret) && ret.Scheme=="https" &&
+        Uri.TryCreate(_options.IpnUrl,UriKind.Absolute,out var ipn) && ipn.Scheme=="https");
+
     public bool ValidateMerchant(string? tmnCode) =>
         !string.IsNullOrWhiteSpace(tmnCode) &&
         string.Equals(_options.TmnCode, tmnCode, StringComparison.OrdinalIgnoreCase);
+
+    // Processing/reversal/unknown outcomes are not permission to start another collection.
+    public static bool IsFinalFailure(string? transactionStatus) => transactionStatus is "02" or "07";
 
     public VnpayPaymentLink CreatePaymentUrl(
         string transactionReference,
@@ -120,7 +130,7 @@ public sealed class VnpayService
         if (string.IsNullOrWhiteSpace(transactionReference) ||
             string.IsNullOrWhiteSpace(responseCode) ||
             string.IsNullOrWhiteSpace(transactionStatus) ||
-            !long.TryParse(query["vnp_Amount"].ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out var amountTimes100))
+            !long.TryParse(query["vnp_Amount"].ToString(), NumberStyles.None, CultureInfo.InvariantCulture, out var amountTimes100) || amountTimes100 <= 0)
             return false;
 
         var transactionNumber = query["vnp_TransactionNo"].ToString();

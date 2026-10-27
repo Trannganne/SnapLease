@@ -1,0 +1,1468 @@
+{
+  "seed_namespace": "TR33",
+  "fake_password_for_fixture_accounts": "TrialOnly!2026a",
+  "rows": {
+    "CuaHang": [
+      {
+        "MaCuaHang": "TR33_S01",
+        "TenCuaHang": "TRIAL33 Branch 1",
+        "ViDo": null,
+        "KinhDo": null,
+        "DiaChi": "SYNTHETIC ADDRESS 1",
+        "SoDienThoai": "0900000001",
+        "Email": "branch1@example.invalid",
+        "MoTa": "FAKE TRIAL DATA ONLY",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaCuaHang": "TR33_S02",
+        "TenCuaHang": "TRIAL33 Branch 2",
+        "ViDo": null,
+        "KinhDo": null,
+        "DiaChi": "SYNTHETIC ADDRESS 2",
+        "SoDienThoai": "0900000002",
+        "Email": "branch2@example.invalid",
+        "MoTa": "FAKE TRIAL DATA ONLY",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaCuaHang": "TR33_S03",
+        "TenCuaHang": "TRIAL33 Branch 3",
+        "ViDo": null,
+        "KinhDo": null,
+        "DiaChi": "SYNTHETIC ADDRESS 3",
+        "SoDienThoai": "0900000003",
+        "Email": "branch3@example.invalid",
+        "MoTa": "FAKE TRIAL DATA ONLY",
+        "TrangThai": "HOAT_DONG"
+      }
+    ],
+    "DanhMuc": [
+      {
+        "MaDanhMuc": "TR33_CAT",
+        "TenDanhMuc": "TRIAL33 Cameras",
+        "MoTa": "Synthetic catalog",
+        "TrangThai": "HOAT_DONG"
+      }
+    ],
+    "ThuongHieu": [
+      {
+        "MaThuongHieu": "TR33_BR1",
+        "TenThuongHieu": "TRIAL33 Brand 1",
+        "QuocGia": "Synthetic"
+      },
+      {
+        "MaThuongHieu": "TR33_BR2",
+        "TenThuongHieu": "TRIAL33 Brand 2",
+        "QuocGia": "Synthetic"
+      }
+    ],
+    "DongMay": [
+      {
+        "MaDongMay": "TR33_M01",
+        "MaDanhMuc": "TR33_CAT",
+        "MaThuongHieu": "TR33_BR1",
+        "TenDongMay": "TRIAL33 Camera Model 01",
+        "MoTa": "Synthetic camera model",
+        "GiaThueNgay": 125000,
+        "TienCoc": 1250000,
+        "PhanTramGiamGia": 0
+      },
+      {
+        "MaDongMay": "TR33_M02",
+        "MaDanhMuc": "TR33_CAT",
+        "MaThuongHieu": "TR33_BR1",
+        "TenDongMay": "TRIAL33 Camera Model 02",
+        "MoTa": "Synthetic camera model",
+        "GiaThueNgay": 150000,
+        "TienCoc": 1500000,
+        "PhanTramGiamGia": 0
+      },
+      {
+        "MaDongMay": "TR33_M03",
+        "MaDanhMuc": "TR33_CAT",
+        "MaThuongHieu": "TR33_BR1",
+        "TenDongMay": "TRIAL33 Camera Model 03",
+        "MoTa": "Synthetic camera model",
+        "GiaThueNgay": 175000,
+        "TienCoc": 1750000,
+        "PhanTramGiamGia": 0
+      },
+      {
+        "MaDongMay": "TR33_M04",
+        "MaDanhMuc": "TR33_CAT",
+        "MaThuongHieu": "TR33_BR2",
+        "TenDongMay": "TRIAL33 Camera Model 04",
+        "MoTa": "Synthetic camera model",
+        "GiaThueNgay": 200000,
+        "TienCoc": 2000000,
+        "PhanTramGiamGia": 0
+      },
+      {
+        "MaDongMay": "TR33_M05",
+        "MaDanhMuc": "TR33_CAT",
+        "MaThuongHieu": "TR33_BR2",
+        "TenDongMay": "TRIAL33 Camera Model 05",
+        "MoTa": "Synthetic camera model",
+        "GiaThueNgay": 225000,
+        "TienCoc": 2250000,
+        "PhanTramGiamGia": 0
+      },
+      {
+        "MaDongMay": "TR33_M06",
+        "MaDanhMuc": "TR33_CAT",
+        "MaThuongHieu": "TR33_BR2",
+        "TenDongMay": "TRIAL33 Camera Model 06",
+        "MoTa": "Synthetic camera model",
+        "GiaThueNgay": 250000,
+        "TienCoc": 2500000,
+        "PhanTramGiamGia": 0
+      }
+    ],
+    "ThietBi": [
+      {
+        "MaThietBi": "TR33_S01M01D1",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M01-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M01D2",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M01-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M01D3",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M01-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M01D4",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M01-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M01D5",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M01-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M01D1",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M01-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M01D2",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M01-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M01D3",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M01-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M01D4",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M01-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M01D5",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M01-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M01D1",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M01-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M01D2",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M01-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M01D3",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M01-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M01D4",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M01-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M01D5",
+        "MaDongMay": "TR33_M01",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M01-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M02D1",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M02-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M02D2",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M02-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M02D3",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M02-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M02D4",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M02-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M02D5",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M02-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M02D1",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M02-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M02D2",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M02-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M02D3",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M02-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M02D4",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M02-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M02D5",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M02-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M02D1",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M02-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M02D2",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M02-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M02D3",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M02-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M02D4",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M02-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M02D5",
+        "MaDongMay": "TR33_M02",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M02-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M03D1",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M03-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M03D2",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M03-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M03D3",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M03-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M03D4",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M03-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M03D5",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M03-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M03D1",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M03-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M03D2",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M03-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M03D3",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M03-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M03D4",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M03-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M03D5",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M03-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M03D1",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M03-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M03D2",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M03-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M03D3",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M03-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M03D4",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M03-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M03D5",
+        "MaDongMay": "TR33_M03",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M03-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M04D1",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M04-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M04D2",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M04-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M04D3",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M04-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M04D4",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M04-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M04D5",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M04-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M04D1",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M04-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M04D2",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M04-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M04D3",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M04-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M04D4",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M04-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M04D5",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M04-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M04D1",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M04-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M04D2",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M04-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M04D3",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M04-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M04D4",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M04-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M04D5",
+        "MaDongMay": "TR33_M04",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M04-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M05D1",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M05-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M05D2",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M05-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M05D3",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M05-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M05D4",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M05-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M05D5",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M05-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M05D1",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M05-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M05D2",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M05-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M05D3",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M05-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M05D4",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M05-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M05D5",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M05-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M05D1",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M05-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M05D2",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M05-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M05D3",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M05-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M05D4",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M05-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M05D5",
+        "MaDongMay": "TR33_M05",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M05-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M06D1",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M06-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M06D2",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M06-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M06D3",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M06-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M06D4",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M06-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S01M06D5",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S01",
+        "SoSerial": "SN-TR33-S01-M06-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M06D1",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M06-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M06D2",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M06-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M06D3",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M06-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M06D4",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M06-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S02M06D5",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S02",
+        "SoSerial": "SN-TR33-S02-M06-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M06D1",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M06-01",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M06D2",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M06-02",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M06D3",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M06-03",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M06D4",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M06-04",
+        "TinhTrang": "Synthetic ready",
+        "TrangThai": "SAN_SANG",
+        "NgayNhap": "2026-10-27"
+      },
+      {
+        "MaThietBi": "TR33_S03M06D5",
+        "MaDongMay": "TR33_M06",
+        "MaCuaHang": "TR33_S03",
+        "SoSerial": "SN-TR33-S03-M06-05",
+        "TinhTrang": "Synthetic maintenance",
+        "TrangThai": "BAO_TRI",
+        "NgayNhap": "2026-10-27"
+      }
+    ],
+    "TaiKhoan": [
+      {
+        "MaTaiKhoan": "TR33_C01",
+        "TenDangNhap": "trial33.customer01",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEPy8tCcjO+fXDzfPO9LJTvuJfzYC4Qeoa4linhxpWSy1VID3igYfqDUNq6isy3d4Ag==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C02",
+        "TenDangNhap": "trial33.customer02",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEPT1pSBRVCB1GWjyVHKKA/ijzD79oWInnHqgTB0v2EslRhCs4vvZ5m/c56Z6yIZ7qw==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C03",
+        "TenDangNhap": "trial33.customer03",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEJiugqC3eT4aX8GRW/pD41gZ8nhZINV8seyqVoPCtk+OB9pKKlyalxhbmChCUjBNiA==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C04",
+        "TenDangNhap": "trial33.customer04",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEFCWLlfe1uxTiKSxGhwR4VV/wISve7XUL429IV9+sSMKdiFRtfMdYqCVrpqJfcqGvA==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C05",
+        "TenDangNhap": "trial33.customer05",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEAb8BVy0RJQ7L63p55PxrIEhSnAbA6QI43esvdL4AxFpFrWeTS3XMvHjCORXVzrvCg==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C06",
+        "TenDangNhap": "trial33.customer06",
+        "MatKhauHash": "AQAAAAIAAYagAAAAECQXNUTpo/C7h/so8j6cLyLm1L0XhYZfq7E7s/dQ/TYPj4oQGV6+t9SE0VQK3iHStw==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C07",
+        "TenDangNhap": "trial33.customer07",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEGL9L3BsdZbS80P+fHGvHYm+qigZieYxzkvt2IY8yKDnDX5PsOpJSU4mQVBZoKDsoQ==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C08",
+        "TenDangNhap": "trial33.customer08",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEGPWP75s+wtjXelKIyp1h1Cy6KIb9B4iMk65fE4duSRzMzOs7cf/jYgxQjmDb4sWqw==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C09",
+        "TenDangNhap": "trial33.customer09",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEBZbkpiRJv1bGdpcIS5dI9+G1m/sWa+TELzsagveRkhOjG9U2Aqu1d5VxTtPvi0Uow==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C10",
+        "TenDangNhap": "trial33.customer10",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEJpm2a0rilVzvRPiTQGBFGViQH1PKICBwtoj6f1yakQF/GbQZeA3J+aIOqwyVlyjIA==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C11",
+        "TenDangNhap": "trial33.customer11",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEPqZUYRx6bqxMkX18ooE5vNwfAvwZtrUFngBMQpqS/KU/IWAL2wLBOXuELvXyLvLeg==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_C12",
+        "TenDangNhap": "trial33.customer12",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEAW80CgvSFHMniJ0sGka/Nz8coRTnTas/X/K1L2ertZao1TbDfj9rTfUn9wOXS7bIQ==",
+        "VaiTro": "KHACH_HANG",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_N01",
+        "TenDangNhap": "trial33.staff01",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEEdzDxYHcgzRpWd+dgVslHni816m8x9bCStEdjomvf1bztiX8sf9r808KtoBzqA8wA==",
+        "VaiTro": "NHAN_VIEN",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_N02",
+        "TenDangNhap": "trial33.staff02",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEGfD4fcTkgoe5sbEneOwGkKql77ERk9z6NOTDyApcbgSwglF/W5NB8X2H7MHIX5CTQ==",
+        "VaiTro": "NHAN_VIEN",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_N03",
+        "TenDangNhap": "trial33.staff03",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEPOo2t2+ocIu/UBdGwASQ7KL71fOhHTlUPRlkyukzZZUjY/0I+NcZzaeZNs68y8r3A==",
+        "VaiTro": "NHAN_VIEN",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      },
+      {
+        "MaTaiKhoan": "TR33_N04",
+        "TenDangNhap": "trial33.admin",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEOywMCr0/9+walSsVvG8spPiWBCG67n6mRjVtzyTBX/c8WA//ts85aPJah5GHxS4Rw==",
+        "VaiTro": "ADMIN",
+        "TrangThai": "HOAT_DONG",
+        "NgayTao": {
+          "sql": "@LocalNow"
+        },
+        "PhienBanBaoMat": 0
+      }
+    ],
+    "KhachThue": [
+      {
+        "MaKhachThue": "TR33_K01",
+        "MaTaiKhoan": "TR33_C01",
+        "HoTen": "TRIAL33 Customer 01",
+        "SoDienThoai": "0910000001",
+        "Email": "TRIAL33.CUSTOMER01@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-01",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K02",
+        "MaTaiKhoan": "TR33_C02",
+        "HoTen": "TRIAL33 Customer 02",
+        "SoDienThoai": "0910000002",
+        "Email": "TRIAL33.CUSTOMER02@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-02",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K03",
+        "MaTaiKhoan": "TR33_C03",
+        "HoTen": "TRIAL33 Customer 03",
+        "SoDienThoai": "0910000003",
+        "Email": "TRIAL33.CUSTOMER03@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-03",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K04",
+        "MaTaiKhoan": "TR33_C04",
+        "HoTen": "TRIAL33 Customer 04",
+        "SoDienThoai": "0910000004",
+        "Email": "TRIAL33.CUSTOMER04@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-04",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K05",
+        "MaTaiKhoan": "TR33_C05",
+        "HoTen": "TRIAL33 Customer 05",
+        "SoDienThoai": "0910000005",
+        "Email": "TRIAL33.CUSTOMER05@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-05",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K06",
+        "MaTaiKhoan": "TR33_C06",
+        "HoTen": "TRIAL33 Customer 06",
+        "SoDienThoai": "0910000006",
+        "Email": "TRIAL33.CUSTOMER06@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-06",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K07",
+        "MaTaiKhoan": "TR33_C07",
+        "HoTen": "TRIAL33 Customer 07",
+        "SoDienThoai": "0910000007",
+        "Email": "TRIAL33.CUSTOMER07@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-07",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K08",
+        "MaTaiKhoan": "TR33_C08",
+        "HoTen": "TRIAL33 Customer 08",
+        "SoDienThoai": "0910000008",
+        "Email": "TRIAL33.CUSTOMER08@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-08",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K09",
+        "MaTaiKhoan": "TR33_C09",
+        "HoTen": "TRIAL33 Customer 09",
+        "SoDienThoai": "0910000009",
+        "Email": "TRIAL33.CUSTOMER09@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-09",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K10",
+        "MaTaiKhoan": "TR33_C10",
+        "HoTen": "TRIAL33 Customer 10",
+        "SoDienThoai": "0910000010",
+        "Email": "TRIAL33.CUSTOMER10@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-10",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K11",
+        "MaTaiKhoan": "TR33_C11",
+        "HoTen": "TRIAL33 Customer 11",
+        "SoDienThoai": "0910000011",
+        "Email": "TRIAL33.CUSTOMER11@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-11",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      },
+      {
+        "MaKhachThue": "TR33_K12",
+        "MaTaiKhoan": "TR33_C12",
+        "HoTen": "TRIAL33 Customer 12",
+        "SoDienThoai": "0910000012",
+        "Email": "TRIAL33.CUSTOMER12@EXAMPLE.INVALID",
+        "CCCD": "TR33-DOC-12",
+        "DiaChi": "SYNTHETIC ONLY",
+        "DaXacNhanThongTin": true,
+        "EmailXacMinhLucUtc": {
+          "sql": "@UtcNow"
+        }
+      }
+    ],
+    "GiayToTuyThan": [
+      {
+        "MaGiayTo": "TR33_ID01",
+        "MaKhachThue": "TR33_K01",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-01",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID02",
+        "MaKhachThue": "TR33_K02",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-02",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID03",
+        "MaKhachThue": "TR33_K03",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-03",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID04",
+        "MaKhachThue": "TR33_K04",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-04",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID05",
+        "MaKhachThue": "TR33_K05",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-05",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID06",
+        "MaKhachThue": "TR33_K06",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-06",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID07",
+        "MaKhachThue": "TR33_K07",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-07",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID08",
+        "MaKhachThue": "TR33_K08",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-08",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID09",
+        "MaKhachThue": "TR33_K09",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-09",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID10",
+        "MaKhachThue": "TR33_K10",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-10",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID11",
+        "MaKhachThue": "TR33_K11",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-11",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      },
+      {
+        "MaGiayTo": "TR33_ID12",
+        "MaKhachThue": "TR33_K12",
+        "LoaiGiayTo": "CCCD",
+        "SoGiayTo": "TR33-DOC-12",
+        "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
+        "MatSauUrl": null,
+        "NgayTaiLen": {
+          "sql": "@LocalNow"
+        },
+        "TrangThaiXacMinh": "HOP_LE",
+        "GhiChu": "SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document"
+      }
+    ],
+    "NhanVien": [
+      {
+        "MaNhanVien": "TR33_NV01",
+        "MaTaiKhoan": "TR33_N01",
+        "MaCuaHang": "TR33_S01",
+        "HoTen": "TRIAL33 Staff 1",
+        "SoDienThoai": "0920000001",
+        "ChucVu": "TRIAL_STAFF",
+        "Email": "staff1@example.invalid",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaNhanVien": "TR33_NV02",
+        "MaTaiKhoan": "TR33_N02",
+        "MaCuaHang": "TR33_S02",
+        "HoTen": "TRIAL33 Staff 2",
+        "SoDienThoai": "0920000002",
+        "ChucVu": "TRIAL_STAFF",
+        "Email": "staff2@example.invalid",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaNhanVien": "TR33_NV03",
+        "MaTaiKhoan": "TR33_N03",
+        "MaCuaHang": "TR33_S03",
+        "HoTen": "TRIAL33 Staff 3",
+        "SoDienThoai": "0920000003",
+        "ChucVu": "TRIAL_STAFF",
+        "Email": "staff3@example.invalid",
+        "TrangThai": "HOAT_DONG"
+      }
+    ]
+  },
+  "devices": 90,
+  "branches": 3,
+  "models": 6,
+  "branch_model_pairs": 18,
+  "ready_status_per_pair": 4,
+  "maintenance_per_pair": 1,
+  "warning": "SAN_SANG is physical status, not interval availability; workflows seeded separately through endpoint fixture runner"
+}

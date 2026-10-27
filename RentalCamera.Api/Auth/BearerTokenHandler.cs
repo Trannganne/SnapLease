@@ -19,7 +19,7 @@ public sealed class BearerTokenHandler(
     : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
     private readonly ITimeLimitedDataProtector _protector = protectionProvider
-        .CreateProtector("RentalCamera.Api", "BearerToken", "v1")
+        .CreateProtector("RentalCamera.Api", "BearerToken", "schema33-v2")
         .ToTimeLimitedDataProtector();
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -32,10 +32,12 @@ public sealed class BearerTokenHandler(
         if (token.Length is < 20 or > 5000)
             return AuthenticateResult.Fail("Token không hợp lệ.");
 
-        string accountId;
+        string accountId; int epoch;
         try
         {
-            accountId = _protector.Unprotect(token);
+            var payload = _protector.Unprotect(token).Split('|');
+            if (payload.Length!=2 || !int.TryParse(payload[1],out epoch) || epoch<0) return AuthenticateResult.Fail("Token không hợp lệ.");
+            accountId=payload[0];
         }
         catch (Exception ex) when (ex is CryptographicException or FormatException or ArgumentException)
         {
@@ -44,7 +46,7 @@ public sealed class BearerTokenHandler(
 
         var account = await db.TaiKhoan.AsNoTracking()
             .SingleOrDefaultAsync(x => x.MaTaiKhoan == accountId && x.TrangThai == "HOAT_DONG");
-        if (account is null)
+        if (account is null || account.PhienBanBaoMat != epoch)
             return AuthenticateResult.Fail("Tài khoản không còn hoạt động.");
 
         var claims = new[]
@@ -61,8 +63,8 @@ public sealed class BearerTokenHandler(
 public sealed class TokenIssuer(IDataProtectionProvider protectionProvider)
 {
     private readonly ITimeLimitedDataProtector _protector = protectionProvider
-        .CreateProtector("RentalCamera.Api", "BearerToken", "v1")
+        .CreateProtector("RentalCamera.Api", "BearerToken", "schema33-v2")
         .ToTimeLimitedDataProtector();
 
-    public string Issue(string accountId) => _protector.Protect(accountId, TimeSpan.FromHours(1));
+    public string Issue(string accountId, int epoch = 0) => _protector.Protect(accountId+"|"+epoch.ToString(System.Globalization.CultureInfo.InvariantCulture), TimeSpan.FromHours(1));
 }

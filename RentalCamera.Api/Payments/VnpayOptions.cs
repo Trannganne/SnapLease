@@ -3,6 +3,9 @@ namespace RentalCamera.Api.Payments;
 public sealed class VnpayOptions
 {
     public bool Enabled { get; set; }
+    public bool FakeTrial { get; set; }
+    // Opt-in only after the Sandbox callback/IPN route is verified for this API.
+    public bool SettlementEnabled { get; set; }
     public string TmnCode { get; set; } = "";
     public string HashSecret { get; set; } = "";
     public string PaymentUrl { get; set; } = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";

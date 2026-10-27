@@ -1,0 +1,37 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "entrypoint": {
+    "root": "tools",
+    "path": "FixtureSeed/FixtureSeed.csproj"
+  },
+  "requires": "Separate approved DB schema/seed/runtime scope, exact manifest hash and fresh server binding",
+  "transport": "In-process real endpoint delegates and authorization policies; no HTTP listener",
+  "catalog_prerequisite": "02_seed_catalog.sql",
+  "idempotency": "Stable hold idempotency keys, preserved private fixture-state; stop on unknown pending write rather than replay",
+  "time_fixture": "Only GiuCho.NgayTao/HetHanLuc are set to a consistent past20minute interval for the expired hold. No contract is inserted or backdated directly. Live handover fixtures require current08:00-19:50 Vietnam service hours.",
+  "cases": [
+    "EMPTY",
+    "PARTIAL",
+    "FULL",
+    "OTHER_BRANCH",
+    "EXPIRED_HOLD",
+    "OVERLAP_A",
+    "OVERLAP_B",
+    "ADJACENT_C",
+    "BULK4",
+    "REFUND_PENDING_ACK",
+    "REFUND_ACK",
+    "NO_REFUND_ACK",
+    "ADDITIONAL_DUE",
+    "RENEW_ALLOWED",
+    "RENEW_BLOCKED",
+    "EXCESS_NON_CANCELED"
+  ],
+  "limits": [
+    "No runtime/SQL execution performed while preparing package",
+    "Rate limiting, real bearer authentication, public HTTP/phone/Web, SQL race and actual provider calls are not proven by fixture creation",
+    "Synthetic pending VNPAY attempts have empty URL; verified local synthetic callbacks exercise source recording without creating payment links",
+    "Fake PDF bytes satisfy current source validation only; document rendering/real signing evidence still needs testing",
+    "Images use fake storage service and typed AnhBienBan rows; upload endpoint/permissions remain a separate test"
+  ]
+}

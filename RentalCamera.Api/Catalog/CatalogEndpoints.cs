@@ -11,7 +11,7 @@ public static class CatalogEndpoints
         app.MapGet("/api/cua-hang", async (RentalCameraContext db, CancellationToken ct) =>
             await db.CuaHang.AsNoTracking().Where(x => x.TrangThai == "HOAT_DONG")
                 .OrderBy(x => x.TenCuaHang)
-                .Select(x => new { x.MaCuaHang, x.TenCuaHang, x.DiaChi, x.SoDienThoai, x.Email, x.MoTa })
+                .Select(x => new { x.MaCuaHang, x.TenCuaHang, x.DiaChi, x.SoDienThoai, x.Email, x.MoTa, x.ViDo, x.KinhDo })
                 .ToListAsync(ct));
 
         var categories = app.MapGroup("/api/danh-muc");

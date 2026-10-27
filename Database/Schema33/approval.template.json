@@ -1,0 +1,10 @@
+{
+  "DatabasePackageApproved": false,
+  "PreDatabaseChecksAccepted": false,
+  "Environment": "Schema33Trial",
+  "ExpectedDatabase": "RentalCameraDb30_Test",
+  "ExpectedDataSource": "SET_AFTER_FRESH_READONLY_VERIFICATION",
+  "ExpectedServerName": "SET_AFTER_FRESH_READONLY_VERIFICATION",
+  "AllowedOperations": [],
+  "notes": "Not an approval. No password/connection string. Supply the separately reviewed manifest SHA on the command line."
+}

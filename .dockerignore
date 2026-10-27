@@ -1,0 +1,15 @@
+**/bin
+**/obj
+**/.git
+**/.keys
+**/Storage
+**/App_Data
+**/*.private.json
+**/appsettings.Schema33Trial.json
+**/appsettings.Development.json
+**/appsettings.Local.json
+.env
+**/.env
+**/*firebase-admin*.json
+**/*.log
+TestResults

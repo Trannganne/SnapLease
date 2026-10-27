@@ -10,131 +10,104 @@ public static class CancellationEndpoints
 {
     public static void MapCancellationEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/yeu-cau-huy/cho-duyet",async(ClaimsPrincipal principal,RentalCameraContext db,CancellationToken ct)=>{
-            var scope=await ApiAccess.StaffScopeAsync(principal,db,ct);if(scope is null)return Results.Forbid();
-            var rows=await db.YeuCauHuyHopDong.AsNoTracking().Join(db.HopDong,r=>r.MaHopDong,h=>h.MaHopDong,(r,h)=>new{r,h.MaCuaHang})
-                .Where(x=>x.r.TrangThai=="CHO_XAC_NHAN"&&(scope.IsAdmin||x.MaCuaHang==scope.StoreId))
-                .OrderBy(x=>x.r.YeuCauLucUtc).Select(x=>new{x.MaCuaHang,yeuCau=x.r}).ToListAsync(ct);
-            return Results.Ok(rows);
-        }).RequireAuthorization("Staff");
-        app.MapGet("/api/yeu-cau-huy/{id}/ho-so",async(string id,ClaimsPrincipal principal,RentalCameraContext db,CancellationToken ct)=>{
-            var scope=await ApiAccess.StaffScopeAsync(principal,db,ct);if(scope is null)return Results.Forbid();
-            var row=await db.YeuCauHuyHopDong.AsNoTracking().SingleOrDefaultAsync(x=>x.Id==id,ct);if(row is null)return Results.NotFound();
-            var store=await db.HopDong.Where(h=>h.MaHopDong==row.MaHopDong).Select(h=>h.MaCuaHang).SingleAsync(ct);
-            if(!scope.IsAdmin&&store!=scope.StoreId)return Results.Forbid();
-            var payments=await db.ThanhToan.AsNoTracking().Where(p=>p.MaYeuCauHuy==id).ToListAsync(ct);
-            var paymentIds=payments.Select(p=>p.MaThanhToan).ToArray();
-            return Results.Ok(new{yeuCau=row,hoanTien=payments,
-                lichSu=await db.NhatKyNghiepVu.AsNoTracking().Where(a=>a.DoiTuongId==id||a.DoiTuongId==row.MaHopDong).OrderBy(a=>a.ThoiGianUtc).ToListAsync(ct),
-                chungTuHoan=await db.HoanTienAudit.AsNoTracking().Where(a=>paymentIds.Contains(a.MaThanhToan)).OrderBy(a=>a.ThoiGianUtc).ToListAsync(ct)});
-        }).RequireAuthorization("Staff");
-        app.MapGet("/api/hop-dong/{id}/huy-truoc-ban-giao",async(string id,ClaimsPrincipal principal,RentalCameraContext db,CancellationToken ct)=> {
-            if(!await ApiAccess.CanAccessContractAsync(id,principal,db,ct))return Results.Forbid();
-            var rows=await db.YeuCauHuyHopDong.AsNoTracking().Where(x=>x.MaHopDong==id).OrderByDescending(x=>x.YeuCauLucUtc)
-                .Select(x=>new{x.Id,x.MaHopDong,x.LoaiYeuCau,x.TrangThai,x.YeuCauLucUtc,x.LyDo,x.XuLyLucUtc,x.LyDoXuLy,
-                    x.MienKhauTru,x.TyLeKhauTru,x.TienCocDaThu,x.TienThueDaThu,x.TienThuThuaDaThu,x.TienKhauTru,
-                    x.TienCocPhaiHoan,x.TienThuePhaiHoan,x.TienThuThuaPhaiHoan}).ToListAsync(ct);
-            var refunds=await db.ThanhToan.AsNoTracking().Where(x=>x.MaHopDong==id&&x.MaYeuCauHuy!=null).Select(x=>new{x.MaThanhToan,x.SoTien,x.LoaiThanhToan,x.TrangThai,x.MaGiaoDich,x.ThoiGian}).ToListAsync(ct);
-            return Results.Ok(new{yeuCau=rows,hoanTien=refunds});
+        app.MapGet("/api/hop-dong/{id}/huy-truoc-ban-giao", async (string id, ClaimsPrincipal p, RentalCameraContext db, CancellationToken ct) => {
+            if (!await ApiAccess.CanAccessContractAsync(id, p, db, ct)) return Results.Forbid();
+            return Results.Ok(new { doiSoatHuy = await db.DoiSoatHuyHopDong.AsNoTracking().SingleOrDefaultAsync(x => x.MaHopDong == id, ct),
+                hoanTien = await db.ThanhToan.AsNoTracking().Where(x => x.MaHopDong == id && x.MaDoiSoatHuyHopDong != null).ToListAsync(ct) });
         }).RequireAuthorization();
-        app.MapPost("/api/hop-dong/{id}/huy-truoc-ban-giao",async(string id,CancellationRequest request,ClaimsPrincipal principal,RentalCameraContext db,CancellationToken ct)=> {
-            if(string.IsNullOrWhiteSpace(request.LyDo)||request.LyDo.Trim().Length>500)return Results.BadRequest(new{loi="Lý do hủy bắt buộc, tối đa 500 ký tự."});
-            var requested=DateTime.UtcNow;var customer=await ApiAccess.CustomerIdAsync(principal,db,ct);
-            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);await TransactionLock.AcquireAsync(db,"contract:"+id,ct);
-            var h=await db.HopDong.SingleOrDefaultAsync(h=>h.MaHopDong==id&&h.MaKhachThue==customer,ct);if(h is null)return Results.NotFound();
-            if(!await EligibleAsync(h,db,ct))return Results.Conflict(new{loi="Chỉ yêu cầu hủy hợp đồng DA_KY/CHO_BAN_GIAO chưa bàn giao, có phiên bản chính sách mới được chấp thuận."});
-            var existing=await db.YeuCauHuyHopDong.SingleOrDefaultAsync(x=>x.MaHopDong==id&&x.TrangThai=="CHO_XAC_NHAN",ct);
-            if(existing is not null)return Results.Ok(existing);
-            var row=new YeuCauHuyHopDong{Id=ApiAccess.NewId("YH"),MaHopDong=id,YeuCauLucUtc=requested,LyDo=request.LyDo.Trim(),
-                TyLeKhauTru=RentalPolicy.CancellationRate(h.ThoiGianBanGiao,DateTime.SpecifyKind(requested.AddHours(7),DateTimeKind.Unspecified))};
-            await ReconcileAsync(row,db,ct,false);db.YeuCauHuyHopDong.Add(row);
-            await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return Results.Created("/api/hop-dong/"+id+"/huy-truoc-ban-giao",row);
-        }).RequireAuthorization("Customer");
-        app.MapPut("/api/yeu-cau-huy/{id}/xu-ly",async(string id,ProcessCancellationRequest request,ClaimsPrincipal principal,RentalCameraContext db,IConfiguration config,CancellationToken ct)=> {
-            var scope=await ApiAccess.StaffScopeAsync(principal,db,ct);if(scope is null)return Results.Forbid();
-            if(request.MienKhauTru&&!scope.IsAdmin)return Results.Forbid();
-            if(request.QuyetDinh is not("DUYET" or "TU_CHOI")||string.IsNullOrWhiteSpace(request.LyDo)||request.LyDo.Trim().Length>500)return Results.BadRequest();
-            var parent=await db.YeuCauHuyHopDong.Where(x=>x.Id==id).Select(x=>x.MaHopDong).SingleOrDefaultAsync(ct);if(parent is null)return Results.NotFound();
-            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);await TransactionLock.AcquireAsync(db,"contract:"+parent,ct);
-            var row=await db.YeuCauHuyHopDong.SingleAsync(x=>x.Id==id,ct);var h=await db.HopDong.SingleAsync(h=>h.MaHopDong==parent,ct);
-            var before=System.Text.Json.JsonSerializer.Serialize(row);
-            if(!scope.IsAdmin&&h.MaCuaHang!=scope.StoreId)return Results.Forbid();
-            if(row.CanAdminXuLy&&!scope.IsAdmin)return Results.Forbid();
-            if(row.TrangThai!="CHO_XAC_NHAN")return Results.Ok(row);
-            if(!await EligibleAsync(h,db,ct))return Results.Conflict(new{loi="Hợp đồng đã bàn giao/đổi trạng thái; không thể hủy trước bàn giao."});
-            row.NguoiXuLy=ApiAccess.AccountId(principal);row.XuLyLucUtc=DateTime.UtcNow;row.LyDoXuLy=request.LyDo.Trim();
-            if(request.QuyetDinh=="TU_CHOI")row.TrangThai="TU_CHOI";
-            else {
-                row.MienKhauTru=request.MienKhauTru;
-                if(request.MienKhauTru && request.CanCuNgoaiLe is not("BAT_KHA_KHANG" or "LOI_CUA_HANG"))return Results.BadRequest(new{loi="Miễn khấu trừ cần căn cứ bất khả kháng hoặc lỗi cửa hàng đã xác nhận."});
-                row.LyDoXuLy+=(request.MienKhauTru?"; "+request.CanCuNgoaiLe:"");
-                row.TrangThai="DA_DUYET";h.TrangThai="DA_HUY";
-                // Device allocations are retained as history; contract state releases their schedule.
-                var allocated=await db.ChiTietHopDong.Where(d=>d.MaHopDong==parent).Select(d=>d.MaThietBi).ToListAsync(ct);
-                var devices=await db.ThietBi.Where(t=>allocated.Contains(t.MaThietBi)&&t.TrangThai=="DANG_GIU").ToListAsync(ct);
-                foreach(var device in devices)device.TrangThai="SAN_SANG";
-                await ReconcileAsync(row,db,ct,true);
-            }
-            db.NhatKyNghiepVu.Add(new(){Id=ApiAccess.NewId("AU"),HanhDong="CANCELLATION_"+request.QuyetDinh,
-                DoiTuongId=row.Id,MaTaiKhoan=ApiAccess.AccountId(principal)!,ThoiGianUtc=DateTime.UtcNow,
-                LyDo=request.LyDo.Trim(),DuLieuJson=System.Text.Json.JsonSerializer.Serialize(new{before,after=row,request.CanCuNgoaiLe})});
-            await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return Results.Ok(row);
+        app.MapPost("/api/hop-dong/{id}/huy-truoc-ban-giao", (string id, CancellationRequest r, ClaimsPrincipal p, RentalCameraContext db, CancellationToken ct) =>
+            DirectAsync(id, r, false, p, db, ct)).RequireAuthorization("Customer");
+        app.MapPost("/api/hop-dong/{id}/huy-truc-tiep", (string id, CancellationRequest r, ClaimsPrincipal p, RentalCameraContext db, CancellationToken ct) =>
+            DirectAsync(id, r, true, p, db, ct)).RequireAuthorization("Staff");
+        app.MapPost("/api/hop-dong/{id}/doi-soat-huy", async (string id, ClaimsPrincipal p, RentalCameraContext db, CancellationToken ct) => {
+            var scope = await ApiAccess.StaffScopeAsync(p, db, ct); if (scope == null) return Results.Forbid();
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            await TransactionLock.AcquireAsync(db, "contract:" + id, ct);
+            var h = await db.HopDong.SingleOrDefaultAsync(x => x.MaHopDong == id, ct); if (h == null) return Results.NotFound();
+            if (!scope.IsAdmin && scope.StoreId != h.MaCuaHang) return Results.Forbid();
+            var row = await db.DoiSoatHuyHopDong.SingleOrDefaultAsync(x => x.MaHopDong == id, ct);
+            if (row == null || h.TrangThai != "DA_HUY" || RentalPolicy.ProtectedContracts.Contains(id)) return Results.Conflict();
+            await ReconcileAsync(row, db, ct, true); await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); return Results.Ok(row);
         }).RequireAuthorization("Staff");
-        app.MapPost("/api/yeu-cau-huy/{id}/doi-soat",async(string id,ClaimsPrincipal principal,RentalCameraContext db,CancellationToken ct)=> {
-            var scope=await ApiAccess.StaffScopeAsync(principal,db,ct);if(scope is null)return Results.Forbid();
-            var parent=await db.YeuCauHuyHopDong.Where(x=>x.Id==id).Select(x=>x.MaHopDong).SingleOrDefaultAsync(ct);if(parent is null)return Results.NotFound();
-            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);await TransactionLock.AcquireAsync(db,"contract:"+parent,ct);
-            var h=await db.HopDong.SingleAsync(h=>h.MaHopDong==parent,ct);if(!scope.IsAdmin&&h.MaCuaHang!=scope.StoreId)return Results.Forbid();
-            var row=await db.YeuCauHuyHopDong.SingleAsync(x=>x.Id==id,ct);if(row.TrangThai!="DA_DUYET")return Results.Conflict();
-            await ReconcileAsync(row,db,ct,true);await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return Results.Ok(row);
-        }).RequireAuthorization("Staff");
-        app.MapPut("/api/thanh-toan/{id}/xac-nhan-hoan-huy",async(string id,RefundEvidenceRequest request,ClaimsPrincipal principal,RentalCameraContext db,CancellationToken ct)=> {
-            var scope=await ApiAccess.StaffScopeAsync(principal,db,ct);if(scope is null)return Results.Forbid();
-            if(string.IsNullOrWhiteSpace(request.ChungTu)||request.ChungTu.Trim().Length>500)return Results.BadRequest(new{loi="Cần mã/chứng từ chuyển hoàn đã kiểm tra."});
-            var parent=await db.ThanhToan.Where(x=>x.MaThanhToan==id).Select(x=>x.MaHopDong).SingleOrDefaultAsync(ct);if(parent is null)return Results.NotFound();
-            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);await TransactionLock.AcquireAsync(db,"contract:"+parent,ct);
-            var h=await db.HopDong.SingleAsync(h=>h.MaHopDong==parent,ct);if(!scope.IsAdmin&&h.MaCuaHang!=scope.StoreId)return Results.Forbid();
-            var p=await db.ThanhToan.SingleAsync(x=>x.MaThanhToan==id,ct);
-            if(p.MaYeuCauHuy is null||h.TrangThai!="DA_HUY")return Results.Conflict();
-            if(p.TrangThai=="DA_HOAN")return Results.Ok(new{p.MaThanhToan,p.TrangThai});
-            if(p.TrangThai!="CHO_THANH_TOAN")return Results.Conflict();
-            p.TrangThai="DA_HOAN";p.MaGiaoDich=request.ChungTu.Trim();p.ThoiGian=DateTime.UtcNow;
-            db.HoanTienAudit.Add(new HoanTienAudit { Id=ApiAccess.NewId("AH"),MaThanhToan=p.MaThanhToan,
-                MaTaiKhoan=ApiAccess.AccountId(principal)!,ChungTu=request.ChungTu.Trim(),ThoiGianUtc=DateTime.UtcNow });
-            await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return Results.Ok(new{p.MaThanhToan,p.TrangThai});
-        }).RequireAuthorization("Staff");
+        app.MapGet("/api/yeu-cau-huy/cho-duyet", () => Results.Json(new { code = "CANCELLATION_QUEUE_REMOVED" }, statusCode: 410)).RequireAuthorization("Staff");
+        app.MapPut("/api/yeu-cau-huy/{id}/xu-ly", () => Results.Json(new { code = "USE_DIRECT_CANCELLATION" }, statusCode: 410)).RequireAuthorization("Staff");
     }
-    internal static async Task<bool> EligibleAsync(HopDong h,RentalCameraContext db,CancellationToken ct)=>
-        !RentalPolicy.ProtectedContracts.Contains(h.MaHopDong)&&h.TrangThai is "DA_KY" or "CHO_BAN_GIAO" && h.DaDongYDieuKhoan&&h.PhienBanDieuKhoan==RentalPolicy.TermsVersion&&
-        !await db.ChiTietHopDong.AnyAsync(d=>d.MaHopDong==h.MaHopDong&&d.NgayGiaoThucTe!=null,ct);
-    public static async Task ReconcileAsync(YeuCauHuyHopDong row,RentalCameraContext db,CancellationToken ct,bool createRefund)
+    private static async Task<IResult> DirectAsync(string id, CancellationRequest r, bool staff, ClaimsPrincipal p, RentalCameraContext db, CancellationToken ct)
     {
-        var payments=await db.ThanhToan.Where(p=>p.MaHopDong==row.MaHopDong).ToListAsync(ct);
-        payments.AddRange(db.ThanhToan.Local.Where(p=>p.MaHopDong==row.MaHopDong && !payments.Contains(p)));
-        var paymentIds=payments.Where(p=>!p.LoaiThanhToan.StartsWith("HOAN_")).Select(p=>p.MaThanhToan).ToArray();
-        // Filter status in memory: the current callback may still be an unsaved tracked change.
-        var attempts=await db.YeuCauThanhToanVnpay.Where(a=>paymentIds.Contains(a.MaThanhToan)).ToListAsync(ct);
-        row.TienCocDaThu=payments.Where(p=>p.LoaiThanhToan=="TIEN_COC"&&p.TrangThai=="THANH_CONG").Sum(p=>p.SoTien);
-        row.TienThueDaThu=payments.Where(p=>p.LoaiThanhToan=="TIEN_THUE"&&p.TrangThai=="THANH_CONG").Sum(p=>p.SoTien);
-        row.TienThuThuaDaThu=attempts.Where(a=>a.LaThuThua&&a.TrangThai=="THANH_CONG").Sum(a=>a.SoTien);
-        var amounts=Amounts(row.TienCocDaThu,row.TienThueDaThu,row.TienThuThuaDaThu,row.TyLeKhauTru,row.MienKhauTru);
-        row.TienKhauTru=amounts.Deduction;row.TienCocPhaiHoan=amounts.DepositRefund;
-        row.TienThuePhaiHoan=amounts.RentRefund;row.TienThuThuaPhaiHoan=amounts.ExcessRefund;
-        if(!createRefund)return;
-        foreach(var part in new[]{(Type:"HOAN_COC",Amount:row.TienCocPhaiHoan),(Type:"HOAN_TIEN_THUE",Amount:row.TienThuePhaiHoan),(Type:"HOAN_THU_THUA",Amount:row.TienThuThuaPhaiHoan)}) {
-            var reserved=payments.Where(p=>p.LoaiThanhToan==part.Type && p.TrangThai is "CHO_THANH_TOAN" or "DA_HOAN" or "THANH_CONG").Sum(p=>p.SoTien);
-            var amount=Math.Max(0,part.Amount-reserved);if(amount==0)continue;
-            db.ThanhToan.Add(new ThanhToan{MaThanhToan=ApiAccess.NewId("TT"),MaHopDong=row.MaHopDong,MaYeuCauHuy=row.Id,
-                LoaiThanhToan=part.Type,SoTien=amount,PhuongThuc="CHUYEN_KHOAN",TrangThai="CHO_THANH_TOAN",NoiDungChuyenKhoan="Theo dõi khoản phải hoàn sau hủy; chưa chuyển tiền."});
+        if (!ContractOperation.Valid(r.OperationId) || string.IsNullOrWhiteSpace(r.LyDo) || r.LyDo.Length > 500 ||
+            r.LyDoNgoaiLe?.Length > 500 || r.TaiLieuUrl?.Length > 500) return Results.BadRequest();
+        var scope = staff ? await ApiAccess.StaffScopeAsync(p, db, ct) : null;
+        if (staff ? scope == null : !p.IsInRole("KHACH_HANG")) return Results.Forbid();
+        var actor = ApiAccess.AccountId(p)!;
+        await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        await TransactionLock.AcquireAsync(db, "contract:" + id, ct);
+        var h = await db.HopDong.SingleOrDefaultAsync(x => x.MaHopDong == id, ct); if (h == null) return Results.NotFound();
+        if (staff ? !scope!.IsAdmin && scope.StoreId != h.MaCuaHang : await ApiAccess.CustomerIdAsync(p, db, ct) != h.MaKhachThue) return Results.Forbid();
+        if (!staff && (r.CanCuNgoaiLe != null || r.LyDoNgoaiLe != null || r.TaiLieuUrl != null)) return Results.BadRequest();
+        if (staff && r.CanCuNgoaiLe is not ("BAT_KHA_KHANG" or "LOI_CUA_HANG")) return Results.BadRequest(new { code = "EXCEPTION_BASIS_REQUIRED" });
+        if (r.CanCuNgoaiLe == "BAT_KHA_KHANG" && !scope!.IsAdmin) return Results.Forbid();
+        if (staff && string.IsNullOrWhiteSpace(r.LyDoNgoaiLe)) return Results.BadRequest();
+        var hash = ContractOperation.Hash(id, actor, r);
+        try {
+            if (await ContractOperation.ReplayAsync(db, h, "CANCEL_DIRECT", r.OperationId!, hash, ct))
+                return Results.Ok(new { h.MaHopDong, h.TrangThai, doiSoat = true });
+            if (!await EligibleAsync(h, db, ct)) return Results.Conflict(new { code = "CANCELLATION_NOT_ELIGIBLE" });
+            var row = await CancelAsync(h, actor, staff ? scope!.IsAdmin ? "ADMIN" : "NHAN_VIEN" : "KHACH_HANG",
+                staff && r.CanCuNgoaiLe == "LOI_CUA_HANG" ? "CUA_HANG_HUY" : "KHACH_HUY", r.LyDo.Trim(),
+                r.CanCuNgoaiLe, r.LyDoNgoaiLe, r.TaiLieuUrl, db, ct);
+            ContractOperation.Record(db, h, "CANCEL_DIRECT", r.OperationId!, hash);
+            await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); return Results.Ok(new { h.MaHopDong, h.TrangThai, doiSoatHuy = row });
+        } catch (InvalidOperationException e) { return Results.Conflict(new { code = "CANCELLATION_CONFLICT", loi = e.Message }); }
+    }
+    internal static async Task<bool> EligibleAsync(HopDong h, RentalCameraContext db, CancellationToken ct) =>
+        !RentalPolicy.ProtectedContracts.Contains(h.MaHopDong) && h.TrangThai is "DA_KY" or "CHO_BAN_GIAO" &&
+        h.DaDongYDieuKhoan && h.PhienBanDieuKhoan == RentalPolicy.TermsVersion &&
+        !await db.ChiTietHopDong.AnyAsync(d => d.MaHopDong == h.MaHopDong && d.NgayGiaoThucTe != null, ct);
+
+    // Caller holds the contract transaction/lock and has checked scope and current eligibility.
+    internal static async Task<DoiSoatHuyHopDong> CancelAsync(HopDong h, string actor, string actorType, string cause, string reason,
+        string? basis, string? exceptionReason, string? evidence, RentalCameraContext db, CancellationToken ct)
+    {
+        if (await db.DoiSoatHuyHopDong.AnyAsync(x => x.MaHopDong == h.MaHopDong, ct)) throw new InvalidOperationException("Đã có hồ sơ hủy.");
+        var now = DateTime.UtcNow;
+        var row = new DoiSoatHuyHopDong { MaHopDong = h.MaHopDong, HuyLucUtc = now, DoiSoatHuyLucUtc = now,
+            NguoiHuy = actor, LoaiTacNhanHuy = actorType, LoaiHuy = cause, LyDoHuy = reason,
+            TyLeKhauTruHuy = basis != null ? 0 : RentalPolicy.CancellationRate(h.ThoiGianBanGiao, RentalPolicy.LocalNow),
+            CanCuNgoaiLeHuy = basis, LyDoNgoaiLeHuy = exceptionReason?.Trim(), TaiLieuNgoaiLeHuyUrl = evidence };
+        db.DoiSoatHuyHopDong.Add(row); h.TrangThai = "DA_HUY";
+        var ids = await db.ChiTietHopDong.Where(x => x.MaHopDong == h.MaHopDong).Select(x => x.MaThietBi).ToListAsync(ct);
+        var devices = await db.ThietBi.Where(x => ids.Contains(x.MaThietBi) && x.TrangThai == "DANG_GIU").ToListAsync(ct);
+        foreach (var d in devices) d.TrangThai = "SAN_SANG";
+        await ReconcileAsync(row, db, ct, true); return row;
+    }
+    public static async Task ReconcileAsync(DoiSoatHuyHopDong row, RentalCameraContext db, CancellationToken ct, bool createRefund)
+    {
+        var payments = await db.ThanhToan.Where(x => x.MaHopDong == row.MaHopDong).ToListAsync(ct);
+        payments.AddRange(db.ThanhToan.Local.Where(x => x.MaHopDong == row.MaHopDong && !payments.Contains(x)));
+        var ids = payments.Where(p => !p.LoaiThanhToan.StartsWith("HOAN_")).Select(p => p.MaThanhToan).ToArray();
+        var attempts = await db.YeuCauThanhToanVnpay.Where(a => ids.Contains(a.MaThanhToan)).ToListAsync(ct);
+        var deposit = payments.Where(p => p.LoaiThanhToan == "TIEN_COC" && p.TrangThai == "THANH_CONG").Sum(p => p.SoTien);
+        var rent = payments.Where(p => p.LoaiThanhToan == "TIEN_THUE" && p.TrangThai == "THANH_CONG").Sum(p => p.SoTien);
+        var excess = attempts.Where(a => a.LaThuThua && a.TrangThai == "THANH_CONG").Sum(a => a.SoTien);
+        if (row.LoaiHuy == "HET_HAN_KY" && deposit + rent + excess != 0) throw new InvalidOperationException("Hợp đồng chưa ký có tiền bất thường; cần đối soát riêng.");
+        var a = Amounts(deposit, rent, excess, row.TyLeKhauTruHuy, false);
+        row.TienCocDaThuKhiHuy = deposit; row.TienThueDaThuKhiHuy = rent; row.TienThuThuaDaThuKhiHuy = excess;
+        row.TienKhauTruHuy = a.Deduction; row.TienCocPhaiHoanKhiHuy = a.DepositRefund;
+        row.TienThuePhaiHoanKhiHuy = a.RentRefund; row.TienThuThuaPhaiHoanKhiHuy = a.ExcessRefund; row.DoiSoatHuyLucUtc = DateTime.UtcNow;
+        if (!createRefund) return;
+        foreach (var part in new[] { (Type: "HOAN_COC", Amount: a.DepositRefund), (Type: "HOAN_TIEN_THUE", Amount: a.RentRefund), (Type: "HOAN_THU_THUA", Amount: a.ExcessRefund) }) {
+            var reserved = payments.Where(p => p.LoaiThanhToan == part.Type && p.TrangThai is "CHO_THANH_TOAN" or "DA_HOAN" or "THANH_CONG").Sum(p => p.SoTien);
+            var amount = Math.Max(0, part.Amount - reserved); if (amount == 0) continue;
+            db.ThanhToan.Add(new() { MaThanhToan = ApiAccess.NewId("TT"), MaHopDong = row.MaHopDong,
+                MaDoiSoatHuyHopDong = row.MaHopDong, LoaiThanhToan = part.Type, SoTien = amount,
+                PhuongThuc = "CHUYEN_KHOAN", TrangThai = "CHO_THANH_TOAN" });
         }
     }
-    public static (decimal Deduction,decimal DepositRefund,decimal RentRefund,decimal ExcessRefund) Amounts(
-        decimal validDeposit,decimal prepaidRent,decimal excess,decimal rate,bool exception)
+    public static (decimal Deduction, decimal DepositRefund, decimal RentRefund, decimal ExcessRefund) Amounts(
+        decimal validDeposit, decimal prepaidRent, decimal excess, decimal rate, bool exception)
     {
-        var deduction=Math.Round(validDeposit*(exception?0:rate),2);
-        return(deduction,validDeposit-deduction,prepaidRent,excess);
+        var deduction = Math.Round(validDeposit * (exception ? 0 : rate), 2);
+        return (deduction, validDeposit - deduction, prepaidRent, excess);
     }
 }
-public sealed record CancellationRequest(string LyDo);
-public sealed record ProcessCancellationRequest(string QuyetDinh,string LyDo,bool MienKhauTru,string? CanCuNgoaiLe);
-public sealed record RefundEvidenceRequest(string ChungTu);
+public sealed record CancellationRequest(string LyDo, string? OperationId = null, string? CanCuNgoaiLe = null, string? LyDoNgoaiLe = null, string? TaiLieuUrl = null);

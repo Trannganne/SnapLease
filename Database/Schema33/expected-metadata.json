@@ -1,0 +1,5957 @@
+{
+  "tables": [
+    {
+      "schema": "dbo",
+      "name": "TaiKhoan"
+    },
+    {
+      "schema": "dbo",
+      "name": "KhachThue"
+    },
+    {
+      "schema": "dbo",
+      "name": "NhanVien"
+    },
+    {
+      "schema": "dbo",
+      "name": "GiayToTuyThan"
+    },
+    {
+      "schema": "dbo",
+      "name": "DanhMuc"
+    },
+    {
+      "schema": "dbo",
+      "name": "ThuongHieu"
+    },
+    {
+      "schema": "dbo",
+      "name": "DongMay"
+    },
+    {
+      "schema": "dbo",
+      "name": "ThietBi"
+    },
+    {
+      "schema": "dbo",
+      "name": "AnhThietBi"
+    },
+    {
+      "schema": "dbo",
+      "name": "CuaHang"
+    },
+    {
+      "schema": "dbo",
+      "name": "GioHang"
+    },
+    {
+      "schema": "dbo",
+      "name": "ChiTietGioHang"
+    },
+    {
+      "schema": "dbo",
+      "name": "GiuCho"
+    },
+    {
+      "schema": "dbo",
+      "name": "ChiTietGiuCho"
+    },
+    {
+      "schema": "dbo",
+      "name": "HopDong"
+    },
+    {
+      "schema": "dbo",
+      "name": "ChiTietHopDong"
+    },
+    {
+      "schema": "dbo",
+      "name": "PhuLuc"
+    },
+    {
+      "schema": "dbo",
+      "name": "XacNhanKyHopDong"
+    },
+    {
+      "schema": "dbo",
+      "name": "ThanhToan"
+    },
+    {
+      "schema": "dbo",
+      "name": "YeuCauThanhToanVnpay"
+    },
+    {
+      "schema": "dbo",
+      "name": "PhieuPhat"
+    },
+    {
+      "schema": "dbo",
+      "name": "QuyetToanHopDong"
+    },
+    {
+      "schema": "dbo",
+      "name": "PhanBoQuyetToan"
+    },
+    {
+      "schema": "dbo",
+      "name": "DanhGia"
+    },
+    {
+      "schema": "dbo",
+      "name": "AnhDanhGia"
+    },
+    {
+      "schema": "dbo",
+      "name": "AnhBienBan"
+    },
+    {
+      "schema": "dbo",
+      "name": "ThongBao"
+    },
+    {
+      "schema": "dbo",
+      "name": "FcmDeviceToken"
+    },
+    {
+      "schema": "dbo",
+      "name": "NotificationDelivery"
+    },
+    {
+      "schema": "dbo",
+      "name": "IdempotencyKey"
+    },
+    {
+      "schema": "dbo",
+      "name": "BienBanNhanTra"
+    },
+    {
+      "schema": "dbo",
+      "name": "DoiSoatHuyHopDong"
+    },
+    {
+      "schema": "dbo",
+      "name": "XacMinhKhachKhongDen"
+    }
+  ],
+  "columns": [
+    [
+      "dbo",
+      "TaiKhoan",
+      "MaTaiKhoan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "TaiKhoan",
+      "TenDangNhap",
+      "varchar(100)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "TaiKhoan",
+      "MatKhauHash",
+      "varchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "TaiKhoan",
+      "VaiTro",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "TaiKhoan",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'HOAT_DONG'"
+    ],
+    [
+      "dbo",
+      "TaiKhoan",
+      "NgayTao",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "TaiKhoan",
+      "PhienBanBaoMat",
+      "int",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "MaKhachThue",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "MaTaiKhoan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "HoTen",
+      "nvarchar(150)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "SoDienThoai",
+      "varchar(15)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "Email",
+      "varchar(255)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "CCCD",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "DiaChi",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "NgaySinh",
+      "date",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "GioiTinh",
+      "nvarchar(10)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "QuocTich",
+      "nvarchar(100)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "NgayCap",
+      "date",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "NoiCap",
+      "nvarchar(200)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "DaXacNhanThongTin",
+      "bit",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "KhachThue",
+      "EmailXacMinhLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "MaNhanVien",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "MaTaiKhoan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "MaCuaHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "HoTen",
+      "nvarchar(150)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "DiaChi",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "SoDienThoai",
+      "varchar(15)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "ChucVu",
+      "nvarchar(100)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "Email",
+      "varchar(255)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "NhanVien",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'HOAT_DONG'"
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "MaGiayTo",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "MaKhachThue",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "LoaiGiayTo",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "SoGiayTo",
+      "varchar(30)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "MatTruocUrl",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "MatSauUrl",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "NgayTaiLen",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "TrangThaiXacMinh",
+      "varchar(20)",
+      0,
+      "'CHO_XAC_MINH'"
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "GhiChu",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DanhMuc",
+      "MaDanhMuc",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DanhMuc",
+      "TenDanhMuc",
+      "nvarchar(150)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DanhMuc",
+      "MoTa",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DanhMuc",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'HOAT_DONG'"
+    ],
+    [
+      "dbo",
+      "ThuongHieu",
+      "MaThuongHieu",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThuongHieu",
+      "TenThuongHieu",
+      "nvarchar(150)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThuongHieu",
+      "QuocGia",
+      "nvarchar(100)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "MaDongMay",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "MaDanhMuc",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "MaThuongHieu",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "TenDongMay",
+      "nvarchar(200)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "MoTa",
+      "nvarchar(1000)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "GiaThueNgay",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "TienCoc",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "PhanTramGiamGia",
+      "decimal(5,2)",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "MaThietBi",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "MaDongMay",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "MaCuaHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "SoSerial",
+      "varchar(100)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "TinhTrang",
+      "nvarchar(200)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'SAN_SANG'"
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "NgayNhap",
+      "date",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThietBi",
+      "RowVersion",
+      "rowversion",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhThietBi",
+      "MaAnh",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhThietBi",
+      "MaDongMay",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhThietBi",
+      "DuongDanAnh",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhThietBi",
+      "LaAnhDaiDien",
+      "bit",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "AnhThietBi",
+      "ThuTuHienThi",
+      "int",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "MaCuaHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "TenCuaHang",
+      "nvarchar(200)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "ViDo",
+      "decimal(9,6)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "KinhDo",
+      "decimal(9,6)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "DiaChi",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "SoDienThoai",
+      "varchar(15)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "Email",
+      "varchar(255)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "MoTa",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "CuaHang",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'HOAT_DONG'"
+    ],
+    [
+      "dbo",
+      "GioHang",
+      "MaGioHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GioHang",
+      "MaKhachThue",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GioHang",
+      "NgayTao",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "GioHang",
+      "NgayCapNhat",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "GioHang",
+      "TrangThai",
+      "varchar(25)",
+      0,
+      "'DANG_CHON'"
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "MaChiTietGioHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "MaGioHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "MaCuaHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "NguonTao",
+      "varchar(20)",
+      0,
+      "'GIO_HANG'"
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "PhienBan",
+      "uniqueidentifier",
+      0,
+      "NEWID()"
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "DaChuyenHopDong",
+      "bit",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "MaDongMay",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "SoLuong",
+      "int",
+      0,
+      "1"
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "NgayBatDau",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "NgayKetThuc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "DonGia",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "TienCoc",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGioHang",
+      "ThanhTien",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiuCho",
+      "MaGiuCho",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiuCho",
+      "MaGioHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiuCho",
+      "MaKhachThue",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiuCho",
+      "MaCuaHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiuCho",
+      "NgayTao",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "GiuCho",
+      "HetHanLuc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "GiuCho",
+      "TrangThai",
+      "varchar(30)",
+      0,
+      "'DANG_GIU'"
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "PhienBanGioHang",
+      "uniqueidentifier",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "MaChiTietGiuCho",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "MaGiuCho",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "MaChiTietGioHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "MaDongMay",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "SoLuong",
+      "int",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "NgayBatDau",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "NgayKetThuc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietGiuCho",
+      "MaChiTietGioHangHopDong",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaGioHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaGiuCho",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaKhachThue",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaNhanVien",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaCuaHang",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "NgayTaoHopDong",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "NgayKy",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "TrangThai",
+      "varchar(30)",
+      0,
+      "'CHO_KY'"
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "ThoiGianBanGiao",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "ThoiGianTraDuKien",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "TongTien",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "TongTienCoc",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "HinhThucKy",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "TepHopDongUrl",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "DaDongYDieuKhoan",
+      "bit",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "PhienBanDieuKhoan",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaBamNoiDung",
+      "char(64)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "MaBamTepPdf",
+      "char(64)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "NoiDungHopDongJson",
+      "nvarchar(max)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "HopDong",
+      "TrangThaiNhanTra",
+      "varchar(30)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "MaBienBanNhanTra",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "KetQuaKiemTra",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "ThieuPhuKien",
+      "bit",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "TinhTrangPhuKien",
+      "nvarchar(1000)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "LoaiNgoaiLeNhanTra",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "LyDoNgoaiLeNhanTra",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "MaChiTietHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "MaThietBi",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "DonGia",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "TinhTrangLucGiao",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "NgayGiaoThucTe",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "TinhTrangLucNhan",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "NgayNhanThucTe",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ChiTietHopDong",
+      "CoHuHong",
+      "bit",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "HanXuLyUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "HanKyUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "DuyetLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "KyLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "DongLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "LyDoDong",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "HieuLucTu",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "NguoiXuLy",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "MaBamNoiDung",
+      "varchar(64)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "MaBamTepPdf",
+      "varchar(64)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "NoiDungJson",
+      "nvarchar(max)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "PhienBanDieuKhoan",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "MaOtpHash",
+      "varchar(64)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "MuoiOtp",
+      "varchar(32)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "OtpHetHanUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "OtpGuiLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "SoLanThuOtp",
+      "int",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "SoLanGuiOtp",
+      "int",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "MaXacNhanKy",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "DiaChiIpKy",
+      "varchar(45)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "MaPhuLuc",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "NgayLap",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'CHO_XAC_NHAN'"
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "ThoiHanTraMoi",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "ChiPhiPhatSinh",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "TienCocBoSung",
+      "decimal(18,2)",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "GhiChu",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhuLuc",
+      "LyDoGiaHan",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "MaXacNhan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "MaOtpHash",
+      "char(64)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "MuoiOtp",
+      "char(32)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "TaoLuc",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "HetHanLuc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "SoLanThu",
+      "int",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'CHO_XAC_NHAN'"
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "XacNhanLuc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "DiaChiIp",
+      "varchar(45)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "ThietBiKy",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "PhienBanDieuKhoan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "MaBamNoiDung",
+      "char(64)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "MaBamTepPdf",
+      "char(64)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "XacNhanKyHopDong",
+      "NoiDungHopDongJson",
+      "nvarchar(max)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaQuyetToan",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaThanhToan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "SoTien",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "LoaiThanhToan",
+      "varchar(30)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "PhuongThuc",
+      "varchar(30)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaGiaoDich",
+      "varchar(100)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "ThoiGian",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'CHO_THANH_TOAN'"
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "NoiDungChuyenKhoan",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "NhaCungCap",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaThamChieu",
+      "varchar(100)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaNganHang",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "LoaiThe",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaPhanHoi",
+      "varchar(10)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "DuongDanThanhToan",
+      "varchar(2000)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "ThoiGianHetHan",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "ThoiGianCapNhat",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "NguoiXacNhanHoan",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "XacNhanHoanLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "NguoiXacNhanNhanHoan",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "KhachXacNhanNhanHoanLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThanhToan",
+      "MaDoiSoatHuyHopDong",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "MaYeuCau",
+      "varchar(50)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "MaThanhToan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "MaThamChieu",
+      "varchar(100)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "SoTien",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "TienTe",
+      "varchar(10)",
+      0,
+      "('VND')"
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "DuongDanThanhToan",
+      "varchar(2000)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "ThoiGianHetHan",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "TrangThai",
+      "varchar(30)",
+      0,
+      "('CHO_THANH_TOAN')"
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "LaThuThua",
+      "bit",
+      0,
+      "(0)"
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "MaGiaoDich",
+      "varchar(100)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "MaNganHang",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "LoaiThe",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "MaPhanHoi",
+      "varchar(10)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "GhiChu",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "ThoiGianTao",
+      "datetime2",
+      0,
+      "SYSUTCDATETIME()"
+    ],
+    [
+      "dbo",
+      "YeuCauThanhToanVnpay",
+      "ThoiGianCapNhat",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "MaPhieuPhat",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "MaChiTietHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "LoaiViPham",
+      "varchar(30)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "SoTien",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "MoTa",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "NgayLap",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "TrangThai",
+      "varchar(20)",
+      0,
+      "'CHO_XAC_NHAN'"
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "NguoiLap",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "NguoiXuLy",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhieuPhat",
+      "XuLyLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "Id",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "MaBienBan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "PhienBan",
+      "int",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "MaBam",
+      "varchar(64)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "NguoiChot",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "ChotLucUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "HanTraHieuLuc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "TienThue",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "PhiGiaHan",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "PhiTraTre",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "BoiThuong",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "TongNghiaVu",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "ThuePhiDaThu",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "CocDaThu",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "CocKhauTru",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "ConPhaiThuBanDau",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "HoanCocBanDau",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "HoanKhacBanDau",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "HoanThanhLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "KhachXacNhanHoanTatLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "QuyetToanHopDong",
+      "NguoiXacNhanHoanTat",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "Id",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MaQuyetToan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "LoaiDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "LoaiNghiaVu",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MoTa",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "SoTien",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MaNghiaVu",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MaThanhToan",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MaChiTietHopDong",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MaPhuLuc",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "MaPhieuPhat",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "DonGia",
+      "decimal(18,2)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "SoNgay",
+      "int",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "PhanBoQuyetToan",
+      "TaoLucUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "MaDanhGia",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "MaChiTietHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "MaKhachThue",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "NhanXet",
+      "nvarchar(1000)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "SoSao",
+      "tinyint",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "NgayDanhGia",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "TrangThaiKiemDuyet",
+      "varchar(20)",
+      1,
+      "'CONG_KHAI'"
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "GhiChuKiemDuyet",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "NgayKiemDuyet",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DanhGia",
+      "NguoiCapNhatHienThi",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "AnhDanhGia",
+      "MaAnhDanhGia",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhDanhGia",
+      "MaDanhGia",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhDanhGia",
+      "DuongDanAnh",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhDanhGia",
+      "PublicId",
+      "nvarchar(200)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhDanhGia",
+      "ThuTu",
+      "tinyint",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhDanhGia",
+      "NgayTao",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "AnhBienBan",
+      "MaAnhBienBan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhBienBan",
+      "MaChiTietHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhBienBan",
+      "Loai",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhBienBan",
+      "DuongDanAnh",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "AnhBienBan",
+      "MoTa",
+      "nvarchar(300)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "AnhBienBan",
+      "ThoiGianChup",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "HanTraNhac",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "EventKey",
+      "varchar(200)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "MaThongBao",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "MaTaiKhoan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "Loai",
+      "varchar(30)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "TieuDe",
+      "nvarchar(200)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "NoiDung",
+      "nvarchar(1000)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "ThoiGianGui",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "DaDoc",
+      "bit",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "EventCode",
+      "varchar(50)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "TargetType",
+      "varchar(30)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "ThongBao",
+      "TargetId",
+      "varchar(50)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "Id",
+      "varchar(36)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "MaTaiKhoan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "Token",
+      "nvarchar(2048)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "TokenHash",
+      "char(64)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "Platform",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "DeviceId",
+      "nvarchar(200)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "IsActive",
+      "bit",
+      0,
+      "1"
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "CreatedAt",
+      "datetime2",
+      0,
+      "SYSUTCDATETIME()"
+    ],
+    [
+      "dbo",
+      "FcmDeviceToken",
+      "UpdatedAt",
+      "datetime2",
+      0,
+      "SYSUTCDATETIME()"
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "Id",
+      "varchar(36)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "MaThongBao",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "DeviceTokenId",
+      "varchar(36)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "State",
+      "varchar(20)",
+      0,
+      "'PENDING'"
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "Attempts",
+      "int",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "NextAttemptUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "LeaseUntilUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "NotificationDelivery",
+      "LastErrorCode",
+      "varchar(100)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "IdempotencyKey",
+      "IdempotencyKey",
+      "varchar(100)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "IdempotencyKey",
+      "MaKhachThue",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "IdempotencyKey",
+      "LoaiThaoTac",
+      "varchar(50)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "IdempotencyKey",
+      "PayloadHash",
+      "varchar(64)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "IdempotencyKey",
+      "MaThucThe",
+      "varchar(50)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "IdempotencyKey",
+      "NgayTao",
+      "datetime2",
+      0,
+      "SYSDATETIME()"
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "Id",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "ThucNhanLuc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "NguoiGhiNhan",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "GhiNhanLucUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "LyDoGhiNhanMuon",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "KiemTraLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "NguoiKiemTra",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "ThucNhanLucTruocSua",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "NguoiSuaThucNhan",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "SuaThucNhanLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "BienBanNhanTra",
+      "LyDoSuaThucNhan",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "HuyLucUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "NguoiHuy",
+      "varchar(20)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "LoaiTacNhanHuy",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "LoaiHuy",
+      "varchar(30)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "LyDoHuy",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TyLeKhauTruHuy",
+      "decimal(5,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TienCocDaThuKhiHuy",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TienThueDaThuKhiHuy",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TienThuThuaDaThuKhiHuy",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TienKhauTruHuy",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TienCocPhaiHoanKhiHuy",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TienThuePhaiHoanKhiHuy",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TienThuThuaPhaiHoanKhiHuy",
+      "decimal(18,2)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "DoiSoatHuyLucUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "CanCuNgoaiLeHuy",
+      "varchar(30)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "LyDoNgoaiLeHuy",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DoiSoatHuyHopDong",
+      "TaiLieuNgoaiLeHuyUrl",
+      "nvarchar(500)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "MaHopDong",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "NguoiXacMinh",
+      "varchar(20)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "XacMinhLucUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "GioHenKhiXacMinhKhongDen",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "KhongCoLichHenMoi",
+      "bit",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "CuaHangSanSangBanGiao",
+      "bit",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "KhachChuaCheckIn",
+      "bit",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "DaThuLienHe",
+      "bit",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "LienHeLucUtc",
+      "datetime2",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "KenhLienHe",
+      "nvarchar(100)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "KetQuaLienHe",
+      "nvarchar(500)",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "CoTranhChapKhongDen",
+      "bit",
+      0,
+      null
+    ],
+    [
+      "dbo",
+      "XacMinhKhachKhongDen",
+      "GhiChuKhongDen",
+      "nvarchar(500)",
+      0,
+      null
+    ]
+  ],
+  "key_columns": [
+    [
+      "TaiKhoan",
+      "PK_TaiKhoan",
+      "PK",
+      1,
+      1,
+      "MaTaiKhoan"
+    ],
+    [
+      "KhachThue",
+      "PK_KhachThue",
+      "PK",
+      1,
+      1,
+      "MaKhachThue"
+    ],
+    [
+      "NhanVien",
+      "PK_NhanVien",
+      "PK",
+      1,
+      1,
+      "MaNhanVien"
+    ],
+    [
+      "GiayToTuyThan",
+      "PK_GiayToTuyThan",
+      "PK",
+      1,
+      1,
+      "MaGiayTo"
+    ],
+    [
+      "DanhMuc",
+      "PK_DanhMuc",
+      "PK",
+      1,
+      1,
+      "MaDanhMuc"
+    ],
+    [
+      "ThuongHieu",
+      "PK_ThuongHieu",
+      "PK",
+      1,
+      1,
+      "MaThuongHieu"
+    ],
+    [
+      "DongMay",
+      "PK_DongMay",
+      "PK",
+      1,
+      1,
+      "MaDongMay"
+    ],
+    [
+      "ThietBi",
+      "PK_ThietBi",
+      "PK",
+      1,
+      1,
+      "MaThietBi"
+    ],
+    [
+      "AnhThietBi",
+      "PK_AnhThietBi",
+      "PK",
+      1,
+      1,
+      "MaAnh"
+    ],
+    [
+      "CuaHang",
+      "PK_CuaHang",
+      "PK",
+      1,
+      1,
+      "MaCuaHang"
+    ],
+    [
+      "GioHang",
+      "PK_GioHang",
+      "PK",
+      1,
+      1,
+      "MaGioHang"
+    ],
+    [
+      "ChiTietGioHang",
+      "PK_ChiTietGioHang",
+      "PK",
+      1,
+      1,
+      "MaChiTietGioHang"
+    ],
+    [
+      "GiuCho",
+      "PK_GiuCho",
+      "PK",
+      1,
+      1,
+      "MaGiuCho"
+    ],
+    [
+      "ChiTietGiuCho",
+      "PK_ChiTietGiuCho",
+      "PK",
+      1,
+      1,
+      "MaChiTietGiuCho"
+    ],
+    [
+      "HopDong",
+      "PK_HopDong",
+      "PK",
+      1,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "ChiTietHopDong",
+      "PK_ChiTietHopDong",
+      "PK",
+      1,
+      1,
+      "MaChiTietHopDong"
+    ],
+    [
+      "PhuLuc",
+      "PK_PhuLuc",
+      "PK",
+      1,
+      1,
+      "MaPhuLuc"
+    ],
+    [
+      "XacNhanKyHopDong",
+      "PK_XacNhanKyHopDong",
+      "PK",
+      1,
+      1,
+      "MaXacNhan"
+    ],
+    [
+      "ThanhToan",
+      "PK_ThanhToan",
+      "PK",
+      1,
+      1,
+      "MaThanhToan"
+    ],
+    [
+      "YeuCauThanhToanVnpay",
+      "PK_YeuCauThanhToanVnpay",
+      "PK",
+      1,
+      1,
+      "MaYeuCau"
+    ],
+    [
+      "PhieuPhat",
+      "PK_PhieuPhat",
+      "PK",
+      1,
+      1,
+      "MaPhieuPhat"
+    ],
+    [
+      "QuyetToanHopDong",
+      "PK_QuyetToanHopDong",
+      "PK",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "PK_PhanBoQuyetToan",
+      "PK",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "DanhGia",
+      "PK_DanhGia",
+      "PK",
+      1,
+      1,
+      "MaDanhGia"
+    ],
+    [
+      "AnhDanhGia",
+      "PK_AnhDanhGia",
+      "PK",
+      1,
+      1,
+      "MaAnhDanhGia"
+    ],
+    [
+      "AnhBienBan",
+      "PK_AnhBienBan",
+      "PK",
+      1,
+      1,
+      "MaAnhBienBan"
+    ],
+    [
+      "ThongBao",
+      "PK_ThongBao",
+      "PK",
+      1,
+      1,
+      "MaThongBao"
+    ],
+    [
+      "FcmDeviceToken",
+      "PK_FcmDeviceToken",
+      "PK",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "NotificationDelivery",
+      "PK_NotificationDelivery",
+      "PK",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "IdempotencyKey",
+      "PK_IdempotencyKey",
+      "PK",
+      1,
+      1,
+      "IdempotencyKey"
+    ],
+    [
+      "IdempotencyKey",
+      "PK_IdempotencyKey",
+      "PK",
+      1,
+      2,
+      "MaKhachThue"
+    ],
+    [
+      "IdempotencyKey",
+      "PK_IdempotencyKey",
+      "PK",
+      1,
+      3,
+      "LoaiThaoTac"
+    ],
+    [
+      "TaiKhoan",
+      "UQ_TaiKhoan_TenDangNhap",
+      "INDEX",
+      1,
+      1,
+      "TenDangNhap"
+    ],
+    [
+      "KhachThue",
+      "UQ_KhachThue_MaTaiKhoan",
+      "INDEX",
+      1,
+      1,
+      "MaTaiKhoan"
+    ],
+    [
+      "KhachThue",
+      "UQ_KhachThue_SoDienThoai",
+      "INDEX",
+      1,
+      1,
+      "SoDienThoai"
+    ],
+    [
+      "KhachThue",
+      "UX_KhachThue_CCCD_NotNull",
+      "INDEX",
+      1,
+      1,
+      "CCCD"
+    ],
+    [
+      "NhanVien",
+      "UQ_NhanVien_MaTaiKhoan",
+      "INDEX",
+      1,
+      1,
+      "MaTaiKhoan"
+    ],
+    [
+      "GiayToTuyThan",
+      "UQ_GiayToTuyThan_SoGiayTo",
+      "INDEX",
+      1,
+      1,
+      "SoGiayTo"
+    ],
+    [
+      "DanhMuc",
+      "UQ_DanhMuc_TenDanhMuc",
+      "INDEX",
+      1,
+      1,
+      "TenDanhMuc"
+    ],
+    [
+      "ThuongHieu",
+      "UQ_ThuongHieu_TenThuongHieu",
+      "INDEX",
+      1,
+      1,
+      "TenThuongHieu"
+    ],
+    [
+      "DongMay",
+      "UQ_DongMay",
+      "INDEX",
+      1,
+      1,
+      "MaThuongHieu"
+    ],
+    [
+      "DongMay",
+      "UQ_DongMay",
+      "INDEX",
+      1,
+      2,
+      "TenDongMay"
+    ],
+    [
+      "ThietBi",
+      "UQ_ThietBi_SoSerial",
+      "INDEX",
+      1,
+      1,
+      "SoSerial"
+    ],
+    [
+      "ThietBi",
+      "IX_ThietBi_TimKiem",
+      "INDEX",
+      0,
+      1,
+      "MaCuaHang"
+    ],
+    [
+      "ThietBi",
+      "IX_ThietBi_TimKiem",
+      "INDEX",
+      0,
+      2,
+      "MaDongMay"
+    ],
+    [
+      "ThietBi",
+      "IX_ThietBi_TimKiem",
+      "INDEX",
+      0,
+      3,
+      "TrangThai"
+    ],
+    [
+      "AnhThietBi",
+      "UX_AnhThietBi_DaiDien",
+      "INDEX",
+      1,
+      1,
+      "MaDongMay"
+    ],
+    [
+      "GioHang",
+      "IX_GioHang_KhachHang",
+      "INDEX",
+      0,
+      1,
+      "MaKhachThue"
+    ],
+    [
+      "GioHang",
+      "IX_GioHang_KhachHang",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "GioHang",
+      "IX_GioHang_KhachHang",
+      "INDEX",
+      0,
+      3,
+      "NgayCapNhat"
+    ],
+    [
+      "GioHang",
+      "UQ_GioHang_MaGioHang_KhachThue",
+      "AK",
+      1,
+      1,
+      "MaGioHang"
+    ],
+    [
+      "GioHang",
+      "UQ_GioHang_MaGioHang_KhachThue",
+      "AK",
+      1,
+      2,
+      "MaKhachThue"
+    ],
+    [
+      "ChiTietGioHang",
+      "IX_ChiTietGioHang_Lich",
+      "INDEX",
+      0,
+      1,
+      "MaDongMay"
+    ],
+    [
+      "ChiTietGioHang",
+      "IX_ChiTietGioHang_Lich",
+      "INDEX",
+      0,
+      2,
+      "NgayBatDau"
+    ],
+    [
+      "ChiTietGioHang",
+      "IX_ChiTietGioHang_Lich",
+      "INDEX",
+      0,
+      3,
+      "NgayKetThuc"
+    ],
+    [
+      "GiuCho",
+      "IX_GiuCho_Availability",
+      "INDEX",
+      0,
+      1,
+      "MaCuaHang"
+    ],
+    [
+      "GiuCho",
+      "IX_GiuCho_Availability",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "GiuCho",
+      "IX_GiuCho_Availability",
+      "INDEX",
+      0,
+      3,
+      "HetHanLuc"
+    ],
+    [
+      "GiuCho",
+      "IX_GiuCho_KhachHang",
+      "INDEX",
+      0,
+      1,
+      "MaKhachThue"
+    ],
+    [
+      "GiuCho",
+      "IX_GiuCho_KhachHang",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "GiuCho",
+      "IX_GiuCho_KhachHang",
+      "INDEX",
+      0,
+      3,
+      "HetHanLuc"
+    ],
+    [
+      "ChiTietGiuCho",
+      "IX_ChiTietGiuCho_Lich",
+      "INDEX",
+      0,
+      1,
+      "MaDongMay"
+    ],
+    [
+      "ChiTietGiuCho",
+      "IX_ChiTietGiuCho_Lich",
+      "INDEX",
+      0,
+      2,
+      "NgayBatDau"
+    ],
+    [
+      "ChiTietGiuCho",
+      "IX_ChiTietGiuCho_Lich",
+      "INDEX",
+      0,
+      3,
+      "NgayKetThuc"
+    ],
+    [
+      "HopDong",
+      "UQ_HopDong_MaGiuCho",
+      "INDEX",
+      1,
+      1,
+      "MaGiuCho"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_Lich",
+      "INDEX",
+      0,
+      1,
+      "MaCuaHang"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_Lich",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_Lich",
+      "INDEX",
+      0,
+      3,
+      "ThoiGianBanGiao"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_Lich",
+      "INDEX",
+      0,
+      4,
+      "ThoiGianTraDuKien"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_KhachHang",
+      "INDEX",
+      0,
+      1,
+      "MaKhachThue"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_KhachHang",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_KhachHang",
+      "INDEX",
+      0,
+      3,
+      "NgayTaoHopDong"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_HanTra",
+      "INDEX",
+      0,
+      1,
+      "TrangThai"
+    ],
+    [
+      "HopDong",
+      "IX_HopDong_HanTra",
+      "INDEX",
+      0,
+      2,
+      "ThoiGianTraDuKien"
+    ],
+    [
+      "ChiTietHopDong",
+      "UQ_ChiTietHopDong",
+      "INDEX",
+      1,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "ChiTietHopDong",
+      "UQ_ChiTietHopDong",
+      "INDEX",
+      1,
+      2,
+      "MaThietBi"
+    ],
+    [
+      "ChiTietHopDong",
+      "IX_ChiTietHopDong_ThietBi",
+      "INDEX",
+      0,
+      1,
+      "MaThietBi"
+    ],
+    [
+      "ChiTietHopDong",
+      "IX_ChiTietHopDong_ThietBi",
+      "INDEX",
+      0,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "PhuLuc",
+      "IX_PhuLuc_HopDong",
+      "INDEX",
+      0,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "PhuLuc",
+      "IX_PhuLuc_HopDong",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "PhuLuc",
+      "IX_PhuLuc_HopDong",
+      "INDEX",
+      0,
+      3,
+      "ThoiHanTraMoi"
+    ],
+    [
+      "PhuLuc",
+      "UX_PhuLuc_Active",
+      "INDEX",
+      1,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "XacNhanKyHopDong",
+      "IX_XacNhanKyHopDong_HopDong_TrangThai",
+      "INDEX",
+      0,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "XacNhanKyHopDong",
+      "IX_XacNhanKyHopDong_HopDong_TrangThai",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "ThanhToan",
+      "UX_ThanhToan_MaGiaoDich",
+      "INDEX",
+      1,
+      1,
+      "MaGiaoDich"
+    ],
+    [
+      "ThanhToan",
+      "UX_ThanhToan_MaThamChieu",
+      "INDEX",
+      1,
+      1,
+      "MaThamChieu"
+    ],
+    [
+      "ThanhToan",
+      "IX_ThanhToan_HopDong",
+      "INDEX",
+      0,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "ThanhToan",
+      "IX_ThanhToan_HopDong",
+      "INDEX",
+      0,
+      2,
+      "LoaiThanhToan"
+    ],
+    [
+      "ThanhToan",
+      "IX_ThanhToan_HopDong",
+      "INDEX",
+      0,
+      3,
+      "TrangThai"
+    ],
+    [
+      "ThanhToan",
+      "AK_ThanhToan_MaThanhToan_MaHopDong",
+      "AK",
+      1,
+      1,
+      "MaThanhToan"
+    ],
+    [
+      "ThanhToan",
+      "AK_ThanhToan_MaThanhToan_MaHopDong",
+      "AK",
+      1,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "ThanhToan",
+      "IX_ThanhToan_MaQuyetToan_LoaiThanhToan",
+      "INDEX",
+      1,
+      1,
+      "MaQuyetToan"
+    ],
+    [
+      "ThanhToan",
+      "IX_ThanhToan_MaQuyetToan_LoaiThanhToan",
+      "INDEX",
+      1,
+      2,
+      "LoaiThanhToan"
+    ],
+    [
+      "ThanhToan",
+      "IX_ThanhToan_MaQuyetToan_MaHopDong",
+      "INDEX",
+      0,
+      1,
+      "MaQuyetToan"
+    ],
+    [
+      "ThanhToan",
+      "IX_ThanhToan_MaQuyetToan_MaHopDong",
+      "INDEX",
+      0,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "PhieuPhat",
+      "IX_PhieuPhat_ChiTietHopDong",
+      "INDEX",
+      0,
+      1,
+      "MaChiTietHopDong"
+    ],
+    [
+      "PhieuPhat",
+      "IX_PhieuPhat_ChiTietHopDong",
+      "INDEX",
+      0,
+      2,
+      "TrangThai"
+    ],
+    [
+      "QuyetToanHopDong",
+      "AK_QuyetToanHopDong_Id_MaHopDong",
+      "AK",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "QuyetToanHopDong",
+      "AK_QuyetToanHopDong_Id_MaHopDong",
+      "AK",
+      1,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "QuyetToanHopDong",
+      "AK_QuyetToanHopDong_Id_PhienBan_MaBam",
+      "INDEX",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "QuyetToanHopDong",
+      "AK_QuyetToanHopDong_Id_PhienBan_MaBam",
+      "INDEX",
+      1,
+      2,
+      "PhienBan"
+    ],
+    [
+      "QuyetToanHopDong",
+      "AK_QuyetToanHopDong_Id_PhienBan_MaBam",
+      "INDEX",
+      1,
+      3,
+      "MaBam"
+    ],
+    [
+      "QuyetToanHopDong",
+      "IX_QuyetToanHopDong_MaHopDong",
+      "INDEX",
+      1,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "QuyetToanHopDong",
+      "IX_QuyetToanHopDong_NguoiChot",
+      "INDEX",
+      0,
+      1,
+      "NguoiChot"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "AK_PhanBoQuyetToan_MaQuyetToan_Id",
+      "AK",
+      1,
+      1,
+      "MaQuyetToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "AK_PhanBoQuyetToan_MaQuyetToan_Id",
+      "AK",
+      1,
+      2,
+      "Id"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaChiTietHopDong",
+      "INDEX",
+      0,
+      1,
+      "MaChiTietHopDong"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaPhieuPhat",
+      "INDEX",
+      0,
+      1,
+      "MaPhieuPhat"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaPhuLuc",
+      "INDEX",
+      0,
+      1,
+      "MaPhuLuc"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaQuyetToan_MaHopDong",
+      "INDEX",
+      0,
+      1,
+      "MaQuyetToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaQuyetToan_MaHopDong",
+      "INDEX",
+      0,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaQuyetToan_MaNghiaVu",
+      "INDEX",
+      0,
+      1,
+      "MaQuyetToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaQuyetToan_MaNghiaVu",
+      "INDEX",
+      0,
+      2,
+      "MaNghiaVu"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaQuyetToan_MaThanhToan_MaNghiaVu",
+      "INDEX",
+      1,
+      1,
+      "MaQuyetToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaQuyetToan_MaThanhToan_MaNghiaVu",
+      "INDEX",
+      1,
+      2,
+      "MaThanhToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaQuyetToan_MaThanhToan_MaNghiaVu",
+      "INDEX",
+      1,
+      3,
+      "MaNghiaVu"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaThanhToan_MaHopDong",
+      "INDEX",
+      0,
+      1,
+      "MaThanhToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "IX_PhanBoQuyetToan_MaThanhToan_MaHopDong",
+      "INDEX",
+      0,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "DanhGia",
+      "UQ_DanhGia_MaChiTietHopDong",
+      "INDEX",
+      1,
+      1,
+      "MaChiTietHopDong"
+    ],
+    [
+      "AnhDanhGia",
+      "UQ_AnhDanhGia_ThuTu",
+      "INDEX",
+      1,
+      1,
+      "MaDanhGia"
+    ],
+    [
+      "AnhDanhGia",
+      "UQ_AnhDanhGia_ThuTu",
+      "INDEX",
+      1,
+      2,
+      "ThuTu"
+    ],
+    [
+      "ThongBao",
+      "IX_ThongBao_ChuaDoc",
+      "INDEX",
+      0,
+      1,
+      "MaTaiKhoan"
+    ],
+    [
+      "ThongBao",
+      "IX_ThongBao_ChuaDoc",
+      "INDEX",
+      0,
+      2,
+      "DaDoc"
+    ],
+    [
+      "ThongBao",
+      "IX_ThongBao_ChuaDoc",
+      "INDEX",
+      0,
+      3,
+      "ThoiGianGui"
+    ],
+    [
+      "ThongBao",
+      "UX_ThongBao_EventKey",
+      "INDEX",
+      1,
+      1,
+      "EventKey"
+    ],
+    [
+      "FcmDeviceToken",
+      "UX_FcmDeviceToken_TokenHash",
+      "INDEX",
+      1,
+      1,
+      "TokenHash"
+    ],
+    [
+      "FcmDeviceToken",
+      "IX_FcmDeviceToken_MaTaiKhoan_IsActive",
+      "INDEX",
+      0,
+      1,
+      "MaTaiKhoan"
+    ],
+    [
+      "FcmDeviceToken",
+      "IX_FcmDeviceToken_MaTaiKhoan_IsActive",
+      "INDEX",
+      0,
+      2,
+      "IsActive"
+    ],
+    [
+      "NotificationDelivery",
+      "UX_NotificationDelivery_Target",
+      "INDEX",
+      1,
+      1,
+      "MaThongBao"
+    ],
+    [
+      "NotificationDelivery",
+      "UX_NotificationDelivery_Target",
+      "INDEX",
+      1,
+      2,
+      "DeviceTokenId"
+    ],
+    [
+      "KhachThue",
+      "UXR_KhachThue_EmailDaXacMinh",
+      "INDEX",
+      1,
+      1,
+      "Email"
+    ],
+    [
+      "ChiTietGiuCho",
+      "UXR_ChiTietGiuCho_Selection",
+      "INDEX",
+      1,
+      1,
+      "MaGiuCho"
+    ],
+    [
+      "ChiTietGiuCho",
+      "UXR_ChiTietGiuCho_Selection",
+      "INDEX",
+      1,
+      2,
+      "MaChiTietGioHang"
+    ],
+    [
+      "ChiTietGiuCho",
+      "IXR_ChiTietGiuCho_Capacity",
+      "INDEX",
+      0,
+      1,
+      "MaDongMay"
+    ],
+    [
+      "ChiTietGiuCho",
+      "IXR_ChiTietGiuCho_Capacity",
+      "INDEX",
+      0,
+      2,
+      "NgayBatDau"
+    ],
+    [
+      "ChiTietGiuCho",
+      "IXR_ChiTietGiuCho_Capacity",
+      "INDEX",
+      0,
+      3,
+      "NgayKetThuc"
+    ],
+    [
+      "ChiTietGiuCho",
+      "IXR_ChiTietGiuCho_Capacity",
+      "INDEX",
+      0,
+      4,
+      "MaGiuCho"
+    ],
+    [
+      "HopDong",
+      "IXR_HopDong_NoShow",
+      "INDEX",
+      0,
+      1,
+      "TrangThai"
+    ],
+    [
+      "HopDong",
+      "IXR_HopDong_NoShow",
+      "INDEX",
+      0,
+      2,
+      "ThoiGianBanGiao"
+    ],
+    [
+      "HopDong",
+      "IXR_HopDong_NoShow",
+      "INDEX",
+      0,
+      3,
+      "MaCuaHang"
+    ],
+    [
+      "BienBanNhanTra",
+      "PK_BienBanNhanTra",
+      "PK",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "BienBanNhanTra",
+      "AK_BienBanNhanTra_Id_MaHopDong",
+      "AK",
+      1,
+      1,
+      "Id"
+    ],
+    [
+      "BienBanNhanTra",
+      "AK_BienBanNhanTra_Id_MaHopDong",
+      "AK",
+      1,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "BienBanNhanTra",
+      "IX_BienBanNhanTra_MaHopDong",
+      "INDEX",
+      1,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "BienBanNhanTra",
+      "IX_BienBanNhanTra_NguoiGhiNhan",
+      "INDEX",
+      0,
+      1,
+      "NguoiGhiNhan"
+    ],
+    [
+      "BienBanNhanTra",
+      "IX_BienBanNhanTra_NguoiKiemTra",
+      "INDEX",
+      0,
+      1,
+      "NguoiKiemTra"
+    ],
+    [
+      "ChiTietHopDong",
+      "IX_ChiTietHopDong_MaBienBanNhanTra_MaHopDong",
+      "INDEX",
+      0,
+      1,
+      "MaBienBanNhanTra"
+    ],
+    [
+      "ChiTietHopDong",
+      "IX_ChiTietHopDong_MaBienBanNhanTra_MaHopDong",
+      "INDEX",
+      0,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "QuyetToanHopDong",
+      "IX_QuyetToanHopDong_MaBienBan_MaHopDong",
+      "INDEX",
+      1,
+      1,
+      "MaBienBan"
+    ],
+    [
+      "QuyetToanHopDong",
+      "IX_QuyetToanHopDong_MaBienBan_MaHopDong",
+      "INDEX",
+      1,
+      2,
+      "MaHopDong"
+    ],
+    [
+      "DoiSoatHuyHopDong",
+      "PK33_DoiSoatHuyHopDong",
+      "PK",
+      1,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "XacMinhKhachKhongDen",
+      "PK33_XacMinhKhachKhongDen",
+      "PK",
+      1,
+      1,
+      "MaHopDong"
+    ],
+    [
+      "DoiSoatHuyHopDong",
+      "IX33_DoiSoatHuyHopDong_Time",
+      "INDEX",
+      0,
+      1,
+      "HuyLucUtc"
+    ],
+    [
+      "DoiSoatHuyHopDong",
+      "IX33_DoiSoatHuyHopDong_Time",
+      "INDEX",
+      0,
+      2,
+      "LoaiHuy"
+    ],
+    [
+      "XacMinhKhachKhongDen",
+      "IX33_XacMinhKhachKhongDen_Time",
+      "INDEX",
+      0,
+      1,
+      "XacMinhLucUtc"
+    ],
+    [
+      "XacMinhKhachKhongDen",
+      "IX33_XacMinhKhachKhongDen_Time",
+      "INDEX",
+      0,
+      2,
+      "CoTranhChapKhongDen"
+    ],
+    [
+      "ThanhToan",
+      "IX33_ThanhToan_RefundCancellation",
+      "INDEX",
+      0,
+      1,
+      "MaDoiSoatHuyHopDong"
+    ],
+    [
+      "ThanhToan",
+      "IX33_ThanhToan_RefundCancellation",
+      "INDEX",
+      0,
+      2,
+      "LoaiThanhToan"
+    ],
+    [
+      "ThanhToan",
+      "IX33_ThanhToan_RefundCancellation",
+      "INDEX",
+      0,
+      3,
+      "TrangThai"
+    ]
+  ],
+  "foreign_key_columns": [
+    [
+      "KhachThue",
+      "FK_KhachThue_MaTaiKhoan",
+      1,
+      "MaTaiKhoan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "NhanVien",
+      "FK_NhanVien_MaTaiKhoan",
+      1,
+      "MaTaiKhoan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "NhanVien",
+      "FK_NhanVien_MaCuaHang",
+      1,
+      "MaCuaHang",
+      "CuaHang",
+      "MaCuaHang"
+    ],
+    [
+      "GiayToTuyThan",
+      "FK_GiayToTuyThan_MaKhachThue",
+      1,
+      "MaKhachThue",
+      "KhachThue",
+      "MaKhachThue"
+    ],
+    [
+      "DongMay",
+      "FK_DongMay_MaDanhMuc",
+      1,
+      "MaDanhMuc",
+      "DanhMuc",
+      "MaDanhMuc"
+    ],
+    [
+      "DongMay",
+      "FK_DongMay_MaThuongHieu",
+      1,
+      "MaThuongHieu",
+      "ThuongHieu",
+      "MaThuongHieu"
+    ],
+    [
+      "ThietBi",
+      "FK_ThietBi_MaDongMay",
+      1,
+      "MaDongMay",
+      "DongMay",
+      "MaDongMay"
+    ],
+    [
+      "ThietBi",
+      "FK_ThietBi_MaCuaHang",
+      1,
+      "MaCuaHang",
+      "CuaHang",
+      "MaCuaHang"
+    ],
+    [
+      "AnhThietBi",
+      "FK_AnhThietBi_MaDongMay",
+      1,
+      "MaDongMay",
+      "DongMay",
+      "MaDongMay"
+    ],
+    [
+      "GioHang",
+      "FK_GioHang_MaKhachThue",
+      1,
+      "MaKhachThue",
+      "KhachThue",
+      "MaKhachThue"
+    ],
+    [
+      "ChiTietGioHang",
+      "FK_ChiTietGioHang_MaGioHang",
+      1,
+      "MaGioHang",
+      "GioHang",
+      "MaGioHang"
+    ],
+    [
+      "ChiTietGioHang",
+      "FK_ChiTietGioHang_MaDongMay",
+      1,
+      "MaDongMay",
+      "DongMay",
+      "MaDongMay"
+    ],
+    [
+      "ChiTietGioHang",
+      "FK_ChiTietGioHang_MaCuaHang",
+      1,
+      "MaCuaHang",
+      "CuaHang",
+      "MaCuaHang"
+    ],
+    [
+      "GiuCho",
+      "FK_GiuCho_MaGioHang",
+      1,
+      "MaGioHang",
+      "GioHang",
+      "MaGioHang"
+    ],
+    [
+      "GiuCho",
+      "FK_GiuCho_MaKhachThue",
+      1,
+      "MaKhachThue",
+      "KhachThue",
+      "MaKhachThue"
+    ],
+    [
+      "GiuCho",
+      "FK_GiuCho_MaCuaHang",
+      1,
+      "MaCuaHang",
+      "CuaHang",
+      "MaCuaHang"
+    ],
+    [
+      "GiuCho",
+      "FK_GiuCho_MaGioHang_MaKhachThue",
+      1,
+      "MaGioHang",
+      "GioHang",
+      "MaGioHang"
+    ],
+    [
+      "GiuCho",
+      "FK_GiuCho_MaGioHang_MaKhachThue",
+      2,
+      "MaKhachThue",
+      "GioHang",
+      "MaKhachThue"
+    ],
+    [
+      "ChiTietGiuCho",
+      "FK_ChiTietGiuCho_MaGiuCho",
+      1,
+      "MaGiuCho",
+      "GiuCho",
+      "MaGiuCho"
+    ],
+    [
+      "ChiTietGiuCho",
+      "FK_ChiTietGiuCho_MaDongMay",
+      1,
+      "MaDongMay",
+      "DongMay",
+      "MaDongMay"
+    ],
+    [
+      "ChiTietGiuCho",
+      "FK_ChiTietGiuCho_MaChiTietGioHang",
+      1,
+      "MaChiTietGioHang",
+      "ChiTietGioHang",
+      "MaChiTietGioHang"
+    ],
+    [
+      "HopDong",
+      "FK_HopDong_MaGioHang",
+      1,
+      "MaGioHang",
+      "GioHang",
+      "MaGioHang"
+    ],
+    [
+      "HopDong",
+      "FK_HopDong_MaGiuCho",
+      1,
+      "MaGiuCho",
+      "GiuCho",
+      "MaGiuCho"
+    ],
+    [
+      "HopDong",
+      "FK_HopDong_MaKhachThue",
+      1,
+      "MaKhachThue",
+      "KhachThue",
+      "MaKhachThue"
+    ],
+    [
+      "HopDong",
+      "FK_HopDong_MaNhanVien",
+      1,
+      "MaNhanVien",
+      "NhanVien",
+      "MaNhanVien"
+    ],
+    [
+      "HopDong",
+      "FK_HopDong_MaCuaHang",
+      1,
+      "MaCuaHang",
+      "CuaHang",
+      "MaCuaHang"
+    ],
+    [
+      "HopDong",
+      "FK_HopDong_MaGioHang_MaKhachThue",
+      1,
+      "MaGioHang",
+      "GioHang",
+      "MaGioHang"
+    ],
+    [
+      "HopDong",
+      "FK_HopDong_MaGioHang_MaKhachThue",
+      2,
+      "MaKhachThue",
+      "GioHang",
+      "MaKhachThue"
+    ],
+    [
+      "ChiTietHopDong",
+      "FK_ChiTietHopDong_MaHopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "ChiTietHopDong",
+      "FK_ChiTietHopDong_MaThietBi",
+      1,
+      "MaThietBi",
+      "ThietBi",
+      "MaThietBi"
+    ],
+    [
+      "PhuLuc",
+      "FK_PhuLuc_MaHopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "XacNhanKyHopDong",
+      "FK_XacNhanKyHopDong_MaHopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "ThanhToan",
+      "FK_ThanhToan_MaHopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "ThanhToan",
+      "FK_ThanhToan_MaQuyetToan_MaHopDong",
+      1,
+      "MaQuyetToan",
+      "QuyetToanHopDong",
+      "Id"
+    ],
+    [
+      "ThanhToan",
+      "FK_ThanhToan_MaQuyetToan_MaHopDong",
+      2,
+      "MaHopDong",
+      "QuyetToanHopDong",
+      "MaHopDong"
+    ],
+    [
+      "YeuCauThanhToanVnpay",
+      "FK_YeuCauThanhToanVnpay_MaThanhToan",
+      1,
+      "MaThanhToan",
+      "ThanhToan",
+      "MaThanhToan"
+    ],
+    [
+      "PhieuPhat",
+      "FK_PhieuPhat_MaChiTietHopDong",
+      1,
+      "MaChiTietHopDong",
+      "ChiTietHopDong",
+      "MaChiTietHopDong"
+    ],
+    [
+      "QuyetToanHopDong",
+      "FK_QuyetToanHopDong_MaHopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "QuyetToanHopDong",
+      "FK_QuyetToanHopDong_NguoiChot",
+      1,
+      "NguoiChot",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaChiTietHopDong",
+      1,
+      "MaChiTietHopDong",
+      "ChiTietHopDong",
+      "MaChiTietHopDong"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaQuyetToan_MaNghiaVu",
+      1,
+      "MaQuyetToan",
+      "PhanBoQuyetToan",
+      "MaQuyetToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaQuyetToan_MaNghiaVu",
+      2,
+      "MaNghiaVu",
+      "PhanBoQuyetToan",
+      "Id"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaPhieuPhat",
+      1,
+      "MaPhieuPhat",
+      "PhieuPhat",
+      "MaPhieuPhat"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaPhuLuc",
+      1,
+      "MaPhuLuc",
+      "PhuLuc",
+      "MaPhuLuc"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaQuyetToan_MaHopDong",
+      1,
+      "MaQuyetToan",
+      "QuyetToanHopDong",
+      "Id"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaQuyetToan_MaHopDong",
+      2,
+      "MaHopDong",
+      "QuyetToanHopDong",
+      "MaHopDong"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaThanhToan_MaHopDong",
+      1,
+      "MaThanhToan",
+      "ThanhToan",
+      "MaThanhToan"
+    ],
+    [
+      "PhanBoQuyetToan",
+      "FK_PhanBoQuyetToan_MaThanhToan_MaHopDong",
+      2,
+      "MaHopDong",
+      "ThanhToan",
+      "MaHopDong"
+    ],
+    [
+      "DanhGia",
+      "FK_DanhGia_MaChiTietHopDong",
+      1,
+      "MaChiTietHopDong",
+      "ChiTietHopDong",
+      "MaChiTietHopDong"
+    ],
+    [
+      "DanhGia",
+      "FK_DanhGia_MaKhachThue",
+      1,
+      "MaKhachThue",
+      "KhachThue",
+      "MaKhachThue"
+    ],
+    [
+      "AnhDanhGia",
+      "FK_AnhDanhGia_MaDanhGia",
+      1,
+      "MaDanhGia",
+      "DanhGia",
+      "MaDanhGia"
+    ],
+    [
+      "AnhBienBan",
+      "FK_AnhBienBan_MaChiTietHopDong",
+      1,
+      "MaChiTietHopDong",
+      "ChiTietHopDong",
+      "MaChiTietHopDong"
+    ],
+    [
+      "ThongBao",
+      "FK_ThongBao_MaTaiKhoan",
+      1,
+      "MaTaiKhoan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "FcmDeviceToken",
+      "FK_FcmDeviceToken_MaTaiKhoan",
+      1,
+      "MaTaiKhoan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "IdempotencyKey",
+      "FK_IdempotencyKey_MaKhachThue",
+      1,
+      "MaKhachThue",
+      "KhachThue",
+      "MaKhachThue"
+    ],
+    [
+      "ChiTietGiuCho",
+      "FKR_ChiTietGiuCho_MaChiTietGioHangHopDong",
+      1,
+      "MaChiTietGioHangHopDong",
+      "ChiTietGioHang",
+      "MaChiTietGioHang"
+    ],
+    [
+      "ThanhToan",
+      "FKR_ThanhToan_NguoiXacNhanHoan",
+      1,
+      "NguoiXacNhanHoan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "ThanhToan",
+      "FKR_ThanhToan_NguoiXacNhanNhanHoan",
+      1,
+      "NguoiXacNhanNhanHoan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "PhieuPhat",
+      "FKR_PhieuPhat_NguoiLap",
+      1,
+      "NguoiLap",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "PhieuPhat",
+      "FKR_PhieuPhat_NguoiXuLy",
+      1,
+      "NguoiXuLy",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "DanhGia",
+      "FKR_DanhGia_NguoiCapNhatHienThi",
+      1,
+      "NguoiCapNhatHienThi",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "PhuLuc",
+      "FKR_PhuLuc_NguoiXuLy",
+      1,
+      "NguoiXuLy",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "BienBanNhanTra",
+      "FK_BienBanNhanTra_HopDong_MaHopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "BienBanNhanTra",
+      "FK_BienBanNhanTra_TaiKhoan_NguoiGhiNhan",
+      1,
+      "NguoiGhiNhan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "BienBanNhanTra",
+      "FK_BienBanNhanTra_TaiKhoan_NguoiKiemTra",
+      1,
+      "NguoiKiemTra",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "BienBanNhanTra",
+      "FK33_BienBanNhanTra_NguoiSua",
+      1,
+      "NguoiSuaThucNhan",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "ChiTietHopDong",
+      "FK_ChiTietHopDong_BienBanNhanTra_MaBienBanNhanTra_MaHopDong",
+      1,
+      "MaBienBanNhanTra",
+      "BienBanNhanTra",
+      "Id"
+    ],
+    [
+      "ChiTietHopDong",
+      "FK_ChiTietHopDong_BienBanNhanTra_MaBienBanNhanTra_MaHopDong",
+      2,
+      "MaHopDong",
+      "BienBanNhanTra",
+      "MaHopDong"
+    ],
+    [
+      "QuyetToanHopDong",
+      "FK_QuyetToanHopDong_BienBanNhanTra_MaBienBan_MaHopDong",
+      1,
+      "MaBienBan",
+      "BienBanNhanTra",
+      "Id"
+    ],
+    [
+      "QuyetToanHopDong",
+      "FK_QuyetToanHopDong_BienBanNhanTra_MaBienBan_MaHopDong",
+      2,
+      "MaHopDong",
+      "BienBanNhanTra",
+      "MaHopDong"
+    ],
+    [
+      "QuyetToanHopDong",
+      "FK33_QuyetToanHopDong_NguoiXacNhanHoanTat",
+      1,
+      "NguoiXacNhanHoanTat",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "DoiSoatHuyHopDong",
+      "FK33_DoiSoatHuyHopDong_HopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "XacMinhKhachKhongDen",
+      "FK33_XacMinhKhachKhongDen_HopDong",
+      1,
+      "MaHopDong",
+      "HopDong",
+      "MaHopDong"
+    ],
+    [
+      "DoiSoatHuyHopDong",
+      "FK33_DoiSoatHuyHopDong_NguoiHuy",
+      1,
+      "NguoiHuy",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "XacMinhKhachKhongDen",
+      "FK33_XacMinhKhachKhongDen_NguoiXacMinh",
+      1,
+      "NguoiXacMinh",
+      "TaiKhoan",
+      "MaTaiKhoan"
+    ],
+    [
+      "ThanhToan",
+      "FK33_ThanhToan_DoiSoatHuyHopDong",
+      1,
+      "MaDoiSoatHuyHopDong",
+      "DoiSoatHuyHopDong",
+      "MaHopDong"
+    ]
+  ],
+  "checks": [
+    {
+      "table": "TaiKhoan",
+      "name": "CK_TaiKhoan_TrangThai",
+      "definition": "TrangThai IN ('HOAT_DONG','TAM_KHOA')"
+    },
+    {
+      "table": "TaiKhoan",
+      "name": "CK_TaiKhoan_VaiTro",
+      "definition": "VaiTro IN ('ADMIN','NHAN_VIEN','KHACH_HANG')"
+    },
+    {
+      "table": "NhanVien",
+      "name": "CK_NhanVien_TrangThai",
+      "definition": "TrangThai IN ('HOAT_DONG','NGHI_VIEC')"
+    },
+    {
+      "table": "GiayToTuyThan",
+      "name": "CK_GiayTo_Loai",
+      "definition": "LoaiGiayTo IN ('CCCD','HO_CHIEU','GPLX')"
+    },
+    {
+      "table": "GiayToTuyThan",
+      "name": "CK_GiayTo_TrangThai",
+      "definition": "TrangThaiXacMinh IN ('CHO_XAC_MINH','HOP_LE','TU_CHOI')"
+    },
+    {
+      "table": "DanhMuc",
+      "name": "CK_DanhMuc_TrangThai",
+      "definition": "TrangThai IN ('HOAT_DONG','TAM_AN')"
+    },
+    {
+      "table": "DongMay",
+      "name": "CK_DongMay_Gia",
+      "definition": "GiaThueNgay >= 0 AND TienCoc >= 0"
+    },
+    {
+      "table": "DongMay",
+      "name": "CK_DongMay_GiamGia",
+      "definition": "PhanTramGiamGia BETWEEN 0 AND 100"
+    },
+    {
+      "table": "ThietBi",
+      "name": "CK_ThietBi_TrangThai",
+      "definition": "TrangThai IN (\n            'SAN_SANG',\n            'DANG_GIU',\n            'DANG_THUE',\n            'BAO_TRI',\n            'HONG',\n            'NGUNG_KINH_DOANH'\n        )"
+    },
+    {
+      "table": "AnhThietBi",
+      "name": "CK_AnhThietBi_ThuTu",
+      "definition": "ThuTuHienThi >= 0"
+    },
+    {
+      "table": "CuaHang",
+      "name": "CK_CuaHang_TrangThai",
+      "definition": "TrangThai IN ('HOAT_DONG','TAM_KHOA')"
+    },
+    {
+      "table": "CuaHang",
+      "name": "CK_CuaHang_ToaDo",
+      "definition": "(ViDo IS NULL AND KinhDo IS NULL) OR\n        (ViDo IS NOT NULL AND KinhDo IS NOT NULL AND\n         ViDo BETWEEN -90 AND 90 AND KinhDo BETWEEN -180 AND 180)"
+    },
+    {
+      "table": "GioHang",
+      "name": "CK_GioHang_TrangThai",
+      "definition": "TrangThai IN (\n            'DANG_CHON',\n            'DA_CHUYEN_HOP_DONG'\n                  )"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "name": "CK_ChiTietGioHang_SoLuong",
+      "definition": "SoLuong > 0"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "name": "CK_ChiTietGioHang_ThoiGian",
+      "definition": "NgayKetThuc > NgayBatDau"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "name": "CK_ChiTietGioHang_SoTien",
+      "definition": "DonGia >= 0 AND TienCoc >= 0 AND ThanhTien >= 0"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "name": "CK_ChiTietGioHang_NguonTao",
+      "definition": "NguonTao IN ('GIO_HANG', 'THUE_NGAY')"
+    },
+    {
+      "table": "GiuCho",
+      "name": "CK_GiuCho_TrangThai",
+      "definition": "TrangThai IN (\n            'DANG_GIU',\n            'DA_CHUYEN_HOP_DONG',\n            'HET_HAN',\n            'DA_HUY'\n        )"
+    },
+    {
+      "table": "GiuCho",
+      "name": "CK_GiuCho_ThoiGian",
+      "definition": "HetHanLuc > NgayTao"
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "name": "CK_ChiTietGiuCho_SoLuong",
+      "definition": "SoLuong > 0"
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "name": "CK_ChiTietGiuCho_ThoiGian",
+      "definition": "NgayKetThuc > NgayBatDau"
+    },
+    {
+      "table": "HopDong",
+      "name": "CK_HopDong_ThoiGian",
+      "definition": "ThoiGianTraDuKien > ThoiGianBanGiao"
+    },
+    {
+      "table": "HopDong",
+      "name": "CK_HopDong_SoTien",
+      "definition": "TongTien >= 0 AND TongTienCoc >= 0"
+    },
+    {
+      "table": "HopDong",
+      "name": "CK_HopDong_HinhThucKy",
+      "definition": "HinhThucKy IS NULL\n            OR HinhThucKy IN ('DIEN_TU','MAN_HINH','BAN_GIAY')"
+    },
+    {
+      "table": "HopDong",
+      "name": "CK_HopDong_TrangThai",
+      "definition": "TrangThai IN (\n            'CHO_KY',\n            'DA_KY',\n            'CHO_BAN_GIAO',\n            'DANG_THUE',\n            'CHO_HOAN_TRA',\n            'HOAN_THANH',\n            'DA_HUY'\n        )"
+    },
+    {
+      "table": "HopDong",
+      "name": "CK_HopDong_ThongTinKy",
+      "definition": "TrangThai IN ('CHO_KY','DA_HUY')\n            OR (NgayKy IS NOT NULL AND HinhThucKy IS NOT NULL)"
+    },
+    {
+      "table": "ChiTietHopDong",
+      "name": "CK_ChiTietHopDong_DonGia",
+      "definition": "DonGia >= 0"
+    },
+    {
+      "table": "ChiTietHopDong",
+      "name": "CK_ChiTietHopDong_NgayNhan",
+      "definition": "NgayNhanThucTe IS NULL\n            OR NgayGiaoThucTe IS NULL\n            OR NgayNhanThucTe >= NgayGiaoThucTe"
+    },
+    {
+      "table": "ChiTietHopDong",
+      "name": "CK_ChiTietHopDong_ReturnInspection",
+      "definition": "(KetQuaKiemTra IS NULL OR KetQuaKiemTra IN('CHUA_KIEM_TRA','DAT','CO_VAN_DE')) AND (LoaiNgoaiLeNhanTra IS NULL OR LoaiNgoaiLeNhanTra IN('THIEU_THIET_BI','BAO_MAT')) AND (KetQuaKiemTra<>'DAT' OR (CoHuHong=0 AND ThieuPhuKien=0))"
+    },
+    {
+      "table": "PhuLuc",
+      "name": "CK_PhuLuc_ChiPhi",
+      "definition": "ChiPhiPhatSinh >= 0 AND TienCocBoSung >= 0"
+    },
+    {
+      "table": "PhuLuc",
+      "name": "CK_PhuLuc_TrangThai",
+      "definition": "TrangThai IN('CHO_XAC_NHAN','CHO_KY','DA_XAC_NHAN','DA_HIEU_LUC','TU_CHOI','DA_HUY','HET_HAN_XU_LY','HET_HAN_KY','DONG_QUY_TRINH_CU')"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "name": "CK_XacNhanKyHopDong_ThoiGian",
+      "definition": "HetHanLuc > TaoLuc"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "name": "CK_XacNhanKyHopDong_SoLanThu",
+      "definition": "SoLanThu >= 0"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "name": "CK_XacNhanKyHopDong_TrangThai",
+      "definition": "TrangThai IN ('CHO_XAC_NHAN','DA_XAC_NHAN','HET_HAN','DA_HUY','KHOA')"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "name": "CK_XacNhanKyHopDong_Json",
+      "definition": "ISJSON(NoiDungHopDongJson) = 1"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CK_ThanhToan_SoTien",
+      "definition": "SoTien > 0"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CK_ThanhToan_Loai",
+      "definition": "LoaiThanhToan IN('TIEN_COC','TIEN_THUE','PHI_GIA_HAN','PHI_PHAT','HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA','THU_QUYET_TOAN')"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CK_ThanhToan_PhuongThuc",
+      "definition": "PhuongThuc IN (\n            'TIEN_MAT',\n            'CHUYEN_KHOAN',\n            'VI_DIEN_TU'\n        )"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CK_ThanhToan_TrangThai",
+      "definition": "TrangThai IN (\n            'CHO_THANH_TOAN',\n            'THANH_CONG',\n            'THAT_BAI',\n            'DA_HOAN'\n        )"
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "name": "CK_YeuCauThanhToanVnpay_TrangThai",
+      "definition": "TrangThai IN ('CHO_THANH_TOAN', 'THANH_CONG', 'THAT_BAI', 'HET_HAN')"
+    },
+    {
+      "table": "PhieuPhat",
+      "name": "CK_PhieuPhat_Loai",
+      "definition": "LoaiViPham IN('TRA_TRE','HU_HONG','KHAC','THIEU_PHU_KIEN')"
+    },
+    {
+      "table": "PhieuPhat",
+      "name": "CK_PhieuPhat_SoTien",
+      "definition": "SoTien >= 0"
+    },
+    {
+      "table": "PhieuPhat",
+      "name": "CK_PhieuPhat_TrangThai",
+      "definition": "TrangThai IN (\n            'CHO_XAC_NHAN',\n            'DA_XAC_NHAN',\n            'DA_THANH_TOAN',\n            'HUY'\n        )"
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "name": "CK_QuyetToanHopDong_Money",
+      "definition": "TienThue>=0 AND PhiGiaHan>=0 AND PhiTraTre>=0 AND BoiThuong>=0 AND ThuePhiDaThu>=0 AND CocDaThu>=0 AND CocKhauTru>=0 AND CocKhauTru<=CocDaThu AND ConPhaiThuBanDau>=0 AND HoanCocBanDau>=0 AND HoanKhacBanDau>=0 AND TongNghiaVu=TienThue+PhiGiaHan+PhiTraTre+BoiThuong AND ThuePhiDaThu+CocDaThu+ConPhaiThuBanDau=TongNghiaVu+HoanCocBanDau+HoanKhacBanDau"
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "name": "CK_QuyetToanHopDong_Version",
+      "definition": "PhienBan=1 AND LEN(MaBam)=64"
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "CK_PhanBoQuyetToan_Kind",
+      "definition": "LoaiNghiaVu IN('TIEN_THUE','PHI_GIA_HAN','TRA_TRE','BOI_THUONG') AND (DonGia IS NULL OR DonGia>=0) AND (SoNgay IS NULL OR SoNgay>=0)"
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "CK_PhanBoQuyetToan_Line",
+      "definition": "(LoaiDong='NGHIA_VU' AND SoTien>=0 AND MaNghiaVu IS NULL AND MaThanhToan IS NULL) OR (LoaiDong='PHAN_BO' AND SoTien>0 AND MaNghiaVu IS NOT NULL AND MaThanhToan IS NOT NULL AND Id<>MaNghiaVu)"
+    },
+    {
+      "table": "DanhGia",
+      "name": "CK_DanhGia_SoSao",
+      "definition": "SoSao BETWEEN 1 AND 5"
+    },
+    {
+      "table": "DanhGia",
+      "name": "CK_DanhGia_TrangThaiKiemDuyet",
+      "definition": "TrangThaiKiemDuyet IS NULL OR TrangThaiKiemDuyet IN ('CONG_KHAI','AN','CHO_DUYET','DA_DUYET','TU_CHOI')"
+    },
+    {
+      "table": "AnhDanhGia",
+      "name": "CK_AnhDanhGia_ThuTu",
+      "definition": "ThuTu BETWEEN 1 AND 4"
+    },
+    {
+      "table": "AnhBienBan",
+      "name": "CK_AnhBienBan_Loai",
+      "definition": "Loai IN ('BAN_GIAO','NHAN_LAI','HU_HONG')"
+    },
+    {
+      "table": "TaiKhoan",
+      "name": "CKR_TaiKhoan_PhienBanBaoMat",
+      "definition": "PhienBanBaoMat>=0"
+    },
+    {
+      "table": "KhachThue",
+      "name": "CKR_KhachThue_EmailProof",
+      "definition": "EmailXacMinhLucUtc IS NULL OR (Email IS NOT NULL AND LEN(LTRIM(RTRIM(Email)))>0)"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CKR_ThanhToan_RefundStaff",
+      "definition": "(NguoiXacNhanHoan IS NULL AND XacNhanHoanLucUtc IS NULL) OR (NguoiXacNhanHoan IS NOT NULL AND XacNhanHoanLucUtc IS NOT NULL AND LoaiThanhToan IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA') AND TrangThai='DA_HOAN')"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CKR_ThanhToan_RefundRecorded",
+      "definition": "LoaiThanhToan NOT IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA') OR TrangThai<>'DA_HOAN' OR (NguoiXacNhanHoan IS NOT NULL AND XacNhanHoanLucUtc IS NOT NULL)"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CKR_ThanhToan_RefundOwner",
+      "definition": "(NguoiXacNhanNhanHoan IS NULL AND KhachXacNhanNhanHoanLucUtc IS NULL) OR (NguoiXacNhanNhanHoan IS NOT NULL AND KhachXacNhanNhanHoanLucUtc IS NOT NULL AND XacNhanHoanLucUtc IS NOT NULL AND NguoiXacNhanHoan IS NOT NULL AND KhachXacNhanNhanHoanLucUtc>=XacNhanHoanLucUtc AND LoaiThanhToan IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA') AND TrangThai='DA_HOAN')"
+    },
+    {
+      "table": "PhieuPhat",
+      "name": "CKR_PhieuPhat_Actor",
+      "definition": "(TrangThai='CHO_XAC_NHAN' AND NguoiXuLy IS NULL AND XuLyLucUtc IS NULL) OR (TrangThai IN ('DA_XAC_NHAN','DA_THANH_TOAN','HUY') AND NguoiXuLy IS NOT NULL AND XuLyLucUtc IS NOT NULL)"
+    },
+    {
+      "table": "HopDong",
+      "name": "CK33_HopDong_TrangThaiNhanTra",
+      "definition": "TrangThaiNhanTra IS NULL OR TrangThaiNhanTra IN ('DANG_KIEM_TRA','DA_KIEM_TRA','NGOAI_LE')"
+    },
+    {
+      "table": "BienBanNhanTra",
+      "name": "CK33_BienBanNhanTra_Inspection",
+      "definition": "(KiemTraLucUtc IS NULL AND NguoiKiemTra IS NULL) OR (KiemTraLucUtc IS NOT NULL AND NguoiKiemTra IS NOT NULL AND ThucNhanLuc IS NOT NULL)"
+    },
+    {
+      "table": "BienBanNhanTra",
+      "name": "CK33_BienBanNhanTra_LastCorrection",
+      "definition": "(ThucNhanLucTruocSua IS NULL AND NguoiSuaThucNhan IS NULL AND SuaThucNhanLucUtc IS NULL AND LyDoSuaThucNhan IS NULL) OR (ThucNhanLucTruocSua IS NOT NULL AND NguoiSuaThucNhan IS NOT NULL AND SuaThucNhanLucUtc IS NOT NULL AND LyDoSuaThucNhan IS NOT NULL AND LEN(LTRIM(RTRIM(LyDoSuaThucNhan)))>0 AND ThucNhanLuc IS NOT NULL)"
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "name": "CK33_QuyetToanHopDong_NoRefundAck",
+      "definition": "(KhachXacNhanHoanTatLucUtc IS NULL AND NguoiXacNhanHoanTat IS NULL) OR (KhachXacNhanHoanTatLucUtc IS NOT NULL AND NguoiXacNhanHoanTat IS NOT NULL AND HoanCocBanDau+HoanKhacBanDau=0 AND KhachXacNhanHoanTatLucUtc>=ChotLucUtc)"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "name": "CK33_DoiSoatHuyHopDong_Actor",
+      "definition": "LoaiTacNhanHuy IN ('KHACH_HANG','NHAN_VIEN','ADMIN','HE_THONG') AND ((LoaiTacNhanHuy='HE_THONG' AND NguoiHuy IS NULL) OR (LoaiTacNhanHuy<>'HE_THONG' AND NguoiHuy IS NOT NULL)) AND LoaiHuy IN ('KHACH_HUY','KHONG_DEN','CUA_HANG_HUY','HET_HAN_KY') AND LEN(LTRIM(RTRIM(LyDoHuy)))>0 AND DoiSoatHuyLucUtc>=HuyLucUtc"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "name": "CK33_DoiSoatHuyHopDong_Money",
+      "definition": "TyLeKhauTruHuy IN (0,0.30,1) AND TienCocDaThuKhiHuy>=0 AND TienThueDaThuKhiHuy>=0 AND TienThuThuaDaThuKhiHuy>=0 AND TienKhauTruHuy>=0 AND TienCocPhaiHoanKhiHuy>=0 AND TienThuePhaiHoanKhiHuy>=0 AND TienThuThuaPhaiHoanKhiHuy>=0 AND TienKhauTruHuy=ROUND(TienCocDaThuKhiHuy*TyLeKhauTruHuy,2) AND TienCocPhaiHoanKhiHuy=TienCocDaThuKhiHuy-TienKhauTruHuy AND TienThuePhaiHoanKhiHuy=TienThueDaThuKhiHuy AND TienThuThuaPhaiHoanKhiHuy=TienThuThuaDaThuKhiHuy AND (LoaiHuy NOT IN ('CUA_HANG_HUY','HET_HAN_KY') OR TyLeKhauTruHuy=0)"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "name": "CK33_DoiSoatHuyHopDong_UnsignedExpiry",
+      "definition": "LoaiHuy<>'HET_HAN_KY' OR (TienCocDaThuKhiHuy=0 AND TienThueDaThuKhiHuy=0 AND TienThuThuaDaThuKhiHuy=0 AND TienKhauTruHuy=0 AND TienCocPhaiHoanKhiHuy=0 AND TienThuePhaiHoanKhiHuy=0 AND TienThuThuaPhaiHoanKhiHuy=0)"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "name": "CK33_DoiSoatHuyHopDong_NoShowReason",
+      "definition": "LoaiHuy<>'KHONG_DEN' OR LyDoHuy=N'Khách không đến nhận bàn giao thiết bị'"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "name": "CK33_DoiSoatHuyHopDong_NoShowRate",
+      "definition": "LoaiHuy<>'KHONG_DEN' OR TyLeKhauTruHuy=1 OR (TyLeKhauTruHuy=0 AND CanCuNgoaiLeHuy IS NOT NULL AND CanCuNgoaiLeHuy IN ('BAT_KHA_KHANG','LOI_CUA_HANG'))"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "name": "CK33_DoiSoatHuyHopDong_Exception",
+      "definition": "(CanCuNgoaiLeHuy IS NULL AND LyDoNgoaiLeHuy IS NULL) OR (CanCuNgoaiLeHuy IS NOT NULL AND CanCuNgoaiLeHuy IN ('BAT_KHA_KHANG','LOI_CUA_HANG') AND LyDoNgoaiLeHuy IS NOT NULL AND LEN(LTRIM(RTRIM(LyDoNgoaiLeHuy)))>0 AND TyLeKhauTruHuy=0 AND (CanCuNgoaiLeHuy<>'BAT_KHA_KHANG' OR LoaiTacNhanHuy='ADMIN'))"
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "name": "CK33_XacMinhKhachKhongDen_Time",
+      "definition": "XacMinhLucUtc>=DATEADD(hour,-5,GioHenKhiXacMinhKhongDen) AND LienHeLucUtc<=XacMinhLucUtc"
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "name": "CK33_XacMinhKhachKhongDen_Text",
+      "definition": "LEN(LTRIM(RTRIM(KenhLienHe)))>0 AND LEN(LTRIM(RTRIM(KetQuaLienHe)))>0 AND LEN(LTRIM(RTRIM(GhiChuKhongDen)))>0"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "CK33_ThanhToan_RefundContext",
+      "definition": "(MaDoiSoatHuyHopDong IS NULL AND ((MaQuyetToan IS NULL AND LoaiThanhToan NOT IN ('THU_QUYET_TOAN','HOAN_COC','HOAN_TIEN_THUE')) OR (MaQuyetToan IS NOT NULL AND LoaiThanhToan IN ('THU_QUYET_TOAN','HOAN_COC','HOAN_TIEN_THUE')))) OR (MaDoiSoatHuyHopDong IS NOT NULL AND MaDoiSoatHuyHopDong=MaHopDong AND MaQuyetToan IS NULL AND LoaiThanhToan IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA'))"
+    }
+  ],
+  "index_filters": [
+    {
+      "table": "TaiKhoan",
+      "name": "UQ_TaiKhoan_TenDangNhap",
+      "definition": null
+    },
+    {
+      "table": "KhachThue",
+      "name": "UQ_KhachThue_MaTaiKhoan",
+      "definition": null
+    },
+    {
+      "table": "KhachThue",
+      "name": "UQ_KhachThue_SoDienThoai",
+      "definition": null
+    },
+    {
+      "table": "KhachThue",
+      "name": "UX_KhachThue_CCCD_NotNull",
+      "definition": "CCCD IS NOT NULL"
+    },
+    {
+      "table": "NhanVien",
+      "name": "UQ_NhanVien_MaTaiKhoan",
+      "definition": null
+    },
+    {
+      "table": "GiayToTuyThan",
+      "name": "UQ_GiayToTuyThan_SoGiayTo",
+      "definition": null
+    },
+    {
+      "table": "DanhMuc",
+      "name": "UQ_DanhMuc_TenDanhMuc",
+      "definition": null
+    },
+    {
+      "table": "ThuongHieu",
+      "name": "UQ_ThuongHieu_TenThuongHieu",
+      "definition": null
+    },
+    {
+      "table": "DongMay",
+      "name": "UQ_DongMay",
+      "definition": null
+    },
+    {
+      "table": "ThietBi",
+      "name": "UQ_ThietBi_SoSerial",
+      "definition": null
+    },
+    {
+      "table": "ThietBi",
+      "name": "IX_ThietBi_TimKiem",
+      "definition": null
+    },
+    {
+      "table": "AnhThietBi",
+      "name": "UX_AnhThietBi_DaiDien",
+      "definition": "LaAnhDaiDien = 1"
+    },
+    {
+      "table": "GioHang",
+      "name": "IX_GioHang_KhachHang",
+      "definition": null
+    },
+    {
+      "table": "ChiTietGioHang",
+      "name": "IX_ChiTietGioHang_Lich",
+      "definition": null
+    },
+    {
+      "table": "GiuCho",
+      "name": "IX_GiuCho_Availability",
+      "definition": null
+    },
+    {
+      "table": "GiuCho",
+      "name": "IX_GiuCho_KhachHang",
+      "definition": null
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "name": "IX_ChiTietGiuCho_Lich",
+      "definition": null
+    },
+    {
+      "table": "HopDong",
+      "name": "UQ_HopDong_MaGiuCho",
+      "definition": null
+    },
+    {
+      "table": "HopDong",
+      "name": "IX_HopDong_Lich",
+      "definition": null
+    },
+    {
+      "table": "HopDong",
+      "name": "IX_HopDong_KhachHang",
+      "definition": null
+    },
+    {
+      "table": "HopDong",
+      "name": "IX_HopDong_HanTra",
+      "definition": null
+    },
+    {
+      "table": "ChiTietHopDong",
+      "name": "UQ_ChiTietHopDong",
+      "definition": null
+    },
+    {
+      "table": "ChiTietHopDong",
+      "name": "IX_ChiTietHopDong_ThietBi",
+      "definition": null
+    },
+    {
+      "table": "PhuLuc",
+      "name": "IX_PhuLuc_HopDong",
+      "definition": null
+    },
+    {
+      "table": "PhuLuc",
+      "name": "UX_PhuLuc_Active",
+      "definition": "TrangThai IN('CHO_XAC_NHAN','CHO_KY')"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "name": "IX_XacNhanKyHopDong_HopDong_TrangThai",
+      "definition": null
+    },
+    {
+      "table": "ThanhToan",
+      "name": "UX_ThanhToan_MaGiaoDich",
+      "definition": "MaGiaoDich IS NOT NULL"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "UX_ThanhToan_MaThamChieu",
+      "definition": "MaThamChieu IS NOT NULL"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "IX_ThanhToan_HopDong",
+      "definition": null
+    },
+    {
+      "table": "ThanhToan",
+      "name": "IX_ThanhToan_MaQuyetToan_LoaiThanhToan",
+      "definition": "[MaQuyetToan] IS NOT NULL AND [TrangThai]='CHO_THANH_TOAN'"
+    },
+    {
+      "table": "ThanhToan",
+      "name": "IX_ThanhToan_MaQuyetToan_MaHopDong",
+      "definition": null
+    },
+    {
+      "table": "PhieuPhat",
+      "name": "IX_PhieuPhat_ChiTietHopDong",
+      "definition": null
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "name": "AK_QuyetToanHopDong_Id_PhienBan_MaBam",
+      "definition": null
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "name": "IX_QuyetToanHopDong_MaHopDong",
+      "definition": null
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "name": "IX_QuyetToanHopDong_NguoiChot",
+      "definition": null
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "IX_PhanBoQuyetToan_MaChiTietHopDong",
+      "definition": null
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "IX_PhanBoQuyetToan_MaPhieuPhat",
+      "definition": null
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "IX_PhanBoQuyetToan_MaPhuLuc",
+      "definition": null
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "IX_PhanBoQuyetToan_MaQuyetToan_MaHopDong",
+      "definition": null
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "IX_PhanBoQuyetToan_MaQuyetToan_MaNghiaVu",
+      "definition": null
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "IX_PhanBoQuyetToan_MaQuyetToan_MaThanhToan_MaNghiaVu",
+      "definition": "[LoaiDong]='PHAN_BO'"
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "name": "IX_PhanBoQuyetToan_MaThanhToan_MaHopDong",
+      "definition": null
+    },
+    {
+      "table": "DanhGia",
+      "name": "UQ_DanhGia_MaChiTietHopDong",
+      "definition": null
+    },
+    {
+      "table": "AnhDanhGia",
+      "name": "UQ_AnhDanhGia_ThuTu",
+      "definition": null
+    },
+    {
+      "table": "ThongBao",
+      "name": "IX_ThongBao_ChuaDoc",
+      "definition": null
+    },
+    {
+      "table": "ThongBao",
+      "name": "UX_ThongBao_EventKey",
+      "definition": "EventKey IS NOT NULL"
+    },
+    {
+      "table": "FcmDeviceToken",
+      "name": "UX_FcmDeviceToken_TokenHash",
+      "definition": null
+    },
+    {
+      "table": "FcmDeviceToken",
+      "name": "IX_FcmDeviceToken_MaTaiKhoan_IsActive",
+      "definition": null
+    },
+    {
+      "table": "NotificationDelivery",
+      "name": "UX_NotificationDelivery_Target",
+      "definition": null
+    },
+    {
+      "table": "KhachThue",
+      "name": "UXR_KhachThue_EmailDaXacMinh",
+      "definition": "Email IS NOT NULL AND EmailXacMinhLucUtc IS NOT NULL"
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "name": "UXR_ChiTietGiuCho_Selection",
+      "definition": null
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "name": "IXR_ChiTietGiuCho_Capacity",
+      "definition": null
+    },
+    {
+      "table": "HopDong",
+      "name": "IXR_HopDong_NoShow",
+      "definition": null
+    },
+    {
+      "table": "BienBanNhanTra",
+      "name": "IX_BienBanNhanTra_MaHopDong",
+      "definition": null
+    },
+    {
+      "table": "BienBanNhanTra",
+      "name": "IX_BienBanNhanTra_NguoiGhiNhan",
+      "definition": null
+    },
+    {
+      "table": "BienBanNhanTra",
+      "name": "IX_BienBanNhanTra_NguoiKiemTra",
+      "definition": null
+    },
+    {
+      "table": "ChiTietHopDong",
+      "name": "IX_ChiTietHopDong_MaBienBanNhanTra_MaHopDong",
+      "definition": null
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "name": "IX_QuyetToanHopDong_MaBienBan_MaHopDong",
+      "definition": null
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "name": "IX33_DoiSoatHuyHopDong_Time",
+      "definition": null
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "name": "IX33_XacMinhKhachKhongDen_Time",
+      "definition": null
+    },
+    {
+      "table": "ThanhToan",
+      "name": "IX33_ThanhToan_RefundCancellation",
+      "definition": null
+    }
+  ],
+  "default_definitions": [
+    {
+      "table": "TaiKhoan",
+      "column": "TrangThai",
+      "definition": "'HOAT_DONG'"
+    },
+    {
+      "table": "TaiKhoan",
+      "column": "NgayTao",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "TaiKhoan",
+      "column": "PhienBanBaoMat",
+      "definition": "0"
+    },
+    {
+      "table": "KhachThue",
+      "column": "DaXacNhanThongTin",
+      "definition": "0"
+    },
+    {
+      "table": "NhanVien",
+      "column": "TrangThai",
+      "definition": "'HOAT_DONG'"
+    },
+    {
+      "table": "GiayToTuyThan",
+      "column": "NgayTaiLen",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "GiayToTuyThan",
+      "column": "TrangThaiXacMinh",
+      "definition": "'CHO_XAC_MINH'"
+    },
+    {
+      "table": "DanhMuc",
+      "column": "TrangThai",
+      "definition": "'HOAT_DONG'"
+    },
+    {
+      "table": "DongMay",
+      "column": "PhanTramGiamGia",
+      "definition": "0"
+    },
+    {
+      "table": "ThietBi",
+      "column": "TrangThai",
+      "definition": "'SAN_SANG'"
+    },
+    {
+      "table": "AnhThietBi",
+      "column": "LaAnhDaiDien",
+      "definition": "0"
+    },
+    {
+      "table": "AnhThietBi",
+      "column": "ThuTuHienThi",
+      "definition": "0"
+    },
+    {
+      "table": "CuaHang",
+      "column": "TrangThai",
+      "definition": "'HOAT_DONG'"
+    },
+    {
+      "table": "GioHang",
+      "column": "NgayTao",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "GioHang",
+      "column": "NgayCapNhat",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "GioHang",
+      "column": "TrangThai",
+      "definition": "'DANG_CHON'"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "column": "NguonTao",
+      "definition": "'GIO_HANG'"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "column": "PhienBan",
+      "definition": "NEWID()"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "column": "DaChuyenHopDong",
+      "definition": "0"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "column": "SoLuong",
+      "definition": "1"
+    },
+    {
+      "table": "GiuCho",
+      "column": "NgayTao",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "GiuCho",
+      "column": "TrangThai",
+      "definition": "'DANG_GIU'"
+    },
+    {
+      "table": "HopDong",
+      "column": "NgayTaoHopDong",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "HopDong",
+      "column": "TrangThai",
+      "definition": "'CHO_KY'"
+    },
+    {
+      "table": "HopDong",
+      "column": "DaDongYDieuKhoan",
+      "definition": "0"
+    },
+    {
+      "table": "ChiTietHopDong",
+      "column": "CoHuHong",
+      "definition": "0"
+    },
+    {
+      "table": "PhuLuc",
+      "column": "SoLanThuOtp",
+      "definition": "0"
+    },
+    {
+      "table": "PhuLuc",
+      "column": "SoLanGuiOtp",
+      "definition": "0"
+    },
+    {
+      "table": "PhuLuc",
+      "column": "NgayLap",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "PhuLuc",
+      "column": "TrangThai",
+      "definition": "'CHO_XAC_NHAN'"
+    },
+    {
+      "table": "PhuLuc",
+      "column": "TienCocBoSung",
+      "definition": "0"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "column": "TaoLuc",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "column": "SoLanThu",
+      "definition": "0"
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "column": "TrangThai",
+      "definition": "'CHO_XAC_NHAN'"
+    },
+    {
+      "table": "ThanhToan",
+      "column": "TrangThai",
+      "definition": "'CHO_THANH_TOAN'"
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "column": "TienTe",
+      "definition": "('VND')"
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "column": "TrangThai",
+      "definition": "('CHO_THANH_TOAN')"
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "column": "LaThuThua",
+      "definition": "(0)"
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "column": "ThoiGianTao",
+      "definition": "SYSUTCDATETIME()"
+    },
+    {
+      "table": "PhieuPhat",
+      "column": "NgayLap",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "PhieuPhat",
+      "column": "TrangThai",
+      "definition": "'CHO_XAC_NHAN'"
+    },
+    {
+      "table": "DanhGia",
+      "column": "NgayDanhGia",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "DanhGia",
+      "column": "TrangThaiKiemDuyet",
+      "definition": "'CONG_KHAI'"
+    },
+    {
+      "table": "AnhDanhGia",
+      "column": "NgayTao",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "AnhBienBan",
+      "column": "ThoiGianChup",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "ThongBao",
+      "column": "ThoiGianGui",
+      "definition": "SYSDATETIME()"
+    },
+    {
+      "table": "ThongBao",
+      "column": "DaDoc",
+      "definition": "0"
+    },
+    {
+      "table": "FcmDeviceToken",
+      "column": "IsActive",
+      "definition": "1"
+    },
+    {
+      "table": "FcmDeviceToken",
+      "column": "CreatedAt",
+      "definition": "SYSUTCDATETIME()"
+    },
+    {
+      "table": "FcmDeviceToken",
+      "column": "UpdatedAt",
+      "definition": "SYSUTCDATETIME()"
+    },
+    {
+      "table": "NotificationDelivery",
+      "column": "State",
+      "definition": "'PENDING'"
+    },
+    {
+      "table": "NotificationDelivery",
+      "column": "Attempts",
+      "definition": "0"
+    },
+    {
+      "table": "IdempotencyKey",
+      "column": "NgayTao",
+      "definition": "SYSDATETIME()"
+    }
+  ],
+  "ef_runtime_convention_indexes": "NOT_EXPORTED; explicit source declaration parity only"
+}

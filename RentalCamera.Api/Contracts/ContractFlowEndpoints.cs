@@ -88,11 +88,14 @@ public static class ContractEndpoints
             if (giayTo.TrangThaiXacMinh == "TU_CHOI")
                 return Results.Conflict(new { loi = "Giấy tờ tùy thân đã bị từ chối, vui lòng cập nhật lại." });
 
-            var selections=await db.LuaChonGioHangGiuCho.AsNoTracking().Where(x=>x.MaGiuCho==id).ToListAsync(ct);
+            var selections=await db.ChiTietGiuCho.AsNoTracking().Where(x=>x.MaGiuCho==id).ToListAsync(ct);
             var originalIds=selections.Count>0?selections.Select(x=>x.MaChiTietGioHang).ToArray():
                 hold.ChiTiet.Where(x=>x.MaChiTietGioHang!=null).Select(x=>x.MaChiTietGioHang!).ToArray();
             var originalLines=await db.ChiTietGioHang.Where(x=>originalIds.Contains(x.MaChiTietGioHang)&&x.GioHang.MaKhachThue==customerId)
                 .ToDictionaryAsync(x=>x.MaChiTietGioHang,ct);
+            if (selections.Any(s => !originalLines.TryGetValue(s.MaChiTietGioHang, out var original) ||
+                original.PhienBan != s.PhienBanGioHang || original.DaChuyenHopDong || original.MaDongMay != s.MaDongMay || original.SoLuong != s.SoLuong))
+                return Results.Conflict(new { code = "CART_VERSION_CONFLICT" });
             var modelIds = hold.ChiTiet.Select(x => x.MaDongMay).Distinct().ToList();
             var models = await db.DongMay.Where(x => modelIds.Contains(x.MaDongMay))
                 .ToDictionaryAsync(x => x.MaDongMay, ct);
@@ -138,7 +141,7 @@ public static class ContractEndpoints
                     NgayKetThuc = line.NgayKetThuc, DonGia = unitPrice, TienCoc = model.TienCoc,
                     ThanhTien = unitPrice * days * line.SoLuong, DaChuyenHopDong = true };
                 db.ChiTietGioHang.Add(snapshotLine);
-                line.MaChiTietGioHang = snapshotLine.MaChiTietGioHang;
+                line.MaChiTietGioHangHopDong = snapshotLine.MaChiTietGioHang;
             }
             hold.MaGioHang = contractCart.MaGioHang;
 
@@ -243,7 +246,8 @@ public static class ContractEndpoints
         }).RequireAuthorization("Customer");
 
         contracts.MapGet("/{id}", async (
-            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+            string id, ClaimsPrincipal principal, RentalCameraContext db, RentalCamera.Api.Payments.VnpayService gateway,
+            Microsoft.Extensions.Options.IOptions<RentalCamera.Api.Payments.VnpayOptions> gatewayOptions, CancellationToken ct) =>
         {
             if (!await ApiAccess.CanAccessContractAsync(id, principal, db, ct)) return Results.Forbid();
             var contract = await db.HopDong.AsNoTracking().SingleOrDefaultAsync(x => x.MaHopDong == id, ct);
@@ -255,16 +259,18 @@ public static class ContractEndpoints
             var bookedList = await db.ChiTietGiuCho.AsNoTracking().Where(x => x.MaGiuCho == contract.MaGiuCho).ToListAsync(ct);
             var modelIds = bookedList.Select(x => x.MaDongMay).Distinct().ToList();
             var models = await db.DongMay.AsNoTracking().Where(x => modelIds.Contains(x.MaDongMay)).ToDictionaryAsync(x => x.MaDongMay, ct);
-            var snapshotIds=bookedList.Where(x=>x.MaChiTietGioHang!=null).Select(x=>x.MaChiTietGioHang!).ToArray();
-            var priceSnapshots=await db.ChiTietGioHang.AsNoTracking().Where(x=>snapshotIds.Contains(x.MaChiTietGioHang)&&x.MaGioHang==contract.MaGioHang&&x.GioHang.TrangThai=="DA_CHUYEN_HOP_DONG")
-                .ToDictionaryAsync(x=>x.MaChiTietGioHang,ct);
+            var snapshotIds=bookedList.Where(x=>x.MaChiTietGioHangHopDong!=null).Select(x=>x.MaChiTietGioHangHopDong!).ToArray();
+            var priceSnapshots=await db.ChiTietGioHang.AsNoTracking()
+                .Where(snapshotLine=>snapshotIds.Contains(snapshotLine.MaChiTietGioHang) &&
+                    snapshotLine.MaGioHang==contract.MaGioHang && snapshotLine.GioHang.TrangThai=="DA_CHUYEN_HOP_DONG")
+                .ToDictionaryAsync(snapshotLine=>snapshotLine.MaChiTietGioHang,ct);
 
             var booked = bookedList.Select(x => new {
                 x.MaDongMay,
                 TenDongMay = models.ContainsKey(x.MaDongMay) ? models[x.MaDongMay].TenDongMay : null,
-                DonGiaTieuChuan = x.MaChiTietGioHang!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHang)?(decimal?)priceSnapshots[x.MaChiTietGioHang].DonGia:null,
-                ThanhTien = x.MaChiTietGioHang!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHang)?(decimal?)priceSnapshots[x.MaChiTietGioHang].ThanhTien:null,
-                NguonGia = x.MaChiTietGioHang!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHang)?"ANH_CHUP_HOP_DONG":"CHUA_XAC_DINH",
+                DonGiaTieuChuan = x.MaChiTietGioHangHopDong!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHangHopDong)?(decimal?)priceSnapshots[x.MaChiTietGioHangHopDong].DonGia:null,
+                ThanhTien = x.MaChiTietGioHangHopDong!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHangHopDong)?(decimal?)priceSnapshots[x.MaChiTietGioHangHopDong].ThanhTien:null,
+                NguonGia = x.MaChiTietGioHangHopDong!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHangHopDong)?"ANH_CHUP_HOP_DONG":"CHUA_XAC_DINH",
                 x.SoLuong, x.NgayBatDau, x.NgayKetThuc,
                 SoNgayThue = (decimal)Math.Ceiling((x.NgayKetThuc - x.NgayBatDau).TotalDays)
             }).ToList();
@@ -294,6 +300,12 @@ public static class ContractEndpoints
             }
             var supplements = await db.PhuLuc.AsNoTracking().Where(x => x.MaHopDong == id)
                 .OrderBy(x => x.NgayLap).ToListAsync(ct);
+            object? settlementView=null;
+            if(contract.TrangThai is "DANG_THUE" or "CHO_HOAN_TRA" or "HOAN_THANH") {
+                var s=await RentalCamera.Api.Settlement.SettlementWorkflow.LoadAsync(id,db,ct);
+                if(s!=null)settlementView=await RentalCamera.Api.Settlement.SettlementViewService.ViewAsync(s,principal,
+                    RentalCamera.Api.Settlement.SettlementViewService.SandboxReady(gateway,gatewayOptions.Value),db,ct);
+            }
 
             return Results.Ok(new
             {
@@ -308,6 +320,7 @@ public static class ContractEndpoints
                 contract.DaDongYDieuKhoan, contract.PhienBanDieuKhoan,
                 contract.MaBamNoiDung, contract.MaBamTepPdf,
                 DatTheoDongMay = booked, ChiTiet = details,
+                QuyetToan = settlementView,
                 ThanhToan = payments, PhuLuc = supplements.Select(RenewalEndpoints.Dto),
                 ThoiHanTraHieuLuc = await RenewalEndpoints.EffectiveReturnAsync(contract, db, ct),
                 ThoiGianServer = DateTime.UtcNow,
@@ -315,9 +328,8 @@ public static class ContractEndpoints
                 CoTheYeuCauGiaHan = RentalPolicy.CanUseExtensionTerms(contract.PhienBanDieuKhoan,contract.DaDongYDieuKhoan)&&RentalPolicy.CanRequestExtension(new(contract.TrangThai,
                     await RenewalEndpoints.EffectiveReturnAsync(contract, db, ct), detailRows.Any(d=>d.NgayNhanThucTe!=null)), DateTime.UtcNow),
                 TienTraTre = await LateReturnService.QuoteAsync(id, db, ct),
-                YeuCauHuy = await db.YeuCauHuyHopDong.AsNoTracking().Where(x=>x.MaHopDong==id).OrderByDescending(x=>x.YeuCauLucUtc)
-                    .Select(x=>new{x.Id,x.TrangThai,x.YeuCauLucUtc,x.LyDo,x.TienKhauTru,x.TienCocPhaiHoan,x.TienThuePhaiHoan,x.TienThuThuaPhaiHoan}).ToListAsync(ct),
-                HoanTienHuy = payments.Where(p=>p.MaYeuCauHuy!=null).Select(p=>new{p.MaThanhToan,p.LoaiThanhToan,p.SoTien,p.TrangThai})
+                DoiSoatHuy = await db.DoiSoatHuyHopDong.AsNoTracking().SingleOrDefaultAsync(x=>x.MaHopDong==id,ct),
+                HoanTienHuy = payments.Where(p=>p.MaDoiSoatHuyHopDong!=null).Select(p=>new{p.MaThanhToan,p.LoaiThanhToan,p.SoTien,p.TrangThai})
             });
         });
 
@@ -739,6 +751,7 @@ public static class ContractEndpoints
             var deviceIds = devices.Select(x => x.MaThietBi).ToList();
             var overlap = await db.ChiTietHopDong.AsNoTracking().AnyAsync(c =>
                 deviceIds.Contains(c.MaThietBi) && c.MaHopDong != id &&
+                (c.MaBienBanNhanTra == null || c.NgayNhanThucTe == null || c.NgayNhanThucTe > contract.ThoiGianBanGiao) &&
                 db.HopDong.Any(h => h.MaHopDong == c.MaHopDong &&
                     h.TrangThai != "HOAN_THANH" && h.TrangThai != "DA_HUY" &&
                     contract.ThoiGianBanGiao < (db.PhuLuc.Where(p=>p.MaHopDong==h.MaHopDong&&
@@ -868,7 +881,16 @@ public static class ContractEndpoints
                 .SingleOrDefaultAsync(x => x.t.MaThanhToan == id, ct);
             if (payment is null) return Results.NotFound();
             if (!scope.IsAdmin && payment.h.MaCuaHang != scope.StoreId) return Results.Forbid();
-            if(payment.t.MaYeuCauHuy!=null)return Results.Conflict(new{loi="Khoản hoàn do hủy cần endpoint xác nhận hoàn có chứng từ và audit."});
+            if(payment.t.LoaiThanhToan.StartsWith("HOAN_"))return Results.Conflict(new{loi="Khoản hoàn dùng endpoint xác nhận đã hoàn riêng; không ghi thu thành công."});
+            if(payment.t.LoaiThanhToan.StartsWith("HOAN_"))return Results.Conflict(new{loi="Khoản hoàn cần API ghi hoàn và Customer xác nhận; không dùng xác nhận thu."});
+            if(payment.t.MaQuyetToan != null)return Results.Conflict(new{loi="Khoản thu quyết toán cần kết quả VNPAY đã xác thực, không xác nhận thủ công hoặc đổi sang tiền mặt."});
+            if(await db.QuyetToanHopDong.AnyAsync(q=>q.MaHopDong==parent,ct)) {
+                var settlement=await RentalCamera.Api.Settlement.SettlementWorkflow.LoadAsync(parent,db,ct);
+                if(settlement?.Final is not {} final || payment.t.MaQuyetToan!=final.Id || payment.t.LoaiThanhToan!="THU_QUYET_TOAN" ||
+                    settlement.Contract.TrangThai!="CHO_HOAN_TRA" || RentalCamera.Api.Settlement.SettlementWorkflow.FinancialMismatch(settlement) ||
+                    payment.t.SoTien!=final.ConPhaiThuBanDau-RentalCamera.Api.Settlement.SettlementWorkflow.Collected(settlement))
+                    return Results.Conflict(new{loi="Khoản thu không khớp quyết toán đã chốt; cần đối soát."});
+            }
             if (payment.t.TrangThai != "CHO_THANH_TOAN")
                 return Results.Conflict(new { loi = "Giao dịch đã được xử lý." });
             if (request.ThanhCong && payment.t.PhuongThuc != "TIEN_MAT" &&
@@ -878,10 +900,11 @@ public static class ContractEndpoints
             payment.t.MaGiaoDich = request.MaGiaoDich?.Trim();
             payment.t.ThoiGian = RentalPolicy.LocalNow;
             if(request.ThanhCong) {
-                var cancellation=await db.YeuCauHuyHopDong.SingleOrDefaultAsync(x=>x.MaHopDong==parent&&x.TrangThai=="DA_DUYET",ct);
+                var cancellation=await db.DoiSoatHuyHopDong.SingleOrDefaultAsync(x=>x.MaHopDong==parent,ct);
                 if(cancellation is not null)await CancellationEndpoints.ReconcileAsync(cancellation,db,ct,true);
             }
             await db.SaveChangesAsync(ct);
+            await RentalCamera.Api.Settlement.SettlementWorkflow.ReconcileAsync(parent, db, ct);
             await tx.CommitAsync(ct);
             return Results.Ok(payment.t);
         }).RequireAuthorization("Staff");

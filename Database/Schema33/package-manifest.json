@@ -1,0 +1,92 @@
+{
+  "Status": "FILES_SEALED_PENDING_RUNTIME_EF_AND_DEFINITION_CHECKS",
+  "Database": "RentalCameraDb30_Test",
+  "Environment": "Schema33Trial",
+  "createdUtc": "2026-10-27T13:59:00.848552+00:00",
+  "requiredTables": 33,
+  "requiredColumns": 376,
+  "files": [
+    {
+      "path": "00_preflight.sql",
+      "sha256": "56a3075c678cf80d16a4774d1a226389093cfc44b55bb3c59b0d5368b64c2739"
+    },
+    {
+      "path": "01_schema33.sql",
+      "sha256": "39dc3b65af1a83ad23cbe2a363b93bf491ac3e476ed95e85be6309a1f3817160"
+    },
+    {
+      "path": "02_seed_catalog.sql",
+      "sha256": "798ded9b41efc54990e3f963c41ce9288babce6c1ac2e01d13f398b61a632607"
+    },
+    {
+      "path": "04_verify_schema.sql",
+      "sha256": "0cadc1e19f942d6c15dce30dfb768963a65af3ecb68d8922a842c5e9f89196c7"
+    },
+    {
+      "path": "05_verify_seed_catalog.sql",
+      "sha256": "6ac0be643801fdd9a6cf99764061354de5da662d4d679c94572ea4f42a9386e1"
+    },
+    {
+      "path": "schema.json",
+      "sha256": "379d725eb3b1b5bcbc46ceb38687d0e04695778aca3f3b075ab6d3db3cd13610"
+    },
+    {
+      "path": "constraints.json",
+      "sha256": "e991e7ce98af8057c688c5ce9e0bc6f84b6badff4cb5f157c6265f6848d8cfb3"
+    },
+    {
+      "path": "expected-metadata.json",
+      "sha256": "6dcad625becd2d88d100a66f4ef8377a4b7d989b6b231a726e0f74b7e1eef7ea"
+    },
+    {
+      "path": "seed-catalog.json",
+      "sha256": "3634850eaf59b8acff70fe7f709a4b1cbb0cd276516fd86a03efe8ab15906552"
+    },
+    {
+      "path": "README.md",
+      "sha256": "8688aa328de17b407b0797851372fe149d51709e87665197d1bca7a5176d27c4"
+    },
+    {
+      "path": "Invoke-Schema33Package.ps1",
+      "sha256": "b5fd6fc2f71fa38e2ac0aca2d2ea3b57df4bdc4daf0480cdb0a4e58edd907730"
+    },
+    {
+      "path": "approval.template.json",
+      "sha256": "f1e89c5c006dcd493a4a4b78164bdb973b9be7b83c8c001a2702daefb47a47fa"
+    }
+  ],
+  "executionBlockers": [
+    "Runtime EF model versus source DDL/design parity pending",
+    "Fresh SQL preflight unavailable while Docker engine does not respond"
+  ],
+  "designHashes": {
+    "schema33-revised.json": "9c2273a8a5d46d49dbf5f09406b3fe52a126e72a078ff76816b1530d62330fad",
+    "constraints33-revised.json": "5bbf540ea63437568283d83318736b5d57fc5aa44daf43ec4470cf0ff240a760"
+  },
+  "handoffStatus": "SOURCE_HANDOFF_READY_DATABASE_API_NOT_RUN",
+  "postInstallChecksRequired": [
+    "Actual33 table/376 column and full structural metadata match",
+    "Stored CHECK/default/filter canonical definition comparison",
+    "Catalog seed verification",
+    "Runtime database binding and HTTP API smoke"
+  ],
+  "cleanup": {
+    "scope": "backend trial only",
+    "buildStatus": "RECORDED_PRE_CLEANUP_PASS_NOT_RERUN",
+    "databaseStatus": "NOT_RUN",
+    "apiSmokeStatus": "NOT_RUN",
+    "regressionStatus": "NOT_RUN",
+    "provenanceRegistry": "../../Docs/SCHEMA33_SQL_INVENTORY.md",
+    "historicalSourceReferencesAreLogicalOriginsNotRuntimeDependencies": true
+  },
+  "archivedHistoricalDrafts": [
+    {
+      "originalPath": "05_verify_seed_and_finance.sql",
+      "sha256": "9c05c3aee737bdceeec00f66273e6c4bb1320200f111c52d46fdb4b1d045743c"
+    },
+    {
+      "originalPath": "SEED_CAPACITY_EXPECTATIONS.json",
+      "sha256": "64252e87d32fe94e09d8cd177f3be45c4a668757f60dc5b24ba79513d445eb51"
+    }
+  ]
+}

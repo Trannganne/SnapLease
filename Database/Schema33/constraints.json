@@ -1,0 +1,3945 @@
+{
+  "approval": "PREPARED_CODE_NOT_DATABASE_APPROVED",
+  "constraints": [
+    {
+      "table": "TaiKhoan",
+      "kind": "PK",
+      "name": "PK_TaiKhoan",
+      "columns": [
+        "MaTaiKhoan"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 5
+        }
+      ]
+    },
+    {
+      "table": "KhachThue",
+      "kind": "PK",
+      "name": "PK_KhachThue",
+      "columns": [
+        "MaKhachThue"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 15
+        }
+      ]
+    },
+    {
+      "table": "NhanVien",
+      "kind": "PK",
+      "name": "PK_NhanVien",
+      "columns": [
+        "MaNhanVien"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "table": "GiayToTuyThan",
+      "kind": "PK",
+      "name": "PK_GiayToTuyThan",
+      "columns": [
+        "MaGiayTo"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 32
+        }
+      ]
+    },
+    {
+      "table": "DanhMuc",
+      "kind": "PK",
+      "name": "PK_DanhMuc",
+      "columns": [
+        "MaDanhMuc"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalCameraContext.cs",
+          "line": 568
+        }
+      ]
+    },
+    {
+      "table": "ThuongHieu",
+      "kind": "PK",
+      "name": "PK_ThuongHieu",
+      "columns": [
+        "MaThuongHieu"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalCameraContext.cs",
+          "line": 576
+        }
+      ]
+    },
+    {
+      "table": "DongMay",
+      "kind": "PK",
+      "name": "PK_DongMay",
+      "columns": [
+        "MaDongMay"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalCameraContext.cs",
+          "line": 583
+        }
+      ]
+    },
+    {
+      "table": "ThietBi",
+      "kind": "PK",
+      "name": "PK_ThietBi",
+      "columns": [
+        "MaThietBi"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalCameraContext.cs",
+          "line": 621
+        }
+      ]
+    },
+    {
+      "table": "AnhThietBi",
+      "kind": "PK",
+      "name": "PK_AnhThietBi",
+      "columns": [
+        "MaAnh"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalCameraContext.cs",
+          "line": 598
+        }
+      ]
+    },
+    {
+      "table": "CuaHang",
+      "kind": "PK",
+      "name": "PK_CuaHang",
+      "columns": [
+        "MaCuaHang"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalCameraContext.cs",
+          "line": 608
+        }
+      ]
+    },
+    {
+      "table": "GioHang",
+      "kind": "PK",
+      "name": "PK_GioHang",
+      "columns": [
+        "MaGioHang"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 58
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "PK",
+      "name": "PK_ChiTietGioHang",
+      "columns": [
+        "MaChiTietGioHang"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 68
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "PK",
+      "name": "PK_GiuCho",
+      "columns": [
+        "MaGiuCho"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 86
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "PK",
+      "name": "PK_ChiTietGiuCho",
+      "columns": [
+        "MaChiTietGiuCho"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 99
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "PK",
+      "name": "PK_HopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 121
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "PK",
+      "name": "PK_ChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 170
+        }
+      ]
+    },
+    {
+      "table": "PhuLuc",
+      "kind": "PK",
+      "name": "PK_PhuLuc",
+      "columns": [
+        "MaPhuLuc"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 203
+        }
+      ]
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "kind": "PK",
+      "name": "PK_XacNhanKyHopDong",
+      "columns": [
+        "MaXacNhan"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 145
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "PK",
+      "name": "PK_ThanhToan",
+      "columns": [
+        "MaThanhToan"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 218
+        }
+      ]
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "kind": "PK",
+      "name": "PK_YeuCauThanhToanVnpay",
+      "columns": [
+        "MaYeuCau"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 298
+        }
+      ]
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "PK",
+      "name": "PK_PhieuPhat",
+      "columns": [
+        "MaPhieuPhat"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 318
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "PK",
+      "name": "PK_QuyetToanHopDong",
+      "columns": [
+        "Id"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/SettlementEntities.cs",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "PK",
+      "name": "PK_PhanBoQuyetToan",
+      "columns": [
+        "Id"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/SettlementEntities.cs",
+          "line": 46
+        }
+      ]
+    },
+    {
+      "table": "DanhGia",
+      "kind": "PK",
+      "name": "PK_DanhGia",
+      "columns": [
+        "MaDanhGia"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 339
+        }
+      ]
+    },
+    {
+      "table": "AnhDanhGia",
+      "kind": "PK",
+      "name": "PK_AnhDanhGia",
+      "columns": [
+        "MaAnhDanhGia"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 370
+        }
+      ]
+    },
+    {
+      "table": "AnhBienBan",
+      "kind": "PK",
+      "name": "PK_AnhBienBan",
+      "columns": [
+        "MaAnhBienBan"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 329
+        }
+      ]
+    },
+    {
+      "table": "ThongBao",
+      "kind": "PK",
+      "name": "PK_ThongBao",
+      "columns": [
+        "MaThongBao"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 382
+        }
+      ]
+    },
+    {
+      "table": "FcmDeviceToken",
+      "kind": "PK",
+      "name": "PK_FcmDeviceToken",
+      "columns": [
+        "Id"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 409
+        }
+      ]
+    },
+    {
+      "table": "NotificationDelivery",
+      "kind": "PK",
+      "name": "PK_NotificationDelivery",
+      "columns": [
+        "Id"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 397
+        }
+      ]
+    },
+    {
+      "table": "IdempotencyKey",
+      "kind": "PK",
+      "name": "PK_IdempotencyKey",
+      "columns": [
+        "IdempotencyKey",
+        "MaKhachThue",
+        "LoaiThaoTac"
+      ],
+      "status": "GIỮ KHÓA NGUỒN",
+      "source": [
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 422
+        },
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 423
+        },
+        {
+          "file": "RentalCamera.Api/Data/RentalModels.cs",
+          "line": 424
+        }
+      ]
+    },
+    {
+      "table": "KhachThue",
+      "kind": "FK",
+      "name": "FK_KhachThue_MaTaiKhoan",
+      "columns": [
+        "MaTaiKhoan"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 171
+        }
+      ]
+    },
+    {
+      "table": "NhanVien",
+      "kind": "FK",
+      "name": "FK_NhanVien_MaTaiKhoan",
+      "columns": [
+        "MaTaiKhoan"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 219
+        }
+      ]
+    },
+    {
+      "table": "NhanVien",
+      "kind": "FK",
+      "name": "FK_NhanVien_MaCuaHang",
+      "columns": [
+        "MaCuaHang"
+      ],
+      "parent": "CuaHang",
+      "parent_columns": [
+        "MaCuaHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 219
+        }
+      ]
+    },
+    {
+      "table": "GiayToTuyThan",
+      "kind": "FK",
+      "name": "FK_GiayToTuyThan_MaKhachThue",
+      "columns": [
+        "MaKhachThue"
+      ],
+      "parent": "KhachThue",
+      "parent_columns": [
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 194
+        }
+      ]
+    },
+    {
+      "table": "DongMay",
+      "kind": "FK",
+      "name": "FK_DongMay_MaDanhMuc",
+      "columns": [
+        "MaDanhMuc"
+      ],
+      "parent": "DanhMuc",
+      "parent_columns": [
+        "MaDanhMuc"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 81
+        }
+      ]
+    },
+    {
+      "table": "DongMay",
+      "kind": "FK",
+      "name": "FK_DongMay_MaThuongHieu",
+      "columns": [
+        "MaThuongHieu"
+      ],
+      "parent": "ThuongHieu",
+      "parent_columns": [
+        "MaThuongHieu"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 81
+        }
+      ]
+    },
+    {
+      "table": "ThietBi",
+      "kind": "FK",
+      "name": "FK_ThietBi_MaDongMay",
+      "columns": [
+        "MaDongMay"
+      ],
+      "parent": "DongMay",
+      "parent_columns": [
+        "MaDongMay"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 244
+        }
+      ]
+    },
+    {
+      "table": "ThietBi",
+      "kind": "FK",
+      "name": "FK_ThietBi_MaCuaHang",
+      "columns": [
+        "MaCuaHang"
+      ],
+      "parent": "CuaHang",
+      "parent_columns": [
+        "MaCuaHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 244
+        }
+      ]
+    },
+    {
+      "table": "AnhThietBi",
+      "kind": "FK",
+      "name": "FK_AnhThietBi_MaDongMay",
+      "columns": [
+        "MaDongMay"
+      ],
+      "parent": "DongMay",
+      "parent_columns": [
+        "MaDongMay"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 111
+        }
+      ]
+    },
+    {
+      "table": "GioHang",
+      "kind": "FK",
+      "name": "FK_GioHang_MaKhachThue",
+      "columns": [
+        "MaKhachThue"
+      ],
+      "parent": "KhachThue",
+      "parent_columns": [
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 276
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "FK",
+      "name": "FK_ChiTietGioHang_MaGioHang",
+      "columns": [
+        "MaGioHang"
+      ],
+      "parent": "GioHang",
+      "parent_columns": [
+        "MaGioHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 307
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "FK",
+      "name": "FK_ChiTietGioHang_MaDongMay",
+      "columns": [
+        "MaDongMay"
+      ],
+      "parent": "DongMay",
+      "parent_columns": [
+        "MaDongMay"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 307
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "FK",
+      "name": "FK_ChiTietGioHang_MaCuaHang",
+      "columns": [
+        "MaCuaHang"
+      ],
+      "parent": "CuaHang",
+      "parent_columns": [
+        "MaCuaHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/migration_thue_ngay.sql",
+          "line": 46
+        },
+        {
+          "file": "Database/migration_thue_ngay_final.sql",
+          "line": 97
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "FK",
+      "name": "FK_GiuCho_MaGioHang",
+      "columns": [
+        "MaGioHang"
+      ],
+      "parent": "GioHang",
+      "parent_columns": [
+        "MaGioHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 343
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "FK",
+      "name": "FK_GiuCho_MaKhachThue",
+      "columns": [
+        "MaKhachThue"
+      ],
+      "parent": "KhachThue",
+      "parent_columns": [
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 343
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "FK",
+      "name": "FK_GiuCho_MaCuaHang",
+      "columns": [
+        "MaCuaHang"
+      ],
+      "parent": "CuaHang",
+      "parent_columns": [
+        "MaCuaHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 343
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "FK",
+      "name": "FK_GiuCho_MaGioHang_MaKhachThue",
+      "columns": [
+        "MaGioHang",
+        "MaKhachThue"
+      ],
+      "parent": "GioHang",
+      "parent_columns": [
+        "MaGioHang",
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/migration_thue_ngay.sql",
+          "line": 72
+        },
+        {
+          "file": "Database/migration_thue_ngay_final.sql",
+          "line": 149
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "FK",
+      "name": "FK_ChiTietGiuCho_MaGiuCho",
+      "columns": [
+        "MaGiuCho"
+      ],
+      "parent": "GiuCho",
+      "parent_columns": [
+        "MaGiuCho"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 382
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "FK",
+      "name": "FK_ChiTietGiuCho_MaDongMay",
+      "columns": [
+        "MaDongMay"
+      ],
+      "parent": "DongMay",
+      "parent_columns": [
+        "MaDongMay"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 382
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "FK",
+      "name": "FK_ChiTietGiuCho_MaChiTietGioHang",
+      "columns": [
+        "MaChiTietGioHang"
+      ],
+      "parent": "ChiTietGioHang",
+      "parent_columns": [
+        "MaChiTietGioHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/migration_thue_ngay.sql",
+          "line": 85
+        },
+        {
+          "file": "Database/migration_thue_ngay_final.sql",
+          "line": 166
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "FK",
+      "name": "FK_HopDong_MaGioHang",
+      "columns": [
+        "MaGioHang"
+      ],
+      "parent": "GioHang",
+      "parent_columns": [
+        "MaGioHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "FK",
+      "name": "FK_HopDong_MaGiuCho",
+      "columns": [
+        "MaGiuCho"
+      ],
+      "parent": "GiuCho",
+      "parent_columns": [
+        "MaGiuCho"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "FK",
+      "name": "FK_HopDong_MaKhachThue",
+      "columns": [
+        "MaKhachThue"
+      ],
+      "parent": "KhachThue",
+      "parent_columns": [
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "FK",
+      "name": "FK_HopDong_MaNhanVien",
+      "columns": [
+        "MaNhanVien"
+      ],
+      "parent": "NhanVien",
+      "parent_columns": [
+        "MaNhanVien"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "FK",
+      "name": "FK_HopDong_MaCuaHang",
+      "columns": [
+        "MaCuaHang"
+      ],
+      "parent": "CuaHang",
+      "parent_columns": [
+        "MaCuaHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "FK",
+      "name": "FK_HopDong_MaGioHang_MaKhachThue",
+      "columns": [
+        "MaGioHang",
+        "MaKhachThue"
+      ],
+      "parent": "GioHang",
+      "parent_columns": [
+        "MaGioHang",
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/migration_thue_ngay.sql",
+          "line": 75
+        },
+        {
+          "file": "Database/migration_thue_ngay_final.sql",
+          "line": 154
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "FK",
+      "name": "FK_ChiTietHopDong_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 533
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "FK",
+      "name": "FK_ChiTietHopDong_MaThietBi",
+      "columns": [
+        "MaThietBi"
+      ],
+      "parent": "ThietBi",
+      "parent_columns": [
+        "MaThietBi"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 533
+        }
+      ]
+    },
+    {
+      "table": "PhuLuc",
+      "kind": "FK",
+      "name": "FK_PhuLuc_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 625
+        }
+      ]
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "kind": "FK",
+      "name": "FK_XacNhanKyHopDong_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 491
+        },
+        {
+          "file": "Database/06_add_electronic_signature.sql",
+          "line": 27
+        },
+        {
+          "file": "Database/06_test.sql",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "FK",
+      "name": "FK_ThanhToan_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 571
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "FK",
+      "name": "FK_ThanhToan_MaQuyetToan_MaHopDong",
+      "columns": [
+        "MaQuyetToan",
+        "MaHopDong"
+      ],
+      "parent": "QuyetToanHopDong",
+      "parent_columns": [
+        "Id",
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 134
+        }
+      ]
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "kind": "FK",
+      "name": "FK_YeuCauThanhToanVnpay_MaThanhToan",
+      "columns": [
+        "MaThanhToan"
+      ],
+      "parent": "ThanhToan",
+      "parent_columns": [
+        "MaThanhToan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/09_add_vnpay_attempts.sql",
+          "line": 44
+        },
+        {
+          "file": "Database/09_add_yeu_cau_thanh_toan_vnpay.sql",
+          "line": 49
+        },
+        {
+          "file": "Database/09_add_vnpay_attempts.sql",
+          "line": 144
+        },
+        {
+          "file": "Database/09_add_yeu_cau_thanh_toan_vnpay.sql",
+          "line": 149
+        }
+      ]
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "FK",
+      "name": "FK_PhieuPhat_MaChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong"
+      ],
+      "parent": "ChiTietHopDong",
+      "parent_columns": [
+        "MaChiTietHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 654
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "FK",
+      "name": "FK_QuyetToanHopDong_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "FK",
+      "name": "FK_QuyetToanHopDong_NguoiChot",
+      "columns": [
+        "NguoiChot"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "FK",
+      "name": "FK_PhanBoQuyetToan_MaChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong"
+      ],
+      "parent": "ChiTietHopDong",
+      "parent_columns": [
+        "MaChiTietHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "FK",
+      "name": "FK_PhanBoQuyetToan_MaQuyetToan_MaNghiaVu",
+      "columns": [
+        "MaQuyetToan",
+        "MaNghiaVu"
+      ],
+      "parent": "PhanBoQuyetToan",
+      "parent_columns": [
+        "MaQuyetToan",
+        "Id"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "FK",
+      "name": "FK_PhanBoQuyetToan_MaPhieuPhat",
+      "columns": [
+        "MaPhieuPhat"
+      ],
+      "parent": "PhieuPhat",
+      "parent_columns": [
+        "MaPhieuPhat"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "FK",
+      "name": "FK_PhanBoQuyetToan_MaPhuLuc",
+      "columns": [
+        "MaPhuLuc"
+      ],
+      "parent": "PhuLuc",
+      "parent_columns": [
+        "MaPhuLuc"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "FK",
+      "name": "FK_PhanBoQuyetToan_MaQuyetToan_MaHopDong",
+      "columns": [
+        "MaQuyetToan",
+        "MaHopDong"
+      ],
+      "parent": "QuyetToanHopDong",
+      "parent_columns": [
+        "Id",
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "FK",
+      "name": "FK_PhanBoQuyetToan_MaThanhToan_MaHopDong",
+      "columns": [
+        "MaThanhToan",
+        "MaHopDong"
+      ],
+      "parent": "ThanhToan",
+      "parent_columns": [
+        "MaThanhToan",
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "DanhGia",
+      "kind": "FK",
+      "name": "FK_DanhGia_MaChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong"
+      ],
+      "parent": "ChiTietHopDong",
+      "parent_columns": [
+        "MaChiTietHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 708
+        }
+      ]
+    },
+    {
+      "table": "DanhGia",
+      "kind": "FK",
+      "name": "FK_DanhGia_MaKhachThue",
+      "columns": [
+        "MaKhachThue"
+      ],
+      "parent": "KhachThue",
+      "parent_columns": [
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 708
+        }
+      ]
+    },
+    {
+      "table": "AnhDanhGia",
+      "kind": "FK",
+      "name": "FK_AnhDanhGia_MaDanhGia",
+      "columns": [
+        "MaDanhGia"
+      ],
+      "parent": "DanhGia",
+      "parent_columns": [
+        "MaDanhGia"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 756
+        },
+        {
+          "file": "Database/09_add_review_details.sql",
+          "line": 71
+        },
+        {
+          "file": "Database/10_review_publication.sql",
+          "line": 110
+        },
+        {
+          "file": "Database/10_review_publication.test.sql",
+          "line": 112
+        }
+      ]
+    },
+    {
+      "table": "AnhBienBan",
+      "kind": "FK",
+      "name": "FK_AnhBienBan_MaChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong"
+      ],
+      "parent": "ChiTietHopDong",
+      "parent_columns": [
+        "MaChiTietHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 689
+        }
+      ]
+    },
+    {
+      "table": "ThongBao",
+      "kind": "FK",
+      "name": "FK_ThongBao_MaTaiKhoan",
+      "columns": [
+        "MaTaiKhoan"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 775
+        }
+      ]
+    },
+    {
+      "table": "FcmDeviceToken",
+      "kind": "FK",
+      "name": "FK_FcmDeviceToken_MaTaiKhoan",
+      "columns": [
+        "MaTaiKhoan"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/08_add_firebase_notifications.sql",
+          "line": 9
+        }
+      ]
+    },
+    {
+      "table": "IdempotencyKey",
+      "kind": "FK",
+      "name": "FK_IdempotencyKey_MaKhachThue",
+      "columns": [
+        "MaKhachThue"
+      ],
+      "parent": "KhachThue",
+      "parent_columns": [
+        "MaKhachThue"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "GIỮ LIÊN KẾT NGUỒN / DELETE RESTRICT",
+      "source": [
+        {
+          "file": "Database/migration_thue_ngay.sql",
+          "line": 92
+        },
+        {
+          "file": "Database/migration_thue_ngay_final.sql",
+          "line": 173
+        }
+      ]
+    },
+    {
+      "table": "TaiKhoan",
+      "kind": "UNIQUE",
+      "name": "UQ_TaiKhoan_TenDangNhap",
+      "columns": [
+        "TenDangNhap"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 154
+        }
+      ]
+    },
+    {
+      "table": "KhachThue",
+      "kind": "UNIQUE",
+      "name": "UQ_KhachThue_MaTaiKhoan",
+      "columns": [
+        "MaTaiKhoan"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 173
+        }
+      ]
+    },
+    {
+      "table": "KhachThue",
+      "kind": "UNIQUE",
+      "name": "UQ_KhachThue_SoDienThoai",
+      "columns": [
+        "SoDienThoai"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 175
+        }
+      ]
+    },
+    {
+      "table": "KhachThue",
+      "kind": "UNIQUE",
+      "name": "UX_KhachThue_CCCD_NotNull",
+      "columns": [
+        "CCCD"
+      ],
+      "filter": "CCCD IS NOT NULL",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 186
+        }
+      ]
+    },
+    {
+      "table": "NhanVien",
+      "kind": "UNIQUE",
+      "name": "UQ_NhanVien_MaTaiKhoan",
+      "columns": [
+        "MaTaiKhoan"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 221
+        }
+      ]
+    },
+    {
+      "table": "GiayToTuyThan",
+      "kind": "UNIQUE",
+      "name": "UQ_GiayToTuyThan_SoGiayTo",
+      "columns": [
+        "SoGiayTo"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 198
+        }
+      ]
+    },
+    {
+      "table": "DanhMuc",
+      "kind": "UNIQUE",
+      "name": "UQ_DanhMuc_TenDanhMuc",
+      "columns": [
+        "TenDanhMuc"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 59
+        }
+      ]
+    },
+    {
+      "table": "ThuongHieu",
+      "kind": "UNIQUE",
+      "name": "UQ_ThuongHieu_TenThuongHieu",
+      "columns": [
+        "TenThuongHieu"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "table": "DongMay",
+      "kind": "UNIQUE",
+      "name": "UQ_DongMay",
+      "columns": [
+        "MaThuongHieu",
+        "TenDongMay"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 81
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "ThietBi",
+      "kind": "UNIQUE",
+      "name": "UQ_ThietBi_SoSerial",
+      "columns": [
+        "SoSerial"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 248
+        }
+      ]
+    },
+    {
+      "table": "ThietBi",
+      "kind": "INDEX",
+      "name": "IX_ThietBi_TimKiem",
+      "columns": [
+        "MaCuaHang",
+        "MaDongMay",
+        "TrangThai"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 798
+        }
+      ]
+    },
+    {
+      "table": "AnhThietBi",
+      "kind": "UNIQUE",
+      "name": "UX_AnhThietBi_DaiDien",
+      "columns": [
+        "MaDongMay"
+      ],
+      "filter": "LaAnhDaiDien = 1",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 793
+        }
+      ]
+    },
+    {
+      "table": "GioHang",
+      "kind": "INDEX",
+      "name": "IX_GioHang_KhachHang",
+      "columns": [
+        "MaKhachThue",
+        "TrangThai",
+        "NgayCapNhat"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 802
+        }
+      ]
+    },
+    {
+      "table": "GioHang",
+      "kind": "UNIQUE",
+      "name": "UQ_GioHang_MaGioHang_KhachThue",
+      "columns": [
+        "MaGioHang",
+        "MaKhachThue"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/migration_thue_ngay_final.sql",
+          "line": 134
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "INDEX",
+      "name": "IX_ChiTietGioHang_Lich",
+      "columns": [
+        "MaDongMay",
+        "NgayBatDau",
+        "NgayKetThuc"
+      ],
+      "filter": null,
+      "include": [
+        "MaGioHang",
+        "SoLuong"
+      ],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 806
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "INDEX",
+      "name": "IX_GiuCho_Availability",
+      "columns": [
+        "MaCuaHang",
+        "TrangThai",
+        "HetHanLuc"
+      ],
+      "filter": null,
+      "include": [
+        "MaKhachThue",
+        "MaGioHang",
+        "NgayTao"
+      ],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 811
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "INDEX",
+      "name": "IX_GiuCho_KhachHang",
+      "columns": [
+        "MaKhachThue",
+        "TrangThai",
+        "HetHanLuc"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 816
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "INDEX",
+      "name": "IX_ChiTietGiuCho_Lich",
+      "columns": [
+        "MaDongMay",
+        "NgayBatDau",
+        "NgayKetThuc"
+      ],
+      "filter": null,
+      "include": [
+        "MaGiuCho",
+        "SoLuong"
+      ],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 820
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "UNIQUE",
+      "name": "UQ_HopDong_MaGiuCho",
+      "columns": [
+        "MaGiuCho"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 413
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "INDEX",
+      "name": "IX_HopDong_Lich",
+      "columns": [
+        "MaCuaHang",
+        "TrangThai",
+        "ThoiGianBanGiao",
+        "ThoiGianTraDuKien"
+      ],
+      "filter": null,
+      "include": [
+        "MaGioHang",
+        "MaGiuCho",
+        "MaKhachThue"
+      ],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 825
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "INDEX",
+      "name": "IX_HopDong_KhachHang",
+      "columns": [
+        "MaKhachThue",
+        "TrangThai",
+        "NgayTaoHopDong"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 839
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "INDEX",
+      "name": "IX_HopDong_HanTra",
+      "columns": [
+        "TrangThai",
+        "ThoiGianTraDuKien"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 843
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "UNIQUE",
+      "name": "UQ_ChiTietHopDong",
+      "columns": [
+        "MaHopDong",
+        "MaThietBi"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 533
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "INDEX",
+      "name": "IX_ChiTietHopDong_ThietBi",
+      "columns": [
+        "MaThietBi",
+        "MaHopDong"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 847
+        }
+      ]
+    },
+    {
+      "table": "PhuLuc",
+      "kind": "INDEX",
+      "name": "IX_PhuLuc_HopDong",
+      "columns": [
+        "MaHopDong",
+        "TrangThai",
+        "ThoiHanTraMoi"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 865
+        }
+      ]
+    },
+    {
+      "table": "PhuLuc",
+      "kind": "UNIQUE",
+      "name": "UX_PhuLuc_Active",
+      "columns": [
+        "MaHopDong"
+      ],
+      "filter": "TrangThai IN('CHO_XAC_NHAN','CHO_KY')",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/11_mobile_workflows.test.sql",
+          "line": 85
+        }
+      ]
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "kind": "INDEX",
+      "name": "IX_XacNhanKyHopDong_HopDong_TrangThai",
+      "columns": [
+        "MaHopDong",
+        "TrangThai"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/06_test.sql",
+          "line": 64
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "UNIQUE",
+      "name": "UX_ThanhToan_MaGiaoDich",
+      "columns": [
+        "MaGiaoDich"
+      ],
+      "filter": "MaGiaoDich IS NOT NULL",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 851
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "UNIQUE",
+      "name": "UX_ThanhToan_MaThamChieu",
+      "columns": [
+        "MaThamChieu"
+      ],
+      "filter": "MaThamChieu IS NOT NULL",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/07_test2.sql",
+          "line": 29
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "INDEX",
+      "name": "IX_ThanhToan_HopDong",
+      "columns": [
+        "MaHopDong",
+        "LoaiThanhToan",
+        "TrangThai"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 861
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "UNIQUE",
+      "name": "AK_ThanhToan_MaThanhToan_MaHopDong",
+      "columns": [
+        "MaThanhToan",
+        "MaHopDong"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 28
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "UNIQUE",
+      "name": "IX_ThanhToan_MaQuyetToan_LoaiThanhToan",
+      "columns": [
+        "MaQuyetToan",
+        "LoaiThanhToan"
+      ],
+      "filter": "[MaQuyetToan] IS NOT NULL AND [TrangThai]='CHO_THANH_TOAN'",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 159
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "INDEX",
+      "name": "IX_ThanhToan_MaQuyetToan_MaHopDong",
+      "columns": [
+        "MaQuyetToan",
+        "MaHopDong"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 160
+        }
+      ]
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "INDEX",
+      "name": "IX_PhieuPhat_ChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong",
+        "TrangThai"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 869
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "UNIQUE",
+      "name": "AK_QuyetToanHopDong_Id_MaHopDong",
+      "columns": [
+        "Id",
+        "MaHopDong"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 47
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "UNIQUE",
+      "name": "AK_QuyetToanHopDong_Id_PhienBan_MaBam",
+      "columns": [
+        "Id",
+        "PhienBan",
+        "MaBam"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 47
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "UNIQUE",
+      "name": "IX_QuyetToanHopDong_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 157
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "INDEX",
+      "name": "IX_QuyetToanHopDong_NguoiChot",
+      "columns": [
+        "NguoiChot"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 158
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "UNIQUE",
+      "name": "AK_PhanBoQuyetToan_MaQuyetToan_Id",
+      "columns": [
+        "MaQuyetToan",
+        "Id"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "INDEX",
+      "name": "IX_PhanBoQuyetToan_MaChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 141
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "INDEX",
+      "name": "IX_PhanBoQuyetToan_MaPhieuPhat",
+      "columns": [
+        "MaPhieuPhat"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 142
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "INDEX",
+      "name": "IX_PhanBoQuyetToan_MaPhuLuc",
+      "columns": [
+        "MaPhuLuc"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 143
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "INDEX",
+      "name": "IX_PhanBoQuyetToan_MaQuyetToan_MaHopDong",
+      "columns": [
+        "MaQuyetToan",
+        "MaHopDong"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 144
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "INDEX",
+      "name": "IX_PhanBoQuyetToan_MaQuyetToan_MaNghiaVu",
+      "columns": [
+        "MaQuyetToan",
+        "MaNghiaVu"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 145
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "UNIQUE",
+      "name": "IX_PhanBoQuyetToan_MaQuyetToan_MaThanhToan_MaNghiaVu",
+      "columns": [
+        "MaQuyetToan",
+        "MaThanhToan",
+        "MaNghiaVu"
+      ],
+      "filter": "[LoaiDong]='PHAN_BO'",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 146
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "INDEX",
+      "name": "IX_PhanBoQuyetToan_MaThanhToan_MaHopDong",
+      "columns": [
+        "MaThanhToan",
+        "MaHopDong"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 147
+        }
+      ]
+    },
+    {
+      "table": "DanhGia",
+      "kind": "UNIQUE",
+      "name": "UQ_DanhGia_MaChiTietHopDong",
+      "columns": [
+        "MaChiTietHopDong"
+      ],
+      "filter": null,
+      "status": "GIỮ UNIQUE NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 710
+        }
+      ]
+    },
+    {
+      "table": "AnhDanhGia",
+      "kind": "UNIQUE",
+      "name": "UQ_AnhDanhGia_ThuTu",
+      "columns": [
+        "MaDanhGia",
+        "ThuTu"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/10_review_publication.test.sql",
+          "line": 112
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "ThongBao",
+      "kind": "INDEX",
+      "name": "IX_ThongBao_ChuaDoc",
+      "columns": [
+        "MaTaiKhoan",
+        "DaDoc",
+        "ThoiGianGui"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 873
+        }
+      ]
+    },
+    {
+      "table": "ThongBao",
+      "kind": "UNIQUE",
+      "name": "UX_ThongBao_EventKey",
+      "columns": [
+        "EventKey"
+      ],
+      "filter": "EventKey IS NOT NULL",
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/11_mobile_workflows.test.sql",
+          "line": 33
+        }
+      ]
+    },
+    {
+      "table": "FcmDeviceToken",
+      "kind": "UNIQUE",
+      "name": "UX_FcmDeviceToken_TokenHash",
+      "columns": [
+        "TokenHash"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/08_add_firebase_notifications.sql",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "table": "FcmDeviceToken",
+      "kind": "INDEX",
+      "name": "IX_FcmDeviceToken_MaTaiKhoan_IsActive",
+      "columns": [
+        "MaTaiKhoan",
+        "IsActive"
+      ],
+      "filter": null,
+      "include": [],
+      "status": "GIỮ INDEX NGUỒN",
+      "source": [
+        {
+          "file": "Database/08_add_firebase_notifications.sql",
+          "line": 51
+        }
+      ]
+    },
+    {
+      "table": "NotificationDelivery",
+      "kind": "UNIQUE",
+      "name": "UX_NotificationDelivery_Target",
+      "columns": [
+        "MaThongBao",
+        "DeviceTokenId"
+      ],
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/11_mobile_workflows.test.sql",
+          "line": 35
+        }
+      ],
+      "status": "GIỮ UNIQUE NGUỒN"
+    },
+    {
+      "table": "TaiKhoan",
+      "kind": "CHECK",
+      "name": "CK_TaiKhoan_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN ('HOAT_DONG','TAM_KHOA')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 152
+        }
+      ]
+    },
+    {
+      "table": "TaiKhoan",
+      "kind": "CHECK",
+      "name": "CK_TaiKhoan_VaiTro",
+      "columns": [],
+      "predicate": "VaiTro IN ('ADMIN','NHAN_VIEN','KHACH_HANG')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 152
+        }
+      ]
+    },
+    {
+      "table": "NhanVien",
+      "kind": "CHECK",
+      "name": "CK_NhanVien_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN ('HOAT_DONG','NGHI_VIEC')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 219
+        }
+      ]
+    },
+    {
+      "table": "GiayToTuyThan",
+      "kind": "CHECK",
+      "name": "CK_GiayTo_Loai",
+      "columns": [],
+      "predicate": "LoaiGiayTo IN ('CCCD','HO_CHIEU','GPLX')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 194
+        }
+      ]
+    },
+    {
+      "table": "GiayToTuyThan",
+      "kind": "CHECK",
+      "name": "CK_GiayTo_TrangThai",
+      "columns": [],
+      "predicate": "TrangThaiXacMinh IN ('CHO_XAC_MINH','HOP_LE','TU_CHOI')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 194
+        }
+      ]
+    },
+    {
+      "table": "DanhMuc",
+      "kind": "CHECK",
+      "name": "CK_DanhMuc_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN ('HOAT_DONG','TAM_AN')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 57
+        }
+      ]
+    },
+    {
+      "table": "DongMay",
+      "kind": "CHECK",
+      "name": "CK_DongMay_Gia",
+      "columns": [],
+      "predicate": "GiaThueNgay >= 0 AND TienCoc >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 81
+        }
+      ]
+    },
+    {
+      "table": "DongMay",
+      "kind": "CHECK",
+      "name": "CK_DongMay_GiamGia",
+      "columns": [],
+      "predicate": "PhanTramGiamGia BETWEEN 0 AND 100",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 81
+        }
+      ]
+    },
+    {
+      "table": "ThietBi",
+      "kind": "CHECK",
+      "name": "CK_ThietBi_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN (\n            'SAN_SANG',\n            'DANG_GIU',\n            'DANG_THUE',\n            'BAO_TRI',\n            'HONG',\n            'NGUNG_KINH_DOANH'\n        )",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 244
+        }
+      ]
+    },
+    {
+      "table": "AnhThietBi",
+      "kind": "CHECK",
+      "name": "CK_AnhThietBi_ThuTu",
+      "columns": [],
+      "predicate": "ThuTuHienThi >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 111
+        }
+      ]
+    },
+    {
+      "table": "CuaHang",
+      "kind": "CHECK",
+      "name": "CK_CuaHang_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN ('HOAT_DONG','TAM_KHOA')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 129
+        }
+      ]
+    },
+    {
+      "table": "CuaHang",
+      "kind": "CHECK",
+      "name": "CK_CuaHang_ToaDo",
+      "columns": [],
+      "predicate": "(ViDo IS NULL AND KinhDo IS NULL) OR\n        (ViDo IS NOT NULL AND KinhDo IS NOT NULL AND\n         ViDo BETWEEN -90 AND 90 AND KinhDo BETWEEN -180 AND 180)",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/14_branch_coordinates.proposed.sql",
+          "line": 20
+        }
+      ]
+    },
+    {
+      "table": "GioHang",
+      "kind": "CHECK",
+      "name": "CK_GioHang_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN (\n            'DANG_CHON',\n            'DA_CHUYEN_HOP_DONG'\n                  )",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 276
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "CHECK",
+      "name": "CK_ChiTietGioHang_SoLuong",
+      "columns": [],
+      "predicate": "SoLuong > 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 307
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "CHECK",
+      "name": "CK_ChiTietGioHang_ThoiGian",
+      "columns": [],
+      "predicate": "NgayKetThuc > NgayBatDau",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 307
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "CHECK",
+      "name": "CK_ChiTietGioHang_SoTien",
+      "columns": [],
+      "predicate": "DonGia >= 0 AND TienCoc >= 0 AND ThanhTien >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 307
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGioHang",
+      "kind": "CHECK",
+      "name": "CK_ChiTietGioHang_NguonTao",
+      "columns": [],
+      "predicate": "NguonTao IN ('GIO_HANG', 'THUE_NGAY')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/migration_thue_ngay_final.sql",
+          "line": 55
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "CHECK",
+      "name": "CK_GiuCho_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN (\n            'DANG_GIU',\n            'DA_CHUYEN_HOP_DONG',\n            'HET_HAN',\n            'DA_HUY'\n        )",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 343
+        }
+      ]
+    },
+    {
+      "table": "GiuCho",
+      "kind": "CHECK",
+      "name": "CK_GiuCho_ThoiGian",
+      "columns": [],
+      "predicate": "HetHanLuc > NgayTao",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 343
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "CHECK",
+      "name": "CK_ChiTietGiuCho_SoLuong",
+      "columns": [],
+      "predicate": "SoLuong > 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 382
+        }
+      ]
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "CHECK",
+      "name": "CK_ChiTietGiuCho_ThoiGian",
+      "columns": [],
+      "predicate": "NgayKetThuc > NgayBatDau",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 382
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "CHECK",
+      "name": "CK_HopDong_ThoiGian",
+      "columns": [],
+      "predicate": "ThoiGianTraDuKien > ThoiGianBanGiao",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "CHECK",
+      "name": "CK_HopDong_SoTien",
+      "columns": [],
+      "predicate": "TongTien >= 0 AND TongTienCoc >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "CHECK",
+      "name": "CK_HopDong_HinhThucKy",
+      "columns": [],
+      "predicate": "HinhThucKy IS NULL\n            OR HinhThucKy IN ('DIEN_TU','MAN_HINH','BAN_GIAY')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "CHECK",
+      "name": "CK_HopDong_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN (\n            'CHO_KY',\n            'DA_KY',\n            'CHO_BAN_GIAO',\n            'DANG_THUE',\n            'CHO_HOAN_TRA',\n            'HOAN_THANH',\n            'DA_HUY'\n        )",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "CHECK",
+      "name": "CK_HopDong_ThongTinKy",
+      "columns": [],
+      "predicate": "TrangThai IN ('CHO_KY','DA_HUY')\n            OR (NgayKy IS NOT NULL AND HinhThucKy IS NOT NULL)",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 410
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "CHECK",
+      "name": "CK_ChiTietHopDong_DonGia",
+      "columns": [],
+      "predicate": "DonGia >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 533
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "CHECK",
+      "name": "CK_ChiTietHopDong_NgayNhan",
+      "columns": [],
+      "predicate": "NgayNhanThucTe IS NULL\n            OR NgayGiaoThucTe IS NULL\n            OR NgayNhanThucTe >= NgayGiaoThucTe",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 533
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "CHECK",
+      "name": "CK_ChiTietHopDong_ReturnInspection",
+      "columns": [],
+      "predicate": "(KetQuaKiemTra IS NULL OR KetQuaKiemTra IN('CHUA_KIEM_TRA','DAT','CO_VAN_DE')) AND (LoaiNgoaiLeNhanTra IS NULL OR LoaiNgoaiLeNhanTra IN('THIEU_THIET_BI','BAO_MAT')) AND (KetQuaKiemTra<>'DAT' OR (CoHuHong=0 AND ThieuPhuKien=0))",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 135
+        }
+      ]
+    },
+    {
+      "table": "PhuLuc",
+      "kind": "CHECK",
+      "name": "CK_PhuLuc_ChiPhi",
+      "columns": [],
+      "predicate": "ChiPhiPhatSinh >= 0 AND TienCocBoSung >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 625
+        }
+      ]
+    },
+    {
+      "table": "PhuLuc",
+      "kind": "CHECK",
+      "name": "CK_PhuLuc_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN('CHO_XAC_NHAN','CHO_KY','DA_XAC_NHAN','DA_HIEU_LUC','TU_CHOI','DA_HUY','HET_HAN_XU_LY','HET_HAN_KY','DONG_QUY_TRINH_CU')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/11_mobile_workflows.test.sql",
+          "line": 83
+        }
+      ]
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "kind": "CHECK",
+      "name": "CK_XacNhanKyHopDong_ThoiGian",
+      "columns": [],
+      "predicate": "HetHanLuc > TaoLuc",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/06_test.sql",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "kind": "CHECK",
+      "name": "CK_XacNhanKyHopDong_SoLanThu",
+      "columns": [],
+      "predicate": "SoLanThu >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/06_test.sql",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "kind": "CHECK",
+      "name": "CK_XacNhanKyHopDong_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN ('CHO_XAC_NHAN','DA_XAC_NHAN','HET_HAN','DA_HUY','KHOA')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/06_test.sql",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "table": "XacNhanKyHopDong",
+      "kind": "CHECK",
+      "name": "CK_XacNhanKyHopDong_Json",
+      "columns": [],
+      "predicate": "ISJSON(NoiDungHopDongJson) = 1",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/06_test.sql",
+          "line": 27
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CK_ThanhToan_SoTien",
+      "columns": [],
+      "predicate": "SoTien > 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 571
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CK_ThanhToan_Loai",
+      "columns": [],
+      "predicate": "LoaiThanhToan IN('TIEN_COC','TIEN_THUE','PHI_GIA_HAN','PHI_PHAT','HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA','THU_QUYET_TOAN')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 162
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CK_ThanhToan_PhuongThuc",
+      "columns": [],
+      "predicate": "PhuongThuc IN (\n            'TIEN_MAT',\n            'CHUYEN_KHOAN',\n            'VI_DIEN_TU'\n        )",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 571
+        }
+      ]
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CK_ThanhToan_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN (\n            'CHO_THANH_TOAN',\n            'THANH_CONG',\n            'THAT_BAI',\n            'DA_HOAN'\n        )",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 571
+        }
+      ]
+    },
+    {
+      "table": "YeuCauThanhToanVnpay",
+      "kind": "CHECK",
+      "name": "CK_YeuCauThanhToanVnpay_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN ('CHO_THANH_TOAN', 'THANH_CONG', 'THAT_BAI', 'HET_HAN')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/09_add_yeu_cau_thanh_toan_vnpay.sql",
+          "line": 136
+        }
+      ]
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "CHECK",
+      "name": "CK_PhieuPhat_Loai",
+      "columns": [],
+      "predicate": "LoaiViPham IN('TRA_TRE','HU_HONG','KHAC','THIEU_PHU_KIEN')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 164
+        }
+      ]
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "CHECK",
+      "name": "CK_PhieuPhat_SoTien",
+      "columns": [],
+      "predicate": "SoTien >= 0",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 654
+        }
+      ]
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "CHECK",
+      "name": "CK_PhieuPhat_TrangThai",
+      "columns": [],
+      "predicate": "TrangThai IN (\n            'CHO_XAC_NHAN',\n            'DA_XAC_NHAN',\n            'DA_THANH_TOAN',\n            'HUY'\n        )",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 654
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "CHECK",
+      "name": "CK_QuyetToanHopDong_Money",
+      "columns": [],
+      "predicate": "TienThue>=0 AND PhiGiaHan>=0 AND PhiTraTre>=0 AND BoiThuong>=0 AND ThuePhiDaThu>=0 AND CocDaThu>=0 AND CocKhauTru>=0 AND CocKhauTru<=CocDaThu AND ConPhaiThuBanDau>=0 AND HoanCocBanDau>=0 AND HoanKhacBanDau>=0 AND TongNghiaVu=TienThue+PhiGiaHan+PhiTraTre+BoiThuong AND ThuePhiDaThu+CocDaThu+ConPhaiThuBanDau=TongNghiaVu+HoanCocBanDau+HoanKhacBanDau",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "CHECK",
+      "name": "CK_QuyetToanHopDong_Version",
+      "columns": [],
+      "predicate": "PhienBan=1 AND LEN(MaBam)=64",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "CHECK",
+      "name": "CK_PhanBoQuyetToan_Kind",
+      "columns": [],
+      "predicate": "LoaiNghiaVu IN('TIEN_THUE','PHI_GIA_HAN','TRA_TRE','BOI_THUONG') AND (DonGia IS NULL OR DonGia>=0) AND (SoNgay IS NULL OR SoNgay>=0)",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "PhanBoQuyetToan",
+      "kind": "CHECK",
+      "name": "CK_PhanBoQuyetToan_Line",
+      "columns": [],
+      "predicate": "(LoaiDong='NGHIA_VU' AND SoTien>=0 AND MaNghiaVu IS NULL AND MaThanhToan IS NULL) OR (LoaiDong='PHAN_BO' AND SoTien>0 AND MaNghiaVu IS NOT NULL AND MaThanhToan IS NOT NULL AND Id<>MaNghiaVu)",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 77
+        }
+      ]
+    },
+    {
+      "table": "DanhGia",
+      "kind": "CHECK",
+      "name": "CK_DanhGia_SoSao",
+      "columns": [],
+      "predicate": "SoSao BETWEEN 1 AND 5",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 708
+        }
+      ]
+    },
+    {
+      "table": "DanhGia",
+      "kind": "CHECK",
+      "name": "CK_DanhGia_TrangThaiKiemDuyet",
+      "columns": [],
+      "predicate": "TrangThaiKiemDuyet IS NULL OR TrangThaiKiemDuyet IN ('CONG_KHAI','AN','CHO_DUYET','DA_DUYET','TU_CHOI')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/10_review_publication.test.sql",
+          "line": 83
+        }
+      ]
+    },
+    {
+      "table": "AnhDanhGia",
+      "kind": "CHECK",
+      "name": "CK_AnhDanhGia_ThuTu",
+      "columns": [],
+      "predicate": "ThuTu BETWEEN 1 AND 4",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/10_review_publication.test.sql",
+          "line": 112
+        }
+      ]
+    },
+    {
+      "table": "AnhBienBan",
+      "kind": "CHECK",
+      "name": "CK_AnhBienBan_Loai",
+      "columns": [],
+      "predicate": "Loai IN ('BAN_GIAO','NHAN_LAI','HU_HONG')",
+      "status": "GIỮ CHECK NGUỒN (BẢN KHAI BÁO ĐƯỢC CHỌN)",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 689
+        }
+      ]
+    },
+    {
+      "table": "TaiKhoan",
+      "kind": "CHECK",
+      "name": "CKR_TaiKhoan_PhienBanBaoMat",
+      "columns": [
+        "PhienBanBaoMat"
+      ],
+      "predicate": "PhienBanBaoMat>=0",
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "KhachThue",
+      "kind": "CHECK",
+      "name": "CKR_KhachThue_EmailProof",
+      "columns": [
+        "Email",
+        "EmailXacMinhLucUtc"
+      ],
+      "predicate": "EmailXacMinhLucUtc IS NULL OR (Email IS NOT NULL AND LEN(LTRIM(RTRIM(Email)))>0)",
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "KhachThue",
+      "kind": "UNIQUE",
+      "name": "UXR_KhachThue_EmailDaXacMinh",
+      "columns": [
+        "Email"
+      ],
+      "filter": "Email IS NOT NULL AND EmailXacMinhLucUtc IS NOT NULL",
+      "status": "BỔ SUNG — THUỘC TÍNH CHƯA DUYỆT; nghiệp vụ 1 email đã xác minh/1 tài khoản đã chốt. Chuẩn hóa và kiểm collation trước DDL."
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "UNIQUE",
+      "name": "UXR_ChiTietGiuCho_Selection",
+      "columns": [
+        "MaGiuCho",
+        "MaChiTietGioHang"
+      ],
+      "filter": null,
+      "status": "ĐIỀU CHỈNH — thay UNIQUE (MaGiuCho,MaDongMay); không mất nhiều dòng cùng mẫu."
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "INDEX",
+      "name": "IXR_ChiTietGiuCho_Capacity",
+      "columns": [
+        "MaDongMay",
+        "NgayBatDau",
+        "NgayKetThuc",
+        "MaGiuCho"
+      ],
+      "filter": null,
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "ChiTietGiuCho",
+      "kind": "FK",
+      "name": "FKR_ChiTietGiuCho_MaChiTietGioHangHopDong",
+      "columns": [
+        "MaChiTietGioHangHopDong"
+      ],
+      "parent": "ChiTietGioHang",
+      "parent_columns": [
+        "MaChiTietGioHang"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "BỔ SUNG — CHƯA DUYỆT; snapshot giá riêng; chủ/kỳ thuê/model kiểm trong transaction"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "FK",
+      "name": "FKR_ThanhToan_NguoiXacNhanHoan",
+      "columns": [
+        "NguoiXacNhanHoan"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "BỔ SUNG — CHƯA DUYỆT; phân biệt nhân viên ghi hoàn và khách nhận hoàn"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "FK",
+      "name": "FKR_ThanhToan_NguoiXacNhanNhanHoan",
+      "columns": [
+        "NguoiXacNhanNhanHoan"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "BỔ SUNG — CHƯA DUYỆT; phân biệt nhân viên ghi hoàn và khách nhận hoàn"
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "FK",
+      "name": "FKR_PhieuPhat_NguoiLap",
+      "columns": [
+        "NguoiLap"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "BỔ SUNG — CHƯA DUYỆT; giữ actor nghiệp vụ trực tiếp"
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "FK",
+      "name": "FKR_PhieuPhat_NguoiXuLy",
+      "columns": [
+        "NguoiXuLy"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "BỔ SUNG — CHƯA DUYỆT; giữ actor nghiệp vụ trực tiếp"
+    },
+    {
+      "table": "DanhGia",
+      "kind": "FK",
+      "name": "FKR_DanhGia_NguoiCapNhatHienThi",
+      "columns": [
+        "NguoiCapNhatHienThi"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "BỔ SUNG — CHƯA DUYỆT; chỉ Admin, không lưu row lịch sử"
+    },
+    {
+      "table": "HopDong",
+      "kind": "INDEX",
+      "name": "IXR_HopDong_NoShow",
+      "columns": [
+        "TrangThai",
+        "ThoiGianBanGiao",
+        "MaCuaHang"
+      ],
+      "filter": null,
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CKR_ThanhToan_RefundStaff",
+      "columns": [
+        "NguoiXacNhanHoan",
+        "XacNhanHoanLucUtc",
+        "LoaiThanhToan",
+        "TrangThai"
+      ],
+      "predicate": "(NguoiXacNhanHoan IS NULL AND XacNhanHoanLucUtc IS NULL) OR (NguoiXacNhanHoan IS NOT NULL AND XacNhanHoanLucUtc IS NOT NULL AND LoaiThanhToan IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA') AND TrangThai='DA_HOAN')",
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CKR_ThanhToan_RefundRecorded",
+      "columns": [
+        "LoaiThanhToan",
+        "TrangThai",
+        "NguoiXacNhanHoan",
+        "XacNhanHoanLucUtc"
+      ],
+      "predicate": "LoaiThanhToan NOT IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA') OR TrangThai<>'DA_HOAN' OR (NguoiXacNhanHoan IS NOT NULL AND XacNhanHoanLucUtc IS NOT NULL)",
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CKR_ThanhToan_RefundOwner",
+      "columns": [
+        "NguoiXacNhanNhanHoan",
+        "KhachXacNhanNhanHoanLucUtc",
+        "XacNhanHoanLucUtc",
+        "NguoiXacNhanHoan",
+        "LoaiThanhToan",
+        "TrangThai"
+      ],
+      "predicate": "(NguoiXacNhanNhanHoan IS NULL AND KhachXacNhanNhanHoanLucUtc IS NULL) OR (NguoiXacNhanNhanHoan IS NOT NULL AND KhachXacNhanNhanHoanLucUtc IS NOT NULL AND XacNhanHoanLucUtc IS NOT NULL AND NguoiXacNhanHoan IS NOT NULL AND KhachXacNhanNhanHoanLucUtc>=XacNhanHoanLucUtc AND LoaiThanhToan IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA') AND TrangThai='DA_HOAN')",
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "PhieuPhat",
+      "kind": "CHECK",
+      "name": "CKR_PhieuPhat_Actor",
+      "columns": [
+        "TrangThai",
+        "NguoiXuLy",
+        "XuLyLucUtc"
+      ],
+      "predicate": "(TrangThai='CHO_XAC_NHAN' AND NguoiXuLy IS NULL AND XuLyLucUtc IS NULL) OR (TrangThai IN ('DA_XAC_NHAN','DA_THANH_TOAN','HUY') AND NguoiXuLy IS NOT NULL AND XuLyLucUtc IS NOT NULL)",
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "PhuLuc",
+      "kind": "FK",
+      "name": "FKR_PhuLuc_NguoiXuLy",
+      "columns": [
+        "NguoiXuLy"
+      ],
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "status": "BỔ SUNG FK CHƯA DUYỆT — field actor đã có, không đổi grain/challenge phụ lục"
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "PK",
+      "name": "PK_BienBanNhanTra",
+      "columns": [
+        "Id"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 39
+        }
+      ]
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "UNIQUE",
+      "name": "AK_BienBanNhanTra_Id_MaHopDong",
+      "columns": [
+        "Id",
+        "MaHopDong"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 40
+        }
+      ]
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "UNIQUE",
+      "name": "IX_BienBanNhanTra_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 137
+        }
+      ]
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "FK",
+      "name": "FK_BienBanNhanTra_HopDong_MaHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 43
+        }
+      ]
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "FK",
+      "name": "FK_BienBanNhanTra_TaiKhoan_NguoiGhiNhan",
+      "columns": [
+        "NguoiGhiNhan"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 44
+        }
+      ]
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "FK",
+      "name": "FK_BienBanNhanTra_TaiKhoan_NguoiKiemTra",
+      "columns": [
+        "NguoiKiemTra"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 45
+        }
+      ]
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "FK",
+      "name": "FK33_BienBanNhanTra_NguoiSua",
+      "columns": [
+        "NguoiSuaThucNhan"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION"
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "INDEX",
+      "name": "IX_BienBanNhanTra_NguoiGhiNhan",
+      "columns": [
+        "NguoiGhiNhan"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 138
+        }
+      ]
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "INDEX",
+      "name": "IX_BienBanNhanTra_NguoiKiemTra",
+      "columns": [
+        "NguoiKiemTra"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 139
+        }
+      ]
+    },
+    {
+      "table": "HopDong",
+      "kind": "CHECK",
+      "name": "CK33_HopDong_TrangThaiNhanTra",
+      "columns": [
+        "TrangThaiNhanTra"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "TrangThaiNhanTra IS NULL OR TrangThaiNhanTra IN ('DANG_KIEM_TRA','DA_KIEM_TRA','NGOAI_LE')"
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "CHECK",
+      "name": "CK33_BienBanNhanTra_Inspection",
+      "columns": [
+        "KiemTraLucUtc",
+        "NguoiKiemTra",
+        "ThucNhanLuc"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "(KiemTraLucUtc IS NULL AND NguoiKiemTra IS NULL) OR (KiemTraLucUtc IS NOT NULL AND NguoiKiemTra IS NOT NULL AND ThucNhanLuc IS NOT NULL)"
+    },
+    {
+      "table": "BienBanNhanTra",
+      "kind": "CHECK",
+      "name": "CK33_BienBanNhanTra_LastCorrection",
+      "columns": [
+        "ThucNhanLucTruocSua",
+        "NguoiSuaThucNhan",
+        "SuaThucNhanLucUtc",
+        "LyDoSuaThucNhan",
+        "ThucNhanLuc"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "(ThucNhanLucTruocSua IS NULL AND NguoiSuaThucNhan IS NULL AND SuaThucNhanLucUtc IS NULL AND LyDoSuaThucNhan IS NULL) OR (ThucNhanLucTruocSua IS NOT NULL AND NguoiSuaThucNhan IS NOT NULL AND SuaThucNhanLucUtc IS NOT NULL AND LyDoSuaThucNhan IS NOT NULL AND LEN(LTRIM(RTRIM(LyDoSuaThucNhan)))>0 AND ThucNhanLuc IS NOT NULL)"
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "FK",
+      "name": "FK_ChiTietHopDong_BienBanNhanTra_MaBienBanNhanTra_MaHopDong",
+      "columns": [
+        "MaBienBanNhanTra",
+        "MaHopDong"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "parent": "BienBanNhanTra",
+      "parent_columns": [
+        "Id",
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 133
+        }
+      ]
+    },
+    {
+      "table": "ChiTietHopDong",
+      "kind": "INDEX",
+      "name": "IX_ChiTietHopDong_MaBienBanNhanTra_MaHopDong",
+      "columns": [
+        "MaBienBanNhanTra",
+        "MaHopDong"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 140
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "FK",
+      "name": "FK_QuyetToanHopDong_BienBanNhanTra_MaBienBan_MaHopDong",
+      "columns": [
+        "MaBienBan",
+        "MaHopDong"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "parent": "BienBanNhanTra",
+      "parent_columns": [
+        "Id",
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION",
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 73
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "UNIQUE",
+      "name": "IX_QuyetToanHopDong_MaBienBan_MaHopDong",
+      "columns": [
+        "MaBienBan",
+        "MaHopDong"
+      ],
+      "status": "GIỮ LIÊN KẾT/ĐỊNH NGHĨA NGUỒN; TÊN ĐÍCH CHƯA DUYỆT",
+      "filter": null,
+      "source": [
+        {
+          "file": "Database/13_return_settlement.proposed.sql",
+          "line": 156
+        }
+      ]
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "FK",
+      "name": "FK33_QuyetToanHopDong_NguoiXacNhanHoanTat",
+      "columns": [
+        "NguoiXacNhanHoanTat"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION"
+    },
+    {
+      "table": "QuyetToanHopDong",
+      "kind": "CHECK",
+      "name": "CK33_QuyetToanHopDong_NoRefundAck",
+      "columns": [
+        "KhachXacNhanHoanTatLucUtc",
+        "NguoiXacNhanHoanTat",
+        "HoanCocBanDau",
+        "HoanKhacBanDau",
+        "ChotLucUtc"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "(KhachXacNhanHoanTatLucUtc IS NULL AND NguoiXacNhanHoanTat IS NULL) OR (KhachXacNhanHoanTatLucUtc IS NOT NULL AND NguoiXacNhanHoanTat IS NOT NULL AND HoanCocBanDau+HoanKhacBanDau=0 AND KhachXacNhanHoanTatLucUtc>=ChotLucUtc)"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "PK",
+      "name": "PK33_DoiSoatHuyHopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "FK",
+      "name": "FK33_DoiSoatHuyHopDong_HopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION"
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "kind": "PK",
+      "name": "PK33_XacMinhKhachKhongDen",
+      "columns": [
+        "MaHopDong"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT"
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "kind": "FK",
+      "name": "FK33_XacMinhKhachKhongDen_HopDong",
+      "columns": [
+        "MaHopDong"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "parent": "HopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "FK",
+      "name": "FK33_DoiSoatHuyHopDong_NguoiHuy",
+      "columns": [
+        "NguoiHuy"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION"
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "kind": "FK",
+      "name": "FK33_XacMinhKhachKhongDen_NguoiXacMinh",
+      "columns": [
+        "NguoiXacMinh"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "parent": "TaiKhoan",
+      "parent_columns": [
+        "MaTaiKhoan"
+      ],
+      "on_delete": "NO ACTION"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "CHECK",
+      "name": "CK33_DoiSoatHuyHopDong_Actor",
+      "columns": [
+        "LoaiTacNhanHuy",
+        "NguoiHuy",
+        "LoaiHuy",
+        "LyDoHuy",
+        "DoiSoatHuyLucUtc",
+        "HuyLucUtc"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "LoaiTacNhanHuy IN ('KHACH_HANG','NHAN_VIEN','ADMIN','HE_THONG') AND ((LoaiTacNhanHuy='HE_THONG' AND NguoiHuy IS NULL) OR (LoaiTacNhanHuy<>'HE_THONG' AND NguoiHuy IS NOT NULL)) AND LoaiHuy IN ('KHACH_HUY','KHONG_DEN','CUA_HANG_HUY','HET_HAN_KY') AND LEN(LTRIM(RTRIM(LyDoHuy)))>0 AND DoiSoatHuyLucUtc>=HuyLucUtc"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "CHECK",
+      "name": "CK33_DoiSoatHuyHopDong_Money",
+      "columns": [
+        "TyLeKhauTruHuy",
+        "LoaiHuy",
+        "TienCocDaThuKhiHuy",
+        "TienThueDaThuKhiHuy",
+        "TienThuThuaDaThuKhiHuy",
+        "TienKhauTruHuy",
+        "TienCocPhaiHoanKhiHuy",
+        "TienThuePhaiHoanKhiHuy",
+        "TienThuThuaPhaiHoanKhiHuy"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "TyLeKhauTruHuy IN (0,0.30,1) AND TienCocDaThuKhiHuy>=0 AND TienThueDaThuKhiHuy>=0 AND TienThuThuaDaThuKhiHuy>=0 AND TienKhauTruHuy>=0 AND TienCocPhaiHoanKhiHuy>=0 AND TienThuePhaiHoanKhiHuy>=0 AND TienThuThuaPhaiHoanKhiHuy>=0 AND TienKhauTruHuy=ROUND(TienCocDaThuKhiHuy*TyLeKhauTruHuy,2) AND TienCocPhaiHoanKhiHuy=TienCocDaThuKhiHuy-TienKhauTruHuy AND TienThuePhaiHoanKhiHuy=TienThueDaThuKhiHuy AND TienThuThuaPhaiHoanKhiHuy=TienThuThuaDaThuKhiHuy AND (LoaiHuy NOT IN ('CUA_HANG_HUY','HET_HAN_KY') OR TyLeKhauTruHuy=0)"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "CHECK",
+      "name": "CK33_DoiSoatHuyHopDong_UnsignedExpiry",
+      "columns": [
+        "LoaiHuy",
+        "TienCocDaThuKhiHuy",
+        "TienThueDaThuKhiHuy",
+        "TienThuThuaDaThuKhiHuy",
+        "TienKhauTruHuy",
+        "TienCocPhaiHoanKhiHuy",
+        "TienThuePhaiHoanKhiHuy",
+        "TienThuThuaPhaiHoanKhiHuy"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "LoaiHuy<>'HET_HAN_KY' OR (TienCocDaThuKhiHuy=0 AND TienThueDaThuKhiHuy=0 AND TienThuThuaDaThuKhiHuy=0 AND TienKhauTruHuy=0 AND TienCocPhaiHoanKhiHuy=0 AND TienThuePhaiHoanKhiHuy=0 AND TienThuThuaPhaiHoanKhiHuy=0)"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "CHECK",
+      "name": "CK33_DoiSoatHuyHopDong_NoShowReason",
+      "columns": [
+        "LoaiHuy",
+        "LyDoHuy"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "LoaiHuy<>'KHONG_DEN' OR LyDoHuy=N'Khách không đến nhận bàn giao thiết bị'"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "CHECK",
+      "name": "CK33_DoiSoatHuyHopDong_NoShowRate",
+      "columns": [
+        "LoaiHuy",
+        "TyLeKhauTruHuy",
+        "CanCuNgoaiLeHuy"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "LoaiHuy<>'KHONG_DEN' OR TyLeKhauTruHuy=1 OR (TyLeKhauTruHuy=0 AND CanCuNgoaiLeHuy IS NOT NULL AND CanCuNgoaiLeHuy IN ('BAT_KHA_KHANG','LOI_CUA_HANG'))"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "CHECK",
+      "name": "CK33_DoiSoatHuyHopDong_Exception",
+      "columns": [
+        "CanCuNgoaiLeHuy",
+        "LyDoNgoaiLeHuy",
+        "TyLeKhauTruHuy",
+        "LoaiTacNhanHuy"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "(CanCuNgoaiLeHuy IS NULL AND LyDoNgoaiLeHuy IS NULL) OR (CanCuNgoaiLeHuy IS NOT NULL AND CanCuNgoaiLeHuy IN ('BAT_KHA_KHANG','LOI_CUA_HANG') AND LyDoNgoaiLeHuy IS NOT NULL AND LEN(LTRIM(RTRIM(LyDoNgoaiLeHuy)))>0 AND TyLeKhauTruHuy=0 AND (CanCuNgoaiLeHuy<>'BAT_KHA_KHANG' OR LoaiTacNhanHuy='ADMIN'))"
+    },
+    {
+      "table": "DoiSoatHuyHopDong",
+      "kind": "INDEX",
+      "name": "IX33_DoiSoatHuyHopDong_Time",
+      "columns": [
+        "HuyLucUtc",
+        "LoaiHuy"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "filter": null
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "kind": "CHECK",
+      "name": "CK33_XacMinhKhachKhongDen_Time",
+      "columns": [
+        "XacMinhLucUtc",
+        "GioHenKhiXacMinhKhongDen",
+        "LienHeLucUtc"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "XacMinhLucUtc>=DATEADD(hour,-5,GioHenKhiXacMinhKhongDen) AND LienHeLucUtc<=XacMinhLucUtc"
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "kind": "CHECK",
+      "name": "CK33_XacMinhKhachKhongDen_Text",
+      "columns": [
+        "KenhLienHe",
+        "KetQuaLienHe",
+        "GhiChuKhongDen"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "LEN(LTRIM(RTRIM(KenhLienHe)))>0 AND LEN(LTRIM(RTRIM(KetQuaLienHe)))>0 AND LEN(LTRIM(RTRIM(GhiChuKhongDen)))>0"
+    },
+    {
+      "table": "XacMinhKhachKhongDen",
+      "kind": "INDEX",
+      "name": "IX33_XacMinhKhachKhongDen_Time",
+      "columns": [
+        "XacMinhLucUtc",
+        "CoTranhChapKhongDen"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "filter": null
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "FK",
+      "name": "FK33_ThanhToan_DoiSoatHuyHopDong",
+      "columns": [
+        "MaDoiSoatHuyHopDong"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "parent": "DoiSoatHuyHopDong",
+      "parent_columns": [
+        "MaHopDong"
+      ],
+      "on_delete": "NO ACTION"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "CHECK",
+      "name": "CK33_ThanhToan_RefundContext",
+      "columns": [
+        "MaDoiSoatHuyHopDong",
+        "MaHopDong",
+        "MaQuyetToan",
+        "LoaiThanhToan"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "predicate": "(MaDoiSoatHuyHopDong IS NULL AND ((MaQuyetToan IS NULL AND LoaiThanhToan NOT IN ('THU_QUYET_TOAN','HOAN_COC','HOAN_TIEN_THUE')) OR (MaQuyetToan IS NOT NULL AND LoaiThanhToan IN ('THU_QUYET_TOAN','HOAN_COC','HOAN_TIEN_THUE')))) OR (MaDoiSoatHuyHopDong IS NOT NULL AND MaDoiSoatHuyHopDong=MaHopDong AND MaQuyetToan IS NULL AND LoaiThanhToan IN ('HOAN_COC','HOAN_TIEN_THUE','HOAN_THU_THUA'))"
+    },
+    {
+      "table": "ThanhToan",
+      "kind": "INDEX",
+      "name": "IX33_ThanhToan_RefundCancellation",
+      "columns": [
+        "MaDoiSoatHuyHopDong",
+        "LoaiThanhToan",
+        "TrangThai"
+      ],
+      "status": "BỔ SUNG/ĐIỀU CHỈNH — CHƯA DUYỆT",
+      "filter": null
+    }
+  ],
+  "cross_row_invariants": [
+    "STATE OWNER: chỉ HopDong.TrangThaiNhanTra persisted. BienBanNhanTra.TrangThai nguồn bị loại ở đích; tạo BB/cập nhật BB/CT/ảnh căn cứ và trạng tháiHD cùng contract lock/transaction. CHECK đơn bảng không chứng minh liên kết state xuyên bảng.",
+    "RECEIPT ID: giữ BienBanNhanTra.Id varchar20, UNIQUE MaHopDong, AK(Id,MaHopDong). CT.MaBienBanNhanTra+MaHopDong và Q.MaBienBan+MaHopDong FK composite tới BB; NO ACTION, không alias MaHopDong thành receiptID.",
+    "RETURN: full-set serial một lần atomic, không subset/trùng/thừa/giả đã trả. Actual local khác recordedUTC/inspectionUTC. Tất cả BAO_TRI đến khi DAT, nhưng availability còn xét khoảng và lịch khác.",
+    "CORRECTION: chỉ trước Qfinal, expected ThucNhanLuc đã xem, actor/time/reason bắt buộc; kiểm lịch/serial đã được gán nơi khác, cập nhật actual chung toàn bộ serial và BB dưới khóa. 4 field sửa lưu duy nhất lần gần nhất, không đầy đủ audit.",
+    "CANCELLATION: kiểm policy/state/chưa giao của mọi serial dưới cùng contract lock với handover/đổi hẹn; backend tính và hủy ngay. Ghi HD.DA_HUY, DS và các refund pending cùng commit; không queue/phản hồi nhiều vòng.",
+    "DS OWNERSHIP: MaHopDong PK/FK0..1. Sự kiện hủy và rate/cause đóng băng; callback thành công đến muộn được cập nhật các tổng đối soát/delta refund theo source dưới lock, không sửa amount/reference/state của refund đã DA_HOAN/ACK.",
+    "NO-SHOW: >=hẹn hiện hành+2h theo server; XM có bản cuối không đồng nghĩa hủy. Khi đủ guard gồm chưa giao, hẹn khớp/không mới, mở/sẵn sàng, chưa đến, đã liên hệ, không tranh chấp/ngoại lệ chưa giải quyết thì cùng transaction XM mới nhất+DS.Huy+HD.DA_HUY. Lý do cố định đúng câu user.",
+    "XM UPDATE: người dùng cho cập nhật trước DA_HUY với phienBanXacMinhDaXem (hash DTO của snapshot hiện hành) và idempotency; XacMinhLucUtc là giờ server thực tế; version được tính lại trongDTO/dưới khóa, không thêm cột SQL hoặc chỉnh giờ cho tăng. Hủy đã commit thì khóa XM, khác payload/key không sửa lịch sử; replay cùng operation trả đối soát hiện hành, không thực thi lại.",
+    "DISPUTE: XM.CoTranhChap hoặc guard chưa đạt không tự hủy/khấu trừ, không xử lý tranh chấp trái nguồn; lưu/đọc rõ daHuy=false và lý do chặn, liên hệ/Admin trực tiếp. Căn cứ BKK/lỗi cửa hàng chỉ ởDS, không ởXM.",
+    "REFUND CONTEXT: ThanhToan.MaDoiSoatHuyHopDong FK DS.MaHopDong + CHECK equality TT.MaHopDong bảo đảm cùng hợp đồng; loại trừ MaQuyetToan. Qrefund dùng FK Q+contract nguồn. Không FK có điều kiện giả hoặc dùng MaYeuCauHuy cho ID nghĩa mới.",
+    "REFUND MONEY: Staff đúng chi nhánh/Admin chỉ bấm đã hoàn khoản backend tính, TIEN_MAT/CHUYEN_KHOAN ngoài thực tế. Không ảnh/mã/amount nhập lại bắt buộc hoặc gateway refund. Pending+đã hoàn được reserved trước tạo delta, không UNIQUE cấm nhiều refund hoặc nhiều delta thật.",
+    "ACK REFUND: chỉ Customer owner đúng giao dịch DA_HOAN/amount/hash đã xem, không Staff/Admin nhận thay; actor/time đầu giữ nguyên khi bấm lặp. Tiền/type/contract/refund context bất biến sau xác nhận/ACK.",
+    "ACK NO REFUND: 2 fieldQ đề xuất chỉ khi tổng hoàn=0, receipt/inspection đủ, final đúng hash, đã thu đủ, không pending/ngoại lệ. Chỉ chủ khách bấm; HoanThanhLucUtc backend không thay ACK. Hai fieldmetadata không nằm trong payload tiền/hash bất biến.",
+    "FINAL: Q chỉ bản cuối/version1, tiền/hash/căn cứ bất biến; PhanBo đúng NGHIA_VU/PHAN_BO nguồn, tựFK cùngQ, payment cùngHD, unique nguồn+nghĩa vụ. Tổng phân bổ≤nguồn/≤nghĩa vụ kiểm transaction, không giả CHECK xuyên dòng.",
+    "COMPLETION: chỉ CHO_HOAN_TRA đủ nhận trả/kiểm tra/tiền/ACK, không thu thừa chưa đối soát; có hoàn tất cả refund phải ghi/ACK; không hoàn cần ACK Q. DA_HUY luôn DA_HUY sau hoàn/ACK, không được review; review chỉ HOAN_THANH đúngowner/detail.",
+    "CART/CAPACITY: giữ selection từng ID/version gốc +liên kết chụp giá riêng, nhóm nhiều dòng cùng model SUM một lần; minimum trên toàn khoảng nửa mở, source physicalstates+holds còn hạn+contract/appendix. SAN_SANG không tự kết luận trống.",
+    "TTL:20 phút chỉ giữ chỗ; đổi ngày/giờ thật commit mới reset20m, branch/no-op/GET/lỗi không reset/hồi sinh; hết hold không tự hủy contract. Hạn ký CHO_KY và gia hạn là luồng riêng nguồn.",
+    "EXTENSION: giữ PhuLuc29 scalar/từng lần, gửi>=24h trước hạn, xử lý min4giờ làm việc/hạn−2h, ký minduyệt+2h/hạn, actualserial/giá gốc/PDF/OTP; phí quyết toán khi trả. Không autoapprove/20m payment.",
+    "OTHER: giờ08–20UTC+7 backendconfig giữ working-hour arithmetic; bỏ chip/reviewhistory/feedback/journal tập trung theo scope, lưu actor cần thiết trực tiếp. Email verifiedunique/epoch/fake sender giữ đề xuất30, chưa code.",
+    "NO LIVE: không sửa source/DDL/DB/runtime/Git/checkpoint/artifact cũ hoặc gửi ngoại vi. DB/runtime fact gần nhất kèm timestamp; không giả metadata hôm nay đã refresh chỉ vì readsource. DDL và SQL compiler/EF/API/tests chưa chạy."
+  ]
+}

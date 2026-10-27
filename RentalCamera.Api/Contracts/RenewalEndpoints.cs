@@ -40,8 +40,7 @@ public static class RenewalEndpoints
             var before=JsonSerializer.Serialize(Dto(p));
             p.TrangThai="DONG_QUY_TRINH_CU";p.NguoiXuLy=ApiAccess.AccountId(principal);p.DongLucUtc=DateTime.UtcNow;
             p.LyDoDong="Yêu cầu theo quy trình cũ, chưa đủ dữ liệu để tiếp tục quy trình mới";
-            db.NhatKyNghiepVu.Add(new(){Id=ApiAccess.NewId("AU"),HanhDong="LEGACY_EXTENSION_CLOSED",DoiTuongId=id,
-                MaTaiKhoan=p.NguoiXuLy!,ThoiGianUtc=p.DongLucUtc.Value,LyDo=p.LyDoDong,DuLieuJson=JsonSerializer.Serialize(new{before,after=Dto(p)})});
+
             await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return Results.Ok(Dto(p));
         }).RequireAuthorization("Admin");
         app.MapGet("/api/hop-dong/{id}/du-kien-gia-han", async (string id,DateTime thoiHanTraMoi,ClaimsPrincipal principal,

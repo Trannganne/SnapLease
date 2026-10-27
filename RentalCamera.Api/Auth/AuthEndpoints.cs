@@ -1,3 +1,6 @@
+using System.Data;
+using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Email;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
@@ -29,6 +32,7 @@ public static class AuthEndpoints
                     loi = $"Tên đăng nhập phải có 4–50 ký tự; {PasswordPolicy.Description} Số điện thoại phải hợp lệ."
                 });
 
+            if (!string.IsNullOrWhiteSpace(request.Email) && AuthLinkService.NormalizeEmail(request.Email)==null) return Results.BadRequest();
             var username = request.TenDangNhap.Trim();
             var phone = request.SoDienThoai.Trim();
             if (await db.TaiKhoan.AnyAsync(x => x.TenDangNhap == username, ct) ||
@@ -52,7 +56,7 @@ public static class AuthEndpoints
                 // ở bước xác minh danh tính sau này.
                 HoTen = null,
                 SoDienThoai = phone,
-                Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim()
+                Email = AuthLinkService.NormalizeEmail(request.Email)
             };
             db.TaiKhoan.Add(account);
             db.KhachThue.Add(customer);
@@ -68,62 +72,57 @@ public static class AuthEndpoints
             return Results.Created($"/api/auth/me", new { account.MaTaiKhoan, customer.MaKhachThue, account.TenDangNhap });
         }).RequireRateLimiting("auth");
 
-        group.MapPost("/quen-mat-khau", async (
-            ForgotPasswordRequest request,
-            RentalCameraContext db,
-            PasswordResetTokenService resetTokens,
-            IConfiguration configuration,
-            CancellationToken ct) =>
-        {
-            if (string.IsNullOrWhiteSpace(request.EmailHoacSoDienThoai) ||
-                request.EmailHoacSoDienThoai.Length > 255)
-                return Results.BadRequest(new { loi = "Email hoặc số điện thoại không hợp lệ." });
-
-            var lookup = request.EmailHoacSoDienThoai.Trim();
-            var account = await db.TaiKhoan.AsNoTracking()
-                .Where(x => x.TrangThai == "HOAT_DONG" &&
-                    db.KhachThue.Any(k => k.MaTaiKhoan == x.MaTaiKhoan &&
-                        (k.Email == lookup || k.SoDienThoai == lookup)))
-                .FirstOrDefaultAsync(ct);
-
-            var lifetimeMinutes = Math.Clamp(
-                configuration.GetValue("PasswordReset:TokenLifetimeMinutes", 15), 5, 60);
-            var exposeToken = configuration.GetValue("PasswordReset:ReturnTokenInResponse", false);
-            var token = account is null
-                ? null
-                : resetTokens.Issue(account.MaTaiKhoan, account.MatKhauHash,
-                    TimeSpan.FromMinutes(lifetimeMinutes));
-
-            return Results.Accepted(value: new
-            {
-                thongBao = "Nếu tài khoản tồn tại, yêu cầu đặt lại mật khẩu đã được tạo.",
-                resetToken = exposeToken ? token : null,
-                expiresInSeconds = exposeToken && token is not null ? lifetimeMinutes * 60 : (int?)null
-            });
+        group.MapPost("/email/xac-minh/gui", async (ClaimsPrincipal principal, RentalCameraContext db, AuthLinkService links, IAuthEmailSender sender, IConfiguration config, CancellationToken ct) => {
+            var accountId = ApiAccess.AccountId(principal);
+            var account = await db.TaiKhoan.AsNoTracking().SingleOrDefaultAsync(a=>a.MaTaiKhoan==accountId && a.TrangThai=="HOAT_DONG",ct);
+            var customer = await db.KhachThue.AsNoTracking().SingleOrDefaultAsync(k=>k.MaTaiKhoan==accountId,ct);
+            if (account == null || customer?.Email==null) return Results.BadRequest(new { code="EMAIL_REQUIRED" });
+            if (customer.EmailXacMinhLucUtc==null) await sender.SendAsync(customer.Email,"VERIFY_EMAIL",links.Issue(account,customer.Email,"VERIFY_EMAIL",TimeSpan.FromMinutes(Math.Clamp(config.GetValue("EmailVerification:TokenLifetimeMinutes",15),5,60))),ct);
+            return Results.Accepted(value:new { thongBao="Yêu cầu xác minh email đã được tiếp nhận." });
+        }).RequireAuthorization("Customer").RequireRateLimiting("auth");
+        group.MapPost("/email/xac-minh", async (EmailVerificationRequest r, RentalCameraContext db, AuthLinkService links, CancellationToken ct) => {
+            if (!links.TryRead(r.Token,"VERIFY_EMAIL",out var claim)) return Results.BadRequest(new { code="INVALID_AUTH_LINK" });
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);
+            await TransactionLock.AcquireAsync(db,"account:"+claim.AccountId,ct);
+            await TransactionLock.AcquireAsync(db,"email:"+AuthLinkService.Fingerprint(claim.Email),ct);
+            var account = await db.TaiKhoan.SingleOrDefaultAsync(a=>a.MaTaiKhoan==claim.AccountId && a.TrangThai=="HOAT_DONG",ct);
+            var customer = await db.KhachThue.SingleOrDefaultAsync(k=>k.MaTaiKhoan==claim.AccountId,ct);
+            if (account==null || customer?.Email!=claim.Email) return Results.BadRequest(new { code="INVALID_AUTH_LINK" });
+            if (customer.EmailXacMinhLucUtc!=null) return Results.NoContent();
+            if (account.PhienBanBaoMat!=claim.Epoch || AuthLinkService.Fingerprint(account.MatKhauHash)!=claim.Fingerprint) return Results.BadRequest(new { code="INVALID_AUTH_LINK" });
+            if (await db.KhachThue.AnyAsync(k=>k.MaTaiKhoan!=claim.AccountId && k.Email==claim.Email && k.EmailXacMinhLucUtc!=null,ct)) return Results.Conflict(new { code="VERIFIED_EMAIL_ALREADY_USED" });
+            customer.EmailXacMinhLucUtc=DateTime.UtcNow; account.PhienBanBaoMat=checked(account.PhienBanBaoMat+1);
+            await db.SaveChangesAsync(ct); await tx.CommitAsync(ct); return Results.NoContent();
         }).RequireRateLimiting("auth");
-
-        group.MapPost("/dat-lai-mat-khau", async (
-            ResetPasswordRequest request,
-            RentalCameraContext db,
-            IPasswordHasher<TaiKhoan> hasher,
-            PasswordResetTokenService resetTokens,
-            CancellationToken ct) =>
-        {
-            if (string.IsNullOrWhiteSpace(request.ResetToken) || request.ResetToken.Length > 5000)
-                return Results.BadRequest(new { loi = "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn." });
-            if (!PasswordPolicy.IsValid(request.MatKhauMoi))
-                return Results.BadRequest(new { loi = PasswordPolicy.Description });
-            if (!resetTokens.TryRead(request.ResetToken.Trim(), out var accountId, out var fingerprint))
-                return Results.BadRequest(new { loi = "Token đặt lại mật khẩu không hợp lệ hoặc đã hết hạn." });
-
-            var account = await db.TaiKhoan.SingleOrDefaultAsync(
-                x => x.MaTaiKhoan == accountId && x.TrangThai == "HOAT_DONG", ct);
-            if (account is null || !resetTokens.MatchesCurrentPassword(fingerprint, account.MatKhauHash))
-                return Results.BadRequest(new { loi = "Token đặt lại mật khẩu không hợp lệ hoặc đã được sử dụng." });
-
-            account.MatKhauHash = hasher.HashPassword(account, request.MatKhauMoi);
-            await db.SaveChangesAsync(ct);
-            return Results.NoContent();
+        group.MapPut("/email", async (ChangeEmailRequest r, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) => {
+            var email=AuthLinkService.NormalizeEmail(r.Email); if(email==null)return Results.BadRequest();
+            var id=ApiAccess.AccountId(principal)!;
+            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);
+            await TransactionLock.AcquireAsync(db,"account:"+id,ct);
+            var account=await db.TaiKhoan.SingleAsync(a=>a.MaTaiKhoan==id,ct);
+            var customer=await db.KhachThue.SingleOrDefaultAsync(k=>k.MaTaiKhoan==id,ct);if(customer==null)return Results.Forbid();
+            if(customer.Email!=email){customer.Email=email;customer.EmailXacMinhLucUtc=null;account.PhienBanBaoMat=checked(account.PhienBanBaoMat+1);await db.SaveChangesAsync(ct);}
+            await tx.CommitAsync(ct); return Results.NoContent();
+        }).RequireAuthorization("Customer");
+        group.MapPost("/quen-mat-khau", async (ForgotPasswordRequest request, RentalCameraContext db, AuthLinkService links, IAuthEmailSender sender, IConfiguration config, CancellationToken ct) => {
+            var email=AuthLinkService.NormalizeEmail(request.EmailHoacSoDienThoai);
+            if(email!=null){
+                var customer=await db.KhachThue.AsNoTracking().SingleOrDefaultAsync(k=>k.Email==email && k.EmailXacMinhLucUtc!=null,ct);
+                var account=customer==null?null:await db.TaiKhoan.AsNoTracking().SingleOrDefaultAsync(a=>a.MaTaiKhoan==customer.MaTaiKhoan && a.TrangThai=="HOAT_DONG",ct);
+                if(account!=null) await sender.SendAsync(email,"RESET_PASSWORD",links.Issue(account,email,"RESET_PASSWORD",TimeSpan.FromMinutes(Math.Clamp(config.GetValue("PasswordReset:TokenLifetimeMinutes",15),5,60))),ct);
+            }
+            return Results.Accepted(value:new { thongBao="Nếu email đã xác minh hợp lệ, hướng dẫn đặt lại mật khẩu sẽ được gửi." });
+        }).RequireRateLimiting("auth");
+        group.MapPost("/dat-lai-mat-khau", async (ResetPasswordRequest request,RentalCameraContext db,IPasswordHasher<TaiKhoan> hasher,AuthLinkService links,CancellationToken ct)=>{
+            if(!PasswordPolicy.IsValid(request.MatKhauMoi))return Results.BadRequest(new{loi=PasswordPolicy.Description});
+            if(!links.TryRead(request.ResetToken,"RESET_PASSWORD",out var claim))return Results.BadRequest(new{code="INVALID_AUTH_LINK"});
+            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);
+            await TransactionLock.AcquireAsync(db,"account:"+claim.AccountId,ct);
+            var account=await db.TaiKhoan.SingleOrDefaultAsync(a=>a.MaTaiKhoan==claim.AccountId && a.TrangThai=="HOAT_DONG",ct);
+            if(account==null || account.PhienBanBaoMat!=claim.Epoch || AuthLinkService.Fingerprint(account.MatKhauHash)!=claim.Fingerprint ||
+                !await db.KhachThue.AnyAsync(k=>k.MaTaiKhoan==claim.AccountId && k.Email==claim.Email && k.EmailXacMinhLucUtc!=null,ct))return Results.BadRequest(new{code="INVALID_AUTH_LINK"});
+            account.MatKhauHash=hasher.HashPassword(account,request.MatKhauMoi);account.PhienBanBaoMat=checked(account.PhienBanBaoMat+1);
+            await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return Results.NoContent();
         }).RequireRateLimiting("auth");
 
         group.MapPost("/login", async (
@@ -157,7 +156,7 @@ public static class AuthEndpoints
 
             return Results.Ok(new
             {
-                accessToken = issuer.Issue(account.MaTaiKhoan),
+                accessToken = issuer.Issue(account.MaTaiKhoan,account.PhienBanBaoMat),
                 tokenType = "Bearer",
                 expiresInSeconds = 3600,
                 account.MaTaiKhoan,
@@ -198,6 +197,8 @@ public static class AuthEndpoints
                 return Results.BadRequest(new { loi = PasswordPolicy.Description });
 
             var accountId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);
+            await TransactionLock.AcquireAsync(db,"account:"+accountId,ct);
             var account = await db.TaiKhoan.SingleOrDefaultAsync(x => x.MaTaiKhoan == accountId, ct);
             if (account is null) return Results.Unauthorized();
 
@@ -213,8 +214,9 @@ public static class AuthEndpoints
             if (verification == PasswordVerificationResult.Failed)
                 return Results.BadRequest(new { loi = "Mật khẩu hiện tại không đúng." });
 
-            account.MatKhauHash = hasher.HashPassword(account, request.MatKhauMoi);
+            account.MatKhauHash = hasher.HashPassword(account, request.MatKhauMoi); account.PhienBanBaoMat=checked(account.PhienBanBaoMat+1);
             await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
             return Results.NoContent();
         }).RequireAuthorization();
     }
@@ -225,3 +227,6 @@ public sealed record ForgotPasswordRequest(string EmailHoacSoDienThoai);
 public sealed record ResetPasswordRequest(string ResetToken, string MatKhauMoi);
 public sealed record LoginRequest(string TenDangNhap, string MatKhau);
 public sealed record ChangePasswordRequest(string MatKhauCu, string MatKhauMoi);
+
+public sealed record EmailVerificationRequest(string Token);
+public sealed record ChangeEmailRequest(string Email);

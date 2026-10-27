@@ -39,9 +39,9 @@ public sealed class TestPushDeliveryPolicy
         string? Get(string key) => config[Section + ":" + key];
         var events = (Get("AllowedEvents") ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (config.GetSection(LegacySection).Exists() || Get("Enabled") != "true" || Get("Mode") != "Continuous" ||
-            config["Notifications:TestAccountId"] != Get("AccountId") ||
+            config["Notifications:TestAccountId"] != "TK130ED33FD1FE41229" ||
             config["Rental:BackgroundJobsEnabled"] != "false" || config["ElectronicSignature:ReturnOtpInResponse"] != "false" ||
-            string.IsNullOrWhiteSpace(Get("AccountId")) || string.IsNullOrWhiteSpace(Get("CustomerId")) ||
+            Get("AccountId") != "TK130ED33FD1FE41229" || Get("CustomerId") != "KH031BC569C14B44B2A" ||
             !Guid.TryParseExact(Get("DeviceRegistrationId"), "D", out _) ||
             !Regex.IsMatch(Get("DeviceTokenHash") ?? "", "\\A[0-9A-F]{64}\\z") ||
             !DateTime.TryParseExact(Get("CutoverUtc"), "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var cutover) ||

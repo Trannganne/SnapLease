@@ -27,7 +27,7 @@ public static class CartHoldEditing
         request.Items.Select(x => x.Id).Distinct(StringComparer.Ordinal).Count() == request.Items.Length;
 
     // Compare the complete selected set, including versions on both sides. Never reconstruct legacy selections.
-    public static bool MatchesSnapshot(GiuCho hold, IReadOnlyCollection<LuaChonGioHangGiuCho> selected,
+    public static bool MatchesSnapshot(GiuCho hold, IReadOnlyCollection<ChiTietGiuCho> selected,
         IReadOnlyCollection<ChiTietGioHang> lines, CartCheckoutItem[] requested)
     {
         if (selected.Count == 0 || selected.Count != requested.Length || lines.Count != selected.Count ||
@@ -43,16 +43,14 @@ public static class CartHoldEditing
                 line.MaDongMay != item.MaDongMay || line.SoLuong != item.SoLuong || line.MaCuaHang != hold.MaCuaHang)
                 return false;
         }
-        var grouped = CartEndpoints.HoldQuantities(lines);
-        return hold.ChiTiet.Count == grouped.Count &&
-            hold.ChiTiet.Select(x => x.MaDongMay).Distinct(StringComparer.Ordinal).Count() == grouped.Count && hold.ChiTiet.All(detail =>
-            grouped.TryGetValue(detail.MaDongMay, out var quantity) && detail.SoLuong == quantity &&
-            lines.Where(x => x.MaDongMay == detail.MaDongMay).All(x =>
-                x.NgayBatDau == detail.NgayBatDau && x.NgayKetThuc == detail.NgayKetThuc));
+        return hold.ChiTiet.Count == selected.Count && hold.ChiTiet.All(detail =>
+            current.TryGetValue(detail.MaChiTietGioHang, out var line) &&
+            detail.MaDongMay == line.MaDongMay && detail.SoLuong == line.SoLuong &&
+            detail.NgayBatDau == line.NgayBatDau && detail.NgayKetThuc == line.NgayKetThuc);
     }
 
     // Call only after every model passed capacity checks, while holding the owner's serializable transaction.
-    public static void Apply(GiuCho hold, IEnumerable<LuaChonGioHangGiuCho> selected,
+    public static void Apply(GiuCho hold, IEnumerable<ChiTietGiuCho> selected,
         IEnumerable<ChiTietGioHang> lines, IReadOnlyDictionary<string, DongMay> models, CartHoldEditRequest request,
         DateTime utcNow)
     {
@@ -95,7 +93,7 @@ public static class CartHoldEditing
             if (!CanEdit(hold, DateTime.UtcNow) ||
                 await db.HopDong.AnyAsync(x => x.MaGiuCho == id, ct))
                 return Results.Conflict(new { code = "HOLD_NOT_EDITABLE", loi = "Giữ chỗ đã hết hạn hoặc không còn được chỉnh sửa." });
-            var selected = await db.LuaChonGioHangGiuCho.Where(x => x.MaGiuCho == id).ToListAsync(ct);
+            var selected = await db.ChiTietGiuCho.Where(x => x.MaGiuCho == id).ToListAsync(ct);
             var ids = selected.Select(x => x.MaChiTietGioHang).ToArray();
             var lines = await db.ChiTietGioHang.Where(x => ids.Contains(x.MaChiTietGioHang) &&
                 x.GioHang.MaKhachThue == customer && x.GioHang.TrangThai == "DANG_CHON").ToListAsync(ct);

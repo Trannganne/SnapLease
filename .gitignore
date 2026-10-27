@@ -25,3 +25,8 @@ firebase-admin*.json
 .vnpay-test-build/
 vnpay-evidence/
 __pycache__/
+
+# Schema33: local connections, approvals, runtime and synthetic media stay private.
+**/appsettings.Schema33Trial.json
+**/*.private.json
+**/schema33-runtime/

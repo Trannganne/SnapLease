@@ -46,6 +46,12 @@ public static class VnpayEndpoints
                 return Results.Conflict(new { loi = "Hoàn cọc không được xử lý bằng luồng thu tiền VNPAY." });
             if (payment.NhaCungCap is not null && payment.NhaCungCap != "VNPAY")
                 return Results.Conflict(new { loi = "Giao dịch đã được khởi tạo với nhà cung cấp khác." });
+            if(payment.MaQuyetToan!=null) {
+                if(!vnpay.SettlementSandboxReady)return Results.Problem(title:"Thanh toán quyết toán qua VNPAY Sandbox chưa được bật sau kiểm chứng callback/IPN.",statusCode:503);
+                var settlement=await RentalCamera.Api.Settlement.SettlementWorkflow.LoadAsync(payment.MaHopDong,db,ct);
+                if(settlement?.Final?.Id!=payment.MaQuyetToan||settlement.Contract.TrangThai!="CHO_HOAN_TRA"||
+                    RentalCamera.Api.Settlement.SettlementWorkflow.FinancialMismatch(settlement))return Results.Conflict(new{loi="Quyết toán cần đối soát trước khi mở VNPAY."});
+            }
 
             // 1. Kiểm tra xem có attempt nào đang CHO_THANH_TOAN và còn hạn không (chống double tap)
             var activeAttempt = await db.YeuCauThanhToanVnpay
@@ -72,8 +78,13 @@ public static class VnpayEndpoints
                 });
             }
 
+            var latestRecordedAttempt = await db.YeuCauThanhToanVnpay
+                .Where(x => x.MaThanhToan == id).OrderByDescending(x => x.ThoiGianTao).FirstOrDefaultAsync(ct);
+            if (latestRecordedAttempt is not null && latestRecordedAttempt.TrangThai != "THAT_BAI")
+                return Results.Conflict(new { loi = "Kết quả yêu cầu VNPAY trước chưa được xác định; cần đối soát trước khi tạo liên kết khác.", canDoiSoat = true, maThanhToan = id });
+
             // Fallback kiểm tra attempt cũ lưu trực tiếp ở ThanhToan (backward compatibility)
-            if (activeAttempt is null &&
+            if (latestRecordedAttempt is null &&
                 !string.IsNullOrWhiteSpace(payment.DuongDanThanhToan) &&
                 payment.ThoiGianHetHan is not null)
             {
@@ -264,7 +275,8 @@ public static class VnpayEndpoints
                 .SingleOrDefaultAsync(ct);
 
             // Phân tích kết quả QueryDR
-            if (queryResult.Success) // ResponseCode == "00" && TransactionStatus == "00"
+            if (queryResult.ErrorDetail is null && queryResult.ResponseCode == "00" &&
+                (queryResult.Success || VnpayService.IsFinalFailure(queryResult.TransactionStatus)))
             {
                 var callbackData = new VnpayCallbackData(
                     txnRef,
@@ -288,39 +300,13 @@ public static class VnpayEndpoints
                 {
                     thanhCong = payment.TrangThai == "THANH_CONG",
                     trangThai = payment.TrangThai,
+                    trangThaiYeuCauVnpay = attempt?.TrangThai,
                     maThanhToan = payment.MaThanhToan,
                     maGiaoDich = payment.MaGiaoDich,
                     maPhanHoi = queryResult.ResponseCode,
-                    thongBao = "Đối soát thành công: Giao dịch đã được cập nhật sang THANH_CONG."
-                });
-            }
-
-            // Kết quả xác định là thất bại từ VNPAY (mã 02: thất bại, mã 07: nghi ngờ gian lận)
-            if (queryResult.ErrorDetail is null && queryResult.ResponseCode == "00" && queryResult.TransactionStatus is "02" or "07")
-            {
-                if (attempt is not null)
-                {
-                    attempt.TrangThai = "THAT_BAI";
-                    attempt.MaPhanHoi = queryResult.ResponseCode;
-                    attempt.ThoiGianCapNhat = DateTime.UtcNow;
-                }
-
-                if (payment.TrangThai != "THANH_CONG")
-                {
-                    payment.ThoiGianCapNhat = DateTime.UtcNow;
-                }
-
-                await db.SaveChangesAsync(ct);
-                await transaction.CommitAsync(ct);
-
-                return Results.Ok(new
-                {
-                    thanhCong = false,
-                    trangThai = "THAT_BAI",
-                    maThanhToan = payment.MaThanhToan,
-                    maPhanHoi = queryResult.ResponseCode,
-                    trangThaiGiaoDichVnpay = queryResult.TransactionStatus,
-                    thongBao = "VNPAY xác nhận giao dịch thất bại. Bây giờ bạn có thể tạo yêu cầu thanh toán lại."
+                    thongBao = queryResult.Success
+                        ? "Đối soát thành công: giao dịch đã được cập nhật theo kết quả xác thực."
+                        : "VNPAY xác nhận yêu cầu không thành công; khoản thu chưa được thanh toán."
                 });
             }
 
@@ -425,6 +411,13 @@ public static class VnpayEndpoints
 
             if (payment is null) return Results.NotFound();
 
+            // Return never records money, but a verified redirect must still belong
+            // to this collection and its original amount.
+            if (payment.LoaiThanhToan.StartsWith("HOAN_") || payment.PhuongThuc != "VI_DIEN_TU" ||
+                callback.AmountTimes100 / 100m != (attempt?.SoTien ?? payment.SoTien) ||
+                attempt is not null && attempt.SoTien != payment.SoTien)
+                return Results.BadRequest(new { loi = "Số tiền hoặc giao dịch Return không khớp khoản thu." });
+
             if (vnpay.MobileCallbackUrl is { } mobileCallbackUrl)
             {
                 var redirectUrl = QueryHelpers.AddQueryString(mobileCallbackUrl, new Dictionary<string, string?>
@@ -461,6 +454,9 @@ public static class VnpayEndpoints
     {
         var expectedAmount = attempt?.SoTien ?? payment.SoTien;
         if(payment.LoaiThanhToan.StartsWith("HOAN_"))return ("99","Refund is not a collection order");
+        if (payment.PhuongThuc != "VI_DIEN_TU" || payment.NhaCungCap != "VNPAY" ||
+            attempt is not null && (attempt.MaThanhToan != payment.MaThanhToan || attempt.SoTien != payment.SoTien || attempt.TienTe != "VND"))
+            return ("99", "Collection reference is inconsistent");
         var callbackAmount = callback.AmountTimes100 / 100m;
         if (expectedAmount != callbackAmount)
         {
@@ -476,6 +472,9 @@ public static class VnpayEndpoints
         {
             return ("02", "Order already confirmed");
         }
+
+        if (!success && !VnpayService.IsFinalFailure(callback.TransactionStatus))
+            return ("99", "Transaction outcome is not final; reconcile the existing reference");
 
         if (attempt is not null)
         {
@@ -506,7 +505,7 @@ public static class VnpayEndpoints
                 payment.MaNganHang = callback.BankCode;
                 payment.LoaiThe = callback.CardType;
                 payment.MaPhanHoi = callback.ResponseCode;
-                payment.ThoiGian = callback.PaidAt ?? DateTime.Now;
+                payment.ThoiGian = callback.PaidAt ?? RentalPolicy.LocalNow;
                 payment.ThoiGianCapNhat = DateTime.UtcNow;
             }
         }
@@ -521,10 +520,12 @@ public static class VnpayEndpoints
 
         if(success && !RentalPolicy.ProtectedContracts.Contains(payment.MaHopDong))
         {
-            var cancellation=await db.YeuCauHuyHopDong.SingleOrDefaultAsync(x=>x.MaHopDong==payment.MaHopDong&&x.TrangThai=="DA_DUYET",ct);
+            var cancellation=await db.DoiSoatHuyHopDong.SingleOrDefaultAsync(x=>x.MaHopDong==payment.MaHopDong,ct);
             if(cancellation is not null)await CancellationEndpoints.ReconcileAsync(cancellation,db,ct,true);
         }
         await db.SaveChangesAsync(ct);
+        if(success && payment.MaQuyetToan!=null)
+            await RentalCamera.Api.Settlement.SettlementWorkflow.ReconcileAsync(payment.MaHopDong,db,ct);
         return ("00", "Confirm Success");
     }
 

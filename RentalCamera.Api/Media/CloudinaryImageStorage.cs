@@ -9,7 +9,8 @@ namespace RentalCamera.Api.Media;
 
 public sealed class CloudinaryImageStorage(
     HttpClient httpClient,
-    IOptions<CloudinaryOptions> options)
+    IOptions<CloudinaryOptions> options,
+    IConfiguration configuration)
 {
     private readonly CloudinaryOptions _options = options.Value;
 
@@ -30,6 +31,7 @@ public sealed class CloudinaryImageStorage(
     // Only call after a fresh primary DB read proves the unique public ID was not committed.
     public async Task DeleteReviewImageAsync(string publicId, CancellationToken ct)
     {
+        if (configuration["Schema33Trial:ProviderMode"] == "Fake") { await TrialMediaStorage.DeleteAsync(publicId); return; }
         EnsureConfigured();
         var parameters = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
@@ -54,6 +56,8 @@ public sealed class CloudinaryImageStorage(
         string ownerId,
         CancellationToken ct)
     {
+        if (file.Length<=0 || file.Length>MaximumBytes) throw new InvalidOperationException("Kích thước ảnh không hợp lệ.");
+        if (configuration["Schema33Trial:ProviderMode"] == "Fake") return await TrialMediaStorage.UploadAsync(file,ct);
         EnsureConfigured();
 
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()

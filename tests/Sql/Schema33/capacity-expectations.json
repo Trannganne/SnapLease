@@ -1,0 +1,169 @@
+{
+  "scope": "Expected before workflow fixtures, not observed database values",
+  "branch_model_counts": {
+    "TR33_S01": {
+      "TR33_M01": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M02": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M03": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M04": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M05": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M06": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      }
+    },
+    "TR33_S02": {
+      "TR33_M01": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M02": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M03": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M04": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M05": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M06": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      }
+    },
+    "TR33_S03": {
+      "TR33_M01": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M02": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M03": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M04": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M05": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      },
+      "TR33_M06": {
+        "total": 5,
+        "SAN_SANG": 4,
+        "BAO_TRI": 1
+      }
+    }
+  },
+  "total": 90,
+  "ready_status": 72,
+  "maintenance": 18,
+  "interval_scenarios": [
+    {
+      "id": "EMPTY",
+      "pair": "TR33_S01/TR33_M01",
+      "occupied": 0,
+      "expected_available": 4
+    },
+    {
+      "id": "PARTIAL",
+      "pair": "TR33_S01/TR33_M01",
+      "occupied": 2,
+      "expected_available": 2
+    },
+    {
+      "id": "FULL",
+      "pair": "TR33_S01/TR33_M01",
+      "occupied": 4,
+      "expected_available": 0
+    },
+    {
+      "id": "OTHER_BRANCH",
+      "pair": "TR33_S02/TR33_M01",
+      "occupied": 0,
+      "expected_available": 4
+    },
+    {
+      "id": "EXPIRED_HOLD",
+      "pair": "TR33_S01/TR33_M01",
+      "hold_quantity": 4,
+      "expired": true,
+      "expected_available": 4
+    },
+    {
+      "id": "ADJACENT",
+      "intervals": "[a,b),[b,c)",
+      "cross_boundary_occupancy_doubled": false
+    },
+    {
+      "id": "OVERLAP",
+      "same_window_quantities": [
+        1,
+        1
+      ],
+      "expected_available_in_overlap": 2
+    },
+    {
+      "id": "BULK",
+      "pair": "TR33_S03/TR33_M03",
+      "request": 4,
+      "expected_allowed_before_reservation": true
+    },
+    {
+      "id": "EXTENSION_ALLOWED",
+      "pair": "TR33_S01/TR33_M04",
+      "future_conflict": 0,
+      "expected_allowed": true
+    },
+    {
+      "id": "EXTENSION_BLOCKED",
+      "pair": "TR33_S02/TR33_M04",
+      "future_conflict": 4,
+      "expected_allowed": false
+    }
+  ],
+  "warning": "SAN_SANG devices can be held by interval bookings. Actual occupancy must be queried from source availability API. No SQL/API tests executed."
+}

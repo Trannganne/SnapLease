@@ -1,0 +1,35 @@
+{
+  "Status": "PREPARED_NOT_COMPILED_OR_EXECUTED",
+  "files": [
+    {
+      "root": "backend",
+      "path": "tests/Sql/Schema33/03_seed_workflows.json",
+      "sha256": "1273fa41e7fa2322d54d8104d2b5cac843456a46ed8a5253ab6937c09b1920cd"
+    },
+    {
+      "root": "backend",
+      "path": "tests/Sql/Schema33/capacity-expectations.json",
+      "sha256": "64252e87d32fe94e09d8cd177f3be45c4a668757f60dc5b24ba79513d445eb51"
+    },
+    {
+      "root": "backend",
+      "path": "tests/Sql/Schema33/05_verify_financial_invariants.sql",
+      "sha256": "8ec667268e443afa50587131f9f7b4ea15fc738bcb4e31be4fc984c6360091e7"
+    },
+    {
+      "root": "backend",
+      "path": "tests/Sql/Schema33/README.md",
+      "sha256": "cdf26934aad8c08db21894e8581a7bd903f4278a1b52c8fce19f39861defa3db"
+    },
+    {
+      "root": "tools",
+      "path": "FixtureSeed/Program.cs",
+      "sha256": "d2768ad1cd94ea177fcebd4389283aff8341df97a6466b768ebfa8cd390ff91d"
+    },
+    {
+      "root": "tools",
+      "path": "FixtureSeed/FixtureSeed.csproj",
+      "sha256": "208a5f89b2bb3d79da59390b3946ff8a544e14b1307df10da8889c72a9f8c388"
+    }
+  ]
+}

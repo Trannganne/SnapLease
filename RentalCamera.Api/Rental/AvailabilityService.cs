@@ -42,7 +42,8 @@ public sealed class AvailabilityService(RentalCameraContext db)
 
                 SELECT
                     ct.NgayBatDau AS BatDau,
-                    CASE WHEN pl.ThoiHanGiaHan > hd.ThoiGianTraDuKien
+                    CASE WHEN rt.ThucNhanLuc IS NOT NULL THEN rt.ThucNhanLuc
+                         WHEN pl.ThoiHanGiaHan > hd.ThoiGianTraDuKien
                          THEN pl.ThoiHanGiaHan ELSE hd.ThoiGianTraDuKien END AS KetThuc,
                     ct.SoLuong
                 FROM HopDong hd WITH (UPDLOCK, HOLDLOCK)
@@ -53,12 +54,17 @@ public sealed class AvailabilityService(RentalCameraContext db)
                     WHERE p.MaHopDong = hd.MaHopDong AND (p.TrangThai IN ('DA_XAC_NHAN','DA_HIEU_LUC')
                         OR (p.TrangThai='CHO_KY' AND p.HanKyUtc>SYSUTCDATETIME()))
                 ) pl
+                OUTER APPLY (
+                    SELECT b.ThucNhanLuc FROM BienBanNhanTra b
+                    WHERE b.MaHopDong=hd.MaHopDong AND b.ThucNhanLuc IS NOT NULL
+                ) rt
                 WHERE hd.MaCuaHang = @store
                   AND ct.MaDongMay = @model
                   AND hd.TrangThai IN ('CHO_KY','DA_KY','CHO_BAN_GIAO','DANG_THUE','CHO_HOAN_TRA')
                   AND (@excludeContract IS NULL OR hd.MaHopDong <> @excludeContract)
                   AND ct.NgayBatDau < @toDate
-                  AND (CASE WHEN pl.ThoiHanGiaHan > hd.ThoiGianTraDuKien
+                  AND (CASE WHEN rt.ThucNhanLuc IS NOT NULL THEN rt.ThucNhanLuc
+                            WHEN pl.ThoiHanGiaHan > hd.ThoiGianTraDuKien
                             THEN pl.ThoiHanGiaHan ELSE hd.ThoiGianTraDuKien END) > @fromDate
             ),
             MocThoiGian AS (

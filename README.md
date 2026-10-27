@@ -1,169 +1,18 @@
-# SnapLease — Backend API
+# SNAPLEASE Backend33
 
-Backend dùng chung cho ứng dụng Web và Mobile của hệ thống đặt/thuê máy ảnh SnapLease.
+This is the source-only `feature/backend-schema33-handoff` branch, based on `4f4d4af0155b84dd850d16c0b25702d02965bf73`. The handoff overlays only the103 approved files;45 baseline files remain unchanged,148 tracked files in total. No legacy deletion is part of this handoff. See the retained-file ledger in Docs/SCHEMA33_SQL_INVENTORY.md.
 
-## Công nghệ
+Use the .NET8/manual setup and sample Schema33Trial configuration below. Do NOT use inherited compose.yaml, old database migrations/sample data, old test scripts or old Docker setup guides to deploy33. No new Compose was created. Baseline appsettings.json contains no live connection/provider credential; configure a separate private runtime from the current example as documented.
 
-- ASP.NET Core 8 Minimal API
-- Entity Framework Core 8
-- SQL Server 2022
-- Docker Compose
-- Swagger/OpenAPI
-- Bearer token bằng ASP.NET Core Data Protection
+Start with [the independent setup and handoff](Docs/SCHEMA33_HANDOFF.md).
 
-## Cấu trúc
+- [Installation schema, seed and guarded runner](Database/Schema33/README.md)
+- [API changes for Backend/Web/Mobile](Docs/SCHEMA33_API_CHANGES.md)
+- [SQL KEEP / ARCHIVE / REVIEW and provenance](Docs/SCHEMA33_SQL_INVENTORY.md)
+- [Delivery files, Markdown classification and proposed Git changes](Docs/SCHEMA33_DELIVERY_FILES.md)
 
-```text
-Backend_Api/
-├── RentalCamera.Api/                 Mã nguồn API
-├── Database/
-│   ├── 01_schema.sql                 Cấu trúc database chính thức
-│   ├── 02_sample_data.sql            Dữ liệu mẫu
-│   └── README.md                      Mô tả database và flow đặt thuê
-├── Docs/                              Tài liệu bàn giao/tích hợp
-├── compose.yaml                       Chạy API + SQL Server + khởi tạo DB
-├── .env.example                       Mẫu biến môi trường
-├── .gitignore                         Loại trừ mật khẩu và file build
-└── HUONG_DAN_CHAY_DOCKER_CHO_THANH_VIEN.md
-```
+The target is a separate RentalCameraDb30_Test with33 application tables. This package uses Schema33Trial and fake providers. The old Compose/bootstrap/reset workflow is not an installation entry point.
 
-## Chạy bằng Docker
+BUILD PASS (.NET SDK8.0.425) was recorded before cleanup; no build was rerun afterward. DATABASE NOT_RUN; API SMOKE NOT_RUN; REGRESSION NOT_RUN. Port5003 is planned, not a verified running URL.
 
-### 1. Yêu cầu
-
-- Git
-- Docker Desktop sử dụng Linux containers
-- Docker Desktop đang hiển thị `Engine running`
-
-### 2. Tạo cấu hình cá nhân
-
-Mở PowerShell tại thư mục chứa `compose.yaml`:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-File `.env` chỉ dùng trên máy cá nhân và không được commit lên GitHub.
-
-Để thử thanh toán VNPAY-QR Sandbox, điền thêm các biến `VNPAY_*` trong `.env` theo hướng dẫn tại [`Docs/VNPAY_SANDBOX.md`](./Docs/VNPAY_SANDBOX.md). Giữ `VNPAY_ENABLED=false` nếu chưa có tài khoản Sandbox; Health và các API khác vẫn hoạt động bình thường.
-
-Để gửi OTP ký hợp đồng qua Gmail, điền các biến `EMAIL_*` bằng App Password theo hướng dẫn tại [`Docs/GUI_OTP_KY_HOP_DONG_QUA_EMAIL.md`](./Docs/GUI_OTP_KY_HOP_DONG_QUA_EMAIL.md).
-
-### 3. Khởi động hệ thống
-
-```powershell
-docker compose up -d --build
-docker compose ps -a
-```
-
-Trạng thái đúng:
-
-```text
-rentalcamera-sql       Up (healthy)
-rentalcamera-db-init   Exited (0)
-rentalcamera-api       Up
-```
-
-`db-init` thoát với mã `0` là bình thường: dịch vụ này chỉ tạo cấu trúc và nạp dữ liệu mẫu một lần.
-
-### 4. Kiểm tra
-
-- Health: <http://localhost:5000/api/health>
-- Swagger: <http://localhost:5000/swagger>
-- OpenAPI JSON: <http://localhost:5000/swagger/v1/swagger.json>
-
-`/api/health` chỉ xác nhận API đã chạy. Gọi thêm `GET /api/danh-muc` hoặc `GET /api/dong-may` để kiểm tra kết nối database.
-
-## Tài khoản mẫu
-
-Đặt mật khẩu cho tài khoản cần dùng:
-
-```powershell
-docker compose exec api dotnet RentalCamera.Api.dll set-password khachhang01
-docker compose exec api dotnet RentalCamera.Api.dll set-password nhanvien01
-docker compose exec api dotnet RentalCamera.Api.dll set-password admin01
-```
-
-Mật khẩu phải có 8–128 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt. Sau đó đăng nhập bằng `POST /api/auth/login`.
-
-Sao chép `accessToken`, mở nút **Authorize** trong Swagger và dán token trực tiếp.
-
-## Upload ảnh biên bản bàn giao
-
-`POST /api/chi-tiet-hop-dong/{id}/anh-bien-ban` dành cho nhân viên/admin và nhận
-`multipart/form-data` gồm `loai`, file `anh` và `moTa` không bắt buộc. Backend tự
-upload file JPEG, PNG hoặc WEBP (tối đa 10 MB) lên Cloudinary rồi lưu URL HTTPS vào
-`AnhBienBan.DuongDanAnh`. Mobile không nhập URL và không giữ khóa Cloudinary.
-
-Cấu hình các biến `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và
-`CLOUDINARY_API_SECRET` trong `.env`, sau đó build lại dịch vụ API.
-
-Hướng dẫn cấu hình, chạy và kiểm thử từng bước: [`UPLOAD_ANH_BIEN_BAN_CLOUDINARY.md`](./Docs/UPLOAD_ANH_BIEN_BAN_CLOUDINARY.md).
-
-## Đánh giá thiết bị
-
-Luồng đánh giá hỗ trợ dữ liệu biểu mẫu theo Figma, 1–5 sao, nhận xét tối đa 500 ký
-tự, 6 chip điểm nổi bật cố định, tối đa 4 ảnh thực tế và trạng thái kiểm duyệt.
-Ảnh được backend tải lên Cloudinary; Mobile không giữ khóa Cloudinary.
-
-Danh sách endpoint, request/response và thứ tự tích hợp Mobile:
-[`API_DANH_GIA.md`](./Docs/API_DANH_GIA.md).
-
-## Base URL cho Web và Mobile
-
-| Môi trường | Base URL |
-|---|---|
-| Web chạy cùng máy | `http://localhost:5000` |
-| Android Emulator | `http://10.0.2.2:5000` |
-| Điện thoại thật cùng Wi-Fi | `http://<IP_LAN_MAY_CHAY_BACKEND>:5000` |
-
-Web phải dùng origin đã được khai báo trong CORS. Mobile native không chịu chính sách CORS của trình duyệt.
-
-## Chạy lại và cập nhật
-
-Sau khi tắt/bật máy:
-
-```powershell
-docker compose up -d
-```
-
-Sau khi Backend thay đổi:
-
-```powershell
-docker compose up -d --build api
-```
-
-Xem log:
-
-```powershell
-docker compose logs -f api
-```
-
-Chỉ khi cần xóa toàn bộ database Docker và dựng lại từ đầu:
-
-```powershell
-docker compose down -v
-docker compose up -d --build
-```
-
-> `docker compose down -v` xóa toàn bộ dữ liệu đang lưu trong volume SQL Server.
-
-## Quy ước bảo mật
-
-Không commit các nội dung sau:
-
-- `.env`
-- `bin/`, `obj/`
-- `.keys/`
-- Token đăng nhập
-- Mật khẩu hoặc connection string chứa mật khẩu thật
-- Dữ liệu cá nhân thật của khách hàng
-
-## Làm việc trên Git
-
-- Code Backend nằm trên nhánh `backend`.
-- Nhánh `main` do nhóm trưởng quản lý.
-- Không merge trực tiếp vào `main` khi chưa được nhóm trưởng kiểm tra.
-- Web và Mobile tích hợp theo Swagger và tài liệu trong thư mục `Docs`.
-
-Hướng dẫn chi tiết: [`HUONG_DAN_CHAY_DOCKER_CHO_THANH_VIEN.md`](./HUONG_DAN_CHAY_DOCKER_CHO_THANH_VIEN.md).
+Never commit private configuration, keys, media, backup, runtime, bin/obj or evidence. Review-marked historical guides remain for business/API comparison and are not default deployment instructions. No commit/merge/push was performed.

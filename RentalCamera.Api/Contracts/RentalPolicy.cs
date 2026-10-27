@@ -3,9 +3,7 @@ namespace RentalCamera.Api.Contracts;
 public static class RentalPolicy
 {
     public const string TermsVersion = "2026-10-20";
-    public static readonly string[] ProtectedContracts =
-        (Environment.GetEnvironmentVariable("Rental__ProtectedContractIds") ?? "")
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    public static readonly string[] ProtectedContracts = ["HD588670599EC646F8AD", "HDC1BF800950C74295A7"];
     // Existing rental API stores Vietnamese wall-clock datetime2, without an offset.
     public static DateTime Utc(DateTime local) => local.Kind == DateTimeKind.Utc ? local :
         DateTime.SpecifyKind(local.Subtract(TimeSpan.FromHours(7)), DateTimeKind.Utc);
