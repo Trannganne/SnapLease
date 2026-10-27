@@ -1,2 +1,0 @@
-using Microsoft.AspNetCore.Mvc;using Microsoft.EntityFrameworkCore;using RentalCamera.Data;
-namespace RentalCamera.Controllers;public class CaiDatController:BaseController{private readonly RentalCameraDbContext _db;public CaiDatController(RentalCameraDbContext db)=>_db=db;public async Task<IActionResult> Index(){var id=HttpContext.Session.GetString("AccountId");return View(await _db.NhanVien.FirstOrDefaultAsync(x=>x.MaTaiKhoan==id));}}
