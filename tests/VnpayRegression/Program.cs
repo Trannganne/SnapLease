@@ -17,7 +17,7 @@ var fields = new Dictionary<string, string> {
     ["vnp_TmnCode"] = "TEST", ["vnp_TxnRef"] = "REF",
     ["vnp_Amount"] = "300000000", ["vnp_BankCode"] = "NCB",
     // Synthetic gateway fixture; never use a customer's transaction in shared tests.
-    ["vnp_PayDate"] = "20260101100000", ["vnp_TransactionNo"] = "TEST_TRANSACTION_001",
+    ["vnp_PayDate"] = "20260101100000", ["vnp_TransactionNo"] = "123456789012345",
     ["vnp_TransactionType"] = "01", ["vnp_TransactionStatus"] = "00",
     ["vnp_OrderInfo"] = "test", ["vnp_PromotionCode"] = "", ["vnp_PromotionAmount"] = ""
 };

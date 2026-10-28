@@ -796,7 +796,7 @@ BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[TaiKhoan] WHERE [MaTaiKhoan]=N'TR33_C01' AND (([MaTaiKhoan] IS NULL AND N'TR33_C01' IS NOT NULL) OR ([MaTaiKhoan] IS NOT NULL AND N'TR33_C01' IS NULL) OR ([MaTaiKhoan] <> N'TR33_C01') OR ([TenDangNhap] IS NULL AND N'trial33.customer01' IS NOT NULL) OR ([TenDangNhap] IS NOT NULL AND N'trial33.customer01' IS NULL) OR ([TenDangNhap] <> N'trial33.customer01') OR ([VaiTro] IS NULL AND N'KHACH_HANG' IS NOT NULL) OR ([VaiTro] IS NOT NULL AND N'KHACH_HANG' IS NULL) OR ([VaiTro] <> N'KHACH_HANG'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[TaiKhoan] ([MaTaiKhoan],[TenDangNhap],[MatKhauHash],[VaiTro],[TrangThai],[NgayTao],[PhienBanBaoMat]) VALUES (N'TR33_C01',N'trial33.customer01',N'AQAAAAIAAYagAAAAEPy8tCcjO+fXDzfPO9LJTvuJfzYC4Qeoa4linhxpWSy1VID3igYfqDUNq6isy3d4Ag==',N'KHACH_HANG',N'HOAT_DONG',@LocalNow,0);
+ INSERT dbo.[TaiKhoan] ([MaTaiKhoan],[TenDangNhap],[MatKhauHash],[VaiTro],[TrangThai],[NgayTao],[PhienBanBaoMat]) VALUES (N'TR33_C01',N'trial33.customer01',N'AQAAAAIAAYagAAAAEG+G7VXnEGatOiFkkyUkCN+TpBwkHgCnWBH/6gQsyaT0FHMPOXAdBrRSOWgAtyhHMg==',N'KHACH_HANG',N'HOAT_DONG',@LocalNow,0);
 
 IF EXISTS(SELECT 1 FROM dbo.[TaiKhoan] WHERE [MaTaiKhoan]=N'TR33_C02')
 BEGIN
@@ -987,6 +987,22 @@ END
 ELSE
  INSERT dbo.[KhachThue] ([MaKhachThue],[MaTaiKhoan],[HoTen],[SoDienThoai],[Email],[CCCD],[DiaChi],[DaXacNhanThongTin],[EmailXacMinhLucUtc]) VALUES (N'TR33_K12',N'TR33_C12',N'TRIAL33 Customer 12',N'0910000012',N'TRIAL33.CUSTOMER12@EXAMPLE.INVALID',N'TR33-DOC-12',N'SYNTHETIC ONLY',1,@UtcNow);
 
+-- Complete only missing synthetic profile fields; never overwrite values edited during tests.
+UPDATE dbo.[KhachThue]
+SET [NgaySinh]=COALESCE([NgaySinh],CONVERT(date,'1995-01-01')),
+    [GioiTinh]=COALESCE([GioiTinh],N'KHAC'),
+    [QuocTich]=COALESCE([QuocTich],N'VIET_NAM'),
+    [NgayCap]=COALESCE([NgayCap],CONVERT(date,'2020-01-01')),
+    [NoiCap]=COALESCE([NoiCap],N'TRIAL33 SYNTHETIC AUTHORITY')
+WHERE [MaKhachThue] IN (N'TR33_K01',N'TR33_K02',N'TR33_K03',N'TR33_K04',N'TR33_K05',N'TR33_K06',N'TR33_K07',N'TR33_K08',N'TR33_K09',N'TR33_K10',N'TR33_K11',N'TR33_K12');
+
+-- Normalize the known synthetic back-image value so the generated collision checks remain
+-- idempotent, then restore/backfill it after all 12 identity rows are validated.
+UPDATE dbo.[GiayToTuyThan]
+SET [MatSauUrl]=NULL
+WHERE [MaGiayTo] IN (N'TR33_ID01',N'TR33_ID02',N'TR33_ID03',N'TR33_ID04',N'TR33_ID05',N'TR33_ID06',N'TR33_ID07',N'TR33_ID08',N'TR33_ID09',N'TR33_ID10',N'TR33_ID11',N'TR33_ID12')
+  AND [MatSauUrl]=N'/fixtures/schema33/fake-identity-back.png';
+
 IF EXISTS(SELECT 1 FROM dbo.[GiayToTuyThan] WHERE [MaGiayTo]=N'TR33_ID01')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[GiayToTuyThan] WHERE [MaGiayTo]=N'TR33_ID01' AND (([MaGiayTo] IS NULL AND N'TR33_ID01' IS NOT NULL) OR ([MaGiayTo] IS NOT NULL AND N'TR33_ID01' IS NULL) OR ([MaGiayTo] <> N'TR33_ID01') OR ([MaKhachThue] IS NULL AND N'TR33_K01' IS NOT NULL) OR ([MaKhachThue] IS NOT NULL AND N'TR33_K01' IS NULL) OR ([MaKhachThue] <> N'TR33_K01') OR ([LoaiGiayTo] IS NULL AND N'CCCD' IS NOT NULL) OR ([LoaiGiayTo] IS NOT NULL AND N'CCCD' IS NULL) OR ([LoaiGiayTo] <> N'CCCD') OR ([SoGiayTo] IS NULL AND N'TR33-DOC-01' IS NOT NULL) OR ([SoGiayTo] IS NOT NULL AND N'TR33-DOC-01' IS NULL) OR ([SoGiayTo] <> N'TR33-DOC-01') OR ([MatTruocUrl] IS NULL AND N'/fixtures/schema33/fake-identity.png' IS NOT NULL) OR ([MatTruocUrl] IS NOT NULL AND N'/fixtures/schema33/fake-identity.png' IS NULL) OR ([MatTruocUrl] <> N'/fixtures/schema33/fake-identity.png') OR ([MatSauUrl] IS NULL AND NULL IS NOT NULL) OR ([MatSauUrl] IS NOT NULL AND NULL IS NULL) OR ([MatSauUrl] <> NULL) OR ([TrangThaiXacMinh] IS NULL AND N'HOP_LE' IS NOT NULL) OR ([TrangThaiXacMinh] IS NOT NULL AND N'HOP_LE' IS NULL) OR ([TrangThaiXacMinh] <> N'HOP_LE'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
@@ -1070,6 +1086,11 @@ BEGIN
 END
 ELSE
  INSERT dbo.[GiayToTuyThan] ([MaGiayTo],[MaKhachThue],[LoaiGiayTo],[SoGiayTo],[MatTruocUrl],[MatSauUrl],[NgayTaiLen],[TrangThaiXacMinh],[GhiChu]) VALUES (N'TR33_ID12',N'TR33_K12',N'CCCD',N'TR33-DOC-12',N'/fixtures/schema33/fake-identity.png',NULL,@LocalNow,N'HOP_LE',N'SYNTHETIC VERIFIED IDENTITY FIXTURE; not a real document');
+
+UPDATE dbo.[GiayToTuyThan]
+SET [MatSauUrl]=N'/fixtures/schema33/fake-identity-back.png'
+WHERE [MaGiayTo] IN (N'TR33_ID01',N'TR33_ID02',N'TR33_ID03',N'TR33_ID04',N'TR33_ID05',N'TR33_ID06',N'TR33_ID07',N'TR33_ID08',N'TR33_ID09',N'TR33_ID10',N'TR33_ID11',N'TR33_ID12')
+  AND [MatSauUrl] IS NULL;
 
 IF EXISTS(SELECT 1 FROM dbo.[NhanVien] WHERE [MaNhanVien]=N'TR33_NV01')
 BEGIN

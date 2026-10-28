@@ -935,7 +935,7 @@
       {
         "MaTaiKhoan": "TR33_C01",
         "TenDangNhap": "trial33.customer01",
-        "MatKhauHash": "AQAAAAIAAYagAAAAEPy8tCcjO+fXDzfPO9LJTvuJfzYC4Qeoa4linhxpWSy1VID3igYfqDUNq6isy3d4Ag==",
+        "MatKhauHash": "AQAAAAIAAYagAAAAEG+G7VXnEGatOiFkkyUkCN+TpBwkHgCnWBH/6gQsyaT0FHMPOXAdBrRSOWgAtyhHMg==",
         "VaiTro": "KHACH_HANG",
         "TrangThai": "HOAT_DONG",
         "NgayTao": {
@@ -1118,6 +1118,11 @@
         "Email": "TRIAL33.CUSTOMER01@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-01",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1131,6 +1136,11 @@
         "Email": "TRIAL33.CUSTOMER02@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-02",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1144,6 +1154,11 @@
         "Email": "TRIAL33.CUSTOMER03@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-03",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1157,6 +1172,11 @@
         "Email": "TRIAL33.CUSTOMER04@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-04",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1170,6 +1190,11 @@
         "Email": "TRIAL33.CUSTOMER05@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-05",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1183,6 +1208,11 @@
         "Email": "TRIAL33.CUSTOMER06@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-06",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1196,6 +1226,11 @@
         "Email": "TRIAL33.CUSTOMER07@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-07",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1209,6 +1244,11 @@
         "Email": "TRIAL33.CUSTOMER08@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-08",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1222,6 +1262,11 @@
         "Email": "TRIAL33.CUSTOMER09@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-09",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1235,6 +1280,11 @@
         "Email": "TRIAL33.CUSTOMER10@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-10",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1248,6 +1298,11 @@
         "Email": "TRIAL33.CUSTOMER11@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-11",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1261,6 +1316,11 @@
         "Email": "TRIAL33.CUSTOMER12@EXAMPLE.INVALID",
         "CCCD": "TR33-DOC-12",
         "DiaChi": "SYNTHETIC ONLY",
+        "NgaySinh": "1995-01-01",
+        "GioiTinh": "KHAC",
+        "QuocTich": "VIET_NAM",
+        "NgayCap": "2020-01-01",
+        "NoiCap": "TRIAL33 SYNTHETIC AUTHORITY",
         "DaXacNhanThongTin": true,
         "EmailXacMinhLucUtc": {
           "sql": "@UtcNow"
@@ -1274,7 +1334,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-01",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1287,7 +1347,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-02",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1300,7 +1360,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-03",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1313,7 +1373,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-04",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1326,7 +1386,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-05",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1339,7 +1399,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-06",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1352,7 +1412,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-07",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1365,7 +1425,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-08",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1378,7 +1438,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-09",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1391,7 +1451,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-10",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1404,7 +1464,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-11",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },
@@ -1417,7 +1477,7 @@
         "LoaiGiayTo": "CCCD",
         "SoGiayTo": "TR33-DOC-12",
         "MatTruocUrl": "/fixtures/schema33/fake-identity.png",
-        "MatSauUrl": null,
+        "MatSauUrl": "/fixtures/schema33/fake-identity-back.png",
         "NgayTaiLen": {
           "sql": "@LocalNow"
         },

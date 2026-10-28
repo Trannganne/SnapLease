@@ -204,3 +204,7 @@ app.MapReviewEndpoints();
 app.MapReportEndpoints();
 
 app.Run();
+
+// Exposes the generated top-level entry point to the in-process integration harness.
+// This does not add an HTTP endpoint or expose trial secrets.
+public partial class Program { }

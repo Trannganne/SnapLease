@@ -85,8 +85,8 @@ public static class ContractEndpoints
             if (string.IsNullOrWhiteSpace(giayTo.MatTruocUrl) || string.IsNullOrWhiteSpace(giayTo.MatSauUrl))
                 return Results.Conflict(new { loi = "Giấy tờ tùy thân chưa đủ hai mặt ảnh." });
 
-            if (giayTo.TrangThaiXacMinh == "TU_CHOI")
-                return Results.Conflict(new { loi = "Giấy tờ tùy thân đã bị từ chối, vui lòng cập nhật lại." });
+            if (!IsIdentityVerifiedForRental(giayTo))
+                return Results.Conflict(new { loi = "Giấy tờ tùy thân chưa được xác minh hợp lệ." });
 
             var selections=await db.ChiTietGiuCho.AsNoTracking().Where(x=>x.MaGiuCho==id).ToListAsync(ct);
             var originalIds=selections.Count>0?selections.Select(x=>x.MaChiTietGioHang).ToArray():
@@ -1032,6 +1032,9 @@ public static class ContractEndpoints
             thongBao
         };
     }
+
+    public static bool IsIdentityVerifiedForRental(GiayToTuyThan document) =>
+        string.Equals(document.TrangThaiXacMinh, "HOP_LE", StringComparison.Ordinal);
 }
 
 public sealed record RequestContractSignatureRequest(bool DaDongYDieuKhoan);

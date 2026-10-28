@@ -69,6 +69,12 @@ var payment=new ThanhToan{MaThanhToan="REF1",MaHopDong="HD1",LoaiThanhToan="HOAN
 var hash=RefundWorkflow.Hash(payment);payment.SoTien=500_001;
 Check(hash!=RefundWorkflow.Hash(payment),"Refund acknowledgement binds exact amount");
 Check(RefundWorkflow.IsRefund("HOAN_THU_THUA")&&!RefundWorkflow.IsRefund("THU_QUYET_TOAN"),"Refund distinct from collection");
+var identity=new GiayToTuyThan{TrangThaiXacMinh="HOP_LE"};
+Check(ContractEndpoints.IsIdentityVerifiedForRental(identity),"Verified identity can create rental contract");
+identity.TrangThaiXacMinh="CHO_XAC_MINH";
+Check(!ContractEndpoints.IsIdentityVerifiedForRental(identity),"Pending identity cannot create rental contract");
+identity.TrangThaiXacMinh="TU_CHOI";
+Check(!ContractEndpoints.IsIdentityVerifiedForRental(identity),"Rejected identity cannot create rental contract");
 #if DIRECT_OFFLINE
 Console.WriteLine("NOT_RUN: EF mapping and exact33 schema.table checks skipped by DIRECT_OFFLINE.");
 #else
