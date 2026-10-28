@@ -12,6 +12,42 @@ The6 inherited test-script password literals were checked statically: each is an
 
 Phạm vi là backend trial33, .NET8/EF Core8/SQL Server2022, dùng đúng database `RentalCameraDb30_Test`. Source này bắt buộc môi trường `Schema33Trial`, provider giả, jobs/push/chatbot tắt. Chưa phải cấu hình production hoặc bản chuyển môi trường demo.
 
+## Ngoại lệ SMTP OTP ký hợp đồng được duyệt riêng
+
+Profile mặc định vẫn Fake. Một môi trường demo được người quản lý duyệt có thể đặt
+`ContractOtpEmail:Mode=SmtpDemo`, `SmtpApproved=true` và `AllowedRecipient` là duy nhất
+email thử đã được duyệt. `Schema33Trial:ProviderMode` vẫn phải là `Fake`; không đổi
+sang Development/Production hoặc bỏ guard để bật SMTP. Mọi binding database,
+PackageApproved, login runtime riêng, payment giả/URL loopback và các cờ tắt
+jobs/push/chatbot/OTP response/auth-token response vẫn bắt buộc như trước.
+
+Chỉ POST `/api/hop-dong/{id}/yeu-cau-ky` dùng provider có key `ContractSigningOtp`.
+Provider mặc định, OTP phụ lục và email xác minh/quên mật khẩu vẫn dùng mailbox giả.
+Người nhận lấy từ `KhachThue.Email` của khách hàng sở hữu hợp đồng; allowlist chỉ
+kiểm tra email này, không thay thế người nhận hoặc nhận địa chỉ từ Flutter.
+`SmtpContractOtpEmailSender` hiện có được tái sử dụng, không đổi HTTP contract/PDF/
+điều khoản/OTP hoặc điều kiện ký.
+
+Cấu hình `Email` phải bật, có Host, Port=587, UseSsl=true (STARTTLS), Username,
+Password và FromAddress trùng Username. Không tắt kiểm tra chứng chỉ. Guard từ chối
+profile chưa duyệt, email sai định dạng hoặc thiếu `ElectronicSignature:Pepper`.
+Chỉ truyền bí mật bằng môi trường tiến trình (`Email__Password`,
+`ElectronicSignature__Pepper`), không ghi vào source, ví dụ JSON, `.env` hoặc log.
+Credential và Pepper được giữ ngoài Git trong runtime riêng; nếu dùng DPAPI Windows,
+launcher phải chạy bằng đúng user/máy đã mã hóa. Pepper sinh ngẫu nhiên 32 byte một
+lần rồi tái sử dụng, không đổi mỗi lần build/restart. Quản trị Docker có thể xem env
+container, nên credential chỉ dùng cho môi trường demo được kiểm soát.
+
+Email trial chỉ được đổi sau khi duyệt đúng tài khoản qua PUT `/api/auth/email` bằng
+phiên xác thực của tài khoản đó. API xóa mốc xác minh email và tăng phiên bản bảo mật;
+khách hàng đăng nhập lại. Không tự đánh dấu email đã xác minh hoặc sửa seed/schema.
+
+Kiểm tra cô lập bằng `tests/Schema33Regression --contract-smtp-checks` dùng capture
+sender, không gọi SQL/HTTP/SMTP. Build/publish chỉ cập nhật API trial, giữ nguyên SQL
+container/volume/database, `.keys`, PDF và storage; không chạy lại package. Health và
+Swagger chỉ chứng minh startup/route; việc Gmail nhận thư và ký thành công phải do
+người thử tự yêu cầu OTP/xác nhận trên điện thoại. Không tự gửi thư kiểm thử.
+
 ## Bằng chứng của đợt tiếp tục 27/10/2026
 
 | Kiểm tra | Trạng thái |

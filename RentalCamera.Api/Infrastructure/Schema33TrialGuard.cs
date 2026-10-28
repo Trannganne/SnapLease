@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Net.Mail;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -8,6 +9,8 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
 {
     private readonly string server;
     public const string DatabaseName = "RentalCameraDb30_Test";
+    public bool ContractSmtpDemoEnabled { get; }
+    public string? AllowedContractOtpRecipient { get; }
     public Schema33TrialGuard(IConfiguration c, IHostEnvironment env)
     {
         if (env.EnvironmentName != "Schema33Trial" || !c.GetValue<bool>("Schema33Trial:Enabled") || !c.GetValue<bool>("Schema33Trial:PackageApproved"))
@@ -22,7 +25,35 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
         foreach (var key in new[] { "PaymentUrl", "ReturnUrl", "IpnUrl", "QueryDrUrl" })
             if (!Uri.TryCreate(c["Vnpay:"+key],UriKind.Absolute,out var uri) || !uri.IsLoopback)
                 throw new InvalidOperationException("Fake payment URLs chỉ được loopback.");
+
+        var emailMode = c["ContractOtpEmail:Mode"] ?? "Fake";
+        if (emailMode == "Fake")
+        {
+            if (c.GetValue<bool>("Email:Enabled") || c.GetValue<bool>("ContractOtpEmail:SmtpApproved"))
+                throw new InvalidOperationException("SMTP chưa được chọn và duyệt riêng cho OTP ký hợp đồng.");
+        }
+        else if (emailMode == "SmtpDemo")
+        {
+            var allowedRecipient = c["ContractOtpEmail:AllowedRecipient"]?.Trim();
+            var username = c["Email:Username"]?.Trim();
+            if (!c.GetValue<bool>("ContractOtpEmail:SmtpApproved") || !c.GetValue<bool>("Email:Enabled") ||
+                string.IsNullOrWhiteSpace(c["Email:Host"]) || c.GetValue<int>("Email:Port") != 587 ||
+                !c.GetValue<bool>("Email:UseSsl") || !IsPlainEmail(username) ||
+                !string.Equals(username, c["Email:FromAddress"]?.Trim(), StringComparison.OrdinalIgnoreCase) ||
+                string.IsNullOrWhiteSpace(c["Email:Password"]) || !IsPlainEmail(allowedRecipient) ||
+                string.IsNullOrWhiteSpace(c["ElectronicSignature:Pepper"]))
+                throw new InvalidOperationException("SMTP OTP demo chưa được duyệt hoặc cấu hình TLS/người nhận/bí mật chưa đầy đủ.");
+            ContractSmtpDemoEnabled = true;
+            AllowedContractOtpRecipient = allowedRecipient;
+        }
+        else
+        {
+            throw new InvalidOperationException("Chế độ OTP ký hợp đồng không được phép.");
+        }
     }
+    private static bool IsPlainEmail(string? value) =>
+        !string.IsNullOrWhiteSpace(value) && MailAddress.TryCreate(value, out var address) &&
+        string.Equals(address.Address, value, StringComparison.OrdinalIgnoreCase);
     public void Validate(string value)
     {
         SqlConnectionStringBuilder b;

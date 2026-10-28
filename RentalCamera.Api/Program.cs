@@ -58,6 +58,7 @@ builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailO
 builder.Services.AddSingleton<FakeTrialSender>();
 builder.Services.AddSingleton<IContractOtpEmailSender>(sp => sp.GetRequiredService<FakeTrialSender>());
 builder.Services.AddSingleton<IAuthEmailSender>(sp => sp.GetRequiredService<FakeTrialSender>());
+ContractSigningOtpRegistration.Register(builder.Services, trialGuard);
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
 builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
 builder.Services.AddHttpClient().ConfigureHttpClientDefaults(b => b.ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler()));

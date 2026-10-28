@@ -4,6 +4,11 @@ using RentalCamera.Api.Rental;
 using RentalCamera.Api.Payments;
 
 #if !DIRECT_OFFLINE
+if (args.Length == 1 && args[0] == "--contract-smtp-checks")
+{
+    await ContractSmtpDemoChecks.RunAsync();
+    return;
+}
 if (args.Length == 2 && args[0] == "--model-output")
 {
     Schema33EfChecks.Run(args[1]);
