@@ -213,7 +213,7 @@ public sealed class VnpayService
             ["vnp_SecureHash"] = secureHash
         };
 
-        var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient(_options.FakeTrial ? string.Empty : "VnpaySandbox");
         client.Timeout = TimeSpan.FromSeconds(15);
         client.DefaultRequestHeaders.UserAgent.ParseAdd("SnapLease/1.0");
 

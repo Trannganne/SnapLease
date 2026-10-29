@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using RentalCamera.Api.Infrastructure;
 
 namespace RentalCamera.Api.Chatbot;
 
@@ -10,7 +11,9 @@ public static class ChatEndpoints
         services.AddSingleton(provider => ChatKnowledge.Load(provider.GetRequiredService<IHostEnvironment>().ContentRootPath));
         services.AddScoped<IChatCatalog, EfChatCatalog>();
         services.AddHttpClient<IChatProvider, GroqChatProvider>(client => client.Timeout = Timeout.InfiniteTimeSpan)
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+            .ConfigurePrimaryHttpMessageHandler(() => configuration["Schema33Trial:ProviderMode"] == "Fake"
+                ? new DenyExternalHttpHandler()
+                : new HttpClientHandler { AllowAutoRedirect = false });
         services.AddScoped<ChatService>();
     }
     public static void MapChatbotEndpoints(this IEndpointRouteBuilder app)

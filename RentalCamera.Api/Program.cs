@@ -60,10 +60,14 @@ builder.Services.AddSingleton<IContractOtpEmailSender>(sp => sp.GetRequiredServi
 builder.Services.AddSingleton<IAuthEmailSender>(sp => sp.GetRequiredService<FakeTrialSender>());
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
 builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
-builder.Services.AddHttpClient().ConfigureHttpClientDefaults(b => b.ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler()));
+builder.Services.AddHttpClient();
+builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
+    .ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler());
+builder.Services.AddHttpClient("VnpaySandbox")
+    .ConfigurePrimaryHttpMessageHandler(() => trialGuard.SandboxVnpay
+        ? new HttpClientHandler { AllowAutoRedirect = false }
+        : new DenyExternalHttpHandler());
 builder.Services.AddChatbot(builder.Configuration);
-builder.Services.ConfigureAll<Microsoft.Extensions.Http.HttpClientFactoryOptions>(o =>
-    o.HttpMessageHandlerBuilderActions.Add(b => b.PrimaryHandler = new DenyExternalHttpHandler()));
 builder.Services.AddScoped<FirebaseNotificationSender>();
 builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.AddHttpClient<CloudinaryImageStorage>().ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler());

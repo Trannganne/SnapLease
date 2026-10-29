@@ -12,6 +12,10 @@ The6 inherited test-script password literals were checked statically: each is an
 
 Phạm vi là backend trial33, .NET8/EF Core8/SQL Server2022, dùng đúng database `RentalCameraDb30_Test`. Source này bắt buộc môi trường `Schema33Trial`, provider giả, jobs/push/chatbot tắt. Chưa phải cấu hình production hoặc bản chuyển môi trường demo.
 
+### Chế độ VNPAY Sandbox trên Schema33
+
+Khi cần kiểm thử merchant VNPAY Sandbox thật trên cùng database33, chạy môi trường `Schema33Sandbox` và dùng `RentalCamera.Api/appsettings.Schema33Sandbox.example.json` làm mẫu. Chế độ này vẫn bắt buộc `RentalCameraDb30_Test`, login SQL riêng không phải `sa`, provider email/media/push giả và jobs/chatbot tắt; chỉ HTTP client dành cho VNPAY Sandbox được phép ra ngoài. TmnCode, HashSecret và connection string chỉ truyền bằng secret môi trường, không ghi vào JSON hoặc Git. Access token của backend/DB cũ không được tái sử dụng; client phải đăng nhập lại sau khi chuyển môi trường. `Schema33Trial` và toàn bộ regression giả vẫn giữ nguyên hành vi loopback.
+
 ## Bằng chứng của đợt tiếp tục 27/10/2026
 
 | Kiểm tra | Trạng thái |
