@@ -1,0 +1,22 @@
+/* SnapLease: only add a blue backdrop behind the EXISTING four KPI cards.
+   Do not change their dimensions, typography, colors or layout. */
+.sl-dashboard-kpi-band{position:relative;isolation:isolate;padding:18px 18px 0;margin:0 -18px 4px}
+.sl-dashboard-kpi-band::before{content:"";position:absolute;z-index:-1;left:0;right:0;top:0;height:calc(100% - 66px);min-height:95px;border-radius:17px 17px 0 0;background:linear-gradient(115deg,#113b70 0%,#092850 100%);pointer-events:none}
+.sl-dashboard-kpi-band .dash-heading{margin-bottom:18px}
+.sl-dashboard-kpi-band .dash-heading-caption{color:#fff}
+.sl-dashboard-kpi-band .dash-heading-caption i{color:#fff}
+.sl-dashboard-kpi-band .dash-kpis{position:relative}
+.sl-dashboard-kpi-band .dash-kpi{animation:slKpiRise .48s ease both;will-change:transform}
+.sl-dashboard-kpi-band .dash-kpi:nth-child(2){animation-delay:.08s}
+.sl-dashboard-kpi-band .dash-kpi:nth-child(3){animation-delay:.16s}
+.sl-dashboard-kpi-band .dash-kpi:nth-child(4){animation-delay:.24s}
+.sl-dashboard-kpi-band .dash-kpi:hover{transform:translateY(-4px)}
+@keyframes slKpiRise{from{opacity:0;transform:translateY(17px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:650px){.sl-dashboard-kpi-band{margin:0 -10px 4px;padding:14px 10px 0}.sl-dashboard-kpi-band::before{height:160px}}
+/* Soft page transition: animation applies to the content only, not to the sidebar. */
+body.sl-page-ready .content{animation:slPageEnter .32s ease both}
+body.sl-page-leaving .content{opacity:.3;transform:translateY(5px);transition:opacity .13s ease,transform .13s ease}
+@keyframes slPageEnter{from{opacity:.25;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.app-shell aside a,.app-shell .sidebar a{transition:background-color .18s ease,color .18s ease,transform .18s ease}
+@media(prefers-reduced-motion:reduce){.sl-dashboard-kpi-band .dash-kpi,body.sl-page-ready .content{animation:none!important}.app-shell aside a,.app-shell .sidebar a{transition:none!important}}
+

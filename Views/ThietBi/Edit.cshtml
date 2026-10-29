@@ -1,0 +1,99 @@
+@model ThietBi
+@{
+    ViewData["Title"] = "Chỉnh sửa thiết bị";
+}
+
+<div class="page-head">
+    <div>
+        <h1>CHỈNH SỬA THIẾT BỊ</h1>
+        <p>Cập nhật tình trạng, trạng thái và chính sách giá thuê ngay trên một màn hình</p>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="panel edit-form">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-4">
+        <h5 class="fw-bold text-primary mb-3">THÔNG TIN THIẾT BỊ</h5>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Mã thiết bị</label>
+                <input class="form-control" value="@Model.MaThietBi" disabled>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Tên thiết bị</label>
+                <input class="form-control" value="@Model.DongMay?.TenDongMay" disabled>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Số serial</label>
+                <input class="form-control" name="soSerial" value="@Model.SoSerial" required>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mt-2"><div class="col-md-6"><label class="form-label fw-semibold">Chi nhánh đang lưu thiết bị</label><select name="maCuaHang" class="form-select" required>@foreach(var c in (IEnumerable<CuaHang>)ViewBag.CuaHang){<option value="@c.MaCuaHang" selected="@(c.MaCuaHang==Model.MaCuaHang)">@c.TenCuaHang</option>}</select></div><div class="col-md-6"><label class="form-label fw-semibold">Thêm ảnh cho dòng máy</label><input type="file" name="anh" accept="image/jpeg,image/png,image/webp" class="form-control" /></div></div>
+    <hr class="my-4" />
+
+    <div class="mb-4">
+        <h5 class="fw-bold text-primary mb-3">GIÁ THUÊ & TIỀN CỌC</h5>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Giá thuê / ngày (đ)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-cash-stack"></i></span>
+                    <input class="form-control" type="number" min="0" step="1000" name="giaThueNgay" value="@(Model.DongMay?.GiaThueNgay.ToString("0") ?? "0")" required>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Tiền cọc (đ)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-wallet2"></i></span>
+                    <input class="form-control" type="number" min="0" step="1000" name="tienCoc" value="@(Model.DongMay?.TienCoc.ToString("0") ?? "0")" required>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Giảm giá (%)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-percent"></i></span>
+                    <input class="form-control" type="number" min="0" max="100" step="0.01" name="phanTramGiamGia" value="@(Model.DongMay?.PhanTramGiamGia.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) ?? "0")" required>
+                </div>
+                <div class="form-text">Áp dụng cho dòng máy @Model.DongMay?.TenDongMay.</div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div>
+        <h5 class="fw-bold text-primary mb-3">TÌNH TRẠNG & TRẠNG THÁI</h5>
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label fw-semibold">Tình trạng vật lý</label>
+                <textarea class="form-control" name="tinhTrang" rows="4" required>@Model.TinhTrang</textarea>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Trạng thái</label>
+                <select class="form-select" name="trangThai" required>
+                    @foreach (var s in new[] { "SAN_SANG", "DANG_GIU", "DANG_THUE", "BAO_TRI", "HONG", "NGUNG_KINH_DOANH" })
+                    {
+                        var label = s switch
+                        {
+                            "SAN_SANG" => "Sẵn sàng",
+                            "DANG_GIU" => "Đang giữ",
+                            "DANG_THUE" => "Đang thuê",
+                            "BAO_TRI" => "Bảo trì",
+                            "HONG" => "Hỏng",
+                            _ => "Ngừng kinh doanh"
+                        };
+                        <option value="@s" selected="@(Model.TrangThai == s)">@label</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-end gap-2">
+        <a asp-action="Details" asp-route-id="@Model.MaThietBi" class="btn btn-light">HỦY</a>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>LƯU THAY ĐỔI</button>
+    </div>
+</form>

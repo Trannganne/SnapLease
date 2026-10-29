@@ -1,0 +1,16 @@
+/* Trang Tổng quan: tinh gọn tiêu đề, nâng cấp KPI - Geek Blue */
+.dash-modern .dash-heading{margin:0 0 16px;align-items:center;gap:14px}
+.dash-modern .dash-heading-caption{display:flex;align-items:center;gap:9px;color:#51678c;font-size:13px;font-weight:600}
+.dash-modern .dash-heading-caption i{color:#2f54eb;font-size:17px}
+.dash-modern .dash-period{border:1px solid #dbe5ff;background:#fff;border-radius:12px;padding:10px 14px;color:#28457c;box-shadow:0 3px 12px rgba(35,70,150,.04)}
+.dash-modern .dash-kpis{gap:18px;margin-bottom:22px}
+.dash-modern .dash-kpi{position:relative;overflow:hidden;min-height:174px;padding:22px 23px 19px!important;border:1px solid #e2e9fa!important;border-radius:18px!important;background:#fff!important;box-shadow:0 7px 25px rgba(31,65,130,.055)!important;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.dash-modern .dash-kpi:before{content:'';position:absolute;left:0;top:23px;bottom:23px;width:4px;border-radius:0 5px 5px 0;background:#2f54eb}
+.dash-modern .dash-kpi:hover{transform:translateY(-3px);border-color:#bdccff!important;box-shadow:0 14px 30px rgba(47,84,235,.12)!important}
+.dash-modern .dash-kpi-head{font-size:14px;font-weight:650;color:#526786;align-items:flex-start}
+.dash-modern .dash-kpi .dash-icon{display:grid;place-items:center;width:43px;height:43px;flex:none;border-radius:13px;background:#edf2ff;color:#2f54eb;font-size:21px}
+.dash-modern .dash-kpi>strong{display:flex!important;align-items:baseline;gap:8px;margin:10px 0 7px!important;font-size:clamp(27px,2.2vw,36px)!important;line-height:1.18!important;letter-spacing:-.04em;color:#173c98!important}
+.dash-modern .dash-kpi>strong small{font-size:13px!important;font-weight:650!important;letter-spacing:0;color:#6680a9}
+.dash-modern .dash-kpi>p{font-size:12px;line-height:1.5;color:#7b8daa;margin:0}
+@media(max-width:1100px){.dash-modern .dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.dash-modern .dash-heading{flex-wrap:wrap}.dash-modern .dash-kpis{grid-template-columns:1fr}.dash-modern .dash-kpi{min-height:150px;padding:18px 20px!important}}

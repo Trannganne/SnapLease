@@ -1,0 +1,3 @@
+@model IEnumerable<RentalCamera.Models.PhuLuc>
+@{ViewData["Title"]="Quản lý gia hạn";}
+<div class="page-head"><h1>Quản lý gia hạn hợp đồng</h1></div><div class="panel table-responsive"><table class="table"><thead><tr><th>Phụ lục</th><th>Hợp đồng</th><th>Ngày trả mới</th><th>Chi phí phát sinh</th><th>Trạng thái</th><th></th></tr></thead><tbody>@foreach(var x in Model){<tr><td>@x.MaPhuLuc</td><td>@x.MaHopDong</td><td>@x.ThoiHanTraMoi.ToString("dd/MM/yyyy HH:mm")</td><td>@x.ChiPhiPhatSinh.ToString("N0") đ</td><td>@x.TrangThai</td><td><a class="btn btn-primary btn-sm" asp-action="Details" asp-route-id="@x.MaPhuLuc">Xem / Duyệt</a></td></tr>}</tbody></table></div>

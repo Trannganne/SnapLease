@@ -1,0 +1,17 @@
+@using RentalCamera.Models
+@{ViewData["Title"]="Thêm nhân viên";var branches=ViewBag.Branches as List<CuaHang> ?? new();var accounts=ViewBag.Accounts as List<TaiKhoan> ?? new();}
+<div class="page-head"><div><h1>Thêm nhân viên</h1><p>Tạo hồ sơ nhân viên và liên kết với tài khoản nội bộ có sẵn</p></div></div>
+<div class="panel sl-staff-form"><form asp-controller="NhanVien" asp-action="Create" method="post">@Html.AntiForgeryToken()
+<div asp-validation-summary="All" class="text-danger mb-3"></div>
+<div class="sl-staff-grid">
+<label>Mã nhân viên <span class="text-danger">*</span><input name="maNhanVien" class="form-control" maxlength="30" required placeholder="Ví dụ: NV012" value="@(Context.Request.HasFormContentType ? Context.Request.Form["maNhanVien"].ToString() : "")" /></label>
+<label>Tài khoản nhân viên <span class="text-danger">*</span><select name="maTaiKhoan" class="form-select" required><option value="">Chọn tài khoản chưa gán</option>@foreach(var a in accounts){<option value="@a.MaTaiKhoan">@a.TenDangNhap (@a.VaiTro)</option>}</select></label>
+<label>Họ và tên <span class="text-danger">*</span><input name="hoTen" class="form-control" required maxlength="120" value="@(Context.Request.HasFormContentType ? Context.Request.Form["hoTen"].ToString() : "")" /></label>
+<label>Số điện thoại <span class="text-danger">*</span><input name="soDienThoai" class="form-control" required maxlength="25" value="@(Context.Request.HasFormContentType ? Context.Request.Form["soDienThoai"].ToString() : "")" /></label>
+<label>Chi nhánh <span class="text-danger">*</span><select name="maCuaHang" class="form-select" required><option value="">Chọn chi nhánh</option>@foreach(var b in branches){<option value="@b.MaCuaHang">@b.TenCuaHang</option>}</select></label>
+<label>Chức vụ<input name="chucVu" class="form-control" maxlength="80" placeholder="Ví dụ: Nhân viên cửa hàng" /></label>
+<label>Email<input name="email" type="email" class="form-control" maxlength="160" /></label>
+<label>Địa chỉ<input name="diaChi" class="form-control" maxlength="250" /></label>
+</div><p class="text-muted small mt-3">Chỉ liên kết tài khoản nội bộ đã tồn tại; trang này không tạo tài khoản đăng nhập hoặc mật khẩu mới.</p>
+<div class="sl-staff-actions"><a asp-action="Index" class="btn btn-outline-secondary">Hủy</a><button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle"></i> Lưu nhân viên</button></div>
+</form></div>

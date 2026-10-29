@@ -1,0 +1,114 @@
+<div class="panel mb-3 p-3"><form method="get" asp-action="Index" class="row g-2 align-items-end"><div class="col-md-4"><label class="form-label">Tìm mã hợp đồng</label><input class="form-control" name="maHopDong" value="@ViewBag.MaHopDong" placeholder="Mã hợp đồng" /></div><div class="col-md-3"><label class="form-label">Giữ chỗ</label><select name="giuCho" class="form-select"><option value="">Tất cả</option><option value="CON_HAN" selected="@(ViewBag.GiuCho == "CON_HAN")">Còn hiệu lực (20 phút)</option><option value="HET_HAN" selected="@(ViewBag.GiuCho == "HET_HAN")">Hết hạn (20 phút)</option><option value="DA_CHUYEN_HOP_DONG" selected="@(ViewBag.GiuCho == "DA_CHUYEN_HOP_DONG")">Đã chuyển hợp đồng</option></select></div><div class="col-md-3"><label class="form-label d-block">Hợp đồng</label><label><input type="checkbox" name="quaHan" value="true" checked="@(ViewBag.QuaHan == true)" /> Chỉ xem quá hạn</label></div><div class="col-md-2"><button class="btn btn-primary w-100">Lọc</button></div></form></div>
+@model OrderVM
+@using RentalCamera.Models
+@{
+    ViewData["Title"] = "Đơn thuê & hợp đồng";
+    var branches = ViewBag.ChiNhanh as List<CuaHang> ?? new List<CuaHang>();
+    var names = branches.ToDictionary(x => x.MaCuaHang, x => x.TenCuaHang);
+    string BranchName(string code) => names.TryGetValue(code, out var name) ? name : code;
+    string Status(string code) => code switch {
+        "DANG_THUE" => "Đang thuê", "DA_HOAN_THANH" => "Hoàn thành",
+        "CHO_BAN_GIAO" => "Chờ bàn giao", "DANG_CHON" => "Đang chọn",
+        "DA_CHUYEN_HOP_DONG" => "Đã chuyển hợp đồng",
+        "CHO_XAC_NHAN" => "Chờ xác nhận", _ => code.Replace("_", " ")
+    };
+}
+<div class="page-head">
+    <div>
+        <h1>Đơn thuê & hợp đồng</h1>
+        <p>Theo dõi hợp đồng, phân bổ thiết bị, bàn giao và nhận trả theo chi nhánh</p>
+    </div>
+</div>
+<div class="sl-collapse-toolbar"><button type="button" class="sl-toggle-btn" data-sl-toggle="slAdvancedFilters" aria-expanded="false" aria-controls="slAdvancedFilters"><i class="bi bi-sliders"></i> Bộ lọc nâng cao <i class="bi bi-chevron-down sl-toggle-chevron"></i></button></div>
+<div id="slAdvancedFilters" class="sl-collapsible" hidden>
+<form method="get" asp-action="Index" class="panel sl-orders-filter">
+    <div class="sl-orders-filter-grid">
+        <label>Chi nhánh
+            <select class="form-select" name="chiNhanh">
+                <option value="">Tất cả chi nhánh</option>
+                @foreach(var branch in branches) {
+                    <option value="@branch.MaCuaHang" selected="@(ViewBag.ChiNhanhDaChon == branch.MaCuaHang)">@branch.TenCuaHang</option>
+                }
+            </select>
+        </label>
+        <label>Trạng thái
+            <select class="form-select" name="trangThai">
+                <option value="">Tất cả trạng thái</option>
+                @foreach(var state in new[]{"DANG_THUE","DA_HOAN_THANH","CHO_BAN_GIAO","DANG_CHON","DA_CHUYEN_HOP_DONG","CHO_XAC_NHAN"}) {
+                    <option value="@state" selected="@(ViewBag.TrangThaiDaChon == state)">@Status(state)</option>
+                }
+            </select>
+        </label>
+        <label>Từ ngày<input class="form-control" type="date" name="tuNgay" value="@ViewBag.TuNgay" /></label>
+        <label>Đến ngày<input class="form-control" type="date" name="denNgay" value="@ViewBag.DenNgay" /></label>
+        <div class="sl-orders-filter-actions">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Lọc</button>
+            <a class="btn btn-outline-primary" asp-action="Index"><i class="bi bi-arrow-counterclockwise"></i> Đặt lại</a>
+        </div>
+    </div>
+</form>
+</div>
+<section class="panel sl-orders-panel">
+    <h3><i class="bi bi-file-earmark-text"></i> Danh sách hợp đồng <span class="sl-orders-count">@Model.HopDong.Count</span></h3>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Mã hợp đồng</th><th>Khách hàng</th><th>Chi nhánh</th><th>Ngày thuê</th><th>Ngày trả</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+            <tbody>
+            @foreach(var x in Model.HopDong) {
+                <tr>
+                    <td><strong>@x.MaHopDong</strong></td>
+                    <td>@(x.KhachThue?.HoTen ?? x.MaKhachThue)</td>
+                    <td><span class="sl-orders-branch"><i class="bi bi-shop"></i> @BranchName(x.MaCuaHang)</span></td>
+                    <td>@x.ThoiGianBanGiao.ToString("dd/MM/yyyy")</td>
+                    <td>@x.ThoiGianTraDuKien.ToString("dd/MM/yyyy")</td>
+                    <td class="money">@x.TongTien.ToString("N0") đ</td>
+                    <td><span class="badge-soft">@Status(x.TrangThai)</span></td>
+                    <td><a class="btn btn-outline-primary btn-sm" asp-action="Details" asp-route-id="@x.MaHopDong">Chi tiết <i class="bi bi-arrow-right"></i></a></td>
+                </tr>
+            }
+            @if(Model.HopDong.Count == 0) { <tr><td colspan="8" class="text-center py-4 text-muted">Không có hợp đồng phù hợp bộ lọc.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</section>
+<section class="panel sl-orders-panel mt-3">
+    <h3><i class="bi bi-hourglass-split"></i> Đơn/giỏ hàng chờ xử lý <span class="sl-orders-count">@Model.GioHang.Count</span></h3>
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Mã</th><th>Khách hàng</th><th>Chi nhánh</th><th>Ngày tạo</th><th>Trạng thái</th></tr></thead>
+            <tbody>
+            @foreach(var x in Model.GioHang) {
+                <tr>
+                    <td><strong>@x.MaGioHang</strong></td>
+                    <td>@(x.KhachThue?.HoTen ?? x.MaKhachThue)</td>
+                    <td><span class="sl-orders-branch"><i class="bi bi-shop"></i> @BranchName(x.MaCuaHang)</span></td>
+                    <td>@x.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td><span class="badge-soft">@Status(x.TrangThai)</span></td>
+                </tr>
+            }
+            @if(Model.GioHang.Count == 0) { <tr><td colspan="5" class="text-center py-4 text-muted">Không có đơn hoặc giỏ hàng phù hợp.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<div class="sl-collapse-toolbar sl-lookup-toolbar"><button type="button" class="sl-toggle-btn" data-sl-toggle="slReservationLookup" aria-expanded="false" aria-controls="slReservationLookup"><i class="bi bi-search"></i> Tra cứu giữ chỗ <i class="bi bi-chevron-down sl-toggle-chevron"></i></button></div>
+<div id="slReservationLookup" class="sl-collapsible" hidden>
+    <div class="panel mt-2 p-3 sl-lookup-panel"><h3>Tra cứu chi tiết giữ chỗ</h3><form asp-action="GiuChoDetails" method="get" class="d-flex gap-2"><input name="id" required class="form-control" placeholder="Nhập mã giữ chỗ" /><button class="btn btn-primary">Xem chi tiết</button></form></div>
+</div>
+<style>
+.sl-collapse-toolbar{display:flex;justify-content:flex-end;margin:10px 0 12px}.sl-lookup-toolbar{margin-top:18px}.sl-toggle-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid #cbd8ff;background:#fff;color:#2347bc;border-radius:11px;padding:10px 16px;font:600 14px Roboto,Arial,sans-serif;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s}.sl-toggle-btn:hover{background:#f1f5ff;border-color:#2f54eb;box-shadow:0 4px 12px #2f54eb12}.sl-toggle-btn:focus-visible{outline:3px solid #a9bcff;outline-offset:2px}.sl-toggle-chevron{transition:transform .2s}.sl-toggle-btn[aria-expanded="true"] .sl-toggle-chevron{transform:rotate(180deg)}.sl-collapsible[hidden]{display:none!important}.sl-collapsible>.sl-orders-filter{margin-bottom:14px}.sl-lookup-panel h3{margin-bottom:12px}@@media(max-width:600px){.sl-toggle-btn{width:100%;justify-content:center}.sl-lookup-panel form{flex-wrap:wrap}.sl-lookup-panel form .btn{width:100%}}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+ document.querySelectorAll('[data-sl-toggle]').forEach(function(button){
+  var panel=document.getElementById(button.getAttribute('data-sl-toggle'));
+  if(!panel)return;
+  button.addEventListener('click',function(){var open=button.getAttribute('aria-expanded')!=='true';panel.hidden=!open;button.setAttribute('aria-expanded',String(open));});
+ });
+ var params=new URLSearchParams(window.location.search);
+ if(['chiNhanh','trangThai','tuNgay','denNgay'].some(function(key){return params.has(key)&&params.get(key)!=='';})){
+  var button=document.querySelector('[data-sl-toggle="slAdvancedFilters"]');var panel=document.getElementById('slAdvancedFilters');if(button&&panel){panel.hidden=false;button.setAttribute('aria-expanded','true');}
+ }
+});
+</script>

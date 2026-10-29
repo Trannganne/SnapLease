@@ -1,0 +1,31 @@
+# Build files
+bin/
+obj/
+.vs/
+.vscode/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local settings
+appsettings.json
+appsettings.Development.json
+appsettings.local.json
+appsettings.*.backup.json
+
+# Secrets
+secrets/
+firebase-admin.json
+*.pfx
+*.key
+
+# Temporary files
+*.user
+*.suo
+*.tmp
+*.log
+
+# Dependencies
+node_modules/

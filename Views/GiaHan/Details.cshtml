@@ -1,0 +1,11 @@
+@model RentalCamera.Models.PhuLuc
+@using RentalCamera.Models
+@{ViewData["Title"]="Duyệt gia hạn";var h=(HopDong)ViewBag.HopDong;var devices=(List<ThietBi>)ViewBag.Devices;var conflicts=(List<string>)ViewBag.Conflicts;}
+<div class="page-head"><h1>Duyệt gia hạn @Model.MaPhuLuc</h1><a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a></div>
+<div class="panel p-4"><p><b>Hợp đồng:</b> @Model.MaHopDong</p><p><b>Ngày trả hiện tại:</b> @h.ThoiGianTraDuKien.ToString("dd/MM/yyyy HH:mm")</p><p><b>Ngày trả đề xuất:</b> @Model.ThoiHanTraMoi.ToString("dd/MM/yyyy HH:mm")</p><p><b>Lý do:</b> @Model.LyDoGiaHan</p><p><b>Chi phí:</b> @Model.ChiPhiPhatSinh.ToString("N0") đ</p><p><b>Trạng thái:</b> @Model.TrangThai</p><h4>Thông tin thiết bị và bảo trì</h4>
+<table class="table"><thead><tr><th>Mã thiết bị</th><th>Tình trạng</th><th>Trạng thái</th></tr></thead><tbody>@foreach(var d in devices){<tr><td>@d.MaThietBi</td><td>@d.TinhTrang</td><td>@d.TrangThai</td></tr>}</tbody></table>
+@if(conflicts.Count>0){<div class="alert alert-danger">Trùng lịch với hợp đồng: @string.Join(", ",conflicts)</div>}
+@if(devices.Any(d=>d.TrangThai=="BAO_TRI")){<div class="alert alert-warning">Có thiết bị đang bảo trì. Không thể duyệt cho đến khi lịch bảo trì được xử lý.</div>}
+<div class="alert alert-info">Hệ thống hiện chỉ có trạng thái bảo trì, chưa có API lịch bảo trì theo ngày. Không tự động hủy lịch bảo trì để tránh mất dữ liệu.</div>
+@if(Model.TrangThai=="CHO_DUYET"){<form asp-action="Review" method="post">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.MaPhuLuc"/><label class="form-label">Lý do từ chối (bắt buộc khi từ chối)</label><textarea name="reason" class="form-control" rows="2"></textarea><div class="mt-3"><button class="btn btn-success" name="decision" value="DA_DUYET">Duyệt gia hạn</button> <button class="btn btn-danger" name="decision" value="TU_CHOI">Từ chối</button></div></form>}
+</div>

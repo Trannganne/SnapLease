@@ -1,0 +1,22 @@
+/* Layout repair, 2026-10-18. Loaded after all existing themes. */
+:root{--color-primary:#2f54eb}
+.dash-modern{width:100%;min-width:0;font-size:15px}
+.dash-modern .dash-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.dash-modern .dash-grid{display:grid;gap:16px}
+.dash-modern .dash-grid-charts,.dash-modern .dash-grid-work{grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr)}
+.dash-modern .dash-grid-bottom{grid-template-columns:minmax(0,1fr) minmax(280px,1fr)}
+.dash-modern .dash-card{min-width:0;background:#fff;border:1px solid #dce6ff;border-radius:16px;padding:20px;box-shadow:0 4px 18px rgba(25,50,110,.055)}
+.dash-modern .dash-kpi strong{font-size:clamp(1.5rem,2.1vw,2rem)}
+.dash-modern .dash-chart{display:flex;height:230px;align-items:flex-end;gap:8px;overflow:hidden}
+.dash-modern .dash-chart-col{display:flex;flex:1;min-width:0;height:100%;flex-direction:column;align-items:center}
+.dash-modern .dash-bar-track{display:flex;flex:1;align-items:flex-end;width:100%}
+.dash-modern .dash-bar{height:var(--bar-height);width:65%;margin:auto auto 0;background:#597ef7;border-radius:5px 5px 0 0}
+.dash-modern .dash-status-layout{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.dash-modern .dash-table{width:100%;border-collapse:collapse;font-size:.88rem}
+.dash-modern .dash-table th,.dash-modern .dash-table td{padding:12px;text-align:left;border-bottom:1px solid #e6ecfa;white-space:nowrap}
+.dash-modern .dash-table th{background:#f0f5ff;color:#10239e}
+.dash-modern .dash-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.dash-modern .dash-section-head h2{font-size:1.05rem;font-weight:700;margin:0}
+.dash-modern .dash-section-head a{font-size:.85rem;color:#2f54eb;text-decoration:none}
+@media(max-width:1200px){.dash-modern .dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-modern .dash-grid-charts,.dash-modern .dash-grid-work,.dash-modern .dash-grid-bottom{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){.dash-modern .dash-kpis{grid-template-columns:minmax(0,1fr)}.dash-modern .dash-card{padding:16px}.dash-modern .dash-chart{height:185px}.dash-modern .dash-status-layout{flex-direction:column;align-items:stretch}}

@@ -1,0 +1,19 @@
+/* SnapLease UX consolidation — loaded last, preserves Geek Blue */
+:root{--sl-ux-primary:#2f54eb;--sl-ux-ink:#1b2850;--sl-ux-line:#e0e8fb;--sl-ux-radius:14px}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}body{font-family:Roboto,Arial,sans-serif!important;background:#f5f7ff;color:var(--sl-ux-ink);font-size:15px}
+.app-shell,.main,.content{min-width:0}.content{padding:24px clamp(16px,2.4vw,36px) 32px;max-width:100%}
+.main{min-height:100vh}.topbar{min-height:72px;border-bottom:1px solid var(--sl-ux-line);box-shadow:0 2px 12px rgba(29,57,196,.035)}
+.sidebar{box-shadow:4px 0 25px rgba(6,17,120,.10)}.sidebar nav a{min-height:43px;display:flex;align-items:center;gap:12px;border-radius:11px;margin:3px 8px;padding:10px 13px;line-height:1.35}.sidebar nav a i{font-size:1.1rem;flex-shrink:0}.sidebar nav a.active{box-shadow:0 3px 12px rgba(0,0,0,.10)}
+.sl-unified-hero{border-radius:18px;padding:22px 26px;margin-bottom:24px;box-shadow:0 8px 24px rgba(47,84,235,.10)}.sl-unified-hero h1{font-size:clamp(1.35rem,2.1vw,1.85rem);margin:0 0 4px}.sl-unified-hero p{margin:0;line-height:1.45}.sl-breadcrumb{margin-bottom:14px}
+.card,.sl-card,.sl-workspace,.sl-search-box,.sl-stat{border-radius:16px;border-color:var(--sl-ux-line);box-shadow:0 4px 20px rgba(22,43,100,.045)}
+.card-header{background:#f9faff;border-bottom:1px solid var(--sl-ux-line);font-weight:700}.card-body{padding:clamp(15px,2vw,24px)}
+.btn,.sl-btn,button{transition:background-color .18s,border-color .18s,box-shadow .18s}.btn{border-radius:10px;min-height:38px;font-weight:600}.btn-primary{background:#2f54eb;border-color:#2f54eb}.btn-primary:hover{background:#1d39c4;border-color:#1d39c4}.btn-outline-primary{color:#1d39c4;border-color:#adc6ff}
+.form-control,.form-select{border-radius:10px;border-color:#d7e1f4;min-height:42px}.form-control:focus,.form-select:focus{border-color:#597ef7;box-shadow:0 0 0 .2rem rgba(47,84,235,.13)}
+label,.form-label{font-weight:600;margin-bottom:6px}.form-text{color:#5c6984}.table-responsive{border-radius:12px;max-width:100%;overflow-x:auto}.table{margin-bottom:0;white-space:normal}.table th{white-space:nowrap;font-weight:700;font-size:.87rem}.table td{vertical-align:middle}.table>:not(caption)>*>*{padding:12px 14px}.table tbody tr:hover{background:#f7f9ff}
+img{max-width:100%;height:auto}input,select,textarea{max-width:100%}button,a,input,select,textarea{touch-action:manipulation}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #85a5ff;outline-offset:2px}
+.dropdown-menu{border:1px solid var(--sl-ux-line);border-radius:12px;box-shadow:0 14px 34px rgba(12,30,90,.12);padding:7px}.dropdown-item{border-radius:8px;padding:9px 12px}.dropdown-item:hover{background:#f0f5ff;color:#1d39c4}
+.alert{border-radius:12px}.badge{padding:.42em .65em;line-height:1.2}.sl-app-footer{margin-top:32px;flex-wrap:wrap;gap:8px}
+@media(max-width:991.98px){.content{padding:18px 16px 28px}.sl-unified-hero{padding:18px}.sidebar{max-width:min(310px,88vw)}}
+@media(max-width:575.98px){.content{padding:14px 12px 24px}.sl-unified-hero{gap:12px;padding:16px;border-radius:14px}.sl-unified-hero p{font-size:.84rem}.topbar{min-height:60px}.card-body{padding:15px}.table>:not(caption)>*>*{padding:10px 12px}.btn{white-space:normal}.sl-app-footer{font-size:.8rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}

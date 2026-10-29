@@ -1,0 +1,10 @@
+@model RentalCamera.Controllers.WorkspaceVm
+@{ ViewData["Title"] = Model.Title; }
+<div class="sl-head"><div><a asp-action="Index" class="sl-back">← Trung tâm nghiệp vụ</a><h1>@Model.Title</h1><p>@Model.Description</p></div><span class="sl-chip">Kết nối API thật</span></div>
+<div id="sl-app" data-mode="@Model.Mode" data-fetch="@Url.Action("Fetch","SnapLease")" data-send="@Url.Action("Send","SnapLease")">
+@Html.AntiForgeryToken()
+<div class="sl-panel"><h3>1. Tra cứu hợp đồng</h3><div class="sl-fields"><label>Mã hợp đồng<input id="sl-id" class="form-control" placeholder="Nhập mã hợp đồng thật, ví dụ HD..." /></label><button class="btn btn-primary" type="button" id="sl-load">Tải thông tin từ API</button></div><p class="text-muted small mt-2">Dữ liệu chỉ hiển thị sau khi API trả về thành công. Không dùng dữ liệu giả.</p></div>
+<div id="sl-result" class="sl-panel" hidden><h3>2. Thông tin từ Backend</h3><div id="sl-summary"></div><details class="mt-3"><summary>Hiển thị JSON gốc</summary><pre id="sl-json" class="sl-json"></pre></details></div>
+<div id="sl-actions" class="sl-panel" hidden><h3>3. Thao tác nghiệp vụ</h3><div id="sl-controls"></div><div id="sl-feedback" role="status" class="mt-3"></div></div>
+</div>
+@section Scripts { <script src="~/js/snaplease.js" asp-append-version="true"></script> }
