@@ -95,6 +95,7 @@ Check(!ContractEndpoints.IsIdentityVerifiedForRental(identity),"Rejected identit
 #if DIRECT_OFFLINE
 Console.WriteLine("NOT_RUN: EF mapping and exact33 schema.table checks skipped by DIRECT_OFFLINE.");
 #else
+await SettlementLifecycleChecks.RunAsync();
 Schema33EfChecks.Run();
 #endif
 Console.WriteLine($"PASS {count} source-level Schema33 checks; no database, app runtime or provider calls.");
