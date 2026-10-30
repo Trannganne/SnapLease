@@ -16,7 +16,7 @@
     },
     {
       "path": "02_seed_catalog.sql",
-      "sha256": "a030c86b950df62f0714fcda4280b77621c27e0bab8d23e051117869052541ae"
+      "sha256": "d95e60eb96633d73f2166fa541191fd629ea175fc56ef90f7f3ca0e97f30dedd"
     },
     {
       "path": "04_verify_schema.sql",
@@ -40,7 +40,7 @@
     },
     {
       "path": "seed-catalog.json",
-      "sha256": "d6b52a3d61384df76f0a3910cf121e9b6ddb08524964c2abd77257ef6f4e0e66"
+      "sha256": "9fc41166a9f39e5c7dd84b5f50dd29cc7aadf8704dfe8e8fdd3a63fb76cad728"
     },
     {
       "path": "README.md",

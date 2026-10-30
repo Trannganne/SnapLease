@@ -5,10 +5,10 @@
     "CuaHang": [
       {
         "MaCuaHang": "TR33_S01",
-        "TenCuaHang": "TRIAL33 Branch 1",
+        "TenCuaHang": "SnapLease Nguyễn Huệ",
         "ViDo": null,
         "KinhDo": null,
-        "DiaChi": "SYNTHETIC ADDRESS 1",
+        "DiaChi": "01 Nguyễn Huệ, Quận 1, TP.HCM",
         "SoDienThoai": "0900000001",
         "Email": "branch1@example.invalid",
         "MoTa": "FAKE TRIAL DATA ONLY",
@@ -16,10 +16,10 @@
       },
       {
         "MaCuaHang": "TR33_S02",
-        "TenCuaHang": "TRIAL33 Branch 2",
+        "TenCuaHang": "SnapLease Võ Văn Ngân",
         "ViDo": null,
         "KinhDo": null,
-        "DiaChi": "SYNTHETIC ADDRESS 2",
+        "DiaChi": "20 Võ Văn Ngân, TP. Thủ Đức, TP.HCM",
         "SoDienThoai": "0900000002",
         "Email": "branch2@example.invalid",
         "MoTa": "FAKE TRIAL DATA ONLY",
@@ -27,10 +27,10 @@
       },
       {
         "MaCuaHang": "TR33_S03",
-        "TenCuaHang": "TRIAL33 Branch 3",
+        "TenCuaHang": "SnapLease Lý Thường Kiệt",
         "ViDo": null,
         "KinhDo": null,
-        "DiaChi": "SYNTHETIC ADDRESS 3",
+        "DiaChi": "268 Lý Thường Kiệt, Quận 10, TP.HCM",
         "SoDienThoai": "0900000003",
         "Email": "branch3@example.invalid",
         "MoTa": "FAKE TRIAL DATA ONLY",
