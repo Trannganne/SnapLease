@@ -11,6 +11,8 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
     public const string DatabaseName = "RentalCameraDb30_Test";
     public bool ContractSmtpDemoEnabled { get; }
     public string? AllowedContractOtpRecipient { get; }
+    public bool AuthSmtpDemoEnabled { get; }
+    public Uri? AuthLinkBaseUri { get; }
     public Schema33TrialGuard(IConfiguration c, IHostEnvironment env)
     {
         if (env.EnvironmentName != "Schema33Trial" || !c.GetValue<bool>("Schema33Trial:Enabled") || !c.GetValue<bool>("Schema33Trial:PackageApproved"))
@@ -50,6 +52,20 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
         {
             throw new InvalidOperationException("Chế độ OTP ký hợp đồng không được phép.");
         }
+        var authMode = c["AuthEmail:Mode"] ?? "Fake";
+        if (authMode == "SmtpDemo")
+        {
+            if (!ContractSmtpDemoEnabled || !c.GetValue<bool>("AuthEmail:SmtpApproved") ||
+                !Uri.TryCreate(c["AuthEmail:LinkBaseUrl"], UriKind.Absolute, out var link) ||
+                link.Scheme != "http" || !link.IsLoopback || link.Port != 5003 ||
+                link.AbsolutePath != "/auth-link" || link.UserInfo.Length != 0 ||
+                link.Query.Length != 0 || link.Fragment.Length != 0)
+                throw new InvalidOperationException("SMTP auth trial cần phê duyệt riêng và URL trung gian loopback đúng cấu hình.");
+            AuthSmtpDemoEnabled = true;
+            AuthLinkBaseUri = link;
+        }
+        else if (authMode != "Fake" || c.GetValue<bool>("AuthEmail:SmtpApproved"))
+            throw new InvalidOperationException("Chế độ email auth trial chưa được duyệt.");
     }
     private static bool IsPlainEmail(string? value) =>
         !string.IsNullOrWhiteSpace(value) && MailAddress.TryCreate(value, out var address) &&

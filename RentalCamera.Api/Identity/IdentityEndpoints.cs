@@ -26,21 +26,29 @@ public static class IdentityEndpoints
         group.MapGet("/anh/{fileName}", async (string fileName, ClaimsPrincipal principal, RentalCameraContext db, IWebHostEnvironment env, CancellationToken ct) =>
         {
             var storagePath = Path.Combine(env.ContentRootPath, "Storage");
+            if (string.IsNullOrWhiteSpace(fileName) || fileName != Path.GetFileName(fileName) ||
+                fileName.Contains('/') || fileName.Contains('\\')) return Results.NotFound();
             var path = Path.GetFullPath(Path.Combine(storagePath, fileName));
-            if (!path.StartsWith(storagePath) || !File.Exists(path))
+            if (!path.StartsWith(Path.GetFullPath(storagePath) + Path.DirectorySeparatorChar, StringComparison.Ordinal) || !File.Exists(path))
                 return Results.NotFound();
 
             // Lấy MaGiayTo từ DB để kiểm tra quyền
             var relativeUrl = $"/api/giay-to/anh/{fileName}";
             var giayTo = await db.GiayToTuyThan.AsNoTracking().FirstOrDefaultAsync(x => x.MatTruocUrl == relativeUrl || x.MatSauUrl == relativeUrl, ct);
-            if (giayTo != null)
+            if (giayTo is null) return Results.NotFound();
+            var role = principal.FindFirstValue(ClaimTypes.Role);
+            if (role == "KHACH_HANG")
             {
-                var role = principal.FindFirstValue(ClaimTypes.Role);
-                if (role == "KHACH_HANG")
-                {
-                    var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
-                    if (customerId == null || giayTo.MaKhachThue != customerId) return Results.Forbid();
-                }
+                var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+                if (customerId == null || giayTo.MaKhachThue != customerId) return Results.Forbid();
+            }
+            else
+            {
+                if (role is not ("ADMIN" or "NHAN_VIEN")) return Results.Forbid();
+                var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
+                if (scope is null || (!scope.IsAdmin && !await db.ChiTietGioHang.AnyAsync(
+                    c => c.GioHang.MaKhachThue == giayTo.MaKhachThue && c.MaCuaHang == scope.StoreId, ct)))
+                    return Results.Forbid();
             }
 
             var contentType = Path.GetExtension(path).ToLowerInvariant() switch
@@ -56,18 +64,28 @@ public static class IdentityEndpoints
         {
             if (request.LoaiGiayTo is not ("CCCD" or "HO_CHIEU" or "GPLX") ||
                 string.IsNullOrWhiteSpace(request.HoTen) || request.HoTen.Length > 150 ||
-                string.IsNullOrWhiteSpace(request.SoGiayTo) || string.IsNullOrWhiteSpace(request.MatTruocUrl))
+                string.IsNullOrWhiteSpace(request.SoGiayTo) || request.SoGiayTo.Trim().Length > 30 ||
+                string.IsNullOrWhiteSpace(request.MatTruocUrl))
                 return Results.BadRequest(new { loi = "Thông tin giấy tờ không hợp lệ." });
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customerId is null) return Results.Forbid();
             if (await db.GiayToTuyThan.AnyAsync(x => x.SoGiayTo == request.SoGiayTo.Trim() && x.MaKhachThue != customerId, ct))
                 return Results.Conflict(new { loi = "Số giấy tờ đã được sử dụng bởi khách thuê khác." });
+            if (await db.GiayToTuyThan.AnyAsync(x => x.SoGiayTo == request.SoGiayTo.Trim(), ct))
+                return Results.Conflict(new { loi = "Giấy tờ đã được gửi. Vui lòng kiểm tra hồ sơ hiện có trước khi gửi lại." });
             
             var writtenFiles = new List<string>();
+            var saved = false;
+            // Existing URLs may only reuse this customer's own stored documents.
+            var ownUrls = await db.GiayToTuyThan.AsNoTracking().Where(x => x.MaKhachThue == customerId)
+                .Select(x => new { x.MatTruocUrl, x.MatSauUrl }).ToListAsync(ct);
             (string? Url, string? Error) SaveBase64Image(string data) {
-                if (!data.StartsWith("data:image")) return (data, null);
+                if (!data.StartsWith("data:image", StringComparison.Ordinal))
+                    return ownUrls.Any(x => x.MatTruocUrl == data || x.MatSauUrl == data)
+                        ? (data, null) : (null, "Ảnh phải được tải lên hoặc thuộc giấy tờ của bạn.");
                 var parts = data.Split(',');
-                if (parts.Length != 2) return (data, null);
+                if (parts.Length != 2 || !parts[0].EndsWith(";base64", StringComparison.Ordinal))
+                    return (null, "Chuỗi ảnh Base64 không hợp lệ.");
                 byte[] bytes;
                 try {
                     bytes = Convert.FromBase64String(parts[1]);
@@ -115,12 +133,12 @@ public static class IdentityEndpoints
                 customer.HoTen = request.HoTen.Trim();
                 db.GiayToTuyThan.Add(entity);
                 await db.SaveChangesAsync(ct);
+                saved = true;
                 return Results.Created($"/api/giay-to/{entity.MaGiayTo}", entity);
-            } catch (Exception) {
-                foreach (var file in writtenFiles) {
+            } finally {
+                foreach (var file in saved ? Enumerable.Empty<string>() : writtenFiles) {
                     if (File.Exists(file)) File.Delete(file);
                 }
-                throw;
             }
         }).RequireAuthorization("Customer");
 
@@ -202,6 +220,14 @@ public static class IdentityEndpoints
 
             if (string.IsNullOrWhiteSpace(doc.MatTruocUrl) || string.IsNullOrWhiteSpace(doc.MatSauUrl))
                 return Results.BadRequest(new { loi = "Giấy tờ chưa đủ 2 mặt ảnh thực tế." });
+
+            if (doc.LoaiGiayTo != "CCCD" || doc.SoGiayTo.Trim() != request.Cccd.Trim())
+                return Results.BadRequest(new { loi = "CCCD xác nhận không khớp giấy tờ đã tải lên." });
+            if (request.Cccd.Trim().Length > 20 || request.HoTen.Trim().Length > 150 ||
+                request.GioiTinh.Trim().Length > 10 || request.QuocTich.Trim().Length > 100 ||
+                request.DiaChiThuongTru.Trim().Length > 500 || request.NoiCap.Trim().Length > 200 ||
+                request.NgaySinh == default || request.NgayCap == default)
+                return Results.BadRequest(new { loi = "Thông tin danh tính không hợp lệ." });
 
             var customer = await db.KhachThue.SingleAsync(x => x.MaKhachThue == customerId, ct);
             

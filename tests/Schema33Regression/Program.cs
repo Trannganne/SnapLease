@@ -4,6 +4,22 @@ using RentalCamera.Api.Rental;
 using RentalCamera.Api.Payments;
 
 #if !DIRECT_OFFLINE
+if (args.Length == 1 && args[0] == "--registration-email-checks")
+{
+    await IdentityChecks.RunRegistrationAsync();
+    return;
+}
+if (args.Length == 1 && args[0] == "--auth-email-checks")
+{
+    await ContractSmtpDemoChecks.RunAuthAsync();
+    return;
+}
+
+if (args.Length == 1 && args[0] == "--identity-checks")
+{
+    await IdentityChecks.RunAsync();
+    return;
+}
 if (args.Length == 1 && args[0] == "--contract-smtp-checks")
 {
     await ContractSmtpDemoChecks.RunAsync();

@@ -5,9 +5,63 @@ using Microsoft.Extensions.Hosting;
 using RentalCamera.Api.Contracts;
 using RentalCamera.Api.Email;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Auth;
+using Microsoft.AspNetCore.DataProtection;
 
 internal static class ContractSmtpDemoChecks
 {
+    public static async Task RunAuthAsync()
+    {
+        await IdentityChecks.RunRegistrationAsync();
+        var count = 0;
+        void Check(bool value, string message) { if (!value) throw new Exception(message); count++; }
+        var values = Settings(true);
+        values["AuthEmail:Mode"] = "SmtpDemo";
+        values["AuthEmail:SmtpApproved"] = "true";
+        values["AuthEmail:LinkBaseUrl"] = "http://127.0.0.1:5003/auth-link";
+        IConfiguration Config(Dictionary<string, string?> v) => new ConfigurationBuilder().AddInMemoryCollection(v).Build();
+        var config = Config(values);
+        var guard = new Schema33TrialGuard(config, new OfflineEnvironment());
+        Check(guard.AuthSmtpDemoEnabled && guard.AuthLinkBaseUri!.IsLoopback, "Explicit trial auth approval uses configured loopback link");
+        foreach (var test in new[] { ("AuthEmail:SmtpApproved", "false"), ("AuthEmail:LinkBaseUrl", "https://external.invalid/auth-link"),
+            ("AuthEmail:LinkBaseUrl", "http://127.0.0.1:5003/auth-link?token=bad"), ("AuthEmail:LinkBaseUrl", "http://127.0.0.1:5003/other"),
+            ("AuthEmail:Mode", "Real"), ("ContractOtpEmail:Mode", "Fake") })
+        {
+            var changed = new Dictionary<string, string?>(values) { [test.Item1] = test.Item2 };
+            var rejected = false;
+            try { _ = new Schema33TrialGuard(Config(changed), new OfflineEnvironment()); }
+            catch (InvalidOperationException) { rejected = true; }
+            Check(rejected, "Invalid auth provider/link approval is blocked before network access");
+        }
+        var services = new ServiceCollection(); services.AddLogging(); services.AddSingleton(config);
+        services.Configure<EmailOptions>(config.GetSection("Email")); services.AddSingleton<FakeTrialSender>();
+        ContractSigningOtpRegistration.Register(services, guard); AuthEmailRegistration.Register(services, guard);
+        using var providers = services.BuildServiceProvider();
+        var sender = providers.GetRequiredService<IAuthEmailSender>();
+        Check(sender is RestrictedAuthEmailSender, "Auth resolves real restricted adapter while signing keeps its keyed provider");
+        Check(providers.GetRequiredKeyedService<IContractOtpEmailSender>(ContractSigningOtpRegistration.ServiceKey) is RestrictedContractOtpEmailSender,
+            "Contract signing still resolves its original restricted provider");
+        foreach (var test in new[] { ("other@example.invalid", "RESET_PASSWORD"), ("allowed@example.invalid", "UNKNOWN_PURPOSE") })
+        {
+            var rejected = false;
+            try { await sender.SendAsync(test.Item1, test.Item2, "offline-placeholder", CancellationToken.None); }
+            catch (AuthEmailDeliveryException) { rejected = true; }
+            Check(rejected, "Unapproved recipient/purpose cannot reach SMTP");
+        }
+        var token = "offline+/%token==";
+        var link = RestrictedAuthEmailSender.BuildLink(guard.AuthLinkBaseUri!, "RESET_PASSWORD", token);
+        var fragment = link.Fragment.TrimStart('#').Split('&').Select(x => x.Split('=', 2)).ToDictionary(x => x[0], x => Uri.UnescapeDataString(x[1]));
+        Check(link.Query.Length == 0 && fragment["token"] == token && fragment["purpose"] == "RESET_PASSWORD", "Token round-trips once in fragment, never in the server query");
+        var links = new AuthLinkService(new EphemeralDataProtectionProvider());
+        var account = new RentalCamera.Api.Data.TaiKhoan { MaTaiKhoan = "OFFLINE_ACCOUNT", MatKhauHash = "OFFLINE_FINGERPRINT", PhienBanBaoMat = 3 };
+        var protectedToken = links.Issue(account, "allowed@example.invalid", "VERIFY_EMAIL", TimeSpan.FromMinutes(15));
+        Check(links.TryRead(protectedToken, "VERIFY_EMAIL", out var claim) && claim.Epoch == 3 && claim.Fingerprint == AuthLinkService.Fingerprint(account.MatKhauHash), "Real protected auth claims bind account epoch and password fingerprint");
+        Check(!links.TryRead(protectedToken, "RESET_PASSWORD", out _) && !links.TryRead(protectedToken + "bad", "VERIFY_EMAIL", out _), "Wrong purpose and tampered token rejected");
+        var expired = links.Issue(account, "allowed@example.invalid", "RESET_PASSWORD", TimeSpan.FromSeconds(-1));
+        Check(!links.TryRead(expired, "RESET_PASSWORD", out _), "Expired protected token rejected without modifying data");
+        Console.WriteLine($"PASS {count} auth email guard/link/crypto/provider checks; no email, database or external provider request. SQL transactions/reuse races require runtime evidence.");
+    }
+
     public static async Task RunAsync()
     {
         var count = 0;
