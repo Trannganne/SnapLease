@@ -42,6 +42,18 @@ a.PhienBan=Guid.NewGuid();Check(!CartHoldEditing.MatchesSnapshot(hold,selected,[
 a.DaChuyenHopDong=true;Check(!CartHoldEditing.MatchesSnapshot(hold,selected,[a,b],requested),"Converted original cannot reuse");a.DaChuyenHopDong=false;
 a.MaCuaHang="S2";Check(!CartHoldEditing.MatchesSnapshot(hold,selected,[a,b],requested),"Branch mismatch rejected");a.MaCuaHang="S1";
 Check(hold.ChiTiet.Sum(x=>x.SoLuong)==3,"Selection quantity counted once");
+var directVersion=Guid.NewGuid();
+var direct=new ChiTietGioHang{MaChiTietGioHang="CG_DIRECT",MaGioHang="GH_DIRECT",MaCuaHang="S1",MaDongMay="M1",SoLuong=1,PhienBan=directVersion,NguonTao="THUE_NGAY",NgayBatDau=start,NgayKetThuc=end};
+var directHold=new GiuCho{MaGiuCho="H_DIRECT",MaGioHang="GH_DIRECT",MaCuaHang="S1",TrangThai="DANG_GIU",HetHanLuc=now.AddMinutes(10)};
+directHold.ChiTiet.Add(new(){MaChiTietGiuCho="L_DIRECT",MaGiuCho="H_DIRECT",MaChiTietGioHang=direct.MaChiTietGioHang,MaDongMay="M1",SoLuong=1,PhienBanGioHang=directVersion,NgayBatDau=start,NgayKetThuc=end});
+CartCheckoutItem[] directRequest=[new(direct.MaChiTietGioHang,directVersion)];
+Check(CartHoldEditing.MatchesSnapshot(directHold,directHold.ChiTiet.ToArray(),[direct],directRequest),"Direct-rental hold can use the existing versioned edit workflow");
+direct.NguonTao="UNKNOWN";
+Check(!CartHoldEditing.MatchesSnapshot(directHold,directHold.ChiTiet.ToArray(),[direct],directRequest),"Unknown selection source cannot edit hold");
+direct.NguonTao="THUE_NGAY";direct.DaChuyenHopDong=true;
+Check(!CartHoldEditing.MatchesSnapshot(directHold,directHold.ChiTiet.ToArray(),[direct],directRequest),"Converted direct-rental selection cannot edit hold");
+direct.DaChuyenHopDong=false;direct.PhienBan=Guid.NewGuid();
+Check(!CartHoldEditing.MatchesSnapshot(directHold,directHold.ChiTiet.ToArray(),[direct],directRequest),"Stale direct-rental version is rejected");
 Check(RentalPolicy.CancellationRate(start,start.AddHours(-48))==0,"48h boundary");
 Check(RentalPolicy.CancellationRate(start,start.AddHours(-48).AddTicks(1))==.30m,"Below48h");
 Check(RentalPolicy.CancellationRate(start,start.AddHours(-24))==.30m,"24h boundary");

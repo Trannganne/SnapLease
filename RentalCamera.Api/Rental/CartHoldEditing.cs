@@ -39,7 +39,7 @@ public static class CartHoldEditing
             if (!versions.TryGetValue(item.MaChiTietGioHang, out var version) ||
                 !current.TryGetValue(item.MaChiTietGioHang, out var line) ||
                 item.MaGiuCho != hold.MaGiuCho || item.PhienBanGioHang != version || line.PhienBan != version ||
-                line.DaChuyenHopDong || line.NguonTao != "GIO_HANG" || line.MaGioHang != hold.MaGioHang ||
+                line.DaChuyenHopDong || line.NguonTao is not ("GIO_HANG" or "THUE_NGAY") || line.MaGioHang != hold.MaGioHang ||
                 line.MaDongMay != item.MaDongMay || line.SoLuong != item.SoLuong || line.MaCuaHang != hold.MaCuaHang)
                 return false;
         }
