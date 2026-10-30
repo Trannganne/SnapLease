@@ -4,8 +4,10 @@ using RentalCamera.Api.Data;
 
 namespace RentalCamera.Api.Rental;
 
-public sealed class AvailabilityService(RentalCameraContext db)
+public sealed class AvailabilityService(RentalCameraContext db, IConfiguration configuration)
 {
+    public int BufferMinutes => RentalRiskPolicy.BufferMinutes(configuration);
+
     // Tinh suc chua nho nhat trong TOAN BO khoang yeu cau, khong chi tai thoi diem bat dau.
     // Hold con han va hop dong dang hoat dong deu chiem capacity. Callers ghi du lieu
     // phai goi ham nay trong transaction SERIALIZABLE de tranh overbooking.
@@ -27,7 +29,9 @@ public sealed class AvailabilityService(RentalCameraContext db)
                   AND TrangThai IN ('SAN_SANG','DANG_GIU','DANG_THUE')
             ),
             LichChiem AS (
-                SELECT ct.NgayBatDau AS BatDau, ct.NgayKetThuc AS KetThuc, ct.SoLuong
+                SELECT ct.NgayBatDau AS BatDau,
+                       DATEADD(MINUTE, @bufferMinutes, ct.NgayKetThuc) AS KetThuc,
+                       ct.SoLuong
                 FROM GiuCho gc WITH (UPDLOCK, HOLDLOCK)
                 JOIN ChiTietGiuCho ct ON ct.MaGiuCho = gc.MaGiuCho
                 WHERE gc.MaCuaHang = @store
@@ -35,16 +39,14 @@ public sealed class AvailabilityService(RentalCameraContext db)
                   AND gc.TrangThai = 'DANG_GIU'
                   AND gc.HetHanLuc > SYSUTCDATETIME()
                   AND (@excludeHold IS NULL OR gc.MaGiuCho <> @excludeHold)
-                  AND ct.NgayBatDau < @toDate
-                  AND ct.NgayKetThuc > @fromDate
+                  AND ct.NgayBatDau < DATEADD(MINUTE, @bufferMinutes, @toDate)
+                  AND DATEADD(MINUTE, @bufferMinutes, ct.NgayKetThuc) > @fromDate
 
                 UNION ALL
 
                 SELECT
                     ct.NgayBatDau AS BatDau,
-                    CASE WHEN rt.ThucNhanLuc IS NOT NULL THEN rt.ThucNhanLuc
-                         WHEN pl.ThoiHanGiaHan > hd.ThoiGianTraDuKien
-                         THEN pl.ThoiHanGiaHan ELSE hd.ThoiGianTraDuKien END AS KetThuc,
+                    occupied.KetThuc AS KetThuc,
                     ct.SoLuong
                 FROM HopDong hd WITH (UPDLOCK, HOLDLOCK)
                 JOIN ChiTietGiuCho ct ON ct.MaGiuCho = hd.MaGiuCho
@@ -58,20 +60,33 @@ public sealed class AvailabilityService(RentalCameraContext db)
                     SELECT b.ThucNhanLuc FROM BienBanNhanTra b
                     WHERE b.MaHopDong=hd.MaHopDong AND b.ThucNhanLuc IS NOT NULL
                 ) rt
+                CROSS APPLY (
+                    SELECT CASE WHEN pl.ThoiHanGiaHan > hd.ThoiGianTraDuKien
+                        THEN pl.ThoiHanGiaHan ELSE hd.ThoiGianTraDuKien END AS KetThucDuKien
+                ) scheduled
+                CROSS APPLY (
+                    SELECT CASE
+                        WHEN rt.ThucNhanLuc IS NOT NULL
+                            THEN DATEADD(MINUTE, @bufferMinutes, rt.ThucNhanLuc)
+                        WHEN hd.TrangThai IN ('DANG_THUE','CHO_HOAN_TRA')
+                             AND scheduled.KetThucDuKien <= @localNow
+                            THEN CAST('9999-12-31T23:59:59.9999999' AS datetime2)
+                        ELSE DATEADD(MINUTE, @bufferMinutes, scheduled.KetThucDuKien)
+                    END AS KetThuc
+                ) occupied
                 WHERE hd.MaCuaHang = @store
                   AND ct.MaDongMay = @model
-                  AND hd.TrangThai IN ('CHO_KY','DA_KY','CHO_BAN_GIAO','DANG_THUE','CHO_HOAN_TRA')
+                  AND hd.TrangThai IN ('CHO_KY','DA_KY','CHO_BAN_GIAO','DANG_THUE','CHO_HOAN_TRA','HOAN_THANH')
                   AND (@excludeContract IS NULL OR hd.MaHopDong <> @excludeContract)
-                  AND ct.NgayBatDau < @toDate
-                  AND (CASE WHEN rt.ThucNhanLuc IS NOT NULL THEN rt.ThucNhanLuc
-                            WHEN pl.ThoiHanGiaHan > hd.ThoiGianTraDuKien
-                            THEN pl.ThoiHanGiaHan ELSE hd.ThoiGianTraDuKien END) > @fromDate
+                  AND ct.NgayBatDau < DATEADD(MINUTE, @bufferMinutes, @toDate)
+                  AND occupied.KetThuc > @fromDate
             ),
             MocThoiGian AS (
                 SELECT @fromDate AS ThoiDiem
                 UNION
                 SELECT BatDau FROM LichChiem
-                WHERE BatDau > @fromDate AND BatDau < @toDate
+                WHERE BatDau > @fromDate
+                  AND BatDau < DATEADD(MINUTE, @bufferMinutes, @toDate)
             ),
             SucChuaTaiTungMoc AS (
                 SELECT
@@ -98,6 +113,8 @@ public sealed class AvailabilityService(RentalCameraContext db)
                 new SqlParameter("@model", modelId),
                 new SqlParameter("@fromDate", from),
                 new SqlParameter("@toDate", to),
+                new SqlParameter("@bufferMinutes", BufferMinutes),
+                new SqlParameter("@localNow", RentalCamera.Api.Contracts.RentalPolicy.LocalNow),
                 new SqlParameter("@excludeHold", (object?)excludeHoldId ?? DBNull.Value),
                 new SqlParameter("@excludeContract", (object?)excludeContractId ?? DBNull.Value))
             .ToListAsync(ct);

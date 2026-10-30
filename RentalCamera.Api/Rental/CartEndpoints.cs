@@ -39,9 +39,9 @@ public static class CartEndpoints
             foreach (var line in lines) result.Add(await ToDtoAsync(line, db, availability, ct));
             return Results.Ok(result);
         });
-        group.MapPost("/chi-tiet", async (CartLineRequest request, ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability, CancellationToken ct) =>
+        group.MapPost("/chi-tiet", async (CartLineRequest request, ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability, IConfiguration config, CancellationToken ct) =>
         {
-            if (!Valid(request)) return Results.BadRequest(new { loi = "Số lượng/thời gian thuê không hợp lệ." });
+            if (!Valid(request, config)) return Results.BadRequest(new { loi = "Số lượng/thời gian thuê không hợp lệ." });
             var customer = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customer is null) return Results.Forbid();
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
@@ -49,6 +49,9 @@ public static class CartEndpoints
             var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
             if (model is null || !await db.CuaHang.AnyAsync(x => x.MaCuaHang == request.MaCuaHang && x.TrangThai == "HOAT_DONG", ct))
                 return Results.NotFound();
+            var limit = await EvaluateCartLimitAsync(db, customer, null, request.MaCuaHang,
+                request.NgayBatDau, request.NgayKetThuc, model, request.SoLuong, config, ct);
+            if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
             var cart = await db.GioHang.FirstOrDefaultAsync(x => x.MaKhachThue == customer && x.TrangThai == "DANG_CHON", ct);
             if (cart is null)
             {
@@ -64,9 +67,9 @@ public static class CartEndpoints
             await tx.CommitAsync(ct);
             return Results.Created("/api/gio-hang/chi-tiet/" + line.MaChiTietGioHang, await ToDtoAsync(line, db, availability, ct));
         });
-        group.MapPut("/chi-tiet/{id}", async (string id, CartLineRequest request, ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability, CancellationToken ct) =>
+        group.MapPut("/chi-tiet/{id}", async (string id, CartLineRequest request, ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability, IConfiguration config, CancellationToken ct) =>
         {
-            if (!Valid(request) || request.PhienBan is null) return Results.BadRequest();
+            if (!Valid(request, config) || request.PhienBan is null) return Results.BadRequest();
             var customer = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customer is null) return Results.Forbid();
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
@@ -76,6 +79,9 @@ public static class CartEndpoints
             if (line.PhienBan != request.PhienBan) return Results.Conflict(new { loi = "Mục giỏ hàng đã thay đổi. Hãy tải lại." });
             var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
             if (model is null || !await db.CuaHang.AnyAsync(x => x.MaCuaHang == request.MaCuaHang && x.TrangThai == "HOAT_DONG", ct)) return Results.NotFound();
+            var limit = await EvaluateCartLimitAsync(db, customer, id, request.MaCuaHang,
+                request.NgayBatDau, request.NgayKetThuc, model, request.SoLuong, config, ct);
+            if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
             line.MaCuaHang = request.MaCuaHang;
             line.PhienBan = Guid.NewGuid();
             RentalEndpoints.ApplyServerPrice(line, model, request.SoLuong, request.NgayBatDau, request.NgayKetThuc);
@@ -125,6 +131,12 @@ public static class CartEndpoints
                 return Results.Conflict(new { loi = "Chọn các mục cùng chi nhánh, cùng thời điểm thuê trong tương lai." });
             var first = lines[0];
             if (!await db.CuaHang.AnyAsync(x => x.MaCuaHang == first.MaCuaHang && x.TrangThai == "HOAT_DONG", ct)) return Results.Conflict(new { loi = "Chi nhánh không hoạt động." });
+            var modelIds = lines.Select(x => x.MaDongMay).Distinct().ToArray();
+            var models = await db.DongMay.Where(x => modelIds.Contains(x.MaDongMay))
+                .ToDictionaryAsync(x => x.MaDongMay, ct);
+            if (models.Count != modelIds.Length) return Results.Conflict(new { loi = "Dữ liệu dòng máy không còn hợp lệ." });
+            var limit = RentalRiskPolicy.Evaluate(lines.Select(x => (models[x.MaDongMay].TienCoc, x.SoLuong)), config);
+            if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
             foreach (var modelGroup in lines.GroupBy(x => x.MaDongMay).OrderBy(x => x.Key))
             {
                 var count = await availability.GetAvailableAsync(first.MaCuaHang, modelGroup.Key, first.NgayBatDau, first.NgayKetThuc, null, null, ct);
@@ -156,7 +168,24 @@ public static class CartEndpoints
         db.ChiTietGioHang.Where(x => x.GioHang.MaKhachThue == customer && x.GioHang.TrangThai == "DANG_CHON"
             && x.NguonTao == "GIO_HANG" && !x.DaChuyenHopDong && !db.ChiTietGiuCho.Any(l=>l.MaChiTietGioHang==x.MaChiTietGioHang
                 && db.HopDong.Any(h=>h.MaGiuCho==l.MaGiuCho)));
-    private static bool Valid(CartLineRequest r) => r.SoLuong is >=1 and <=10 && RentalEndpoints.ValidPeriod(r.NgayBatDau, r.NgayKetThuc) && r.NgayBatDau > RentalPolicy.LocalNow;
+    private static bool Valid(CartLineRequest r, IConfiguration config) =>
+        r.SoLuong >= 1 && r.SoLuong <= RentalRiskPolicy.StandardMaxQuantity(config) &&
+        RentalEndpoints.ValidPeriod(r.NgayBatDau, r.NgayKetThuc) && r.NgayBatDau > RentalPolicy.LocalNow;
+
+    private static async Task<RentalLimitDecision> EvaluateCartLimitAsync(
+        RentalCameraContext db, string customer, string? excludedLineId, string storeId,
+        DateTime fromDate, DateTime toDate, DongMay requestedModel, int requestedQuantity,
+        IConfiguration config, CancellationToken ct)
+    {
+        var existing = await (from line in ActiveLines(db, customer)
+                              join model in db.DongMay on line.MaDongMay equals model.MaDongMay
+                              where excludedLineId == null || line.MaChiTietGioHang != excludedLineId
+                              where line.MaCuaHang == storeId && line.NgayBatDau == fromDate && line.NgayKetThuc == toDate
+                              select new { model.TienCoc, line.SoLuong }).ToListAsync(ct);
+        return RentalRiskPolicy.Evaluate(
+            existing.Select(x => (x.TienCoc, x.SoLuong))
+                .Append((requestedModel.TienCoc, requestedQuantity)), config);
+    }
     private static async Task<object> ToDtoAsync(ChiTietGioHang line, RentalCameraContext db, AvailabilityService availability, CancellationToken ct)
     {
         var model = await db.DongMay.AsNoTracking().SingleAsync(x => x.MaDongMay == line.MaDongMay, ct);

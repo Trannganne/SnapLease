@@ -21,6 +21,7 @@ public static class ContractEndpoints
         app.MapPost("/api/giu-cho/{id}/xac-nhan-thue", async (
             string id, ClaimsPrincipal principal, RentalCameraContext db,
             AvailabilityService availability,
+            IConfiguration configuration,
             FirebaseNotificationSender notificationSender, ILoggerFactory loggerFactory,
             HttpContext httpContext, CancellationToken ct) =>
         {
@@ -101,6 +102,10 @@ public static class ContractEndpoints
                 .ToDictionaryAsync(x => x.MaDongMay, ct);
             if (models.Count != modelIds.Count)
                 return Results.Conflict(new { loi = "Dữ liệu dòng máy trong giữ chỗ không còn hợp lệ." });
+
+            var limit = RentalRiskPolicy.Evaluate(
+                hold.ChiTiet.Select(x => (models[x.MaDongMay].TienCoc, x.SoLuong)), configuration);
+            if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
 
             foreach (var selected in hold.ChiTiet.GroupBy(x => x.MaDongMay).OrderBy(x => x.Key))
             {

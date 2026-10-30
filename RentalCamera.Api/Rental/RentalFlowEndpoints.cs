@@ -26,16 +26,25 @@ public static class RentalEndpoints
             return Results.Ok(new
             {
                 maCuaHang, maDongMay, ngayBatDau, ngayKetThuc,
-                soLuongConTrong = count
+                soLuongConTrong = count,
+                bufferPhut = availability.BufferMinutes
             });
         });
 
         app.MapGet("/api/lich-trong/thang", async (
             string maCuaHang, string maDongMay, int soLuong, int thang, int nam, string? maGiuCho,
-            AvailabilityService availability, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+            AvailabilityService availability, ClaimsPrincipal principal, RentalCameraContext db,
+            IConfiguration configuration, CancellationToken ct) =>
         {
-            if (string.IsNullOrWhiteSpace(maCuaHang) || string.IsNullOrWhiteSpace(maDongMay) || soLuong is < 1 or > 10 || thang is < 1 or > 12 || nam < 2020)
+            if (string.IsNullOrWhiteSpace(maCuaHang) || string.IsNullOrWhiteSpace(maDongMay) ||
+                soLuong < 1 || soLuong > RentalRiskPolicy.StandardMaxQuantity(configuration) ||
+                thang is < 1 or > 12 || nam < 2020)
                 return Results.BadRequest(new { loi = "Tham số không hợp lệ." });
+
+            var model = await db.DongMay.AsNoTracking().SingleOrDefaultAsync(x => x.MaDongMay == maDongMay, ct);
+            if (model is null) return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+            var limit = RentalRiskPolicy.Evaluate([(model.TienCoc, soLuong)], configuration);
+            if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
                 
             if (!string.IsNullOrEmpty(maGiuCho))
             {
@@ -62,6 +71,7 @@ public static class RentalEndpoints
             return Results.Ok(new
             {
                 maCuaHang, maDongMay, soLuong, thang, nam,
+                bufferPhut = availability.BufferMinutes,
                 thoiGianServer = DateTime.UtcNow,
                 ngayList = list.Select(x => new
                 {
@@ -74,9 +84,10 @@ public static class RentalEndpoints
 
         app.MapGet("/api/tam-tinh", async (
             string maCuaHang, string maDongMay, int soLuong, DateTime ngayBatDau, DateTime ngayKetThuc,
-            RentalCameraContext db, CancellationToken ct) =>
+            RentalCameraContext db, IConfiguration configuration, CancellationToken ct) =>
         {
-            if (string.IsNullOrWhiteSpace(maCuaHang) || string.IsNullOrWhiteSpace(maDongMay) || soLuong is < 1 or > 10 ||
+            if (string.IsNullOrWhiteSpace(maCuaHang) || string.IsNullOrWhiteSpace(maDongMay) ||
+                soLuong < 1 || soLuong > RentalRiskPolicy.StandardMaxQuantity(configuration) ||
                 !ValidPeriod(ngayBatDau, ngayKetThuc))
                 return Results.BadRequest(new { loi = "Đầu vào hoặc thời gian thuê không hợp lệ." });
             
@@ -86,6 +97,9 @@ public static class RentalEndpoints
             var model = await db.DongMay.AsNoTracking().SingleOrDefaultAsync(x => x.MaDongMay == maDongMay, ct);
             if (model is null)
                 return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+
+            var limit = RentalRiskPolicy.Evaluate([(model.TienCoc, soLuong)], configuration);
+            if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
 
             var quote = CalculatePrice(model, soLuong, ngayBatDau, ngayKetThuc);
             return Results.Ok(quote);
@@ -142,7 +156,8 @@ public static class RentalEndpoints
                 return Results.BadRequest(new { loi = "Thiếu Idempotency-Key." });
 
             if (string.IsNullOrWhiteSpace(request.MaCuaHang) || string.IsNullOrWhiteSpace(request.MaDongMay) ||
-                request.SoLuong is < 1 or > 10 || !ValidPeriod(request.NgayBatDau, request.NgayKetThuc) ||
+                request.SoLuong < 1 || request.SoLuong > RentalRiskPolicy.StandardMaxQuantity(configuration) ||
+                !ValidPeriod(request.NgayBatDau, request.NgayKetThuc) ||
                 request.NgayBatDau <= RentalPolicy.LocalNow)
                 return Results.BadRequest(new { loi = "Thông tin thuê không hợp lệ." });
 
@@ -194,6 +209,9 @@ public static class RentalEndpoints
                     var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
                     if (model is null)
                         return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+
+                    var limit = RentalRiskPolicy.Evaluate([(model.TienCoc, request.SoLuong)], configuration);
+                    if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
 
                     var available = await availability.GetAvailableAsync(request.MaCuaHang, request.MaDongMay,
                         request.NgayBatDau, request.NgayKetThuc, null, null, ct);
@@ -327,10 +345,11 @@ public static class RentalEndpoints
         holds.MapPut("/{id}", async (
             string id, [FromBody] UpdateGiuChoRequest request,
             ClaimsPrincipal principal, RentalCameraContext db,
-            AvailabilityService availability, CancellationToken ct) =>
+            AvailabilityService availability, IConfiguration configuration, CancellationToken ct) =>
         {
             if (string.IsNullOrWhiteSpace(request.MaCuaHang) || string.IsNullOrWhiteSpace(request.MaDongMay) ||
-                request.SoLuong is < 1 or > 10 || !ValidPeriod(request.NgayBatDau, request.NgayKetThuc) ||
+                request.SoLuong < 1 || request.SoLuong > RentalRiskPolicy.StandardMaxQuantity(configuration) ||
+                !ValidPeriod(request.NgayBatDau, request.NgayKetThuc) ||
                 request.NgayBatDau <= RentalPolicy.LocalNow)
                 return Results.BadRequest(new { loi = "Thông tin cập nhật không hợp lệ." });
 
@@ -357,6 +376,9 @@ public static class RentalEndpoints
 
                     var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
                     if (model is null) return Results.NotFound(new { loi = "Dòng máy không tồn tại." });
+
+                    var limit = RentalRiskPolicy.Evaluate([(model.TienCoc, request.SoLuong)], configuration);
+                    if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
 
                     // Bỏ qua giữ chỗ hiện tại của chính nó khi kiểm tra số lượng trống
                     var available = await availability.GetAvailableAsync(request.MaCuaHang, request.MaDongMay,

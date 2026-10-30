@@ -76,7 +76,8 @@ public static class CartHoldEditing
     }
 
     public static async Task<IResult> UpdateAsync(string id, CartHoldEditRequest request,
-        ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability, CancellationToken ct)
+        ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability,
+        IConfiguration configuration, CancellationToken ct)
     {
         if (!ValidRequest(request) || request.NgayBatDau <= RentalPolicy.LocalNow)
             return Results.BadRequest(new { code = "INVALID_CART_HOLD_EDIT", loi = "Thông tin cập nhật không hợp lệ." });
@@ -112,6 +113,8 @@ public static class CartHoldEditing
             var modelIds = lines.Select(x => x.MaDongMay).Distinct().ToArray();
             var models = await db.DongMay.Where(x => modelIds.Contains(x.MaDongMay)).ToDictionaryAsync(x => x.MaDongMay, ct);
             if (models.Count != modelIds.Length) return Results.Conflict(new { code = "MODEL_NOT_FOUND", loi = "Không tìm thấy đầy đủ mẫu thiết bị." });
+            var limit = RentalRiskPolicy.Evaluate(lines.Select(x => (models[x.MaDongMay].TienCoc, x.SoLuong)), configuration);
+            if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
             foreach (var group in CartEndpoints.HoldQuantities(lines).OrderBy(x => x.Key, StringComparer.Ordinal))
             {
                 var available = await availability.GetAvailableAsync(request.MaCuaHang, group.Key,
