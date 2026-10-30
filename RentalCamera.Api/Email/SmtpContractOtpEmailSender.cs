@@ -34,21 +34,29 @@ public sealed class SmtpContractOtpEmailSender(
         var safeContractId = WebUtility.HtmlEncode(contractId);
         var safeOtp = WebUtility.HtmlEncode(otp);
 
-        using var message = new MailMessage
-        {
-            From = new MailAddress(_options.FromAddress.Trim(), _options.FromName.Trim(), Encoding.UTF8),
-            Subject = $"Mã OTP ký hợp đồng {contractId}",
-            SubjectEncoding = Encoding.UTF8,
-            BodyEncoding = Encoding.UTF8,
-            IsBodyHtml = true,
-            Body = $"""
+        var body = $"""
                 <p>Xin chào {safeName},</p>
                 <p>Mã OTP dùng để xác nhận ký hợp đồng <strong>{safeContractId}</strong> là:</p>
                 <p style="font-size:28px;font-weight:bold;letter-spacing:6px">{safeOtp}</p>
                 <p>Mã có hiệu lực đến <strong>{expiresAt:HH:mm dd/MM/yyyy}</strong>.</p>
                 <p>Không cung cấp mã này cho người khác. Nếu bạn không yêu cầu ký hợp đồng, hãy bỏ qua email này.</p>
                 <p>Rental Camera</p>
-                """
+                """;
+        await SendMessageAsync(recipientEmail, recipientName, $"Mã OTP ký hợp đồng {contractId}", body, "CONTRACT_OTP", cancellationToken);
+    }
+
+    public async Task SendMessageAsync(string recipientEmail, string recipientName, string subject,
+        string htmlBody, string purpose, CancellationToken cancellationToken)
+    {
+        if (!IsConfigured) throw new InvalidOperationException("Dịch vụ gửi email chưa được cấu hình đầy đủ.");
+        using var message = new MailMessage
+        {
+            From = new MailAddress(_options.FromAddress.Trim(), _options.FromName.Trim(), Encoding.UTF8),
+            Subject = subject,
+            SubjectEncoding = Encoding.UTF8,
+            BodyEncoding = Encoding.UTF8,
+            IsBodyHtml = true,
+            Body = htmlBody
         };
         message.To.Add(new MailAddress(recipientEmail.Trim(), recipientName.Trim(), Encoding.UTF8));
 
@@ -60,15 +68,16 @@ public sealed class SmtpContractOtpEmailSender(
             DeliveryMethod = SmtpDeliveryMethod.Network
         };
 
-        logger.LogInformation("Đang gửi OTP ký hợp đồng {ContractId} tới email khách hàng.", contractId);
+        logger.LogInformation("SMTP delivery started. Purpose={Purpose}", purpose);
         try
         {
             await client.SendMailAsync(message, cancellationToken);
-            logger.LogInformation("Đã gửi OTP ký hợp đồng {ContractId} qua email.", contractId);
+            logger.LogInformation("SMTP delivery accepted. Purpose={Purpose}", purpose);
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Gửi OTP ký hợp đồng {ContractId} qua email thất bại.", contractId);
+            // SMTP exceptions may contain recipient addresses. Never log the message/body.
+            logger.LogWarning("SMTP delivery failed. Purpose={Purpose} ErrorType={ErrorType}", purpose, exception.GetType().Name);
             throw;
         }
     }

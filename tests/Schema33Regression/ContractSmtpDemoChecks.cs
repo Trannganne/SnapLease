@@ -55,8 +55,8 @@ internal static class ContractSmtpDemoChecks
         {
             Check(guard.ContractSmtpDemoEnabled, "Approved SMTP profile is accepted without opening SQL");
             Check(providers.GetRequiredKeyedService<IContractOtpEmailSender>(ContractSigningOtpRegistration.ServiceKey)
-                is RestrictedContractOtpEmailSender { IsConfigured: true }, "Only the contract key resolves restricted SMTP");
-            Check(providers.GetRequiredService<IContractOtpEmailSender>() is FakeTrialSender, "Appendix/default sender stays fake");
+                is RestrictedContractOtpEmailSender { IsConfigured: true }, "Signing key resolves restricted SMTP");
+            Check(providers.GetRequiredService<IContractOtpEmailSender>() is FakeTrialSender, "Unkeyed/default sender stays fake");
             Check(providers.GetRequiredService<IAuthEmailSender>() is FakeTrialSender, "Verification/password-reset sender stays fake");
         }
 
@@ -125,7 +125,29 @@ internal static class ContractSmtpDemoChecks
         var signature = new ContractSignatureService(config);
         var hash = signature.HashOtp("offline-placeholder");
         Check(new ContractSignatureService(config).VerifyOtp("offline-placeholder", hash.Hash, hash.Salt), "Same Pepper survives service reconstruction");
-        Console.WriteLine($"PASS {count} contract SMTP guard/provider checks; no SQL, HTTP or SMTP calls.");
+        var appendixCapture = new CaptureSender();
+        var appendixSender = new RestrictedContractOtpEmailSender(appendixCapture, guard.AllowedContractOtpRecipient!);
+        await appendixSender.SendAsync("ALLOWED@example.invalid", "Offline customer", "phụ lục OFFLINE_APPENDIX",
+            "offline-placeholder", expiresAt, CancellationToken.None);
+        Check(appendixCapture.Calls == 1 && appendixCapture.Recipient == "ALLOWED@example.invalid" &&
+            appendixCapture.DocumentId == "phụ lục OFFLINE_APPENDIX", "Appendix keeps the server recipient and document identity");
+        try
+        {
+            await appendixSender.SendAsync("other@example.invalid", "Offline", "phụ lục OFFLINE_APPENDIX",
+                "offline-placeholder", expiresAt, CancellationToken.None);
+            throw new Exception("Unapproved appendix recipient was accepted");
+        }
+        catch (InvalidOperationException) { Check(appendixCapture.Calls == 1, "Appendix recipient outside allowlist never reaches transport"); }
+        appendixCapture.Fail = true;
+        try
+        {
+            await appendixSender.SendAsync("allowed@example.invalid", "Offline", "phụ lục OFFLINE_APPENDIX",
+                "offline-placeholder", expiresAt, CancellationToken.None);
+            throw new Exception("Appendix transport failure was swallowed");
+        }
+        catch (OfflineTransportException) { Check(appendixCapture.Calls == 2, "Appendix transport failure propagates without retry"); }
+        await AppendixOtpProviderChecks.RunAsync(Check);
+        Console.WriteLine($"PASS {count} contract/appendix SMTP guard/provider checks; no SQL, network HTTP or SMTP calls.");
     }
 
     private static Dictionary<string, string?> Settings(bool smtp) => new()
@@ -157,12 +179,14 @@ internal static class ContractSmtpDemoChecks
         public bool IsConfigured => true;
         public int Calls { get; private set; }
         public string? Recipient { get; private set; }
+        public string? DocumentId { get; private set; }
         public bool Fail { get; set; }
         public Task SendAsync(string recipientEmail, string recipientName, string contractId,
             string otp, DateTime expiresAt, CancellationToken cancellationToken)
         {
             Calls++;
             Recipient = recipientEmail;
+            DocumentId = contractId;
             return Fail ? Task.FromException(new OfflineTransportException()) : Task.CompletedTask;
         }
     }
