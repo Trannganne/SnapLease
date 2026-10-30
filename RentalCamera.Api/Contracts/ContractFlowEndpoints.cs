@@ -390,7 +390,7 @@ public static class ContractEndpoints
             string id, RequestContractSignatureRequest request, HttpContext httpContext,
             ClaimsPrincipal principal, RentalCameraContext db,
             ContractSignatureService signatureService, ContractPdfService pdfService,
-            IContractOtpEmailSender emailSender, IConfiguration configuration,
+            [FromKeyedServices(ContractSigningOtpRegistration.ServiceKey)] IContractOtpEmailSender emailSender, IConfiguration configuration,
             CancellationToken ct) =>
         {
             var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);

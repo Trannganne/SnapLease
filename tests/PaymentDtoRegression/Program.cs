@@ -39,3 +39,16 @@ payment.PhuongThuc = "VI_DIEN_TU";
 dto = Map();
 Check(dto.GetProperty("nganHang").ValueKind == JsonValueKind.Null
     && dto.GetProperty("soTaiKhoan").ValueKind == JsonValueKind.Null, "electronic payment does not acquire transfer receiver fields");
+payment.PhuongThuc = "TIEN_MAT";
+payment.DuongDanThanhToan = null;
+dto = Map();
+Check(dto.GetProperty("phuongThuc").GetString() == "TIEN_MAT"
+    && dto.GetProperty("trangThai").GetString() == "CHO_THANH_TOAN"
+    && dto.GetProperty("soTien").GetDecimal() == 250000,
+    "cash selection preserves server amount and pending status");
+Check(dto.GetProperty("nganHang").ValueKind == JsonValueKind.Null
+    && dto.GetProperty("soTaiKhoan").ValueKind == JsonValueKind.Null,
+    "cash does not acquire bank transfer instructions");
+payment.TrangThai = "THANH_CONG";
+Check(Map().GetProperty("trangThai").GetString() == "THANH_CONG",
+    "cash mapper reports the recorded status without inventing a transition");

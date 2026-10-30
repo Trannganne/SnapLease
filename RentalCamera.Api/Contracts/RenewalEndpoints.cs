@@ -156,7 +156,8 @@ public static class RenewalEndpoints
         }).RequireAuthorization("Customer");
     }
 
-    private static async Task<IResult> RequestSignatureAsync(string id,ClaimsPrincipal principal,RentalCameraContext db,ContractSignatureService signature,ContractPdfService pdf,IContractOtpEmailSender email,CancellationToken ct)
+    private static async Task<IResult> RequestSignatureAsync(string id,ClaimsPrincipal principal,RentalCameraContext db,ContractSignatureService signature,ContractPdfService pdf,
+        [FromKeyedServices(ContractSigningOtpRegistration.ServiceKey)] IContractOtpEmailSender email,CancellationToken ct)
     {
         if(!email.IsConfigured)return Results.Problem("Chưa cấu hình email OTP.",statusCode:503);
         var customer=await ApiAccess.CustomerIdAsync(principal,db,ct);
