@@ -40,21 +40,55 @@
     "DanhMuc": [
       {
         "MaDanhMuc": "TR33_CAT",
-        "TenDanhMuc": "TRIAL33 Cameras",
-        "MoTa": "Synthetic catalog",
+        "TenDanhMuc": "Máy ảnh",
+        "MoTa": "Máy ảnh mirrorless và DSLR dành cho chụp sự kiện, chân dung, sản phẩm và sản xuất nội dung chuyên nghiệp.",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaDanhMuc": "TR33_CAT_LENS",
+        "TenDanhMuc": "Ống kính",
+        "MoTa": "Ống kính chính hãng với nhiều dải tiêu cự, khẩu độ và ngàm máy phục vụ nhu cầu chụp ảnh, quay phim.",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaDanhMuc": "TR33_CAT_SUPPORT",
+        "TenDanhMuc": "Thiết bị hỗ trợ",
+        "MoTa": "Gimbal, tripod và phụ kiện hỗ trợ giúp ổn định hình ảnh và tối ưu quy trình ghi hình.",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaDanhMuc": "TR33_CAT_POWER",
+        "TenDanhMuc": "Pin và bộ sạc",
+        "MoTa": "Pin và bộ sạc tương thích cho máy ảnh, bảo đảm thời lượng vận hành trong các buổi chụp kéo dài.",
+        "TrangThai": "HOAT_DONG"
+      },
+      {
+        "MaDanhMuc": "TR33_CAT_STORAGE",
+        "TenDanhMuc": "Thẻ nhớ và lưu trữ",
+        "MoTa": "Thẻ nhớ tốc độ cao và phụ kiện lưu trữ dành cho ảnh RAW, video 4K và quy trình hậu kỳ chuyên nghiệp.",
         "TrangThai": "HOAT_DONG"
       }
     ],
     "ThuongHieu": [
       {
         "MaThuongHieu": "TR33_BR1",
-        "TenThuongHieu": "TRIAL33 Brand 1",
-        "QuocGia": "Synthetic"
+        "TenThuongHieu": "Canon",
+        "QuocGia": "Nhật Bản"
       },
       {
         "MaThuongHieu": "TR33_BR2",
-        "TenThuongHieu": "TRIAL33 Brand 2",
-        "QuocGia": "Synthetic"
+        "TenThuongHieu": "Sony",
+        "QuocGia": "Nhật Bản"
+      },
+      {
+        "MaThuongHieu": "TR33_BR3",
+        "TenThuongHieu": "DJI",
+        "QuocGia": "Trung Quốc"
+      },
+      {
+        "MaThuongHieu": "TR33_BR4",
+        "TenThuongHieu": "SanDisk",
+        "QuocGia": "Hoa Kỳ"
       }
     ],
     "DongMay": [
@@ -62,61 +96,105 @@
         "MaDongMay": "TR33_M01",
         "MaDanhMuc": "TR33_CAT",
         "MaThuongHieu": "TR33_BR1",
-        "TenDongMay": "TRIAL33 Camera Model 01",
-        "MoTa": "Synthetic camera model",
-        "GiaThueNgay": 125000,
-        "TienCoc": 1250000,
-        "PhanTramGiamGia": 0
+        "TenDongMay": "Canon EOS R6 Mark II",
+        "MoTa": "Máy ảnh mirrorless full-frame 24,2 MP, chống rung trong thân máy và quay 4K 60p; phù hợp chụp sự kiện, chân dung và sản xuất nội dung chuyên nghiệp.",
+        "GiaThueNgay": 650000,
+        "TienCoc": 20000000,
+        "PhanTramGiamGia": 5
       },
       {
         "MaDongMay": "TR33_M02",
         "MaDanhMuc": "TR33_CAT",
-        "MaThuongHieu": "TR33_BR1",
-        "TenDongMay": "TRIAL33 Camera Model 02",
-        "MoTa": "Synthetic camera model",
-        "GiaThueNgay": 150000,
-        "TienCoc": 1500000,
-        "PhanTramGiamGia": 0
+        "MaThuongHieu": "TR33_BR2",
+        "TenDongMay": "Sony Alpha 7 IV",
+        "MoTa": "Máy ảnh mirrorless full-frame 33 MP, lấy nét theo chủ thể và quay 4K 60p; cân bằng tốt giữa chất lượng ảnh tĩnh và video.",
+        "GiaThueNgay": 600000,
+        "TienCoc": 18000000,
+        "PhanTramGiamGia": 5
       },
       {
         "MaDongMay": "TR33_M03",
-        "MaDanhMuc": "TR33_CAT",
+        "MaDanhMuc": "TR33_CAT_LENS",
         "MaThuongHieu": "TR33_BR1",
-        "TenDongMay": "TRIAL33 Camera Model 03",
-        "MoTa": "Synthetic camera model",
-        "GiaThueNgay": 175000,
-        "TienCoc": 1750000,
+        "TenDongMay": "Canon RF 24-70mm F2.8L IS USM",
+        "MoTa": "Ống kính zoom RF dòng L có khẩu độ cố định f/2.8, chống rung quang học và mô-tơ Nano USM; phù hợp sự kiện, chân dung và quay phim.",
+        "GiaThueNgay": 350000,
+        "TienCoc": 12000000,
         "PhanTramGiamGia": 0
       },
       {
         "MaDongMay": "TR33_M04",
-        "MaDanhMuc": "TR33_CAT",
-        "MaThuongHieu": "TR33_BR2",
-        "TenDongMay": "TRIAL33 Camera Model 04",
-        "MoTa": "Synthetic camera model",
-        "GiaThueNgay": 200000,
-        "TienCoc": 2000000,
+        "MaDanhMuc": "TR33_CAT_SUPPORT",
+        "MaThuongHieu": "TR33_BR3",
+        "TenDongMay": "DJI RS 3 Pro Combo",
+        "MoTa": "Gimbal ba trục bằng sợi carbon, tải trọng thử nghiệm 4,5 kg, khóa trục tự động và màn hình OLED; dành cho máy ảnh mirrorless và cinema camera.",
+        "GiaThueNgay": 450000,
+        "TienCoc": 10000000,
         "PhanTramGiamGia": 0
       },
       {
         "MaDongMay": "TR33_M05",
-        "MaDanhMuc": "TR33_CAT",
+        "MaDanhMuc": "TR33_CAT_POWER",
         "MaThuongHieu": "TR33_BR2",
-        "TenDongMay": "TRIAL33 Camera Model 05",
-        "MoTa": "Synthetic camera model",
-        "GiaThueNgay": 225000,
-        "TienCoc": 2250000,
+        "TenDongMay": "Sony NP-FZ100",
+        "MoTa": "Pin sạc Z-series dung lượng 2.280 mAh dành cho nhiều thân máy Sony Alpha; thích hợp làm pin chính hoặc pin dự phòng cho buổi chụp dài.",
+        "GiaThueNgay": 80000,
+        "TienCoc": 1500000,
         "PhanTramGiamGia": 0
       },
       {
         "MaDongMay": "TR33_M06",
-        "MaDanhMuc": "TR33_CAT",
-        "MaThuongHieu": "TR33_BR2",
-        "TenDongMay": "TRIAL33 Camera Model 06",
-        "MoTa": "Synthetic camera model",
-        "GiaThueNgay": 250000,
-        "TienCoc": 2500000,
+        "MaDanhMuc": "TR33_CAT_STORAGE",
+        "MaThuongHieu": "TR33_BR4",
+        "TenDongMay": "SanDisk Extreme PRO SDXC UHS-II V60 128GB",
+        "MoTa": "Thẻ nhớ SDXC UHS-II chuẩn V60 dung lượng 128 GB, phù hợp chụp liên tiếp độ phân giải cao và ghi video 4K/6K ổn định.",
+        "GiaThueNgay": 60000,
+        "TienCoc": 1000000,
         "PhanTramGiamGia": 0
+      }
+    ],
+    "AnhThietBi": [
+      {
+        "MaAnh": "TR33_IMG_M01",
+        "MaDongMay": "TR33_M01",
+        "DuongDanAnh": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Canon_EOS_R6_Mark_II_9_jan_2023d.jpg?width=1200",
+        "LaAnhDaiDien": true,
+        "ThuTuHienThi": 0
+      },
+      {
+        "MaAnh": "TR33_IMG_M02",
+        "MaDongMay": "TR33_M02",
+        "DuongDanAnh": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Sony_Alpha_7_Mark_IV.jpg?width=1200",
+        "LaAnhDaiDien": true,
+        "ThuTuHienThi": 0
+      },
+      {
+        "MaAnh": "TR33_IMG_M03",
+        "MaDongMay": "TR33_M03",
+        "DuongDanAnh": "https://www.uniquephoto.com/resources/uniquephoto/images/products/processed/CNL7381.largeThumb.a.png",
+        "LaAnhDaiDien": true,
+        "ThuTuHienThi": 0
+      },
+      {
+        "MaAnh": "TR33_IMG_M04",
+        "MaDongMay": "TR33_M04",
+        "DuongDanAnh": "https://devitech-senegal.com/storage/dji-rs-3-pro-1-800x800.jpg",
+        "LaAnhDaiDien": true,
+        "ThuTuHienThi": 0
+      },
+      {
+        "MaAnh": "TR33_IMG_M05",
+        "MaDongMay": "TR33_M05",
+        "DuongDanAnh": "https://commons.wikimedia.org/wiki/Special:Redirect/file/Sony_NP-FZ100_Battery.jpg?width=1200",
+        "LaAnhDaiDien": true,
+        "ThuTuHienThi": 0
+      },
+      {
+        "MaAnh": "TR33_IMG_M06",
+        "MaDongMay": "TR33_M06",
+        "DuongDanAnh": "https://www.sandisk.com/content/dam/store/en-us/assets/products/memory-cards/extreme-pro-sd-uhs-ii-v60/gallery/extreme-pro-sd-uhs-ii-v60-128gb-front.png",
+        "LaAnhDaiDien": true,
+        "ThuTuHienThi": 0
       }
     ],
     "ThietBi": [
@@ -125,7 +203,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M01-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -134,7 +212,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M01-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -143,7 +221,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M01-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -152,7 +230,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M01-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -161,7 +239,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M01-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -170,7 +248,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M01-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -179,7 +257,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M01-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -188,7 +266,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M01-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -197,7 +275,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M01-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -206,7 +284,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M01-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -215,7 +293,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M01-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -224,7 +302,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M01-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -233,7 +311,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M01-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -242,7 +320,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M01-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -251,7 +329,7 @@
         "MaDongMay": "TR33_M01",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M01-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -260,7 +338,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M02-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -269,7 +347,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M02-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -278,7 +356,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M02-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -287,7 +365,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M02-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -296,7 +374,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M02-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -305,7 +383,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M02-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -314,7 +392,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M02-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -323,7 +401,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M02-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -332,7 +410,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M02-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -341,7 +419,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M02-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -350,7 +428,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M02-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -359,7 +437,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M02-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -368,7 +446,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M02-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -377,7 +455,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M02-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -386,7 +464,7 @@
         "MaDongMay": "TR33_M02",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M02-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -395,7 +473,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M03-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -404,7 +482,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M03-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -413,7 +491,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M03-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -422,7 +500,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M03-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -431,7 +509,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M03-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -440,7 +518,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M03-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -449,7 +527,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M03-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -458,7 +536,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M03-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -467,7 +545,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M03-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -476,7 +554,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M03-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -485,7 +563,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M03-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -494,7 +572,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M03-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -503,7 +581,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M03-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -512,7 +590,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M03-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -521,7 +599,7 @@
         "MaDongMay": "TR33_M03",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M03-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -530,7 +608,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M04-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -539,7 +617,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M04-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -548,7 +626,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M04-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -557,7 +635,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M04-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -566,7 +644,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M04-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -575,7 +653,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M04-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -584,7 +662,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M04-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -593,7 +671,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M04-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -602,7 +680,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M04-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -611,7 +689,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M04-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -620,7 +698,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M04-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -629,7 +707,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M04-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -638,7 +716,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M04-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -647,7 +725,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M04-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -656,7 +734,7 @@
         "MaDongMay": "TR33_M04",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M04-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -665,7 +743,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M05-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -674,7 +752,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M05-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -683,7 +761,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M05-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -692,7 +770,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M05-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -701,7 +779,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M05-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -710,7 +788,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M05-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -719,7 +797,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M05-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -728,7 +806,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M05-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -737,7 +815,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M05-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -746,7 +824,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M05-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -755,7 +833,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M05-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -764,7 +842,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M05-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -773,7 +851,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M05-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -782,7 +860,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M05-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -791,7 +869,7 @@
         "MaDongMay": "TR33_M05",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M05-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -800,7 +878,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M06-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -809,7 +887,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M06-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -818,7 +896,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M06-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -827,7 +905,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M06-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -836,7 +914,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S01",
         "SoSerial": "SN-TR33-S01-M06-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -845,7 +923,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M06-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -854,7 +932,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M06-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -863,7 +941,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M06-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -872,7 +950,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M06-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -881,7 +959,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S02",
         "SoSerial": "SN-TR33-S02-M06-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       },
@@ -890,7 +968,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M06-01",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -899,7 +977,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M06-02",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -908,7 +986,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M06-03",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -917,7 +995,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M06-04",
-        "TinhTrang": "Synthetic ready",
+        "TinhTrang": "Hoạt động tốt, đã kiểm tra trước khi cho thuê",
         "TrangThai": "SAN_SANG",
         "NgayNhap": "2026-10-27"
       },
@@ -926,7 +1004,7 @@
         "MaDongMay": "TR33_M06",
         "MaCuaHang": "TR33_S03",
         "SoSerial": "SN-TR33-S03-M06-05",
-        "TinhTrang": "Synthetic maintenance",
+        "TinhTrang": "Đang bảo trì định kỳ",
         "TrangThai": "BAO_TRI",
         "NgayNhap": "2026-10-27"
       }

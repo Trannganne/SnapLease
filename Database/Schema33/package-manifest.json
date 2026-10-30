@@ -2,7 +2,7 @@
   "Status": "FILES_SEALED_PENDING_RUNTIME_EF_AND_DEFINITION_CHECKS",
   "Database": "RentalCameraDb30_Test",
   "Environment": "Schema33Trial",
-  "createdUtc": "2026-10-27T13:59:00.848552+00:00",
+  "createdUtc": "2026-10-27T20:59:00.848552+07:00",
   "requiredTables": 33,
   "requiredColumns": 376,
   "files": [
@@ -16,7 +16,7 @@
     },
     {
       "path": "02_seed_catalog.sql",
-      "sha256": "d95e60eb96633d73f2166fa541191fd629ea175fc56ef90f7f3ca0e97f30dedd"
+      "sha256": "84562847c0b38c96ad5f379a70e0099cbf7a5ec4d6843d1bd49ee11d3680b210"
     },
     {
       "path": "04_verify_schema.sql",
@@ -24,7 +24,7 @@
     },
     {
       "path": "05_verify_seed_catalog.sql",
-      "sha256": "6ac0be643801fdd9a6cf99764061354de5da662d4d679c94572ea4f42a9386e1"
+      "sha256": "0c9bd13cc6bc277511f2560ad4f76cb0c6d43c9eac69aec57b554342d98a658f"
     },
     {
       "path": "schema.json",
@@ -40,11 +40,11 @@
     },
     {
       "path": "seed-catalog.json",
-      "sha256": "9fc41166a9f39e5c7dd84b5f50dd29cc7aadf8704dfe8e8fdd3a63fb76cad728"
+      "sha256": "a1eabf6c133f8b8e5012524c590357fa9b4c96afa6ae1a8ad7d34005e8c94059"
     },
     {
       "path": "README.md",
-      "sha256": "8688aa328de17b407b0797851372fe149d51709e87665197d1bca7a5176d27c4"
+      "sha256": "c58c2205f42e38c94cea0e796ea91a92850930a8c051ad558103649c812a9fbc"
     },
     {
       "path": "Invoke-Schema33Package.ps1",

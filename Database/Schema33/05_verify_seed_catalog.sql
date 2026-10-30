@@ -17,6 +17,10 @@ IF EXISTS(SELECT MaCuaHang,MaDongMay FROM dbo.ThietBi WHERE MaThietBi LIKE 'TR33
 IF (SELECT COUNT(*) FROM dbo.ThietBi WHERE MaThietBi LIKE 'TR33[_]%')<>90 THROW 53330,'Expected90 synthetic devices.',1;
 IF (SELECT COUNT(DISTINCT MaCuaHang) FROM dbo.ThietBi WHERE MaThietBi LIKE 'TR33[_]%')<>3 THROW 53331,'Expected3 branches.',1;
 IF (SELECT COUNT(DISTINCT MaDongMay) FROM dbo.ThietBi WHERE MaThietBi LIKE 'TR33[_]%')<>6 THROW 53332,'Expected6 models.',1;
+IF (SELECT COUNT(*) FROM dbo.DanhMuc WHERE MaDanhMuc IN ('TR33_CAT','TR33_CAT_LENS','TR33_CAT_SUPPORT','TR33_CAT_POWER','TR33_CAT_STORAGE'))<>5 THROW 53336,'Expected5 professional catalog categories.',1;
+IF (SELECT COUNT(*) FROM dbo.ThuongHieu WHERE MaThuongHieu IN ('TR33_BR1','TR33_BR2','TR33_BR3','TR33_BR4'))<>4 THROW 53337,'Expected4 catalog brands.',1;
+IF (SELECT COUNT(*) FROM dbo.DongMay WHERE MaDongMay LIKE 'TR33[_]M0[1-6]')<>6 THROW 53338,'Expected6 professional catalog models.',1;
+IF (SELECT COUNT(*) FROM dbo.AnhThietBi WHERE MaAnh LIKE 'TR33[_]IMG[_]M0[1-6]' AND LaAnhDaiDien=1)<>6 THROW 53339,'Expected one featured image for each catalog model.',1;
 IF EXISTS(SELECT MaCuaHang,MaDongMay FROM dbo.ThietBi WHERE MaThietBi LIKE 'TR33[_]%' GROUP BY MaCuaHang,MaDongMay HAVING COUNT(*)<>5) THROW 53333,'Each branch-model pair must have5 devices.',1;
 IF EXISTS(SELECT SoSerial FROM dbo.ThietBi WHERE MaThietBi LIKE 'TR33[_]%' GROUP BY SoSerial HAVING COUNT(*)<>1) THROW 53334,'Duplicate serial.',1;
 SELECT MaCuaHang,MaDongMay,COUNT(*) TotalDevices,SUM(CASE WHEN TrangThai='SAN_SANG' THEN 1 ELSE 0 END) ReadyStatus,SUM(CASE WHEN TrangThai='BAO_TRI' THEN 1 ELSE 0 END) MaintenanceStatus FROM dbo.ThietBi WHERE MaThietBi LIKE 'TR33[_]%' GROUP BY MaCuaHang,MaDongMay ORDER BY MaCuaHang,MaDongMay;

@@ -1,7 +1,14 @@
--- PREPARED ONLY. Synthetic, idempotent baseline. No contracts/payments/PDF/signature rows are fabricated.
+-- PREPARED ONLY. Idempotent trial baseline with professional catalog data. No contracts/payments/PDF/signature rows are fabricated.
 
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
+SET ANSI_NULLS ON;
+SET ANSI_PADDING ON;
+SET ANSI_WARNINGS ON;
+SET ARITHABORT ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET QUOTED_IDENTIFIER ON;
+SET NUMERIC_ROUNDABORT OFF;
 IF DB_NAME() <> N'RentalCameraDb30_Test'
     THROW 53300, 'Only RentalCameraDb30_Test is permitted by this reviewed trial package.', 1;
 IF CONVERT(nvarchar(128),SESSION_CONTEXT(N'Schema33.ExpectedDatabase')) IS NULL
@@ -98,698 +105,683 @@ END
 ELSE
  INSERT dbo.[CuaHang] ([MaCuaHang],[TenCuaHang],[ViDo],[KinhDo],[DiaChi],[SoDienThoai],[Email],[MoTa],[TrangThai]) VALUES (N'TR33_S03',N'SnapLease Lý Thường Kiệt',NULL,NULL,N'268 Lý Thường Kiệt, Quận 10, TP.HCM',N'0900000003',N'branch3@example.invalid',N'FAKE TRIAL DATA ONLY',N'HOAT_DONG');
 
-IF EXISTS(SELECT 1 FROM dbo.[DanhMuc] WHERE [MaDanhMuc]=N'TR33_CAT')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[DanhMuc] WHERE [MaDanhMuc]=N'TR33_CAT' AND (([MaDanhMuc] IS NULL AND N'TR33_CAT' IS NOT NULL) OR ([MaDanhMuc] IS NOT NULL AND N'TR33_CAT' IS NULL) OR ([MaDanhMuc] <> N'TR33_CAT') OR ([TenDanhMuc] IS NULL AND N'TRIAL33 Cameras' IS NOT NULL) OR ([TenDanhMuc] IS NOT NULL AND N'TRIAL33 Cameras' IS NULL) OR ([TenDanhMuc] <> N'TRIAL33 Cameras') OR ([MoTa] IS NULL AND N'Synthetic catalog' IS NOT NULL) OR ([MoTa] IS NOT NULL AND N'Synthetic catalog' IS NULL) OR ([MoTa] <> N'Synthetic catalog'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[DanhMuc] ([MaDanhMuc],[TenDanhMuc],[MoTa],[TrangThai]) VALUES (N'TR33_CAT',N'TRIAL33 Cameras',N'Synthetic catalog',N'HOAT_DONG');
+DECLARE @SeedDanhMuc TABLE (MaDanhMuc varchar(20) PRIMARY KEY, TenDanhMuc nvarchar(150), MoTa nvarchar(500), TrangThai varchar(20));
+INSERT @SeedDanhMuc VALUES
+(N'TR33_CAT',N'Máy ảnh',N'Máy ảnh mirrorless và DSLR dành cho chụp sự kiện, chân dung, sản phẩm và sản xuất nội dung chuyên nghiệp.',N'HOAT_DONG'),
+(N'TR33_CAT_LENS',N'Ống kính',N'Ống kính chính hãng với nhiều dải tiêu cự, khẩu độ và ngàm máy phục vụ nhu cầu chụp ảnh, quay phim.',N'HOAT_DONG'),
+(N'TR33_CAT_SUPPORT',N'Thiết bị hỗ trợ',N'Gimbal, tripod và phụ kiện hỗ trợ giúp ổn định hình ảnh và tối ưu quy trình ghi hình.',N'HOAT_DONG'),
+(N'TR33_CAT_POWER',N'Pin và bộ sạc',N'Pin và bộ sạc tương thích cho máy ảnh, bảo đảm thời lượng vận hành trong các buổi chụp kéo dài.',N'HOAT_DONG'),
+(N'TR33_CAT_STORAGE',N'Thẻ nhớ và lưu trữ',N'Thẻ nhớ tốc độ cao và phụ kiện lưu trữ dành cho ảnh RAW, video 4K và quy trình hậu kỳ chuyên nghiệp.',N'HOAT_DONG');
+IF EXISTS(SELECT 1 FROM dbo.DanhMuc d JOIN @SeedDanhMuc s ON s.MaDanhMuc=d.MaDanhMuc WHERE d.TenDanhMuc<>s.TenDanhMuc OR ISNULL(d.MoTa,N'')<>ISNULL(s.MoTa,N'') OR d.TrangThai<>s.TrangThai)
+ THROW 53311,'Seed category ID collides with different data; stop without updating data.',1;
+INSERT dbo.DanhMuc(MaDanhMuc,TenDanhMuc,MoTa,TrangThai)
+SELECT s.MaDanhMuc,s.TenDanhMuc,s.MoTa,s.TrangThai FROM @SeedDanhMuc s WHERE NOT EXISTS(SELECT 1 FROM dbo.DanhMuc d WHERE d.MaDanhMuc=s.MaDanhMuc);
 
-IF EXISTS(SELECT 1 FROM dbo.[ThuongHieu] WHERE [MaThuongHieu]=N'TR33_BR1')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[ThuongHieu] WHERE [MaThuongHieu]=N'TR33_BR1' AND (([MaThuongHieu] IS NULL AND N'TR33_BR1' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR1' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR1') OR ([TenThuongHieu] IS NULL AND N'TRIAL33 Brand 1' IS NOT NULL) OR ([TenThuongHieu] IS NOT NULL AND N'TRIAL33 Brand 1' IS NULL) OR ([TenThuongHieu] <> N'TRIAL33 Brand 1') OR ([QuocGia] IS NULL AND N'Synthetic' IS NOT NULL) OR ([QuocGia] IS NOT NULL AND N'Synthetic' IS NULL) OR ([QuocGia] <> N'Synthetic'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[ThuongHieu] ([MaThuongHieu],[TenThuongHieu],[QuocGia]) VALUES (N'TR33_BR1',N'TRIAL33 Brand 1',N'Synthetic');
+DECLARE @SeedThuongHieu TABLE (MaThuongHieu varchar(20) PRIMARY KEY, TenThuongHieu nvarchar(150), QuocGia nvarchar(100));
+INSERT @SeedThuongHieu VALUES
+(N'TR33_BR1',N'Canon',N'Nhật Bản'),
+(N'TR33_BR2',N'Sony',N'Nhật Bản'),
+(N'TR33_BR3',N'DJI',N'Trung Quốc'),
+(N'TR33_BR4',N'SanDisk',N'Hoa Kỳ');
+IF EXISTS(SELECT 1 FROM dbo.ThuongHieu d JOIN @SeedThuongHieu s ON s.MaThuongHieu=d.MaThuongHieu WHERE d.TenThuongHieu<>s.TenThuongHieu OR ISNULL(d.QuocGia,N'')<>ISNULL(s.QuocGia,N''))
+ THROW 53311,'Seed brand ID collides with different data; stop without updating data.',1;
+INSERT dbo.ThuongHieu(MaThuongHieu,TenThuongHieu,QuocGia)
+SELECT s.MaThuongHieu,s.TenThuongHieu,s.QuocGia FROM @SeedThuongHieu s WHERE NOT EXISTS(SELECT 1 FROM dbo.ThuongHieu d WHERE d.MaThuongHieu=s.MaThuongHieu);
 
-IF EXISTS(SELECT 1 FROM dbo.[ThuongHieu] WHERE [MaThuongHieu]=N'TR33_BR2')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[ThuongHieu] WHERE [MaThuongHieu]=N'TR33_BR2' AND (([MaThuongHieu] IS NULL AND N'TR33_BR2' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR2' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR2') OR ([TenThuongHieu] IS NULL AND N'TRIAL33 Brand 2' IS NOT NULL) OR ([TenThuongHieu] IS NOT NULL AND N'TRIAL33 Brand 2' IS NULL) OR ([TenThuongHieu] <> N'TRIAL33 Brand 2') OR ([QuocGia] IS NULL AND N'Synthetic' IS NOT NULL) OR ([QuocGia] IS NOT NULL AND N'Synthetic' IS NULL) OR ([QuocGia] <> N'Synthetic'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[ThuongHieu] ([MaThuongHieu],[TenThuongHieu],[QuocGia]) VALUES (N'TR33_BR2',N'TRIAL33 Brand 2',N'Synthetic');
+DECLARE @SeedDongMay TABLE (MaDongMay varchar(20) PRIMARY KEY, MaDanhMuc varchar(20), MaThuongHieu varchar(20), TenDongMay nvarchar(200), MoTa nvarchar(1000), GiaThueNgay decimal(18,2), TienCoc decimal(18,2), PhanTramGiamGia decimal(5,2));
+INSERT @SeedDongMay VALUES
+(N'TR33_M01',N'TR33_CAT',N'TR33_BR1',N'Canon EOS R6 Mark II',N'Máy ảnh mirrorless full-frame 24,2 MP, chống rung trong thân máy và quay 4K 60p; phù hợp chụp sự kiện, chân dung và sản xuất nội dung chuyên nghiệp.',650000,20000000,5),
+(N'TR33_M02',N'TR33_CAT',N'TR33_BR2',N'Sony Alpha 7 IV',N'Máy ảnh mirrorless full-frame 33 MP, lấy nét theo chủ thể và quay 4K 60p; cân bằng tốt giữa chất lượng ảnh tĩnh và video.',600000,18000000,5),
+(N'TR33_M03',N'TR33_CAT_LENS',N'TR33_BR1',N'Canon RF 24-70mm F2.8L IS USM',N'Ống kính zoom RF dòng L có khẩu độ cố định f/2.8, chống rung quang học và mô-tơ Nano USM; phù hợp sự kiện, chân dung và quay phim.',350000,12000000,0),
+(N'TR33_M04',N'TR33_CAT_SUPPORT',N'TR33_BR3',N'DJI RS 3 Pro Combo',N'Gimbal ba trục bằng sợi carbon, tải trọng thử nghiệm 4,5 kg, khóa trục tự động và màn hình OLED; dành cho máy ảnh mirrorless và cinema camera.',450000,10000000,0),
+(N'TR33_M05',N'TR33_CAT_POWER',N'TR33_BR2',N'Sony NP-FZ100',N'Pin sạc Z-series dung lượng 2.280 mAh dành cho nhiều thân máy Sony Alpha; thích hợp làm pin chính hoặc pin dự phòng cho buổi chụp dài.',80000,1500000,0),
+(N'TR33_M06',N'TR33_CAT_STORAGE',N'TR33_BR4',N'SanDisk Extreme PRO SDXC UHS-II V60 128GB',N'Thẻ nhớ SDXC UHS-II chuẩn V60 dung lượng 128 GB, phù hợp chụp liên tiếp độ phân giải cao và ghi video 4K/6K ổn định.',60000,1000000,0);
+IF EXISTS(SELECT 1 FROM dbo.DongMay d JOIN @SeedDongMay s ON s.MaDongMay=d.MaDongMay WHERE d.MaDanhMuc<>s.MaDanhMuc OR d.MaThuongHieu<>s.MaThuongHieu OR d.TenDongMay<>s.TenDongMay OR ISNULL(d.MoTa,N'')<>ISNULL(s.MoTa,N'') OR d.GiaThueNgay<>s.GiaThueNgay OR d.TienCoc<>s.TienCoc OR d.PhanTramGiamGia<>s.PhanTramGiamGia)
+ THROW 53311,'Seed model ID collides with different data; stop without updating data.',1;
+INSERT dbo.DongMay(MaDongMay,MaDanhMuc,MaThuongHieu,TenDongMay,MoTa,GiaThueNgay,TienCoc,PhanTramGiamGia)
+SELECT s.MaDongMay,s.MaDanhMuc,s.MaThuongHieu,s.TenDongMay,s.MoTa,s.GiaThueNgay,s.TienCoc,s.PhanTramGiamGia FROM @SeedDongMay s WHERE NOT EXISTS(SELECT 1 FROM dbo.DongMay d WHERE d.MaDongMay=s.MaDongMay);
 
-IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M01')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M01' AND (([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaDanhMuc] IS NULL AND N'TR33_CAT' IS NOT NULL) OR ([MaDanhMuc] IS NOT NULL AND N'TR33_CAT' IS NULL) OR ([MaDanhMuc] <> N'TR33_CAT') OR ([MaThuongHieu] IS NULL AND N'TR33_BR1' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR1' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR1') OR ([TenDongMay] IS NULL AND N'TRIAL33 Camera Model 01' IS NOT NULL) OR ([TenDongMay] IS NOT NULL AND N'TRIAL33 Camera Model 01' IS NULL) OR ([TenDongMay] <> N'TRIAL33 Camera Model 01') OR ([MoTa] IS NULL AND N'Synthetic camera model' IS NOT NULL) OR ([MoTa] IS NOT NULL AND N'Synthetic camera model' IS NULL) OR ([MoTa] <> N'Synthetic camera model') OR ([GiaThueNgay] IS NULL AND 125000 IS NOT NULL) OR ([GiaThueNgay] IS NOT NULL AND 125000 IS NULL) OR ([GiaThueNgay] <> 125000) OR ([TienCoc] IS NULL AND 1250000 IS NOT NULL) OR ([TienCoc] IS NOT NULL AND 1250000 IS NULL) OR ([TienCoc] <> 1250000) OR ([PhanTramGiamGia] IS NULL AND 0 IS NOT NULL) OR ([PhanTramGiamGia] IS NOT NULL AND 0 IS NULL) OR ([PhanTramGiamGia] <> 0))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[DongMay] ([MaDongMay],[MaDanhMuc],[MaThuongHieu],[TenDongMay],[MoTa],[GiaThueNgay],[TienCoc],[PhanTramGiamGia]) VALUES (N'TR33_M01',N'TR33_CAT',N'TR33_BR1',N'TRIAL33 Camera Model 01',N'Synthetic camera model',125000,1250000,0);
-
-IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M02')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M02' AND (([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaDanhMuc] IS NULL AND N'TR33_CAT' IS NOT NULL) OR ([MaDanhMuc] IS NOT NULL AND N'TR33_CAT' IS NULL) OR ([MaDanhMuc] <> N'TR33_CAT') OR ([MaThuongHieu] IS NULL AND N'TR33_BR1' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR1' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR1') OR ([TenDongMay] IS NULL AND N'TRIAL33 Camera Model 02' IS NOT NULL) OR ([TenDongMay] IS NOT NULL AND N'TRIAL33 Camera Model 02' IS NULL) OR ([TenDongMay] <> N'TRIAL33 Camera Model 02') OR ([MoTa] IS NULL AND N'Synthetic camera model' IS NOT NULL) OR ([MoTa] IS NOT NULL AND N'Synthetic camera model' IS NULL) OR ([MoTa] <> N'Synthetic camera model') OR ([GiaThueNgay] IS NULL AND 150000 IS NOT NULL) OR ([GiaThueNgay] IS NOT NULL AND 150000 IS NULL) OR ([GiaThueNgay] <> 150000) OR ([TienCoc] IS NULL AND 1500000 IS NOT NULL) OR ([TienCoc] IS NOT NULL AND 1500000 IS NULL) OR ([TienCoc] <> 1500000) OR ([PhanTramGiamGia] IS NULL AND 0 IS NOT NULL) OR ([PhanTramGiamGia] IS NOT NULL AND 0 IS NULL) OR ([PhanTramGiamGia] <> 0))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[DongMay] ([MaDongMay],[MaDanhMuc],[MaThuongHieu],[TenDongMay],[MoTa],[GiaThueNgay],[TienCoc],[PhanTramGiamGia]) VALUES (N'TR33_M02',N'TR33_CAT',N'TR33_BR1',N'TRIAL33 Camera Model 02',N'Synthetic camera model',150000,1500000,0);
-
-IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M03')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M03' AND (([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaDanhMuc] IS NULL AND N'TR33_CAT' IS NOT NULL) OR ([MaDanhMuc] IS NOT NULL AND N'TR33_CAT' IS NULL) OR ([MaDanhMuc] <> N'TR33_CAT') OR ([MaThuongHieu] IS NULL AND N'TR33_BR1' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR1' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR1') OR ([TenDongMay] IS NULL AND N'TRIAL33 Camera Model 03' IS NOT NULL) OR ([TenDongMay] IS NOT NULL AND N'TRIAL33 Camera Model 03' IS NULL) OR ([TenDongMay] <> N'TRIAL33 Camera Model 03') OR ([MoTa] IS NULL AND N'Synthetic camera model' IS NOT NULL) OR ([MoTa] IS NOT NULL AND N'Synthetic camera model' IS NULL) OR ([MoTa] <> N'Synthetic camera model') OR ([GiaThueNgay] IS NULL AND 175000 IS NOT NULL) OR ([GiaThueNgay] IS NOT NULL AND 175000 IS NULL) OR ([GiaThueNgay] <> 175000) OR ([TienCoc] IS NULL AND 1750000 IS NOT NULL) OR ([TienCoc] IS NOT NULL AND 1750000 IS NULL) OR ([TienCoc] <> 1750000) OR ([PhanTramGiamGia] IS NULL AND 0 IS NOT NULL) OR ([PhanTramGiamGia] IS NOT NULL AND 0 IS NULL) OR ([PhanTramGiamGia] <> 0))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[DongMay] ([MaDongMay],[MaDanhMuc],[MaThuongHieu],[TenDongMay],[MoTa],[GiaThueNgay],[TienCoc],[PhanTramGiamGia]) VALUES (N'TR33_M03',N'TR33_CAT',N'TR33_BR1',N'TRIAL33 Camera Model 03',N'Synthetic camera model',175000,1750000,0);
-
-IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M04')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M04' AND (([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaDanhMuc] IS NULL AND N'TR33_CAT' IS NOT NULL) OR ([MaDanhMuc] IS NOT NULL AND N'TR33_CAT' IS NULL) OR ([MaDanhMuc] <> N'TR33_CAT') OR ([MaThuongHieu] IS NULL AND N'TR33_BR2' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR2' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR2') OR ([TenDongMay] IS NULL AND N'TRIAL33 Camera Model 04' IS NOT NULL) OR ([TenDongMay] IS NOT NULL AND N'TRIAL33 Camera Model 04' IS NULL) OR ([TenDongMay] <> N'TRIAL33 Camera Model 04') OR ([MoTa] IS NULL AND N'Synthetic camera model' IS NOT NULL) OR ([MoTa] IS NOT NULL AND N'Synthetic camera model' IS NULL) OR ([MoTa] <> N'Synthetic camera model') OR ([GiaThueNgay] IS NULL AND 200000 IS NOT NULL) OR ([GiaThueNgay] IS NOT NULL AND 200000 IS NULL) OR ([GiaThueNgay] <> 200000) OR ([TienCoc] IS NULL AND 2000000 IS NOT NULL) OR ([TienCoc] IS NOT NULL AND 2000000 IS NULL) OR ([TienCoc] <> 2000000) OR ([PhanTramGiamGia] IS NULL AND 0 IS NOT NULL) OR ([PhanTramGiamGia] IS NOT NULL AND 0 IS NULL) OR ([PhanTramGiamGia] <> 0))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[DongMay] ([MaDongMay],[MaDanhMuc],[MaThuongHieu],[TenDongMay],[MoTa],[GiaThueNgay],[TienCoc],[PhanTramGiamGia]) VALUES (N'TR33_M04',N'TR33_CAT',N'TR33_BR2',N'TRIAL33 Camera Model 04',N'Synthetic camera model',200000,2000000,0);
-
-IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M05')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M05' AND (([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaDanhMuc] IS NULL AND N'TR33_CAT' IS NOT NULL) OR ([MaDanhMuc] IS NOT NULL AND N'TR33_CAT' IS NULL) OR ([MaDanhMuc] <> N'TR33_CAT') OR ([MaThuongHieu] IS NULL AND N'TR33_BR2' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR2' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR2') OR ([TenDongMay] IS NULL AND N'TRIAL33 Camera Model 05' IS NOT NULL) OR ([TenDongMay] IS NOT NULL AND N'TRIAL33 Camera Model 05' IS NULL) OR ([TenDongMay] <> N'TRIAL33 Camera Model 05') OR ([MoTa] IS NULL AND N'Synthetic camera model' IS NOT NULL) OR ([MoTa] IS NOT NULL AND N'Synthetic camera model' IS NULL) OR ([MoTa] <> N'Synthetic camera model') OR ([GiaThueNgay] IS NULL AND 225000 IS NOT NULL) OR ([GiaThueNgay] IS NOT NULL AND 225000 IS NULL) OR ([GiaThueNgay] <> 225000) OR ([TienCoc] IS NULL AND 2250000 IS NOT NULL) OR ([TienCoc] IS NOT NULL AND 2250000 IS NULL) OR ([TienCoc] <> 2250000) OR ([PhanTramGiamGia] IS NULL AND 0 IS NOT NULL) OR ([PhanTramGiamGia] IS NOT NULL AND 0 IS NULL) OR ([PhanTramGiamGia] <> 0))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[DongMay] ([MaDongMay],[MaDanhMuc],[MaThuongHieu],[TenDongMay],[MoTa],[GiaThueNgay],[TienCoc],[PhanTramGiamGia]) VALUES (N'TR33_M05',N'TR33_CAT',N'TR33_BR2',N'TRIAL33 Camera Model 05',N'Synthetic camera model',225000,2250000,0);
-
-IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M06')
-BEGIN
- IF EXISTS(SELECT 1 FROM dbo.[DongMay] WHERE [MaDongMay]=N'TR33_M06' AND (([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaDanhMuc] IS NULL AND N'TR33_CAT' IS NOT NULL) OR ([MaDanhMuc] IS NOT NULL AND N'TR33_CAT' IS NULL) OR ([MaDanhMuc] <> N'TR33_CAT') OR ([MaThuongHieu] IS NULL AND N'TR33_BR2' IS NOT NULL) OR ([MaThuongHieu] IS NOT NULL AND N'TR33_BR2' IS NULL) OR ([MaThuongHieu] <> N'TR33_BR2') OR ([TenDongMay] IS NULL AND N'TRIAL33 Camera Model 06' IS NOT NULL) OR ([TenDongMay] IS NOT NULL AND N'TRIAL33 Camera Model 06' IS NULL) OR ([TenDongMay] <> N'TRIAL33 Camera Model 06') OR ([MoTa] IS NULL AND N'Synthetic camera model' IS NOT NULL) OR ([MoTa] IS NOT NULL AND N'Synthetic camera model' IS NULL) OR ([MoTa] <> N'Synthetic camera model') OR ([GiaThueNgay] IS NULL AND 250000 IS NOT NULL) OR ([GiaThueNgay] IS NOT NULL AND 250000 IS NULL) OR ([GiaThueNgay] <> 250000) OR ([TienCoc] IS NULL AND 2500000 IS NOT NULL) OR ([TienCoc] IS NOT NULL AND 2500000 IS NULL) OR ([TienCoc] <> 2500000) OR ([PhanTramGiamGia] IS NULL AND 0 IS NOT NULL) OR ([PhanTramGiamGia] IS NOT NULL AND 0 IS NULL) OR ([PhanTramGiamGia] <> 0))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
-END
-ELSE
- INSERT dbo.[DongMay] ([MaDongMay],[MaDanhMuc],[MaThuongHieu],[TenDongMay],[MoTa],[GiaThueNgay],[TienCoc],[PhanTramGiamGia]) VALUES (N'TR33_M06',N'TR33_CAT',N'TR33_BR2',N'TRIAL33 Camera Model 06',N'Synthetic camera model',250000,2500000,0);
-
+DECLARE @SeedAnh TABLE (MaAnh varchar(20) PRIMARY KEY, MaDongMay varchar(20), DuongDanAnh nvarchar(500), LaAnhDaiDien bit, ThuTuHienThi int);
+INSERT @SeedAnh VALUES
+(N'TR33_IMG_M01',N'TR33_M01',N'https://commons.wikimedia.org/wiki/Special:Redirect/file/Canon_EOS_R6_Mark_II_9_jan_2023d.jpg?width=1200',1,0),
+(N'TR33_IMG_M02',N'TR33_M02',N'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sony_Alpha_7_Mark_IV.jpg?width=1200',1,0),
+(N'TR33_IMG_M03',N'TR33_M03',N'https://www.uniquephoto.com/resources/uniquephoto/images/products/processed/CNL7381.largeThumb.a.png',1,0),
+(N'TR33_IMG_M04',N'TR33_M04',N'https://devitech-senegal.com/storage/dji-rs-3-pro-1-800x800.jpg',1,0),
+(N'TR33_IMG_M05',N'TR33_M05',N'https://commons.wikimedia.org/wiki/Special:Redirect/file/Sony_NP-FZ100_Battery.jpg?width=1200',1,0),
+(N'TR33_IMG_M06',N'TR33_M06',N'https://www.sandisk.com/content/dam/store/en-us/assets/products/memory-cards/extreme-pro-sd-uhs-ii-v60/gallery/extreme-pro-sd-uhs-ii-v60-128gb-front.png',1,0);
+IF EXISTS(SELECT 1 FROM dbo.AnhThietBi d JOIN @SeedAnh s ON s.MaAnh=d.MaAnh WHERE d.MaDongMay<>s.MaDongMay OR d.DuongDanAnh<>s.DuongDanAnh OR d.LaAnhDaiDien<>s.LaAnhDaiDien OR d.ThuTuHienThi<>s.ThuTuHienThi)
+ THROW 53311,'Seed image ID collides with different data; stop without updating data.',1;
+INSERT dbo.AnhThietBi(MaAnh,MaDongMay,DuongDanAnh,LaAnhDaiDien,ThuTuHienThi)
+SELECT s.MaAnh,s.MaDongMay,s.DuongDanAnh,s.LaAnhDaiDien,s.ThuTuHienThi FROM @SeedAnh s WHERE NOT EXISTS(SELECT 1 FROM dbo.AnhThietBi d WHERE d.MaAnh=s.MaAnh);
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D1' AND (([MaThietBi] IS NULL AND N'TR33_S01M01D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M01D1' IS NULL) OR ([MaThietBi] <> N'TR33_S01M01D1') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M01-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M01-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M01-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D1',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D1',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D2' AND (([MaThietBi] IS NULL AND N'TR33_S01M01D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M01D2' IS NULL) OR ([MaThietBi] <> N'TR33_S01M01D2') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M01-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M01-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M01-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D2',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D2',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D3' AND (([MaThietBi] IS NULL AND N'TR33_S01M01D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M01D3' IS NULL) OR ([MaThietBi] <> N'TR33_S01M01D3') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M01-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M01-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M01-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D3',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D3',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D4' AND (([MaThietBi] IS NULL AND N'TR33_S01M01D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M01D4' IS NULL) OR ([MaThietBi] <> N'TR33_S01M01D4') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M01-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M01-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M01-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D4',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D4',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M01D5' AND (([MaThietBi] IS NULL AND N'TR33_S01M01D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M01D5' IS NULL) OR ([MaThietBi] <> N'TR33_S01M01D5') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M01-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M01-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M01-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D5',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M01D5',N'TR33_M01',N'TR33_S01',N'SN-TR33-S01-M01-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D1' AND (([MaThietBi] IS NULL AND N'TR33_S02M01D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M01D1' IS NULL) OR ([MaThietBi] <> N'TR33_S02M01D1') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M01-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M01-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M01-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D1',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D1',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D2' AND (([MaThietBi] IS NULL AND N'TR33_S02M01D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M01D2' IS NULL) OR ([MaThietBi] <> N'TR33_S02M01D2') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M01-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M01-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M01-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D2',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D2',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D3' AND (([MaThietBi] IS NULL AND N'TR33_S02M01D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M01D3' IS NULL) OR ([MaThietBi] <> N'TR33_S02M01D3') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M01-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M01-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M01-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D3',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D3',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D4' AND (([MaThietBi] IS NULL AND N'TR33_S02M01D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M01D4' IS NULL) OR ([MaThietBi] <> N'TR33_S02M01D4') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M01-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M01-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M01-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D4',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D4',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M01D5' AND (([MaThietBi] IS NULL AND N'TR33_S02M01D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M01D5' IS NULL) OR ([MaThietBi] <> N'TR33_S02M01D5') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M01-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M01-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M01-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D5',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M01D5',N'TR33_M01',N'TR33_S02',N'SN-TR33-S02-M01-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D1' AND (([MaThietBi] IS NULL AND N'TR33_S03M01D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M01D1' IS NULL) OR ([MaThietBi] <> N'TR33_S03M01D1') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M01-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M01-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M01-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D1',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D1',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D2' AND (([MaThietBi] IS NULL AND N'TR33_S03M01D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M01D2' IS NULL) OR ([MaThietBi] <> N'TR33_S03M01D2') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M01-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M01-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M01-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D2',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D2',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D3' AND (([MaThietBi] IS NULL AND N'TR33_S03M01D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M01D3' IS NULL) OR ([MaThietBi] <> N'TR33_S03M01D3') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M01-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M01-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M01-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D3',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D3',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D4' AND (([MaThietBi] IS NULL AND N'TR33_S03M01D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M01D4' IS NULL) OR ([MaThietBi] <> N'TR33_S03M01D4') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M01-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M01-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M01-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D4',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D4',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M01D5' AND (([MaThietBi] IS NULL AND N'TR33_S03M01D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M01D5' IS NULL) OR ([MaThietBi] <> N'TR33_S03M01D5') OR ([MaDongMay] IS NULL AND N'TR33_M01' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M01' IS NULL) OR ([MaDongMay] <> N'TR33_M01') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M01-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M01-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M01-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D5',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M01D5',N'TR33_M01',N'TR33_S03',N'SN-TR33-S03-M01-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D1' AND (([MaThietBi] IS NULL AND N'TR33_S01M02D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M02D1' IS NULL) OR ([MaThietBi] <> N'TR33_S01M02D1') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M02-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M02-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M02-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D1',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D1',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D2' AND (([MaThietBi] IS NULL AND N'TR33_S01M02D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M02D2' IS NULL) OR ([MaThietBi] <> N'TR33_S01M02D2') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M02-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M02-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M02-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D2',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D2',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D3' AND (([MaThietBi] IS NULL AND N'TR33_S01M02D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M02D3' IS NULL) OR ([MaThietBi] <> N'TR33_S01M02D3') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M02-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M02-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M02-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D3',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D3',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D4' AND (([MaThietBi] IS NULL AND N'TR33_S01M02D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M02D4' IS NULL) OR ([MaThietBi] <> N'TR33_S01M02D4') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M02-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M02-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M02-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D4',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D4',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M02D5' AND (([MaThietBi] IS NULL AND N'TR33_S01M02D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M02D5' IS NULL) OR ([MaThietBi] <> N'TR33_S01M02D5') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M02-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M02-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M02-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D5',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M02D5',N'TR33_M02',N'TR33_S01',N'SN-TR33-S01-M02-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D1' AND (([MaThietBi] IS NULL AND N'TR33_S02M02D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M02D1' IS NULL) OR ([MaThietBi] <> N'TR33_S02M02D1') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M02-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M02-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M02-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D1',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D1',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D2' AND (([MaThietBi] IS NULL AND N'TR33_S02M02D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M02D2' IS NULL) OR ([MaThietBi] <> N'TR33_S02M02D2') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M02-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M02-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M02-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D2',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D2',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D3' AND (([MaThietBi] IS NULL AND N'TR33_S02M02D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M02D3' IS NULL) OR ([MaThietBi] <> N'TR33_S02M02D3') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M02-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M02-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M02-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D3',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D3',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D4' AND (([MaThietBi] IS NULL AND N'TR33_S02M02D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M02D4' IS NULL) OR ([MaThietBi] <> N'TR33_S02M02D4') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M02-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M02-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M02-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D4',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D4',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M02D5' AND (([MaThietBi] IS NULL AND N'TR33_S02M02D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M02D5' IS NULL) OR ([MaThietBi] <> N'TR33_S02M02D5') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M02-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M02-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M02-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D5',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M02D5',N'TR33_M02',N'TR33_S02',N'SN-TR33-S02-M02-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D1' AND (([MaThietBi] IS NULL AND N'TR33_S03M02D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M02D1' IS NULL) OR ([MaThietBi] <> N'TR33_S03M02D1') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M02-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M02-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M02-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D1',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D1',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D2' AND (([MaThietBi] IS NULL AND N'TR33_S03M02D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M02D2' IS NULL) OR ([MaThietBi] <> N'TR33_S03M02D2') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M02-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M02-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M02-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D2',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D2',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D3' AND (([MaThietBi] IS NULL AND N'TR33_S03M02D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M02D3' IS NULL) OR ([MaThietBi] <> N'TR33_S03M02D3') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M02-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M02-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M02-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D3',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D3',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D4' AND (([MaThietBi] IS NULL AND N'TR33_S03M02D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M02D4' IS NULL) OR ([MaThietBi] <> N'TR33_S03M02D4') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M02-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M02-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M02-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D4',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D4',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M02D5' AND (([MaThietBi] IS NULL AND N'TR33_S03M02D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M02D5' IS NULL) OR ([MaThietBi] <> N'TR33_S03M02D5') OR ([MaDongMay] IS NULL AND N'TR33_M02' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M02' IS NULL) OR ([MaDongMay] <> N'TR33_M02') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M02-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M02-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M02-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D5',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M02D5',N'TR33_M02',N'TR33_S03',N'SN-TR33-S03-M02-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D1' AND (([MaThietBi] IS NULL AND N'TR33_S01M03D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M03D1' IS NULL) OR ([MaThietBi] <> N'TR33_S01M03D1') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M03-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M03-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M03-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D1',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D1',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D2' AND (([MaThietBi] IS NULL AND N'TR33_S01M03D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M03D2' IS NULL) OR ([MaThietBi] <> N'TR33_S01M03D2') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M03-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M03-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M03-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D2',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D2',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D3' AND (([MaThietBi] IS NULL AND N'TR33_S01M03D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M03D3' IS NULL) OR ([MaThietBi] <> N'TR33_S01M03D3') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M03-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M03-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M03-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D3',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D3',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D4' AND (([MaThietBi] IS NULL AND N'TR33_S01M03D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M03D4' IS NULL) OR ([MaThietBi] <> N'TR33_S01M03D4') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M03-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M03-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M03-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D4',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D4',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M03D5' AND (([MaThietBi] IS NULL AND N'TR33_S01M03D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M03D5' IS NULL) OR ([MaThietBi] <> N'TR33_S01M03D5') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M03-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M03-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M03-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D5',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M03D5',N'TR33_M03',N'TR33_S01',N'SN-TR33-S01-M03-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D1' AND (([MaThietBi] IS NULL AND N'TR33_S02M03D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M03D1' IS NULL) OR ([MaThietBi] <> N'TR33_S02M03D1') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M03-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M03-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M03-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D1',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D1',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D2' AND (([MaThietBi] IS NULL AND N'TR33_S02M03D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M03D2' IS NULL) OR ([MaThietBi] <> N'TR33_S02M03D2') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M03-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M03-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M03-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D2',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D2',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D3' AND (([MaThietBi] IS NULL AND N'TR33_S02M03D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M03D3' IS NULL) OR ([MaThietBi] <> N'TR33_S02M03D3') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M03-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M03-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M03-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D3',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D3',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D4' AND (([MaThietBi] IS NULL AND N'TR33_S02M03D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M03D4' IS NULL) OR ([MaThietBi] <> N'TR33_S02M03D4') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M03-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M03-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M03-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D4',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D4',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M03D5' AND (([MaThietBi] IS NULL AND N'TR33_S02M03D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M03D5' IS NULL) OR ([MaThietBi] <> N'TR33_S02M03D5') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M03-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M03-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M03-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D5',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M03D5',N'TR33_M03',N'TR33_S02',N'SN-TR33-S02-M03-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D1' AND (([MaThietBi] IS NULL AND N'TR33_S03M03D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M03D1' IS NULL) OR ([MaThietBi] <> N'TR33_S03M03D1') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M03-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M03-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M03-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D1',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D1',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D2' AND (([MaThietBi] IS NULL AND N'TR33_S03M03D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M03D2' IS NULL) OR ([MaThietBi] <> N'TR33_S03M03D2') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M03-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M03-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M03-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D2',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D2',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D3' AND (([MaThietBi] IS NULL AND N'TR33_S03M03D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M03D3' IS NULL) OR ([MaThietBi] <> N'TR33_S03M03D3') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M03-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M03-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M03-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D3',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D3',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D4' AND (([MaThietBi] IS NULL AND N'TR33_S03M03D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M03D4' IS NULL) OR ([MaThietBi] <> N'TR33_S03M03D4') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M03-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M03-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M03-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D4',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D4',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M03D5' AND (([MaThietBi] IS NULL AND N'TR33_S03M03D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M03D5' IS NULL) OR ([MaThietBi] <> N'TR33_S03M03D5') OR ([MaDongMay] IS NULL AND N'TR33_M03' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M03' IS NULL) OR ([MaDongMay] <> N'TR33_M03') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M03-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M03-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M03-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D5',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M03D5',N'TR33_M03',N'TR33_S03',N'SN-TR33-S03-M03-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D1' AND (([MaThietBi] IS NULL AND N'TR33_S01M04D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M04D1' IS NULL) OR ([MaThietBi] <> N'TR33_S01M04D1') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M04-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M04-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M04-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D1',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D1',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D2' AND (([MaThietBi] IS NULL AND N'TR33_S01M04D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M04D2' IS NULL) OR ([MaThietBi] <> N'TR33_S01M04D2') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M04-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M04-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M04-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D2',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D2',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D3' AND (([MaThietBi] IS NULL AND N'TR33_S01M04D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M04D3' IS NULL) OR ([MaThietBi] <> N'TR33_S01M04D3') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M04-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M04-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M04-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D3',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D3',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D4' AND (([MaThietBi] IS NULL AND N'TR33_S01M04D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M04D4' IS NULL) OR ([MaThietBi] <> N'TR33_S01M04D4') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M04-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M04-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M04-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D4',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D4',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M04D5' AND (([MaThietBi] IS NULL AND N'TR33_S01M04D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M04D5' IS NULL) OR ([MaThietBi] <> N'TR33_S01M04D5') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M04-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M04-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M04-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D5',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M04D5',N'TR33_M04',N'TR33_S01',N'SN-TR33-S01-M04-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D1' AND (([MaThietBi] IS NULL AND N'TR33_S02M04D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M04D1' IS NULL) OR ([MaThietBi] <> N'TR33_S02M04D1') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M04-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M04-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M04-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D1',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D1',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D2' AND (([MaThietBi] IS NULL AND N'TR33_S02M04D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M04D2' IS NULL) OR ([MaThietBi] <> N'TR33_S02M04D2') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M04-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M04-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M04-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D2',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D2',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D3' AND (([MaThietBi] IS NULL AND N'TR33_S02M04D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M04D3' IS NULL) OR ([MaThietBi] <> N'TR33_S02M04D3') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M04-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M04-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M04-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D3',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D3',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D4' AND (([MaThietBi] IS NULL AND N'TR33_S02M04D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M04D4' IS NULL) OR ([MaThietBi] <> N'TR33_S02M04D4') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M04-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M04-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M04-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D4',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D4',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M04D5' AND (([MaThietBi] IS NULL AND N'TR33_S02M04D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M04D5' IS NULL) OR ([MaThietBi] <> N'TR33_S02M04D5') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M04-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M04-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M04-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D5',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M04D5',N'TR33_M04',N'TR33_S02',N'SN-TR33-S02-M04-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D1' AND (([MaThietBi] IS NULL AND N'TR33_S03M04D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M04D1' IS NULL) OR ([MaThietBi] <> N'TR33_S03M04D1') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M04-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M04-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M04-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D1',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D1',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D2' AND (([MaThietBi] IS NULL AND N'TR33_S03M04D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M04D2' IS NULL) OR ([MaThietBi] <> N'TR33_S03M04D2') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M04-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M04-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M04-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D2',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D2',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D3' AND (([MaThietBi] IS NULL AND N'TR33_S03M04D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M04D3' IS NULL) OR ([MaThietBi] <> N'TR33_S03M04D3') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M04-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M04-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M04-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D3',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D3',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D4' AND (([MaThietBi] IS NULL AND N'TR33_S03M04D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M04D4' IS NULL) OR ([MaThietBi] <> N'TR33_S03M04D4') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M04-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M04-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M04-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D4',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D4',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M04D5' AND (([MaThietBi] IS NULL AND N'TR33_S03M04D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M04D5' IS NULL) OR ([MaThietBi] <> N'TR33_S03M04D5') OR ([MaDongMay] IS NULL AND N'TR33_M04' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M04' IS NULL) OR ([MaDongMay] <> N'TR33_M04') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M04-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M04-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M04-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D5',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M04D5',N'TR33_M04',N'TR33_S03',N'SN-TR33-S03-M04-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D1' AND (([MaThietBi] IS NULL AND N'TR33_S01M05D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M05D1' IS NULL) OR ([MaThietBi] <> N'TR33_S01M05D1') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M05-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M05-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M05-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D1',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D1',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D2' AND (([MaThietBi] IS NULL AND N'TR33_S01M05D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M05D2' IS NULL) OR ([MaThietBi] <> N'TR33_S01M05D2') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M05-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M05-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M05-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D2',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D2',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D3' AND (([MaThietBi] IS NULL AND N'TR33_S01M05D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M05D3' IS NULL) OR ([MaThietBi] <> N'TR33_S01M05D3') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M05-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M05-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M05-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D3',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D3',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D4' AND (([MaThietBi] IS NULL AND N'TR33_S01M05D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M05D4' IS NULL) OR ([MaThietBi] <> N'TR33_S01M05D4') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M05-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M05-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M05-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D4',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D4',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M05D5' AND (([MaThietBi] IS NULL AND N'TR33_S01M05D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M05D5' IS NULL) OR ([MaThietBi] <> N'TR33_S01M05D5') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M05-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M05-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M05-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D5',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M05D5',N'TR33_M05',N'TR33_S01',N'SN-TR33-S01-M05-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D1' AND (([MaThietBi] IS NULL AND N'TR33_S02M05D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M05D1' IS NULL) OR ([MaThietBi] <> N'TR33_S02M05D1') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M05-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M05-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M05-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D1',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D1',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D2' AND (([MaThietBi] IS NULL AND N'TR33_S02M05D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M05D2' IS NULL) OR ([MaThietBi] <> N'TR33_S02M05D2') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M05-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M05-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M05-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D2',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D2',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D3' AND (([MaThietBi] IS NULL AND N'TR33_S02M05D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M05D3' IS NULL) OR ([MaThietBi] <> N'TR33_S02M05D3') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M05-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M05-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M05-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D3',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D3',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D4' AND (([MaThietBi] IS NULL AND N'TR33_S02M05D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M05D4' IS NULL) OR ([MaThietBi] <> N'TR33_S02M05D4') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M05-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M05-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M05-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D4',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D4',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M05D5' AND (([MaThietBi] IS NULL AND N'TR33_S02M05D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M05D5' IS NULL) OR ([MaThietBi] <> N'TR33_S02M05D5') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M05-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M05-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M05-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D5',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M05D5',N'TR33_M05',N'TR33_S02',N'SN-TR33-S02-M05-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D1' AND (([MaThietBi] IS NULL AND N'TR33_S03M05D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M05D1' IS NULL) OR ([MaThietBi] <> N'TR33_S03M05D1') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M05-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M05-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M05-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D1',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D1',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D2' AND (([MaThietBi] IS NULL AND N'TR33_S03M05D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M05D2' IS NULL) OR ([MaThietBi] <> N'TR33_S03M05D2') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M05-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M05-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M05-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D2',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D2',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D3' AND (([MaThietBi] IS NULL AND N'TR33_S03M05D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M05D3' IS NULL) OR ([MaThietBi] <> N'TR33_S03M05D3') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M05-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M05-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M05-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D3',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D3',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D4' AND (([MaThietBi] IS NULL AND N'TR33_S03M05D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M05D4' IS NULL) OR ([MaThietBi] <> N'TR33_S03M05D4') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M05-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M05-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M05-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D4',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D4',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M05D5' AND (([MaThietBi] IS NULL AND N'TR33_S03M05D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M05D5' IS NULL) OR ([MaThietBi] <> N'TR33_S03M05D5') OR ([MaDongMay] IS NULL AND N'TR33_M05' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M05' IS NULL) OR ([MaDongMay] <> N'TR33_M05') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M05-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M05-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M05-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D5',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M05D5',N'TR33_M05',N'TR33_S03',N'SN-TR33-S03-M05-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D1' AND (([MaThietBi] IS NULL AND N'TR33_S01M06D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M06D1' IS NULL) OR ([MaThietBi] <> N'TR33_S01M06D1') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M06-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M06-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M06-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D1',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D1',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D2' AND (([MaThietBi] IS NULL AND N'TR33_S01M06D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M06D2' IS NULL) OR ([MaThietBi] <> N'TR33_S01M06D2') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M06-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M06-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M06-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D2',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D2',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D3' AND (([MaThietBi] IS NULL AND N'TR33_S01M06D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M06D3' IS NULL) OR ([MaThietBi] <> N'TR33_S01M06D3') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M06-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M06-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M06-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D3',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D3',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D4' AND (([MaThietBi] IS NULL AND N'TR33_S01M06D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M06D4' IS NULL) OR ([MaThietBi] <> N'TR33_S01M06D4') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M06-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M06-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M06-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D4',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D4',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S01M06D5' AND (([MaThietBi] IS NULL AND N'TR33_S01M06D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S01M06D5' IS NULL) OR ([MaThietBi] <> N'TR33_S01M06D5') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S01' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S01' IS NULL) OR ([MaCuaHang] <> N'TR33_S01') OR ([SoSerial] IS NULL AND N'SN-TR33-S01-M06-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S01-M06-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S01-M06-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D5',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S01M06D5',N'TR33_M06',N'TR33_S01',N'SN-TR33-S01-M06-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D1' AND (([MaThietBi] IS NULL AND N'TR33_S02M06D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M06D1' IS NULL) OR ([MaThietBi] <> N'TR33_S02M06D1') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M06-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M06-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M06-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D1',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D1',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D2' AND (([MaThietBi] IS NULL AND N'TR33_S02M06D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M06D2' IS NULL) OR ([MaThietBi] <> N'TR33_S02M06D2') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M06-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M06-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M06-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D2',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D2',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D3' AND (([MaThietBi] IS NULL AND N'TR33_S02M06D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M06D3' IS NULL) OR ([MaThietBi] <> N'TR33_S02M06D3') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M06-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M06-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M06-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D3',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D3',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D4' AND (([MaThietBi] IS NULL AND N'TR33_S02M06D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M06D4' IS NULL) OR ([MaThietBi] <> N'TR33_S02M06D4') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M06-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M06-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M06-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D4',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D4',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S02M06D5' AND (([MaThietBi] IS NULL AND N'TR33_S02M06D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S02M06D5' IS NULL) OR ([MaThietBi] <> N'TR33_S02M06D5') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S02' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S02' IS NULL) OR ([MaCuaHang] <> N'TR33_S02') OR ([SoSerial] IS NULL AND N'SN-TR33-S02-M06-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S02-M06-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S02-M06-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D5',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S02M06D5',N'TR33_M06',N'TR33_S02',N'SN-TR33-S02-M06-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D1')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D1' AND (([MaThietBi] IS NULL AND N'TR33_S03M06D1' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M06D1' IS NULL) OR ([MaThietBi] <> N'TR33_S03M06D1') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M06-01' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M06-01' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M06-01') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D1',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-01',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D1',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-01',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D2')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D2' AND (([MaThietBi] IS NULL AND N'TR33_S03M06D2' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M06D2' IS NULL) OR ([MaThietBi] <> N'TR33_S03M06D2') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M06-02' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M06-02' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M06-02') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D2',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-02',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D2',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-02',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D3')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D3' AND (([MaThietBi] IS NULL AND N'TR33_S03M06D3' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M06D3' IS NULL) OR ([MaThietBi] <> N'TR33_S03M06D3') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M06-03' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M06-03' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M06-03') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D3',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-03',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D3',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-03',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D4')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D4' AND (([MaThietBi] IS NULL AND N'TR33_S03M06D4' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M06D4' IS NULL) OR ([MaThietBi] <> N'TR33_S03M06D4') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M06-04' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M06-04' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M06-04') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D4',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-04',N'Synthetic ready',N'SAN_SANG',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D4',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-04',N'Hoạt động tốt, đã kiểm tra trước khi cho thuê',N'SAN_SANG',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D5')
 BEGIN
  IF EXISTS(SELECT 1 FROM dbo.[ThietBi] WHERE [MaThietBi]=N'TR33_S03M06D5' AND (([MaThietBi] IS NULL AND N'TR33_S03M06D5' IS NOT NULL) OR ([MaThietBi] IS NOT NULL AND N'TR33_S03M06D5' IS NULL) OR ([MaThietBi] <> N'TR33_S03M06D5') OR ([MaDongMay] IS NULL AND N'TR33_M06' IS NOT NULL) OR ([MaDongMay] IS NOT NULL AND N'TR33_M06' IS NULL) OR ([MaDongMay] <> N'TR33_M06') OR ([MaCuaHang] IS NULL AND N'TR33_S03' IS NOT NULL) OR ([MaCuaHang] IS NOT NULL AND N'TR33_S03' IS NULL) OR ([MaCuaHang] <> N'TR33_S03') OR ([SoSerial] IS NULL AND N'SN-TR33-S03-M06-05' IS NOT NULL) OR ([SoSerial] IS NOT NULL AND N'SN-TR33-S03-M06-05' IS NULL) OR ([SoSerial] <> N'SN-TR33-S03-M06-05') OR ([NgayNhap] IS NULL AND N'2026-10-27' IS NOT NULL) OR ([NgayNhap] IS NOT NULL AND N'2026-10-27' IS NULL) OR ([NgayNhap] <> N'2026-10-27'))) THROW 53311,'Seed ID collides with different identity; stop without updating data.',1;
 END
 ELSE
- INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D5',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-05',N'Synthetic maintenance',N'BAO_TRI',N'2026-10-27');
+ INSERT dbo.[ThietBi] ([MaThietBi],[MaDongMay],[MaCuaHang],[SoSerial],[TinhTrang],[TrangThai],[NgayNhap]) VALUES (N'TR33_S03M06D5',N'TR33_M06',N'TR33_S03',N'SN-TR33-S03-M06-05',N'Đang bảo trì định kỳ',N'BAO_TRI',N'2026-10-27');
 
 IF EXISTS(SELECT 1 FROM dbo.[TaiKhoan] WHERE [MaTaiKhoan]=N'TR33_C01')
 BEGIN

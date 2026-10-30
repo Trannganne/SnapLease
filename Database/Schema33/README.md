@@ -4,7 +4,7 @@ This directory contains the reviewed schema definition, fresh33-table installati
 
 - 00_preflight.sql: guarded read-only SQL metadata query, not yet executed.
 - 01_schema33.sql: guarded one-transaction initialization for an empty schema only. No CREATE DATABASE, DROP, replay, migration history table or auto startup initialization.
-- 02_seed_catalog.sql / seed-catalog.json: idempotent synthetic catalog,90 devices,16 test accounts and12 fake identity profiles. Never overwrite existing seed IDs or reset modified account passwords.
+- 02_seed_catalog.sql / seed-catalog.json: idempotent professional rental catalog with5 categories,4 brands,6 models,6 featured images and90 devices; also includes16 test accounts and12 fake identity profiles. Never overwrite existing seed IDs or reset modified account passwords.
 - 04_verify_schema.sql / expected-metadata.json: exact schema.table,376 columns, keys/indexes/FKs/CHECK trust and definition export. Canonical definition comparison and EF runtime checks still required.
 - 05_verify_seed_catalog.sql: installation/catalog checks only, prepared by the fixture split generator.
 
