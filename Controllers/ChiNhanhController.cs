@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Data;
 namespace RentalCamera.Controllers;
+using RentalCamera.ViewModels;
 public class ChiNhanhController : BaseController {
  private readonly RentalCameraDbContext db;
  public ChiNhanhController(RentalCameraDbContext db) => this.db=db;
@@ -23,6 +24,43 @@ public class ChiNhanhController : BaseController {
  ViewBag.Models=await (from tb in db.ThietBi join dm in db.DongMay on tb.MaDongMay equals dm.MaDongMay where tb.MaCuaHang==id select dm).Distinct().OrderBy(x=>x.TenDongMay).ToListAsync();
  ViewBag.Images=(await db.AnhThietBi.Where(x=>x.LaAnhDaiDien).ToListAsync()).GroupBy(x=>x.MaDongMay).ToDictionary(g=>g.Key,g=>g.First().DuongDanAnh);
  ViewBag.Q=q;ViewBag.Status=status;ViewBag.DongMay=dongMay;
+ // Đánh giá thuộc chi nhánh thực hiện hợp đồng
+var reviews = await (
+    from dg in db.DanhGia.AsNoTracking()
+
+    join ct in db.ChiTietHopDong.AsNoTracking()
+        on dg.MaChiTietHopDong equals ct.MaChiTietHopDong
+
+    join hd in db.HopDong.AsNoTracking()
+        on ct.MaHopDong equals hd.MaHopDong
+
+    join tb in db.ThietBi.AsNoTracking()
+        on ct.MaThietBi equals tb.MaThietBi
+
+    join dm in db.DongMay.AsNoTracking()
+        on tb.MaDongMay equals dm.MaDongMay
+
+    join kh in db.KhachThue.AsNoTracking()
+        on dg.MaKhachThue equals kh.MaKhachThue
+
+    where hd.MaCuaHang == id
+
+    orderby dg.NgayDanhGia descending
+
+    select new BranchReviewVM
+    {
+        MaDanhGia = dg.MaDanhGia,
+        HoTen = kh.HoTen,
+        TenDongMay = dm.TenDongMay,
+        SoSerial = tb.SoSerial,
+        SoSao = dg.SoSao,
+        NhanXet = dg.NhanXet,
+        NgayDanhGia = dg.NgayDanhGia,
+        TrangThaiKiemDuyet = dg.TrangThaiKiemDuyet
+    }
+).ToListAsync();
+
+ViewBag.Reviews = reviews;
  return View(branch);}
 
  [HttpGet] public async Task<IActionResult> Edit(string id){var x=await db.CuaHang.FindAsync(id);return x==null?NotFound():View(x);}

@@ -1,6 +1,943 @@
-@model NhanVien
-@{ViewData["Title"]="Chi tiết nhân viên";var branch=ViewBag.Branch as CuaHang;var contracts=ViewBag.Contracts as List<HopDong> ?? new();}
-<div class="page-head"><div><h1>@Model.HoTen</h1><p>@Model.MaNhanVien · @Model.ChucVu</p></div><div class="d-flex gap-2"><a asp-action="Edit" asp-route-id="@Model.MaNhanVien" class="btn btn-primary">Chỉnh sửa</a><a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a></div></div>
-<div class="panel"><h3>Thông tin nhân viên</h3><div class="detail-grid mt-3"><div><span>Chi nhánh</span><b>@branch?.TenCuaHang</b></div><div><span>Điện thoại</span><b>@Model.SoDienThoai</b></div><div><span>Email</span><b>@Model.Email</b></div><div><span>Địa chỉ</span><b>@Model.DiaChi</b></div><div><span>Trạng thái</span><b>@Model.TrangThai</b></div></div></div>
-<div class="panel mt-3"><h3>Lịch sử hợp đồng liên quan đến nhân viên</h3><p class="text-muted">Hiện hệ thống chưa có nguồn dữ liệu nhật ký thao tác riêng. Bảng dưới đây chỉ thể hiện các hợp đồng gắn với mã nhân viên.</p><div class="table-responsive"><table class="table"><thead><tr><th>Mã hợp đồng</th><th>Ngày ký</th><th>Trạng thái</th><th>Tổng tiền</th></tr></thead><tbody>@foreach(var h in contracts){<tr><td>@h.MaHopDong</td><td>@h.NgayKy?.ToString("dd/MM/yyyy HH:mm")</td><td>@h.TrangThai</td><td>@h.TongTien.ToString("N0") đ</td></tr>}@if(!contracts.Any()){<tr><td colspan="4">Chưa có hợp đồng liên quan.</td></tr>}</tbody></table></div></div>
-<div class="panel mt-3"><form method="post" asp-action="Delete" onsubmit="return confirm('Xóa nhân viên này? Thao tác không thể hoàn tác.')">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@Model.MaNhanVien"/><button type="submit" class="btn btn-outline-danger">Xóa nhân viên</button><small class="text-muted ms-2">Không xóa được nhân viên đã có hợp đồng hoặc dữ liệu liên quan.</small></form></div>
+@model RentalCamera.Models.NhanVien
+@using RentalCamera.Models
+
+@{
+    ViewData["Title"] = "Chi tiết nhân viên";
+
+    var branch = ViewBag.Branch as CuaHang;
+
+    var contracts = ViewBag.Contracts as IEnumerable<HopDong>
+                    ?? Enumerable.Empty<HopDong>();
+
+    var branches = ViewBag.Branches as IEnumerable<CuaHang>
+                   ?? Enumerable.Empty<CuaHang>();
+
+    var branchName = branch?.TenCuaHang ?? Model.MaCuaHang;
+
+    var isActive = Model.TrangThai == "HOAT_DONG";
+
+    var initials = string.IsNullOrWhiteSpace(Model.HoTen)
+        ? "NV"
+        : string.Join("", Model.HoTen.Trim()
+            .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+            .TakeLast(2)
+            .Select(x => x.Substring(0, 1).ToUpper()));
+}
+
+<style>
+    .employee-detail-page {
+        font-family: "Roboto", sans-serif;
+        color: #17375e;
+        padding-bottom: 25px;
+    }
+
+    .employee-detail-page .ed-card {
+        background: #fff;
+        border: 1px solid #e2ecfa;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(18, 68, 120, .045);
+        margin-bottom: 16px;
+    }
+
+    /* HỒ SƠ NHÂN VIÊN */
+
+    .ed-profile {
+        padding: 22px 25px;
+        display: grid;
+        grid-template-columns: 1.15fr 1fr auto;
+        align-items: center;
+        gap: 25px;
+    }
+
+    .ed-profile-main {
+        display: flex;
+        align-items: center;
+        gap: 19px;
+    }
+
+    .ed-avatar {
+        width: 85px;
+        height: 85px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e5f2ff, #cfe5ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0878f9;
+        font-size: 29px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .ed-name {
+        margin: 0 0 9px;
+        font-size: 21px;
+        font-weight: 800;
+        color: #102e54;
+    }
+
+    .ed-profile-badges {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .ed-code {
+        padding: 5px 10px;
+        background: #e6f1ff;
+        border-radius: 20px;
+        color: #0875f9;
+        font-weight: 800;
+        font-size: 12px;
+    }
+
+    .ed-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 11px;
+        border-radius: 20px;
+        background: #dcf8e9;
+        color: #079b59;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .ed-status.inactive {
+        background: #fff0dd;
+        color: #df8800;
+    }
+
+    .ed-status::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: currentColor;
+        border-radius: 50%;
+    }
+
+    .ed-profile-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .ed-profile-meta i {
+        color: #0875f9;
+        margin-right: 9px;
+    }
+
+    .ed-profile-contact {
+        border-left: 1px solid #e2ecfa;
+        padding-left: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 13px;
+        font-size: 13px;
+    }
+
+    .ed-profile-contact div {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ed-profile-contact i {
+        font-size: 16px;
+        color: #0875f9;
+    }
+
+    .ed-profile-actions {
+        display: flex;
+        gap: 8px;
+        align-self: start;
+    }
+
+    /* NÚT */
+
+    .ed-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 15px;
+        border-radius: 9px;
+        background: #fff;
+        border: 1px solid #cbdffb;
+        color: #0875f9;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: .2s;
+        white-space: nowrap;
+    }
+
+    .ed-btn:hover {
+        background: #edf5ff;
+        color: #0069e8;
+    }
+
+    .ed-btn-primary {
+        background: linear-gradient(120deg, #078eff, #2459f4);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 5px 13px rgba(0, 112, 255, .14);
+    }
+
+    .ed-btn-primary:hover {
+        background: #006ce5;
+        color: #fff;
+    }
+
+    /* TIÊU ĐỀ CARD */
+
+    .ed-section {
+        padding: 20px 23px;
+    }
+
+    .ed-section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 18px;
+        color: #0875f9;
+        font-size: 15px;
+        font-weight: 800;
+    }
+
+    .ed-section-title i {
+        font-size: 19px;
+    }
+
+    /* THÔNG TIN CHI TIẾT */
+
+    .ed-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+    }
+
+    .ed-info-column + .ed-info-column {
+        border-left: 1px solid #e2ecfa;
+        padding-left: 25px;
+    }
+
+    .ed-info-row {
+        display: grid;
+        grid-template-columns: 145px 1fr;
+        gap: 12px;
+        padding: 10px 0;
+        font-size: 13px;
+    }
+
+    .ed-info-label {
+        color: #8193ad;
+    }
+
+    .ed-info-value {
+        color: #17375e;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    /* LỊCH SỬ HỢP ĐỒNG */
+
+    .ed-history-description {
+        margin: -9px 0 17px;
+        font-size: 12px;
+        color: #8494ad;
+    }
+
+    .ed-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .ed-table thead th {
+        padding: 12px;
+        background: #e9f3ff;
+        color: #173c6b;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .ed-table thead th:first-child {
+        border-radius: 8px 0 0 8px;
+    }
+
+    .ed-table thead th:last-child {
+        border-radius: 0 8px 8px 0;
+    }
+
+    .ed-table tbody td {
+        padding: 12px;
+        border-bottom: 1px solid #e8eff8;
+        vertical-align: middle;
+    }
+
+    .ed-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    .ed-contract-code {
+        font-weight: 800;
+        color: #0875f9;
+    }
+
+    .ed-money {
+        font-weight: 800;
+        color: #14365f;
+    }
+
+    .ed-contract-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #eaf2ff;
+        color: #0875f9;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .ed-contract-status.done {
+        background: #def8e9;
+        color: #079b59;
+    }
+
+    .ed-contract-status.waiting {
+        background: #fff0dd;
+        color: #d88400;
+    }
+
+    /* POPUP */
+
+    .ed-modal .modal-content {
+        border: none;
+        border-radius: 17px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(10, 42, 90, .2);
+    }
+
+    .ed-modal .modal-header {
+        background: #f8fbff;
+        padding: 19px 23px;
+        border-bottom: 1px solid #e4edf9;
+    }
+
+    .ed-modal .modal-title {
+        color: #14365f;
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .ed-modal-icon {
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e6f1ff;
+        border-radius: 12px;
+        color: #0875f9;
+        font-size: 21px;
+    }
+
+    .ed-modal .modal-body {
+        padding: 23px;
+    }
+
+    .ed-modal .modal-footer {
+        padding: 16px 23px;
+        background: #f8fbff;
+        border-top: 1px solid #e4edf9;
+    }
+
+    .ed-field label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #17375e;
+    }
+
+    .ed-field .form-control,
+    .ed-field .form-select {
+        min-height: 42px;
+        border: 1px solid #d2e2f8;
+        border-radius: 9px;
+        font-size: 13px;
+        color: #17375e;
+    }
+
+    .ed-field .form-control:focus,
+    .ed-field .form-select:focus {
+        border-color: #0875f9;
+        box-shadow: 0 0 0 3px rgba(8, 117, 249, .08);
+    }
+
+    .ed-field .form-control[readonly] {
+        background: #edf4fd;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1050px) {
+        .ed-profile {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .ed-profile-actions {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .ed-profile {
+            grid-template-columns: 1fr;
+        }
+
+        .ed-profile-contact {
+            border-left: none;
+            border-top: 1px solid #e2ecfa;
+            padding: 15px 0 0;
+        }
+
+        .ed-info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ed-info-column + .ed-info-column {
+            border-left: none;
+            padding-left: 0;
+        }
+
+        .ed-info-row {
+            grid-template-columns: 120px 1fr;
+        }
+    }
+</style>
+
+<div class="employee-detail-page">
+
+    @if (TempData["Ok"] != null)
+    {
+        <div class="alert alert-success">
+            <i class="bi bi-check-circle me-2"></i>
+            @TempData["Ok"]
+        </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- HỒ SƠ NHÂN VIÊN -->
+    <div class="ed-card ed-profile">
+
+        <div class="ed-profile-main">
+
+            <div class="ed-avatar">
+                @initials
+            </div>
+
+            <div>
+
+                <h2 class="ed-name">@Model.HoTen</h2>
+
+                <div class="ed-profile-badges">
+
+                    <span class="ed-code">
+                        @Model.MaNhanVien
+                    </span>
+
+                    <span class="ed-status @(isActive ? "" : "inactive")">
+                        @(isActive ? "HOẠT ĐỘNG" : Model.TrangThai.Replace("_", " "))
+                    </span>
+
+                </div>
+
+                <div class="ed-profile-meta">
+
+                    <span>
+                        <i class="bi bi-briefcase"></i>
+                        @Model.ChucVu
+                    </span>
+
+                    <span>
+                        <i class="bi bi-shop"></i>
+                        @branchName
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="ed-profile-contact">
+
+            <div>
+                <i class="bi bi-telephone"></i>
+                <span>@Model.SoDienThoai</span>
+            </div>
+
+            <div>
+                <i class="bi bi-envelope"></i>
+                <span>@(Model.Email ?? "Chưa cập nhật")</span>
+            </div>
+
+            <div>
+                <i class="bi bi-geo-alt"></i>
+                <span>@(Model.DiaChi ?? "Chưa cập nhật")</span>
+            </div>
+
+        </div>
+
+        <div class="ed-profile-actions">
+
+            <button type="button"
+                    class="ed-btn ed-btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editEmployeeModal">
+
+                <i class="bi bi-pencil-square"></i>
+                Chỉnh sửa
+
+            </button>
+
+            <a asp-controller="NhanVien"
+               asp-action="Index"
+               class="ed-btn">
+
+                <i class="bi bi-arrow-left"></i>
+                Quay lại
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- THÔNG TIN NHÂN VIÊN -->
+    <div class="ed-card ed-section">
+
+        <h3 class="ed-section-title">
+            <i class="bi bi-person-lines-fill"></i>
+            THÔNG TIN NHÂN VIÊN
+        </h3>
+
+        <div class="ed-info-grid">
+
+            <div class="ed-info-column">
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Mã nhân viên</span>
+                    <span class="ed-info-value">@Model.MaNhanVien</span>
+                </div>
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Họ tên</span>
+                    <span class="ed-info-value">@Model.HoTen</span>
+                </div>
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Chức vụ</span>
+                    <span class="ed-info-value">@Model.ChucVu</span>
+                </div>
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Chi nhánh</span>
+                    <span class="ed-info-value">@branchName</span>
+                </div>
+
+            </div>
+
+            <div class="ed-info-column">
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Số điện thoại</span>
+                    <span class="ed-info-value">@Model.SoDienThoai</span>
+                </div>
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Email</span>
+                    <span class="ed-info-value">@(Model.Email ?? "Chưa cập nhật")</span>
+                </div>
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Địa chỉ</span>
+                    <span class="ed-info-value">@(Model.DiaChi ?? "Chưa cập nhật")</span>
+                </div>
+
+                <div class="ed-info-row">
+                    <span class="ed-info-label">Trạng thái</span>
+                    <span class="ed-info-value">
+                        <span class="ed-status @(isActive ? "" : "inactive")">
+                            @Model.TrangThai.Replace("_", " ")
+                        </span>
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LỊCH SỬ HỢP ĐỒNG -->
+    <div class="ed-card ed-section">
+
+        <h3 class="ed-section-title">
+            <i class="bi bi-file-earmark-text"></i>
+            LỊCH SỬ HỢP ĐỒNG LIÊN QUAN
+        </h3>
+
+        <p class="ed-history-description">
+            Danh sách các hợp đồng được gắn với nhân viên này.
+            Hiển thị tối đa 30 hợp đồng gần nhất.
+        </p>
+
+        <div class="table-responsive">
+
+            <table class="ed-table">
+
+                <thead>
+                    <tr>
+                        <th>Mã hợp đồng</th>
+                        <th>Ngày ký</th>
+                        <th>Thời gian thuê</th>
+                        <th>Trạng thái</th>
+                        <th>Tổng tiền</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var contract in contracts)
+                    {
+                        var statusClass = contract.TrangThai == "HOAN_THANH"
+                            ? "done"
+                            : contract.TrangThai == "CHO_BAN_GIAO"
+                                ? "waiting"
+                                : "";
+
+                        var statusText = contract.TrangThai switch
+                        {
+                            "CHO_BAN_GIAO" => "CHỜ BÀN GIAO",
+                            "DANG_THUE" => "ĐANG THUÊ",
+                            "CHO_HOAN_TRA" => "CHỜ HOÀN TRẢ",
+                            "HOAN_THANH" => "HOÀN THÀNH",
+                            "DA_HUY" => "ĐÃ HỦY",
+                            _ => contract.TrangThai.Replace("_", " ")
+                        };
+
+                        <tr>
+
+                            <td>
+                                <span class="ed-contract-code">
+                                    @contract.MaHopDong
+                                </span>
+                            </td>
+
+                            <td>
+                                @(contract.NgayKy?.ToString("dd/MM/yyyy HH:mm")
+                                    ?? "Chưa cập nhật")
+                            </td>
+
+                            <td>
+                                @contract.ThoiGianBanGiao.ToString("dd/MM/yyyy")
+                                →
+                                @contract.ThoiGianTraDuKien.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                <span class="ed-contract-status @statusClass">
+                                    @statusText
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="ed-money">
+                                    @contract.TongTien.ToString("N0") đ
+                                </span>
+                            </td>
+
+                            <td>
+                                <a asp-controller="DonThue"
+                                   asp-action="Details"
+                                   asp-route-id="@contract.MaHopDong"
+                                   class="ed-btn"
+                                   style="padding:6px 11px">
+
+                                    <i class="bi bi-eye"></i>
+                                    Xem
+
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+
+                    @if (!contracts.Any())
+                    {
+                        <tr>
+                            <td colspan="6"
+                                class="text-center text-muted py-4">
+
+                                Nhân viên chưa có hợp đồng liên quan.
+
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- POPUP CHỈNH SỬA NHÂN VIÊN -->
+<div class="modal fade ed-modal"
+     id="editEmployeeModal"
+     tabindex="-1"
+     aria-labelledby="editEmployeeModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="ed-modal-icon">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="modal-title" id="editEmployeeModalLabel">
+                            Chỉnh sửa nhân viên
+                        </h5>
+
+                        <p class="small text-muted mb-0">
+                            Cập nhật thông tin nhân viên.
+                        </p>
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Đóng">
+                </button>
+
+            </div>
+
+            <form asp-controller="NhanVien"
+                  asp-action="Edit"
+                  asp-route-id="@Model.MaNhanVien"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <!-- MÃ NHÂN VIÊN -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>Mã nhân viên</label>
+
+                            <input value="@Model.MaNhanVien"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
+                        <!-- HỌ TÊN -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>
+                                Họ tên
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input name="hoTen"
+                                   value="@Model.HoTen"
+                                   class="form-control"
+                                   required />
+
+                        </div>
+
+                        <!-- SỐ ĐIỆN THOẠI -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>
+                                Số điện thoại
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input name="soDienThoai"
+                                   value="@Model.SoDienThoai"
+                                   class="form-control"
+                                   required />
+
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>Email</label>
+
+                            <input name="email"
+                                   type="email"
+                                   value="@Model.Email"
+                                   class="form-control" />
+
+                        </div>
+
+                        <!-- ĐỊA CHỈ -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>Địa chỉ</label>
+
+                            <input name="diaChi"
+                                   value="@Model.DiaChi"
+                                   class="form-control" />
+
+                        </div>
+
+                        <!-- CHỨC VỤ -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>
+                                Chức vụ
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input name="chucVu"
+                                   value="@Model.ChucVu"
+                                   class="form-control"
+                                   required />
+
+                        </div>
+
+                        <!-- CHI NHÁNH -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>
+                                Chi nhánh
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="maCuaHang"
+                                    class="form-select"
+                                    required>
+
+                                @foreach (var b in branches)
+                                {
+                                    if (b.MaCuaHang == Model.MaCuaHang)
+                                    {
+                                        <option value="@b.MaCuaHang" selected>
+                                            @b.TenCuaHang
+                                        </option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@b.MaCuaHang">
+                                            @b.TenCuaHang
+                                        </option>
+                                    }
+                                }
+
+                            </select>
+
+                        </div>
+
+                        <!-- TRẠNG THÁI -->
+                        <div class="col-md-6 ed-field">
+
+                            <label>
+                                Trạng thái
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="trangThai"
+                                    class="form-select"
+                                    required>
+
+                                @if (Model.TrangThai == "HOAT_DONG")
+                                {
+                                    <option value="HOAT_DONG" selected>
+                                        Hoạt động
+                                    </option>
+
+                                    <option value="NGUNG_HOAT_DONG">
+                                        Ngừng hoạt động
+                                    </option>
+                                }
+                                else
+                                {
+                                    <option value="HOAT_DONG">
+                                        Hoạt động
+                                    </option>
+
+                                    <option value="NGUNG_HOAT_DONG" selected>
+                                        Ngừng hoạt động
+                                    </option>
+                                }
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="ed-btn"
+                            data-bs-dismiss="modal">
+
+                        Hủy
+
+                    </button>
+
+                    <button type="submit"
+                            class="ed-btn ed-btn-primary">
+
+                        <i class="bi bi-floppy"></i>
+                        Lưu thay đổi
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

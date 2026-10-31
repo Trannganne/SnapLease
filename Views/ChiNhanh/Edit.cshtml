@@ -1,2 +1,338 @@
 @model RentalCamera.Models.CuaHang
-@{ViewData["Title"]="Sửa chi nhánh";}<div class="page-head"><h1>SỬA CHI NHÁNH</h1></div><form method="post" class="panel p-3"><input type="hidden" name="id" value="@Model.MaCuaHang"/>@Html.AntiForgeryToken()<label>Tên chi nhánh</label><input class="form-control mb-2" name="tenCuaHang" value="@Model.TenCuaHang" required/><label>Địa chỉ</label><input class="form-control mb-2" name="diaChi" value="@Model.DiaChi" required/><label>Số điện thoại</label><input class="form-control mb-2" name="soDienThoai" value="@Model.SoDienThoai"/><label>Email</label><input class="form-control mb-2" name="email" value="@Model.Email"/><label>Mô tả</label><textarea class="form-control mb-2" name="moTa">@Model.MoTa</textarea><label>Trạng thái</label><select class="form-select mb-3" name="trangThai"><option value="HOAT_DONG" selected="@(Model.TrangThai=="HOAT_DONG")">Hoạt động</option><option value="NGUNG_HOAT_DONG" selected="@(Model.TrangThai=="NGUNG_HOAT_DONG")">Ngừng hoạt động</option></select><button class="btn btn-primary">Lưu</button></form>
+
+@{
+    ViewData["Title"] = "Sửa chi nhánh";
+}
+
+<style>
+    .branch-edit-page {
+        max-width: 1050px;
+        margin: 0 auto 30px;
+        font-family: "Roboto", sans-serif;
+    }
+
+    .branch-edit-card {
+        background: #fff;
+        border: 1px solid #e0eafa;
+        border-radius: 18px;
+        padding: 26px 30px;
+        box-shadow: 0 8px 25px rgba(25, 75, 145, .05);
+    }
+
+    .branch-edit-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 20px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #e8eff9;
+    }
+
+    .branch-edit-heading-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eaf3ff;
+        border-radius: 13px;
+        color: #0872f9;
+        font-size: 23px;
+    }
+
+    .branch-edit-heading h2 {
+        margin: 0;
+        color: #102d56;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .branch-edit-heading p {
+        margin: 5px 0 0;
+        color: #8293ad;
+        font-size: 12px;
+    }
+
+    .branch-edit-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+    }
+
+    .branch-edit-field {
+        min-width: 0;
+    }
+
+    .branch-edit-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .branch-edit-field label {
+        display: block;
+        margin-bottom: 8px;
+        color: #173b68;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .branch-edit-field .form-control,
+    .branch-edit-field .form-select {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid #d4e3f8;
+        border-radius: 10px;
+        padding: 10px 13px;
+        font-size: 13px;
+        color: #173b68;
+        background: #fff;
+        box-shadow: none;
+    }
+
+    .branch-edit-field .form-control:focus,
+    .branch-edit-field .form-select:focus {
+        border-color: #0872f9;
+        box-shadow: 0 0 0 3px rgba(8,114,249,.08);
+    }
+
+    .branch-edit-field .form-control:disabled {
+        background: #f2f6fc;
+        color: #7589a5;
+    }
+
+    .branch-edit-field textarea.form-control {
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    .branch-edit-hint {
+        display: block;
+        margin-top: 6px;
+        font-size: 11px;
+        color: #8293ad;
+    }
+
+    .branch-edit-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding-top: 22px;
+        margin-top: 24px;
+        border-top: 1px solid #e8eff9;
+    }
+
+    .branch-edit-actions .btn {
+        min-height: 42px;
+        padding: 9px 20px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .branch-edit-actions .btn-primary {
+        background: #0872f9;
+        border-color: #0872f9;
+    }
+
+    .branch-edit-actions .btn-outline-primary {
+        border-color: #bdd5ff;
+        color: #0872f9;
+    }
+
+    @@media (max-width: 700px) {
+        .branch-edit-card {
+            padding: 20px;
+        }
+
+        .branch-edit-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .branch-edit-field.full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+<div class="branch-edit-page">
+
+    <div class="branch-edit-card">
+
+        <!-- TIÊU ĐỀ FORM -->
+        <div class="branch-edit-heading">
+
+            <div class="branch-edit-heading-icon">
+                <i class="bi bi-pencil-square"></i>
+            </div>
+
+            <div>
+                <h2>Cập nhật thông tin chi nhánh</h2>
+                <p>Chỉnh sửa thông tin chi nhánh trong hệ thống.</p>
+            </div>
+
+        </div>
+
+        <!-- FORM -->
+        <form method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All"
+                 class="text-danger mb-3"></div>
+
+            <!-- GIỮ MÃ CHI NHÁNH KHI POST -->
+            <input asp-for="MaCuaHang" type="hidden" />
+
+            <div class="branch-edit-grid">
+
+                <!-- MÃ CHI NHÁNH -->
+                <div class="branch-edit-field">
+
+                    <label>Mã chi nhánh</label>
+
+                    <input type="text"
+                           value="@Model.MaCuaHang"
+                           class="form-control"
+                           disabled />
+
+                    <small class="branch-edit-hint">
+                        Mã chi nhánh không thể thay đổi.
+                    </small>
+
+                </div>
+
+                <!-- TÊN CHI NHÁNH -->
+                <div class="branch-edit-field">
+
+                    <label asp-for="TenCuaHang">
+                        Tên chi nhánh
+                    </label>
+
+                    <input asp-for="TenCuaHang"
+                           class="form-control"
+                           required />
+
+                    <span asp-validation-for="TenCuaHang"
+                          class="text-danger"></span>
+
+                </div>
+
+                <!-- ĐỊA CHỈ -->
+                <div class="branch-edit-field">
+
+                    <label asp-for="DiaChi">
+                        Địa chỉ
+                    </label>
+
+                    <input asp-for="DiaChi"
+                           class="form-control"
+                           required />
+
+                    <span asp-validation-for="DiaChi"
+                          class="text-danger"></span>
+
+                </div>
+
+                <!-- SỐ ĐIỆN THOẠI -->
+                <div class="branch-edit-field">
+
+                    <label asp-for="SoDienThoai">
+                        Số điện thoại
+                    </label>
+
+                    <input asp-for="SoDienThoai"
+                           class="form-control" />
+
+                    <span asp-validation-for="SoDienThoai"
+                          class="text-danger"></span>
+
+                </div>
+
+                <!-- EMAIL -->
+                <div class="branch-edit-field">
+
+                    <label asp-for="Email">
+                        Email
+                    </label>
+
+                    <input asp-for="Email"
+                           class="form-control" />
+
+                    <span asp-validation-for="Email"
+                          class="text-danger"></span>
+
+                </div>
+
+                <!-- TRẠNG THÁI -->
+                <div class="branch-edit-field">
+
+                    <label asp-for="TrangThai">
+                        Trạng thái
+                    </label>
+
+                    <select asp-for="TrangThai"
+                            class="form-select">
+
+                        <option value="HOAT_DONG">
+                            Hoạt động
+                        </option>
+
+                        <option value="TAM_NGUNG">
+                            Tạm ngừng
+                        </option>
+
+                        <option value="NGUNG_HOAT_DONG">
+                            Ngừng hoạt động
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="TrangThai"
+                          class="text-danger"></span>
+
+                </div>
+
+                <!-- MÔ TẢ -->
+                <div class="branch-edit-field full">
+
+                    <label asp-for="MoTa">
+                        Mô tả
+                    </label>
+
+                    <textarea asp-for="MoTa"
+                              class="form-control"
+                              rows="3"></textarea>
+
+                    <span asp-validation-for="MoTa"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+            <!-- NÚT THAO TÁC -->
+            <div class="branch-edit-actions">
+
+                <a asp-action="Index"
+                   class="btn btn-outline-primary">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Quay lại
+
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-floppy"></i>
+                    Lưu thay đổi
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

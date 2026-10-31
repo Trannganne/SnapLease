@@ -1,2 +1,136 @@
 @model IEnumerable<RentalCamera.Controllers.PenaltyRowVM>
-@{ViewData["Title"]="Quản lý phí phạt";}<div class="page-head"><div><h1>Quản lý phí phạt</h1><p>Theo dõi phí trả trễ, hư hỏng, mất phụ kiện và các vi phạm hợp đồng</p></div><a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Lập phiếu phạt</a></div><div class="panel"><div class="table-responsive"><table class="table"><thead><tr><th>Mã phiếu</th><th>Hợp đồng</th><th>Thiết bị</th><th>Loại vi phạm</th><th>Số tiền</th><th>Ngày lập</th><th>Trạng thái</th><th></th></tr></thead><tbody>@foreach(var r in Model){<tr><td><b>@r.Phieu.MaPhieuPhat</b></td><td>@r.MaHopDong</td><td>@r.MaThietBi</td><td>@r.Phieu.LoaiViPham.Replace("_"," ")<br><small class="muted">@r.Phieu.MoTa</small></td><td class="money"><b>@r.Phieu.SoTien.ToString("N0")đ</b></td><td>@r.Phieu.NgayLap.ToString("dd/MM/yyyy")</td><td><span class="badge-soft">@r.Phieu.TrangThai.Replace("_"," ")</span></td><td>@if(r.Phieu.TrangThai=="CHO_DUYET"){<form method="post" asp-action="SetStatus">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@r.Phieu.MaPhieuPhat"/><button class="btn btn-outline-success btn-sm" name="status" value="DA_DUYET">Duyệt</button><button class="btn btn-outline-danger btn-sm" name="status" value="TU_CHOI">Từ chối</button></form>}else if(r.Phieu.TrangThai=="DA_DUYET"){<form method="post" asp-action="SetStatus">@Html.AntiForgeryToken()<input type="hidden" name="id" value="@r.Phieu.MaPhieuPhat"><input type="hidden" name="status" value="DA_THANH_TOAN"><button class="btn btn-outline-success btn-sm">Đã thu</button></form>}</td></tr>}</tbody></table></div></div>
+@using System.Linq
+@{
+    ViewData["Title"] = "Quản lý phí phạt";
+    var rows = Model?.ToList() ?? new List<RentalCamera.Controllers.PenaltyRowVM>();
+    var total = rows.Count;
+    var pending = rows.Count(x => x.Phieu.TrangThai == "CHO_DUYET" || x.Phieu.TrangThai == "CHO_XAC_NHAN");
+    var approved = rows.Count(x => x.Phieu.TrangThai == "DA_DUYET" || x.Phieu.TrangThai == "DA_XAC_NHAN");
+    var paid = rows.Count(x => x.Phieu.TrangThai == "DA_THANH_TOAN");
+    string StatusName(string s) => s switch {
+        "CHO_DUYET" or "CHO_XAC_NHAN" => "Chờ xác nhận",
+        "DA_DUYET" or "DA_XAC_NHAN" => "Đã xác nhận",
+        "DA_THANH_TOAN" => "Đã thanh toán",
+        "TU_CHOI" => "Đã từ chối",
+        _ => s.Replace("_", " ")
+    };
+    string StatusClass(string s) => s switch {
+        "CHO_DUYET" or "CHO_XAC_NHAN" => "pending",
+        "DA_DUYET" or "DA_XAC_NHAN" => "approved",
+        "DA_THANH_TOAN" => "paid",
+        "TU_CHOI" => "rejected",
+        _ => "neutral"
+    };
+}
+
+<div class="penalty-page">
+    <div class="penalty-intro">
+        <div>
+            <h2><i class="bi bi-shield-check"></i> Quản lý phí phạt</h2>
+            <p>Theo dõi, xác nhận và quản lý các khoản phí phát sinh trong quá trình thuê thiết bị.</p>
+        </div>
+        <a asp-controller="PhiPhat" asp-action="Create" class="btn btn-primary penalty-create">
+            <i class="bi bi-plus-lg"></i> Lập phiếu phạt
+        </a>
+    </div>
+
+    <div class="penalty-kpis">
+        <article class="penalty-kpi kpi-blue"><div class="kpi-icon"><i class="bi bi-file-earmark-text"></i></div><div><span>TỔNG PHIẾU PHẠT</span><strong>@total</strong><small>Tổng số phiếu trong hệ thống</small></div></article>
+        <article class="penalty-kpi kpi-orange"><div class="kpi-icon"><i class="bi bi-clock-history"></i></div><div><span>CHỜ XÁC NHẬN</span><strong>@pending</strong><small>Phiếu phạt cần xử lý</small></div></article>
+        <article class="penalty-kpi kpi-green"><div class="kpi-icon"><i class="bi bi-check-circle"></i></div><div><span>ĐÃ XÁC NHẬN</span><strong>@approved</strong><small>Phiếu đã được duyệt</small></div></article>
+        <article class="penalty-kpi kpi-purple"><div class="kpi-icon"><i class="bi bi-credit-card"></i></div><div><span>ĐÃ THANH TOÁN</span><strong>@paid</strong><small>Phiếu đã hoàn tất thu tiền</small></div></article>
+    </div>
+
+    <section class="penalty-card penalty-filters" aria-label="Bộ lọc phiếu phạt">
+        <label class="penalty-search"><span>Tìm kiếm</span><div class="penalty-input-icon"><i class="bi bi-search"></i><input id="penaltySearch" class="form-control" placeholder="Mã phiếu, hợp đồng, thiết bị..." /></div></label>
+        <label><span>Loại vi phạm</span><select id="penaltyType" class="form-select"><option value="">Tất cả</option>@foreach(var t in rows.Select(x => x.Phieu.LoaiViPham).Distinct().OrderBy(x => x)){<option value="@t">@t.Replace("_", " ")</option>}</select></label>
+        <label><span>Trạng thái</span><select id="penaltyStatus" class="form-select"><option value="">Tất cả</option>@foreach(var s in rows.Select(x => x.Phieu.TrangThai).Distinct().OrderBy(x => x)){<option value="@s">@StatusName(s)</option>}</select></label>
+        <label><span>Từ ngày</span><input id="penaltyFrom" class="form-control" type="date" /></label>
+        <label><span>Đến ngày</span><input id="penaltyTo" class="form-control" type="date" /></label>
+        <div class="penalty-filter-actions"><button type="button" id="penaltyApply" class="btn btn-primary"><i class="bi bi-funnel"></i> Lọc</button><button type="button" id="penaltyReset" class="btn btn-outline-primary"><i class="bi bi-arrow-clockwise"></i> Đặt lại</button></div>
+    </section>
+
+    <section class="penalty-card penalty-table-card">
+        <div class="penalty-section-heading"><h3><i class="bi bi-list-ul"></i> DANH SÁCH PHIẾU PHẠT</h3><span id="penaltyResultCount">@total phiếu</span></div>
+        <div class="table-responsive">
+            <table class="table penalty-table align-middle">
+                <thead><tr><th>Mã phiếu</th><th>Hợp đồng</th><th>Thiết bị</th><th>Loại vi phạm</th><th>Số tiền</th><th>Ngày lập</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                <tbody id="penaltyRows">
+                @foreach(var r in rows){
+                    <tr class="penalty-data-row" data-search="@(r.Phieu.MaPhieuPhat + " " + r.MaHopDong + " " + r.MaThietBi + " " + r.Phieu.MoTa)" data-type="@r.Phieu.LoaiViPham" data-status="@r.Phieu.TrangThai" data-date="@r.Phieu.NgayLap.ToString("yyyy-MM-dd")">
+                        <td><strong>@r.Phieu.MaPhieuPhat</strong></td><td>@r.MaHopDong</td><td>@r.MaThietBi</td>
+                        <td><b>@r.Phieu.LoaiViPham.Replace("_", " ")</b><small class="penalty-desc">@r.Phieu.MoTa</small></td>
+                        <td class="penalty-money">@r.Phieu.SoTien.ToString("N0") đ</td><td>@r.Phieu.NgayLap.ToString("dd/MM/yyyy")</td>
+                        <td><span class="penalty-badge @StatusClass(r.Phieu.TrangThai)">@StatusName(r.Phieu.TrangThai)</span></td>
+                        <td><button type="button" class="btn btn-outline-primary btn-sm penalty-detail-button" data-bs-toggle="modal" data-bs-target="#penaltyDetailModal" data-id="@r.Phieu.MaPhieuPhat" data-contract="@r.MaHopDong" data-device="@r.MaThietBi" data-type="@r.Phieu.LoaiViPham.Replace("_", " ")" data-amount="@r.Phieu.SoTien.ToString("N0") đ" data-date="@r.Phieu.NgayLap.ToString("dd/MM/yyyy")" data-status="@StatusName(r.Phieu.TrangThai)" data-status-code="@r.Phieu.TrangThai" data-description="@r.Phieu.MoTa"><i class="bi bi-eye"></i> Chi tiết</button></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+        <div id="penaltyEmpty" class="penalty-empty" hidden><i class="bi bi-inbox"></i><p>Không tìm thấy phiếu phạt phù hợp.</p></div>
+        <div class="penalty-table-footer"><span id="penaltyFooterCount">Hiển thị @total phiếu phạt</span><div class="penalty-pager"><button id="penaltyPrev" class="btn btn-outline-secondary btn-sm" type="button" aria-label="Trang trước"><i class="bi bi-chevron-left"></i></button><span id="penaltyPageLabel">1 / 1</span><button id="penaltyNext" class="btn btn-outline-secondary btn-sm" type="button" aria-label="Trang sau"><i class="bi bi-chevron-right"></i></button></div></div>
+    </section>
+</div>
+
+<div class="modal fade" id="penaltyDetailModal" tabindex="-1" aria-labelledby="penaltyModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content penalty-modal">
+        <div class="modal-header"><h5 class="modal-title" id="penaltyModalTitle"><i class="bi bi-file-earmark-check"></i> Chi tiết phiếu phạt</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+        <div class="modal-body"><div class="penalty-modal-grid">
+            <div class="penalty-modal-panel"><h6><i class="bi bi-calendar-check"></i> Thông tin phiếu phạt</h6><dl class="penalty-dl"><dt>Mã phiếu phạt</dt><dd id="detailId"></dd><dt>Mã hợp đồng</dt><dd id="detailContract"></dd><dt>Thiết bị</dt><dd id="detailDevice"></dd><dt>Loại vi phạm</dt><dd id="detailType"></dd><dt>Ngày lập</dt><dd id="detailDate"></dd></dl><label class="form-label mt-3">Nội dung vi phạm</label><div class="penalty-description-box" id="detailDescription"></div></div>
+            <div class="penalty-modal-panel"><h6><i class="bi bi-shield-check"></i> Xử lý phí phạt</h6><span class="text-muted">Số tiền phạt</span><div class="penalty-modal-amount" id="detailAmount"></div><span class="text-muted">Trạng thái hiện tại</span><p class="mt-2"><span id="detailStatus" class="penalty-badge"></span></p><div class="alert alert-info small mt-4 mb-0">Chỉ xác nhận phiếu sau khi đã kiểm tra thông tin vi phạm. Việc đánh dấu đã thu tiền phải được đối chiếu với giao dịch thực tế.</div></div>
+        </div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+            <form id="penaltyApproveForm" asp-controller="PhiPhat" asp-action="SetStatus" method="post" class="d-none">@Html.AntiForgeryToken()<input type="hidden" name="id" id="approveId" /><input type="hidden" name="status" value="DA_DUYET" /><button class="btn btn-primary" type="submit" onclick="return confirm('Xác nhận duyệt phiếu phạt này?')"><i class="bi bi-check2-circle"></i> Xác nhận phiếu phạt</button></form>
+            <form id="penaltyRejectForm" asp-controller="PhiPhat" asp-action="SetStatus" method="post" class="d-none">@Html.AntiForgeryToken()<input type="hidden" name="id" id="rejectId" /><input type="hidden" name="status" value="TU_CHOI" /><button class="btn btn-outline-danger" type="submit" onclick="return confirm('Từ chối phiếu phạt này?')">Từ chối</button></form>
+            <form id="penaltyPaidForm" asp-controller="PhiPhat" asp-action="SetStatus" method="post" class="d-none">@Html.AntiForgeryToken()<input type="hidden" name="id" id="paidId" /><input type="hidden" name="status" value="DA_THANH_TOAN" /><button class="btn btn-success" type="submit" onclick="return confirm('Bạn đã đối chiếu và xác nhận nhận đủ tiền phạt?')"><i class="bi bi-cash-coin"></i> Đã thu tiền</button></form>
+        </div>
+    </div></div>
+</div>
+
+<link rel="stylesheet" href="~/css/pages/penalty-redesign.css" asp-append-version="true" />
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const all = Array.from(document.querySelectorAll('.penalty-data-row'));
+    const $ = id => document.getElementById(id);
+    let filtered = [...all], page = 1;
+    const pageSize = 10;
+    function draw() {
+        const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+        page = Math.min(Math.max(1, page), pages);
+        all.forEach(row => row.hidden = true);
+        filtered.slice((page - 1) * pageSize, page * pageSize).forEach(row => row.hidden = false);
+        $('penaltyResultCount').textContent = filtered.length + ' phiếu';
+        $('penaltyFooterCount').textContent = 'Hiển thị ' + (filtered.length ? ((page - 1) * pageSize + 1) : 0) + '–' + Math.min(page * pageSize, filtered.length) + ' / ' + filtered.length + ' phiếu';
+        $('penaltyPageLabel').textContent = page + ' / ' + pages;
+        $('penaltyPrev').disabled = page <= 1;
+        $('penaltyNext').disabled = page >= pages;
+        $('penaltyEmpty').hidden = filtered.length !== 0;
+    }
+    function apply() {
+        const q = $('penaltySearch').value.trim().toLocaleLowerCase('vi');
+        const type = $('penaltyType').value, status = $('penaltyStatus').value;
+        const from = $('penaltyFrom').value, to = $('penaltyTo').value;
+        filtered = all.filter(r => (!q || r.dataset.search.toLocaleLowerCase('vi').includes(q)) && (!type || r.dataset.type === type) && (!status || r.dataset.status === status) && (!from || r.dataset.date >= from) && (!to || r.dataset.date <= to));
+        page = 1; draw();
+    }
+    $('penaltyApply').addEventListener('click', apply);
+    $('penaltySearch').addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); apply(); } });
+    $('penaltyReset').addEventListener('click', () => { ['penaltySearch','penaltyType','penaltyStatus','penaltyFrom','penaltyTo'].forEach(id => $(id).value = ''); apply(); });
+    $('penaltyPrev').addEventListener('click', () => { page--; draw(); });
+    $('penaltyNext').addEventListener('click', () => { page++; draw(); });
+    document.querySelectorAll('.penalty-detail-button').forEach(btn => btn.addEventListener('click', function () {
+        const d = this.dataset;
+        ['Id','Contract','Device','Type','Date','Description','Amount','Status'].forEach(key => $('detail' + key).textContent = d[key.toLowerCase()] || '—');
+        ['approveId','rejectId','paidId'].forEach(id => $(id).value = d.id);
+        const pending = d.statusCode === 'CHO_DUYET';
+        const approved = d.statusCode === 'DA_DUYET';
+        $('penaltyApproveForm').classList.toggle('d-none', !pending);
+        $('penaltyRejectForm').classList.toggle('d-none', !pending);
+        $('penaltyPaidForm').classList.toggle('d-none', !approved);
+        const badge = $('detailStatus');
+        badge.className = 'penalty-badge ' + (pending ? 'pending' : approved ? 'approved' : d.statusCode === 'DA_THANH_TOAN' ? 'paid' : 'neutral');
+    }));
+    draw();
+});
+</script>

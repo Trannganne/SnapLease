@@ -1,9 +1,929 @@
-@model List<NhanVien>
-@{ ViewData["Title"]="Nhân viên & phân quyền"; var branches=ViewBag.Branches as List<CuaHang> ?? new(); var names=branches.ToDictionary(x=>x.MaCuaHang,x=>x.TenCuaHang); }
-<div class="sl-staff-header"><div class="page-head"><div><h1>Nhân viên & phân quyền</h1><p>Theo dõi nhân sự và chi nhánh được phân công</p></div></div><a class="sl-add-staff" asp-controller="NhanVien" asp-action="Create"><i class="bi bi-person-plus-fill"></i> Thêm nhân viên</a></div>
-<form method="get" class="panel sl-admin-filter sl-admin-filters"><label>Chi nhánh<select class="form-select" name="chiNhanh"><option value="">Tất cả chi nhánh</option>@foreach(var b in branches){<option value="@b.MaCuaHang" selected="@(ViewBag.ChiNhanh==b.MaCuaHang)">@b.TenCuaHang</option>}</select></label><label>Tìm nhân viên<input class="form-control" name="q" value="@ViewBag.Q" placeholder="Mã hoặc họ tên" /></label><button class="btn btn-primary" type="submit">Lọc</button><a asp-action="Index" class="btn btn-outline-primary">Đặt lại</a></form>
-<div class="panel"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Mã nhân viên</th><th>Họ tên</th><th>Chức vụ</th><th>Chi nhánh</th><th>Liên hệ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>
-@foreach(var n in Model){<tr><td><strong>@n.MaNhanVien</strong></td><td>@n.HoTen</td><td>@n.ChucVu</td><td>@(names.GetValueOrDefault(n.MaCuaHang,n.MaCuaHang))</td><td>@n.SoDienThoai <small class="d-block text-muted">@n.Email</small></td><td><span class="badge-soft">@n.TrangThai.Replace("_"," ")</span></td><td><a asp-action="Details" asp-route-id="@n.MaNhanVien" class="btn btn-sm btn-outline-primary">Chi tiết</a> <a asp-action="Edit" asp-route-id="@n.MaNhanVien" class="btn btn-sm btn-outline-secondary">Sửa</a></td></tr>}
-@if(Model.Count==0){<tr><td colspan="7" class="text-center py-4 text-muted">Không có nhân viên phù hợp.</td></tr>}
-</tbody></table></div></div>
-<div class="sl-admin-note">Nhật ký dưới trang chi tiết là lịch sử hợp đồng liên quan đến nhân viên, không phải nhật ký thao tác hệ thống. Chỉ cấp quyền sửa/xóa cho quản trị viên khi triển khai thực tế.</div>
+@model List<RentalCamera.Models.NhanVien>
+@using RentalCamera.Models
+
+@{
+    ViewData["Title"] = "Nhân viên & phân quyền";
+
+    var employees = Model ?? new List<NhanVien>();
+
+    var branches = ViewBag.Branches as IEnumerable<CuaHang>
+                   ?? Enumerable.Empty<CuaHang>();
+
+    var accounts = ViewBag.Accounts as IEnumerable<TaiKhoan>
+                   ?? Enumerable.Empty<TaiKhoan>();
+
+    var branchNames = branches.ToDictionary(
+        x => x.MaCuaHang,
+        x => x.TenCuaHang
+    );
+
+    var q = ViewBag.Q as string ?? "";
+    var selectedBranch = ViewBag.ChiNhanh as string ?? "";
+}
+
+<style>
+    .staff-page {
+        font-family: "Roboto", sans-serif;
+        color: #14365e;
+        padding-bottom: 24px;
+    }
+
+    /* THANH THAO TÁC */
+
+    .staff-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+    }
+
+    .staff-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 16px;
+        min-height: 40px;
+        border-radius: 9px;
+        border: 1px solid #cfe0fb;
+        background: white;
+        color: #0875f9;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .staff-btn:hover {
+        background: #edf5ff;
+        color: #0065e5;
+    }
+
+    .staff-btn-primary {
+        background: linear-gradient(120deg, #078eff, #2459f4);
+        border-color: transparent;
+        color: white;
+        box-shadow: 0 5px 12px rgba(0, 112, 255, .15);
+    }
+
+    .staff-btn-primary:hover {
+        background: linear-gradient(120deg, #0074e8, #1948df);
+        color: white;
+    }
+
+    /* BỘ LỌC */
+
+    .staff-filter-card {
+        background: #fff;
+        border: 1px solid #e1eafb;
+        border-radius: 14px;
+        padding: 17px 20px;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 16px rgba(25, 80, 140, .04);
+    }
+
+    .staff-filter-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr auto auto;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .staff-field label {
+        display: block;
+        margin-bottom: 7px;
+        color: #153b6a;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .staff-field .form-control,
+    .staff-field .form-select {
+        min-height: 41px;
+        border: 1px solid #d3e3fa;
+        border-radius: 9px;
+        font-size: 13px;
+        color: #153b6a;
+        box-shadow: none;
+    }
+
+    .staff-field .form-control:focus,
+    .staff-field .form-select:focus {
+        border-color: #0875f9;
+        box-shadow: 0 0 0 3px rgba(8, 117, 249, .08);
+    }
+
+    /* DANH SÁCH */
+
+    .staff-list-card {
+        background: #fff;
+        border: 1px solid #e1eafb;
+        border-radius: 15px;
+        padding: 18px;
+        box-shadow: 0 5px 20px rgba(25, 80, 140, .04);
+    }
+
+    .staff-list-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 17px;
+    }
+
+    .staff-list-heading h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 800;
+        color: #12365f;
+    }
+
+    .staff-list-heading p {
+        margin: 5px 0 0;
+        color: #8494ad;
+        font-size: 12px;
+    }
+
+    .staff-count {
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 12px;
+        border-radius: 20px;
+        background: #eaf3ff;
+        color: #0875f9;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* BẢNG */
+
+    .staff-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .staff-table thead th {
+        background: #eaf3ff;
+        color: #143b6c;
+        padding: 13px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .staff-table thead th:first-child {
+        border-radius: 9px 0 0 9px;
+    }
+
+    .staff-table thead th:last-child {
+        border-radius: 0 9px 9px 0;
+    }
+
+    .staff-table tbody td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #e8eff9;
+        vertical-align: middle;
+    }
+
+    .staff-table tbody tr:hover {
+        background: #f7fbff;
+    }
+
+    .staff-code {
+        font-weight: 800;
+        color: #0875f9;
+    }
+
+    .staff-person {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .staff-avatar {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #e6f0ff;
+        color: #0875f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 14px;
+    }
+
+    .staff-person-name {
+        font-weight: 700;
+        color: #173b69;
+    }
+
+    .staff-branch {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #4d6485;
+    }
+
+    .staff-contact strong {
+        display: block;
+        color: #173b69;
+        font-size: 12px;
+    }
+
+    .staff-contact small {
+        display: block;
+        margin-top: 4px;
+        color: #8294ad;
+        font-size: 11px;
+    }
+
+    /* TRẠNG THÁI */
+
+    .staff-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        background: #dff8ef;
+        color: #07966e;
+        white-space: nowrap;
+    }
+
+    .staff-status.inactive {
+        background: #fff0df;
+        color: #df8700;
+    }
+
+    .staff-status::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .staff-actions {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+    }
+
+    .staff-actions .staff-btn {
+        padding: 7px 11px;
+        min-height: 32px;
+        font-size: 12px;
+    }
+
+    /* POPUP */
+
+    .staff-modal .modal-content {
+        border: none;
+        border-radius: 17px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(12, 46, 95, .18);
+    }
+
+    .staff-modal .modal-header {
+        background: #f8fbff;
+        border-bottom: 1px solid #e8eff9;
+        padding: 20px 24px;
+    }
+
+    .staff-modal .modal-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #10335e;
+    }
+
+    .staff-modal .modal-body {
+        padding: 24px;
+    }
+
+    .staff-modal .modal-footer {
+        padding: 16px 24px;
+        background: #f8fbff;
+        border-top: 1px solid #e8eff9;
+    }
+
+    .staff-modal-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: #e6f1ff;
+        color: #0875f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+    }
+
+    .staff-modal .form-control,
+    .staff-modal .form-select {
+        min-height: 42px;
+    }
+
+    /* RESPONSIVE */
+
+    @@media (max-width: 1000px) {
+        .staff-filter-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .staff-filter-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .staff-list-card {
+            padding: 12px;
+        }
+
+        .staff-toolbar {
+            justify-content: stretch;
+        }
+
+        .staff-toolbar .staff-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="staff-page">
+
+    <!-- NÚT THÊM NHÂN VIÊN -->
+    <div class="staff-toolbar">
+
+        <button type="button"
+                class="staff-btn staff-btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#createStaffModal">
+
+            <i class="bi bi-person-plus-fill"></i>
+            Thêm nhân viên
+
+        </button>
+
+    </div>
+
+    <!-- BỘ LỌC -->
+    <div class="staff-filter-card">
+
+        <form asp-controller="NhanVien"
+              asp-action="Index"
+              method="get">
+
+            <div class="staff-filter-grid">
+
+                <div class="staff-field">
+
+                    <label for="staffBranch">Chi nhánh</label>
+
+                    <select id="staffBranch"
+                            name="chiNhanh"
+                            class="form-select">
+
+                        <option value="">Tất cả chi nhánh</option>
+
+                        @foreach (var branch in branches)
+                        {
+                            if (selectedBranch == branch.MaCuaHang)
+                            {
+                                <option value="@branch.MaCuaHang" selected>
+                                    @branch.TenCuaHang
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@branch.MaCuaHang">
+                                    @branch.TenCuaHang
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="staff-field">
+
+                    <label for="staffSearch">Tìm nhân viên</label>
+
+                    <input id="staffSearch"
+                           name="q"
+                           value="@q"
+                           class="form-control"
+                           placeholder="Nhập mã hoặc họ tên nhân viên..." />
+
+                </div>
+
+                <button type="submit"
+                        class="staff-btn staff-btn-primary">
+
+                    <i class="bi bi-funnel"></i>
+                    Lọc
+
+                </button>
+
+                <a asp-controller="NhanVien"
+                   asp-action="Index"
+                   class="staff-btn">
+
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Đặt lại
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- DANH SÁCH NHÂN VIÊN -->
+    <div class="staff-list-card">
+
+        <div class="staff-list-heading">
+
+            <div>
+                <h3>
+                    <i class="bi bi-people-fill me-2 text-primary"></i>
+                    Danh sách nhân viên
+                </h3>
+
+                <p>
+                    Theo dõi nhân sự và chi nhánh được phân công
+                </p>
+            </div>
+
+            <span class="staff-count">
+                @employees.Count nhân viên
+            </span>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="staff-table">
+
+                <thead>
+                    <tr>
+                        <th>Mã nhân viên</th>
+                        <th>Họ tên</th>
+                        <th>Chức vụ</th>
+                        <th>Chi nhánh</th>
+                        <th>Liên hệ</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var n in employees)
+                    {
+                        var isActive = n.TrangThai == "HOAT_DONG";
+
+                        var branchName = branchNames.GetValueOrDefault(
+                            n.MaCuaHang,
+                            n.MaCuaHang
+                        );
+
+                        <tr>
+
+                            <td>
+                                <span class="staff-code">
+                                    @n.MaNhanVien
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="staff-person">
+
+                                    <div class="staff-avatar">
+                                        @(string.IsNullOrWhiteSpace(n.HoTen)
+                                            ? "NV"
+                                            : n.HoTen.Trim().Substring(0, 1).ToUpper())
+                                    </div>
+
+                                    <span class="staff-person-name">
+                                        @n.HoTen
+                                    </span>
+
+                                </div>
+                            </td>
+
+                            <td>
+                                @n.ChucVu
+                            </td>
+
+                            <td>
+                                <span class="staff-branch">
+                                    <i class="bi bi-shop"></i>
+                                    @branchName
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="staff-contact">
+                                    <strong>@n.SoDienThoai</strong>
+                                    <small>@n.Email</small>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="staff-status @(isActive ? "" : "inactive")">
+                                    @(n.TrangThai.Replace("_", " "))
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="staff-actions">
+
+                                    <a asp-controller="NhanVien"
+                                       asp-action="Details"
+                                       asp-route-id="@n.MaNhanVien"
+                                       class="staff-btn">
+
+                                        <i class="bi bi-eye"></i>
+                                        Chi tiết
+
+                                    </a>
+
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary staff-open-edit"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#staffEditModal"
+                                            data-id="@n.MaNhanVien"
+                                            data-name="@n.HoTen"
+                                            data-phone="@n.SoDienThoai"
+                                            data-email="@n.Email"
+                                            data-address="@n.DiaChi"
+                                            data-position="@n.ChucVu"
+                                            data-branch="@n.MaCuaHang"
+                                            data-status="@n.TrangThai">
+
+                                        <i class="bi bi-pencil-square"></i>
+                                        Sửa
+
+                                    </button>
+
+                                </div>
+                            </td>
+
+                        </tr>
+                    }
+
+                    @if (!employees.Any())
+                    {
+                        <tr>
+                            <td colspan="7"
+                                class="text-center py-4 text-muted">
+                                Không tìm thấy nhân viên phù hợp.
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- POPUP THÊM NHÂN VIÊN -->
+<div class="modal fade staff-modal"
+     id="createStaffModal"
+     tabindex="-1"
+     aria-labelledby="createStaffModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content">
+
+            <!-- HEADER POPUP -->
+            <div class="modal-header">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="staff-modal-icon">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="modal-title" id="createStaffModalLabel">
+                            Thêm nhân viên
+                        </h5>
+
+                        <p class="text-muted small mb-0">
+                            Nhập thông tin nhân viên và chọn tài khoản liên kết.
+                        </p>
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Đóng">
+                </button>
+
+            </div>
+
+            <!-- FORM THÊM -->
+            <form asp-controller="NhanVien"
+                  asp-action="Create"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <!-- MÃ NHÂN VIÊN -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>
+                                Mã nhân viên
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input name="maNhanVien"
+                                   class="form-control"
+                                   placeholder="Ví dụ: NV003"
+                                   required />
+
+                        </div>
+
+                        <!-- HỌ TÊN -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>
+                                Họ tên
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input name="hoTen"
+                                   class="form-control"
+                                   placeholder="Nhập họ tên nhân viên"
+                                   required />
+
+                        </div>
+
+                        <!-- SỐ ĐIỆN THOẠI -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>
+                                Số điện thoại
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input name="soDienThoai"
+                                   class="form-control"
+                                   placeholder="Nhập số điện thoại"
+                                   required />
+
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>Email</label>
+
+                            <input name="email"
+                                   type="email"
+                                   class="form-control"
+                                   placeholder="Nhập email" />
+
+                        </div>
+
+                        <!-- CHỨC VỤ -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>Chức vụ</label>
+
+                            <input name="chucVu"
+                                   class="form-control"
+                                   placeholder="Ví dụ: Nhân viên vận hành"
+                                   required />
+
+                        </div>
+
+                        <!-- CHI NHÁNH -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>
+                                Chi nhánh
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="maCuaHang"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    Chọn chi nhánh
+                                </option>
+
+                                @foreach (var branch in branches)
+                                {
+                                    <option value="@branch.MaCuaHang">
+                                        @branch.TenCuaHang
+                                    </option>
+                                }
+
+                            </select>
+
+                        </div>
+
+                        <!-- TÀI KHOẢN -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>
+                                Tài khoản liên kết
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select name="maTaiKhoan"
+                                    class="form-select"
+                                    required>
+
+                                <option value="">
+                                    Chọn tài khoản chưa được gán
+                                </option>
+
+                                @foreach (var account in accounts)
+                                {
+                                    <option value="@account.MaTaiKhoan">
+                                        @account.TenDangNhap (@account.VaiTro)
+                                    </option>
+                                }
+
+                            </select>
+
+                            @if (!accounts.Any())
+                            {
+                                <small class="text-warning">
+                                    Không có tài khoản phù hợp chưa được gán.
+                                </small>
+                            }
+
+                        </div>
+
+                        <!-- ĐỊA CHỈ -->
+                        <div class="col-md-6 staff-field">
+
+                            <label>Địa chỉ</label>
+
+                            <input name="diaChi"
+                                   class="form-control"
+                                   placeholder="Nhập địa chỉ nhân viên" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- FOOTER POPUP -->
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="staff-btn"
+                            data-bs-dismiss="modal">
+
+                        <i class="bi bi-x-lg"></i>
+                        Hủy
+
+                    </button>
+
+                    <button type="submit"
+                            class="staff-btn staff-btn-primary"
+                            disabled="@(!accounts.Any())">
+
+                        <i class="bi bi-check2-circle"></i>
+                        Thêm nhân viên
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+<style>
+    .staff-edit-modal .modal-dialog {
+        max-width: 760px;
+    }
+
+    .staff-edit-modal .modal-content {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(12, 50, 100, .2);
+        font-family: "Roboto", sans-serif;
+    }
+
+    .staff-edit-modal .modal-header {
+        background: #f7fbff;
+        border-bottom: 1px solid #e5edf8;
+        padding: 20px 24px;
+    }
+
+    .staff-edit-modal .modal-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #12345b;
+    }
+
+    .staff-edit-modal .modal-subtitle {
+        color: #8193ad;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .staff-edit-modal .modal-body {
+        padding: 24px;
+    }
+
+    .staff-edit-modal .modal-footer {
+        padding: 15px 24px;
+        background: #f7fbff;
+        border-top: 1px solid #e5edf8;
+    }
+
+    .staff-edit-modal .staff-form-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #17375e;
+        margin-bottom: 7px;
+        display: block;
+    }
+
+    .staff-edit-modal .form-control,
+    .staff-edit-modal .form-select {
+        min-height: 43px;
+        border: 1px solid #d5e4f8;
+        border-radius: 9px;
+        font-size: 13px;
+        color: #17375e;
+    }
+
+    .staff-edit-modal .form-control:focus,
+    .staff-edit-modal .form-select:focus {
+        border-color: #0878f9;
+        box-shadow: 0 0 0 3px rgba(8, 120, 249, .08);
+    }
+
+    .staff-edit-modal .form-control[readonly] {
+        background: #edf4fc;
+    }
+
+    .staff-edit-modal .staff-save-btn {
+        background: linear-gradient(120deg, #0099ff, #245af5);
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .staff-edit-modal .staff-cancel-btn {
+        background: white;
+        border: 1px solid #d5e4f8;
+        color: #17375e;
+        padding: 10px 20px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .staff-edit-modal .staff-modal-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #e5f1ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0878f9;
+        font-size: 21px;
+    }
+</style>

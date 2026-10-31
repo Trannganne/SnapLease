@@ -1,2 +1,780 @@
 @model RentalCamera.Models.PhieuPhat
-@{ViewData["Title"]="Lập phiếu phạt";}<div class="page-head"><div><h1>Lập phiếu phạt</h1><p>Ghi nhận vi phạm gắn trực tiếp với thiết bị trong hợp đồng</p></div><a asp-action="Index" class="btn btn-outline-secondary">Quay lại</a></div><div class="panel"><form method="post" class="row g-3">@Html.AntiForgeryToken()<div asp-validation-summary="ModelOnly" class="text-danger"></div><div class="col-md-6"><label>Mã phiếu</label><input asp-for="MaPhieuPhat" class="form-control" readonly></div><div class="col-md-6"><label>Chi tiết hợp đồng / thiết bị</label><select asp-for="MaChiTietHopDong" class="form-select">@foreach(var x in (IEnumerable<RentalCamera.Models.ChiTietHopDong>)ViewBag.ChiTiet){<option value="@x.MaChiTietHopDong">@x.MaHopDong · @x.MaThietBi · @x.MaChiTietHopDong</option>}</select></div><div class="col-md-6"><label>Loại vi phạm</label><select asp-for="LoaiViPham" class="form-select"><option value="TRA_TRE">Trả trễ</option><option value="HU_HONG">Hư hỏng</option><option value="MAT_PHU_KIEN">Mất phụ kiện</option><option value="KHAC">Khác</option></select></div><div class="col-md-6"><label>Số tiền</label><input asp-for="SoTien" type="number" min="0" class="form-control"></div><div class="col-md-6"><label>Ngày lập</label><input asp-for="NgayLap" type="datetime-local" class="form-control"></div><div class="col-md-6"><label>Trạng thái</label><select asp-for="TrangThai" class="form-select"><option value="CHUA_THANH_TOAN">Chưa thanh toán</option><option value="DA_THANH_TOAN">Đã thanh toán</option><option value="HUY">Hủy</option></select></div><div class="col-12"><label>Mô tả</label><textarea asp-for="MoTa" class="form-control" rows="4" placeholder="Mô tả tình trạng vi phạm, cách tính phí..."></textarea></div><div class="col-12"><button class="btn btn-primary">Lưu phiếu phạt</button></div></form></div>
+@using RentalCamera.Models
+
+@{
+    ViewData["Title"] = "Lập phiếu phạt";
+
+    var chiTiet = ViewBag.ChiTiet as IEnumerable<ChiTietHopDong>
+                  ?? Enumerable.Empty<ChiTietHopDong>();
+}
+
+<div class="penalty-create-page">
+
+    <!-- HEADER -->
+    <div class="penalty-create-header">
+
+        <div class="d-flex align-items-center gap-3">
+
+            <div class="penalty-header-icon">
+                <i class="bi bi-file-earmark-plus"></i>
+            </div>
+
+            <div>
+                <h2>Lập phiếu phạt</h2>
+                <p>
+                    Ghi nhận vi phạm phát sinh trong quá trình thuê thiết bị.
+                </p>
+            </div>
+
+        </div>
+
+        <a asp-action="Index"
+           class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại
+        </a>
+
+    </div>
+
+    <form method="post"
+          asp-action="Create"
+          id="penaltyCreateForm">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
+
+        <div class="penalty-create-layout">
+
+            <!-- CỘT TRÁI -->
+            <div class="penalty-create-card">
+
+                <h4>
+                    <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                    Thông tin phiếu phạt
+                </h4>
+
+                <div class="row g-4">
+
+                    <!-- MÃ PHIẾU -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Mã phiếu
+                        </label>
+
+                        <input asp-for="MaPhieuPhat"
+                               class="form-control"
+                               readonly />
+
+                        <small class="text-muted">
+                            Mã phiếu được chuẩn bị khi mở biểu mẫu.
+                        </small>
+
+                        <span asp-validation-for="MaPhieuPhat"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <!-- HỢP ĐỒNG / THIẾT BỊ -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Chi tiết hợp đồng / thiết bị
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select asp-for="MaChiTietHopDong"
+                                id="penaltyContract"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Chọn hợp đồng / thiết bị --
+                            </option>
+
+                            @foreach (var x in chiTiet)
+                            {
+                                <option value="@x.MaChiTietHopDong">
+                                    @x.MaHopDong · @x.MaThietBi · @x.MaChiTietHopDong
+                                </option>
+                            }
+
+                        </select>
+
+                        <span asp-validation-for="MaChiTietHopDong"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <!-- LOẠI VI PHẠM -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Loại vi phạm
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select asp-for="LoaiViPham"
+                                id="penaltyType"
+                                class="form-select"
+                                required>
+
+                            <option value="TRA_TRE">
+                                Trả trễ
+                            </option>
+
+                            <option value="HU_HONG">
+                                Hư hỏng
+                            </option>
+
+                            <option value="MAT_PHU_KIEN">
+                                Mất phụ kiện
+                            </option>
+
+                            <option value="KHAC">
+                                Khác
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="LoaiViPham"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <!-- SỐ TIỀN -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Số tiền phạt (đ)
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <div class="input-group">
+
+                            <input asp-for="SoTien"
+                                   id="penaltyAmount"
+                                   type="number"
+                                   min="0"
+                                   step="1"
+                                   class="form-control"
+                                   required />
+
+                            <span class="input-group-text">
+                                đ
+                            </span>
+
+                        </div>
+
+                        <span asp-validation-for="SoTien"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <!-- NGÀY LẬP -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Ngày lập
+                        </label>
+
+                        <input asp-for="NgayLap"
+                               type="datetime-local"
+                               asp-format="{0:yyyy-MM-ddTHH:mm}"
+                               class="form-control" />
+
+                        <span asp-validation-for="NgayLap"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <!-- TRẠNG THÁI -->
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Trạng thái
+                        </label>
+
+                        <select asp-for="TrangThai"
+                                id="penaltyStatus"
+                                class="form-select">
+
+                            <option value="CHUA_THANH_TOAN">
+                                Chưa thanh toán
+                            </option>
+
+                            <option value="DA_THANH_TOAN">
+                                Đã thanh toán
+                            </option>
+
+                            <option value="HUY">
+                                Hủy
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="TrangThai"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <!-- MÔ TẢ -->
+                    <div class="col-12">
+
+                        <label class="form-label">
+                            Mô tả vi phạm
+                        </label>
+
+                        <textarea asp-for="MoTa"
+                                  id="penaltyDescription"
+                                  class="form-control"
+                                  rows="5"
+                                  placeholder="Mô tả tình trạng vi phạm, mức độ hư hỏng và cách tính phí..."></textarea>
+
+                        <span asp-validation-for="MoTa"
+                              class="text-danger"></span>
+
+                    </div>
+
+                </div>
+
+                <!-- BUTTON -->
+                <div class="penalty-create-actions">
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-floppy me-2"></i>
+                        Lưu phiếu phạt
+
+                    </button>
+
+                    <a asp-action="Index"
+                       class="btn btn-outline-secondary">
+
+                        <i class="bi bi-x-lg me-2"></i>
+                        Hủy
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI -->
+            <div>
+
+                <!-- ẢNH MINH CHỨNG -->
+                <div class="penalty-create-card mb-3"
+                     id="penaltyEvidenceSection">
+
+                    <h4>
+                        <i class="bi bi-images text-primary me-2"></i>
+                        Ảnh minh chứng hư hỏng
+                    </h4>
+
+                    <p class="text-muted small">
+                        Hình ảnh ghi nhận tình trạng thiết bị khi nhận trả.
+                    </p>
+
+                    <div class="penalty-evidence-card">
+
+                        <div class="penalty-upload-zone">
+
+                            <i class="bi bi-cloud-arrow-up"></i>
+
+                            <p>
+                                Chọn ảnh minh chứng từ thiết bị
+                            </p>
+
+                            <input type="file"
+                                   id="penaltyEvidenceInput"
+                                   class="form-control"
+                                   accept="image/jpeg,image/png,image/webp"
+                                   multiple />
+
+                            <small class="text-muted d-block mt-2">
+                                JPG, PNG, WebP · Tối đa 5 MB/ảnh
+                            </small>
+
+                        </div>
+
+                        <div id="penaltyImagePreview"
+                             class="penalty-image-grid">
+                        </div>
+
+                        <small id="penaltyImageCount"
+                               class="text-muted d-block mt-3">
+                            Chưa chọn ảnh.
+                        </small>
+
+                    </div>
+
+                    <div class="alert alert-info small mt-3 mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Ảnh hiện chỉ được xem trước.
+                        Chức năng lưu ảnh cần đối chiếu API backend.
+                    </div>
+
+                </div>
+
+                <!-- TỔNG QUAN -->
+                <div class="penalty-create-card">
+
+                    <h4>
+                        <i class="bi bi-clipboard-check text-success me-2"></i>
+                        Tổng quan thông tin
+                    </h4>
+
+                    <div class="penalty-summary">
+
+                        <div class="penalty-summary-header">
+                            <i class="bi bi-card-checklist me-2"></i>
+                            Thông tin phiếu phạt
+                        </div>
+
+                        <div class="penalty-summary-body">
+
+                            <div class="penalty-summary-row">
+                                <span>Mã phiếu</span>
+                                <strong id="summaryCode">
+                                    @Model.MaPhieuPhat
+                                </strong>
+                            </div>
+
+                            <div class="penalty-summary-row">
+                                <span>Hợp đồng / thiết bị</span>
+                                <strong id="summaryContract">
+                                    Chưa chọn
+                                </strong>
+                            </div>
+
+                            <div class="penalty-summary-row">
+                                <span>Loại vi phạm</span>
+                                <strong id="summaryType">
+                                    Trả trễ
+                                </strong>
+                            </div>
+
+                            <div class="penalty-summary-row">
+                                <span>Số tiền phạt</span>
+                                <strong id="summaryAmount"
+                                        class="penalty-summary-amount">
+                                    0 đ
+                                </strong>
+                            </div>
+
+                            <div class="penalty-summary-row">
+                                <span>Trạng thái</span>
+                                <strong id="summaryStatus">
+                                    Chưa thanh toán
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<style>
+.penalty-create-page {
+    font-family: Roboto, Arial, sans-serif;
+    color: #102b55;
+}
+
+.penalty-create-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px;
+    background: #fff;
+    border: 1px solid #dce9ff;
+    border-radius: 16px;
+    margin-bottom: 20px;
+}
+
+.penalty-header-icon {
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: #e8f1ff;
+    color: #0866e8;
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.penalty-create-header h2 {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 6px;
+}
+
+.penalty-create-header p {
+    color: #7185a4;
+    margin: 0;
+}
+
+.penalty-create-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.penalty-create-card {
+    background: #fff;
+    border: 1px solid #e0eaff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 6px 24px rgba(32, 75, 130, .04);
+    min-width: 0;
+}
+
+.penalty-create-card h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.penalty-create-card .form-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #17355f;
+    margin-bottom: 8px;
+}
+
+.penalty-create-card .form-control,
+.penalty-create-card .form-select {
+    border: 1px solid #cfe0ff;
+    border-radius: 9px;
+    min-height: 44px;
+}
+
+.penalty-create-card .form-control:focus,
+.penalty-create-card .form-select:focus {
+    border-color: #1677ff;
+    box-shadow: 0 0 0 3px rgba(22,119,255,.1);
+}
+
+.penalty-create-card textarea.form-control {
+    min-height: 145px;
+}
+
+.penalty-evidence-card {
+    background: #fcfaff;
+    border: 1px solid #e6d8ff;
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.penalty-upload-zone {
+    border: 2px dashed #a8c7ff;
+    border-radius: 12px;
+    background: #f8fbff;
+    padding: 30px 16px;
+    text-align: center;
+}
+
+.penalty-upload-zone i {
+    font-size: 34px;
+    color: #1677ff;
+}
+
+.penalty-upload-zone p {
+    margin: 12px 0;
+    color: #58749d;
+}
+
+.penalty-image-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.penalty-image-item {
+    position: relative;
+    border: 1px solid #dce9ff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.penalty-image-item img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.penalty-image-remove {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    border: 0;
+    background: #fff;
+    color: #e11d48;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+}
+
+.penalty-summary {
+    border: 1px solid #c8efdf;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.penalty-summary-header {
+    background: #eafaf2;
+    padding: 16px;
+    font-weight: 700;
+    color: #086b4b;
+}
+
+.penalty-summary-body {
+    padding: 18px;
+}
+
+.penalty-summary-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+    font-size: 14px;
+}
+
+.penalty-summary-row span {
+    color: #6c82a1;
+}
+
+.penalty-summary-row strong {
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.penalty-summary-amount {
+    color: #e11d48;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.penalty-create-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.penalty-create-actions .btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+@@media (max-width: 992px) {
+    .penalty-create-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@@media (max-width: 576px) {
+    .penalty-create-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .penalty-image-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .penalty-create-actions {
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const type = document.getElementById("penaltyType");
+    const contract = document.getElementById("penaltyContract");
+    const amount = document.getElementById("penaltyAmount");
+    const status = document.getElementById("penaltyStatus");
+
+    const evidenceSection = document.getElementById(
+        "penaltyEvidenceSection"
+    );
+
+    const input = document.getElementById(
+        "penaltyEvidenceInput"
+    );
+
+    const preview = document.getElementById(
+        "penaltyImagePreview"
+    );
+
+    const imageCount = document.getElementById(
+        "penaltyImageCount"
+    );
+
+    const form = document.getElementById("penaltyCreateForm");
+
+    let selectedFiles = [];
+
+    // CẬP NHẬT TỔNG QUAN
+    function updateSummary() {
+
+        document.getElementById("summaryContract").textContent =
+            contract.selectedIndex > 0
+                ? contract.options[contract.selectedIndex].text.trim()
+                : "Chưa chọn";
+
+        document.getElementById("summaryType").textContent =
+            type.options[type.selectedIndex].text;
+
+        const value = Number(amount.value) || 0;
+
+        document.getElementById("summaryAmount").textContent =
+            new Intl.NumberFormat("vi-VN").format(value) + " đ";
+
+        document.getElementById("summaryStatus").textContent =
+            status.options[status.selectedIndex].text;
+    }
+
+    // CHỈ HIỆN ẢNH KHI HƯ HỎNG
+    function updateEvidenceVisibility() {
+
+        const isDamage = type.value === "HU_HONG";
+
+        evidenceSection.hidden = !isDamage;
+
+        input.disabled = !isDamage;
+
+        if (!isDamage) {
+            selectedFiles = [];
+            syncInput();
+            renderImages();
+        }
+    }
+
+    function syncInput() {
+
+        const transfer = new DataTransfer();
+
+        selectedFiles.forEach(file => {
+            transfer.items.add(file);
+        });
+
+        input.files = transfer.files;
+    }
+
+    // HIỂN THỊ ẢNH
+    function renderImages() {
+
+        preview.replaceChildren();
+
+        selectedFiles.forEach((file, index) => {
+
+            const url = URL.createObjectURL(file);
+
+            const item = document.createElement("div");
+            item.className = "penalty-image-item";
+
+            const img = document.createElement("img");
+            img.src = url;
+            img.alt = "Ảnh minh chứng " + (index + 1);
+
+            img.onload = function () {
+                URL.revokeObjectURL(url);
+            };
+
+            const remove = document.createElement("button");
+            remove.type = "button";
+            remove.className = "penalty-image-remove";
+            remove.textContent = "×";
+            remove.setAttribute("aria-label", "Xóa ảnh");
+
+            remove.addEventListener("click", function () {
+
+                selectedFiles.splice(index, 1);
+
+                syncInput();
+                renderImages();
+
+            });
+
+            item.appendChild(img);
+            item.appendChild(remove);
+
+            preview.appendChild(item);
+        });
+
+        imageCount.textContent =
+            selectedFiles.length > 0
+                ? "Đã chọn " + selectedFiles.length + " ảnh"
+                : "Chưa chọn ảnh.";
+    }
+
+    // CHỌN ẢNH
+    input.addEventListener("change", function (event) {
+
+        const files = Array.from(event.target.files);
+
+        for (const file of files) {
+
+            if (!["image/jpeg", "image/png", "image/webp"]
+                .includes(file.type)) {
+
+                alert("Chỉ hỗ trợ JPG, PNG và WebP.");
+                continue;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+
+                alert("Ảnh vượt quá 5 MB.");
+                continue;
+            }
+
+            if (selectedFiles.length >= 10) {
+
+                alert("Chỉ được chọn tối đa 10 ảnh.");
+                break;
+            }
+
+            selectedFiles.push(file);
+        }
+
+        syncInput();
+        renderImages();
+    });
+
+    // CẬP NHẬT KHI THAY ĐỔI DỮ LIỆU
+    type.addEventListener("change", function () {
+        updateEvidenceVisibility();
+        updateSummary();
+    });
+
+    contract.addEventListener("change", updateSummary);
+    amount.addEventListener("input", updateSummary);
+    status.addEventListener("change", updateSummary);
+
+    // KHỞI TẠO
+    updateEvidenceVisibility();
+    updateSummary();
+
+});
+</script>

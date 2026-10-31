@@ -1,0 +1,264 @@
+/* ==========================================
+   SNAPLEASE DASHBOARD - MẪU 2
+   Floating KPI Cards / Soft Gradient
+========================================== */
+
+/* Nền xanh gradient nhẹ */
+.dash-modern .sl-dashboard-kpi-band {
+    position: relative;
+    isolation: isolate;
+    padding: 22px;
+    margin: 0 0 24px;
+
+    background: linear-gradient(
+        115deg,
+        #e9f4ff 0%,
+        #dceaff 48%,
+        #d3e5ff 100%
+    );
+
+    border-radius: 20px;
+}
+
+
+/* Thanh tiêu đề */
+.dash-modern .sl-dashboard-kpi-band .dash-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.dash-modern .sl-dashboard-kpi-band .dash-heading-caption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #24548b;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.dash-modern .sl-dashboard-kpi-band .dash-heading-caption i {
+    color: #2684f4;
+    font-size: 19px;
+}
+
+/* Bộ chọn tháng */
+.dash-modern .sl-dashboard-kpi-band .dash-period {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: white;
+    border: 1px solid #dce7f5;
+    border-radius: 12px;
+    padding: 11px 16px;
+    color: #24548b;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(30, 80, 150, .05);
+}
+
+/* Lưới 4 KPI */
+.dash-modern .sl-dashboard-kpi-band .dash-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 0;
+}
+
+/* Thẻ thống kê */
+.dash-modern .sl-dashboard-kpi-band .dash-kpi {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    min-width: 0;
+    min-height: 130px;
+    padding: 22px 18px !important;
+
+    background: #fff !important;
+    border: 1px solid #e8eff9 !important;
+    border-radius: 19px !important;
+
+    box-shadow:
+        0 10px 25px rgba(40, 90, 160, .08),
+        0 2px 6px rgba(40, 90, 160, .03) !important;
+
+    transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+}
+
+/* Loại bỏ vạch xanh cũ */
+.dash-modern .sl-dashboard-kpi-band .dash-kpi::before {
+    display: none !important;
+}
+
+/* Hiệu ứng hover */
+.dash-modern .sl-dashboard-kpi-band .dash-kpi:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 18px 35px rgba(40, 90, 160, .14) !important;
+}
+
+/* Icon lớn bên trái */
+.dash-modern .dash-kpi .kpi-icon-box {
+    width: 68px;
+    height: 68px;
+    flex: 0 0 68px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+    font-size: 30px;
+}
+
+/* Nội dung KPI */
+.dash-modern .dash-kpi .kpi-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.dash-modern .dash-kpi .kpi-title {
+    display: block;
+    color: #28466f;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+/* Giá trị */
+.dash-modern .dash-kpi .kpi-value {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    font-size: clamp(24px, 1.8vw, 33px);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -.7px;
+    color: #123d72;
+
+    font-variant-numeric: tabular-nums;
+}
+
+.dash-modern .dash-kpi .kpi-value small {
+    font-size: 13px;
+    font-weight: 600;
+    color: #59769c;
+    letter-spacing: 0;
+}
+
+.dash-modern .dash-kpi .kpi-content p {
+    margin: 8px 0 0;
+    color: #7890ae;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* Nút mũi tên */
+.dash-modern .dash-kpi .kpi-arrow {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: #edf4ff;
+    color: #2675e8;
+    text-decoration: none;
+    font-size: 17px;
+
+    transition: .2s;
+}
+
+.dash-modern .dash-kpi .kpi-arrow:hover {
+    background: #2675e8;
+    color: white;
+    transform: translateX(3px);
+}
+
+/* Màu riêng từng thẻ */
+
+/* Thiết bị - Xanh dương */
+.dash-modern .kpi-device .kpi-icon-box {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    color: #2563eb;
+}
+
+/* Đang thuê - Xanh ngọc */
+.dash-modern .kpi-renting .kpi-icon-box {
+    background: linear-gradient(135deg, #ccfbf1, #99f6e4);
+    color: #0d9488;
+}
+
+/* Đơn thuê - Cam */
+.dash-modern .kpi-orders .kpi-icon-box {
+    background: linear-gradient(135deg, #ffedd5, #fed7aa);
+    color: #ea580c;
+}
+
+/* Doanh thu - Tím */
+.dash-modern .kpi-revenue .kpi-icon-box {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    color: #7c3aed;
+}
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+    .dash-modern .sl-dashboard-kpi-band .dash-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .dash-modern .sl-dashboard-kpi-band {
+        margin: 0 -10px 20px;
+        padding: 16px 12px 0;
+    }
+
+    .dash-modern .sl-dashboard-kpi-band::before {
+        height: 175px;
+    }
+
+    .dash-modern .sl-dashboard-kpi-band .dash-kpis {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .dash-modern .sl-dashboard-kpi-band .dash-kpi {
+        min-height: 110px;
+        padding: 18px !important;
+    }
+
+    .dash-modern .dash-kpi .kpi-icon-box {
+        width: 58px;
+        height: 58px;
+        flex-basis: 58px;
+        font-size: 25px;
+    }
+
+    .dash-modern .dash-kpi .kpi-value {
+        font-size: 28px;
+    }
+
+    .dash-modern .sl-dashboard-kpi-band .dash-heading {
+        flex-wrap: wrap;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dash-modern .sl-dashboard-kpi-band .dash-kpi,
+    .dash-modern .dash-kpi .kpi-arrow {
+        transition: none;
+    }
+}

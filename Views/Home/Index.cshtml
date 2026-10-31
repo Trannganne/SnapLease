@@ -1,66 +1,259 @@
-@model DashboardVM
+@model RentalCamera.ViewModels.DashboardVM
+@using System.Globalization
 @{
     ViewData["Title"] = "Tổng quan";
     string StatusLabel(string s) => s switch {
-        "SAN_SANG" => "Sẵn sàng", "DANG_GIU" => "Đang giữ", "DANG_THUE" => "Đang thuê",
-        "BAO_TRI" => "Bảo trì", "HONG" => "Hỏng", "NGUNG_KINH_DOANH" => "Ngừng kinh doanh", _ => s.Replace("_", " ")
+        "SAN_SANG" => "Sẵn sàng", "DANG_THUE" => "Đang thuê", "BAO_TRI" => "Bảo trì",
+        "DANG_GIU" => "Đang giữ", "HONG" => "Hỏng", "NGUNG_KINH_DOANH" => "Ngừng kinh doanh", _ => s.Replace("_", " ")
     };
     string OrderLabel(string s) => s switch {
-        "DANG_THUE" => "Đang thuê", "DA_HOAN_THANH" => "Hoàn thành", "HOAN_THANH" => "Hoàn thành",
-        "DA_HUY" => "Đã hủy", "CHO_BAN_GIAO" => "Chờ bàn giao", "CHO_COC" => "Chờ cọc",
-        "CHO_THANH_TOAN_COC" => "Chờ cọc", _ => s.Replace("_", " ")
+        "DANG_THUE" => "Đang thuê", "DA_HOAN_THANH" or "HOAN_THANH" => "Hoàn thành",
+        "DA_HUY" => "Đã hủy", "CHO_BAN_GIAO" => "Chờ bàn giao", "CHO_HOAN_TRA" => "Chờ hoàn trả",
+        "CHO_COC" or "CHO_THANH_TOAN_COC" => "Chờ cọc", _ => s.Replace("_", " ")
     };
-    string StatusClass(string s) => s switch {
+    string OrderClass(string s) => s switch {
         "DANG_THUE" => "info", "DA_HOAN_THANH" or "HOAN_THANH" => "success", "DA_HUY" => "danger", _ => "warning"
     };
-    var stateTotal = Model.TrangThai.Values.Sum();
-    var availablePct = stateTotal == 0 ? 0 : 100.0 * Model.TrangThai.GetValueOrDefault("SAN_SANG") / stateTotal;
-    var rentingPct = stateTotal == 0 ? 0 : 100.0 * Model.TrangThai.GetValueOrDefault("DANG_THUE") / stateTotal;
-    var pct1 = availablePct.ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
-    var pct2 = (availablePct + rentingPct).ToString(System.Globalization.CultureInfo.InvariantCulture) + "%";
-    var maxRevenue = Math.Max(1m, Model.DoanhThuTheoThang.DefaultIfEmpty(0).Max());
+    var stateOrder = new[] { "SAN_SANG", "DANG_THUE", "BAO_TRI", "DANG_GIU", "HONG", "NGUNG_KINH_DOANH" };
+    var stateColors = new Dictionary<string,string> {
+        ["SAN_SANG"] = "#13cdb5", ["DANG_THUE"] = "#15b6fa", ["BAO_TRI"] = "#ffd257",
+        ["DANG_GIU"] = "#ff7580", ["HONG"] = "#ad80f5", ["NGUNG_KINH_DOANH"] = "#94a3b8"
+    };
+    var totalStates = Model.TrangThai.Values.Sum();
+    var donutParts = new List<string>();
+    double cursor = 0;
+    foreach (var code in stateOrder) {
+        var count = Model.TrangThai.GetValueOrDefault(code);
+        if (count == 0 || totalStates == 0) continue;
+        var next = cursor + 100.0 * count / totalStates;
+        donutParts.Add($"{stateColors[code]} {cursor.ToString(CultureInfo.InvariantCulture)}% {next.ToString(CultureInfo.InvariantCulture)}%");
+        cursor = next;
+    }
+    var otherStates = Model.TrangThai.Where(x => !stateOrder.Contains(x.Key)).ToList();
+    foreach (var item in otherStates) {
+        if (item.Value == 0 || totalStates == 0) continue;
+        var next = cursor + 100.0 * item.Value / totalStates;
+        donutParts.Add($"#cbd5e1 {cursor.ToString(CultureInfo.InvariantCulture)}% {next.ToString(CultureInfo.InvariantCulture)}%");
+        cursor = next;
+    }
+    var donutBackground = donutParts.Count == 0 ? "#e8eef8" : "conic-gradient(" + string.Join(",", donutParts) + ")";
+    var maxRevenue = Math.Max(1m, Model.DoanhThuTheoThang.DefaultIfEmpty(0m).Max());
+    var reportYear = Model.NamBaoCao > 0 ? Model.NamBaoCao : DateTime.Today.Year;
 }
-<div class="dash-modern">
-  <div class="sl-dashboard-kpi-band">
-  <div class="dash-heading" aria-label="Thời gian thống kê">
-    <div class="dash-heading-caption"><i class="bi bi-activity" aria-hidden="true"></i><span>Số liệu hoạt động cửa hàng</span></div>
-    <div class="dash-period"><i class="bi bi-calendar3"></i><span>Tháng @DateTime.Today.ToString("MM/yyyy")</span></div>
-  </div>
-  <div class="dash-kpis">
-    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Tổng thiết bị</span><i class="bi bi-camera dash-icon"></i></div><strong>@Model.TongThietBi <small>máy</small></strong><p>Thiết bị toàn hệ thống</p></div>
-    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Đang cho thuê</span><i class="bi bi-camera-video dash-icon"></i></div><strong>@Model.DangThue <small>máy</small></strong><p>Trạng thái hiện tại</p></div>
-    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Đơn thuê hôm nay</span><i class="bi bi-calendar-check dash-icon"></i></div><strong>@Model.DonHomNay <small>đơn</small></strong><p>Hợp đồng ký trong ngày</p></div>
-    <div class="dash-card dash-kpi"><div class="dash-kpi-head"><span>Doanh thu tháng</span><i class="bi bi-cash-stack dash-icon"></i></div><strong>@Model.DoanhThuThang.ToString("N0") <small>đ</small></strong><p>Không tính tiền cọc</p></div>
-  </div>
-  </div><!-- /sl-dashboard-kpi-band -->
-  <div class="dash-grid dash-grid-charts">
-    <section class="dash-card dash-revenue"><div class="dash-section-head"><h2><i class="bi bi-bar-chart-line"></i> Doanh thu theo tháng</h2><form method="get" asp-action="Index"><label class="visually-hidden" for="dash-year">Năm báo cáo</label><select id="dash-year" name="nam" class="form-select form-select-sm" onchange="this.form.submit()"><option value="@Model.NamBaoCao">Năm @Model.NamBaoCao</option>@if(Model.NamBaoCao>2000){<option value="@(Model.NamBaoCao-1)">Năm @(Model.NamBaoCao-1)</option>}</select></form></div>
-      <div class="dash-chart" role="img" aria-label="Biểu đồ doanh thu từng tháng của năm @Model.NamBaoCao">
-        @for(var i=0;i<12;i++){var value=Model.DoanhThuTheoThang.ElementAtOrDefault(i);var height=(double)(value/maxRevenue)*100; <div class="dash-chart-col"><div class="dash-bar-track"><div class="dash-bar" style="--bar-height:@(height.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="Tháng @(i+1): @value.ToString("N0") đ"></div></div><span>T@(i+1)</span></div>}
-      </div><div class="dash-chart-foot">Doanh thu thực nhận từ thanh toán thành công · Đơn vị: VNĐ</div>
-    </section>
-    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-pie-chart"></i> Tình trạng thiết bị</h2><a asp-controller="ThietBi" asp-action="Index">Chi tiết <i class="bi bi-arrow-right"></i></a></div>
-      @if(stateTotal==0){<div class="dash-empty">Chưa có dữ liệu thiết bị.</div>}
-      else {<div class="dash-status-layout"><div class="dash-donut" style="--donut-p1:@pct1;--donut-p2:@pct2" role="img" aria-label="Tổng cộng @stateTotal thiết bị, phân theo trạng thái"><div><strong>@stateTotal</strong><span>thiết bị</span></div></div><div class="dash-status-legend">@foreach(var st in Model.TrangThai.OrderByDescending(x=>x.Value)){<div class="dash-legend-row"><span class="dash-dot"></span><span>@StatusLabel(st.Key)</span><strong>@st.Value máy</strong><small>@(Math.Round(st.Value*100.0/stateTotal))%</small></div>}</div></div>}
-    </section>
-  </div>
-  <div class="dash-grid dash-grid-work">
-    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-list-ul"></i> Đơn thuê gần đây</h2><a asp-controller="DonThue" asp-action="Index">Xem tất cả <i class="bi bi-arrow-right"></i></a></div>
-      @if(!Model.DonGanDay.Any()){<div class="dash-empty"><i class="bi bi-inbox"></i> Chưa có hợp đồng nào.</div>}
-      else{<div class="table-responsive"><table class="dash-table"><thead><tr><th>Mã hợp đồng</th><th>Khách hàng</th><th>Ngày nhận</th><th>Ngày trả</th><th>Tiền thuê</th><th>Trạng thái</th><th></th></tr></thead><tbody>@foreach(var h in Model.DonGanDay){<tr><td><strong>@h.MaHopDong</strong></td><td>@(h.KhachThue?.HoTen ?? h.MaKhachThue)</td><td>@h.ThoiGianBanGiao.ToString("dd/MM/yyyy")</td><td>@h.ThoiGianTraDuKien.ToString("dd/MM/yyyy")</td><td>@h.TongTien.ToString("N0") đ</td><td><span class="dash-badge dash-badge-@StatusClass(h.TrangThai)">@OrderLabel(h.TrangThai)</span></td><td><a asp-controller="DonThue" asp-action="Details" asp-route-id="@h.MaHopDong">Chi tiết</a></td></tr>}</tbody></table></div>}
-    </section>
-    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-clipboard-check"></i> Công việc cần xử lý</h2><a asp-controller="DonThue" asp-action="Index">Xem đơn thuê <i class="bi bi-arrow-right"></i></a></div>
-      <div class="dash-tasks">
-      @foreach(var task in new[]{(Key:"coc",Label:"Chờ xác nhận tiền cọc",Icon:"bi-wallet2"),(Key:"phanbo",Label:"Chờ phân bổ thiết bị",Icon:"bi-box-seam"),(Key:"bangiao",Label:"Chờ bàn giao thiết bị",Icon:"bi-camera"),(Key:"quahan",Label:"Hợp đồng quá hạn trả",Icon:"bi-clock-history")}){<a asp-controller="DonThue" asp-action="Index" class="dash-task"><i class="bi @task.Icon"></i><span>@task.Label</span><strong>@Model.ViecCanXuLy.GetValueOrDefault(task.Key)</strong><i class="bi bi-chevron-right"></i></a>}
-      </div><p class="dash-footnote">Số lượng theo trạng thái hợp đồng hiện có.</p>
-    </section>
-  </div>
-  <div class="dash-grid dash-grid-bottom">
-    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-trophy"></i> Thiết bị được thuê nhiều</h2><a asp-controller="ThietBi" asp-action="Index">Xem thiết bị <i class="bi bi-arrow-right"></i></a></div>
-      @if(!Model.PhoBien.Any()){<div class="dash-empty">Chưa có lượt thuê được ghi nhận.</div>}else{<div class="dash-popular">@{var rank=0;}@foreach(var item in Model.PhoBien){rank++;<div class="dash-popular-item"><span class="dash-rank">@rank</span><span>@item.Ten</span><strong>@item.Luot lượt</strong></div>}</div>}
-    </section>
-    <section class="dash-card"><div class="dash-section-head"><h2><i class="bi bi-calendar-event"></i> Lịch bàn giao / nhận trả sắp tới</h2><a asp-controller="LichThue" asp-action="Index">Xem lịch <i class="bi bi-arrow-right"></i></a></div>
-      @if(!Model.LichSapToi.Any()){<div class="dash-empty"><i class="bi bi-calendar-check"></i> Chưa có lịch sắp tới.</div>}else{<div class="dash-upcoming">@foreach(var h in Model.LichSapToi){var isHandover=h.ThoiGianBanGiao>=DateTime.Now;var when=isHandover?h.ThoiGianBanGiao:h.ThoiGianTraDuKien;<a asp-controller="DonThue" asp-action="Details" asp-route-id="@h.MaHopDong"><i class="bi @(isHandover?"bi-box-arrow-up-right":"bi-box-arrow-in-down-left")"></i><span><strong>@(isHandover?"Bàn giao":"Nhận trả") · @h.MaHopDong</strong><small>@when.ToString("dd/MM/yyyy HH:mm") · @(h.KhachThue?.HoTen??h.MaKhachThue)</small></span><i class="bi bi-chevron-right"></i></a>}</div>}
-    </section>
-  </div>
+
+<div class="snap-overview">
+    <div class="overview-kpi-band">
+        <div class="overview-kpi-heading">
+            <span><i class="bi bi-activity"></i> Hoạt động cửa hàng</span>
+            <span class="overview-date"><i class="bi bi-calendar3"></i> Tháng @DateTime.Today.ToString("MM/yyyy")</span>
+        </div>
+        <div class="overview-kpis">
+            <article class="overview-kpi overview-blue">
+                <div class="overview-kpi-icon"><i class="bi bi-camera"></i></div>
+                <div class="overview-kpi-body">
+                    <div class="overview-kpi-title">Tổng thiết bị</div>
+                    <div class="overview-kpi-number"><span>@Model.TongThietBi</span><span>máy</span></div>
+                    <div class="overview-kpi-note">Thiết bị toàn hệ thống</div>
+                </div>
+                <a asp-controller="ThietBi" asp-action="Index" class="overview-kpi-link" aria-label="Xem thiết bị"><i class="bi bi-arrow-right"></i></a>
+            </article>
+            <article class="overview-kpi overview-green">
+                <div class="overview-kpi-icon"><i class="bi bi-camera-video"></i></div>
+                <div class="overview-kpi-body">
+                    <div class="overview-kpi-title">Đang cho thuê</div>
+                    <div class="overview-kpi-number"><span>@Model.DangThue</span><span>máy</span></div>
+                    <div class="overview-kpi-note">Thiết bị đang được thuê</div>
+                </div>
+                <a asp-controller="ThietBi" asp-action="Index" class="overview-kpi-link" aria-label="Xem thiết bị đang thuê"><i class="bi bi-arrow-right"></i></a>
+            </article>
+            <article class="overview-kpi overview-orange">
+                <div class="overview-kpi-icon"><i class="bi bi-calendar-check"></i></div>
+                <div class="overview-kpi-body">
+                    <div class="overview-kpi-title">Hợp đồng hôm nay</div>
+                    <div class="overview-kpi-number"><span>@Model.DonHomNay</span><span>đơn</span></div>
+                    <div class="overview-kpi-note">Hợp đồng ký trong ngày</div>
+                </div>
+                <a asp-controller="DonThue" asp-action="Index" class="overview-kpi-link" aria-label="Xem hợp đồng"><i class="bi bi-arrow-right"></i></a>
+            </article>
+            <article class="overview-kpi overview-purple">
+                <div class="overview-kpi-icon"><i class="bi bi-wallet2"></i></div>
+                <div class="overview-kpi-body">
+                    <div class="overview-kpi-title">Doanh thu tháng</div>
+                    <div class="overview-kpi-number"><span>@Model.DoanhThuThang.ToString("N0")</span><span>đ</span></div>
+                    <div class="overview-kpi-note">Không tính tiền cọc</div>
+                </div>
+                <a asp-controller="BaoCao" asp-action="Index" class="overview-kpi-link" aria-label="Xem báo cáo"><i class="bi bi-arrow-right"></i></a>
+            </article>
+        </div>
+    </div>
+
+    <div class="overview-grid overview-charts">
+        <section class="overview-panel">
+            <header class="overview-panel-head">
+                <h2><i class="bi bi-bar-chart-line"></i> Doanh thu theo tháng</h2>
+                <form method="get" asp-controller="Home" asp-action="Index">
+                    <label for="overview-year" class="visually-hidden">Năm báo cáo</label>
+                    <select id="overview-year" name="nam" class="form-select form-select-sm" onchange="this.form.submit()">
+                        @for (int year = DateTime.Today.Year; year >= 2000; year--) {
+                            <option value="@year" selected="@(year == reportYear)">Năm @year</option>
+                        }
+                    </select>
+                </form>
+            </header>
+            <div class="overview-revenue-total">@Model.DoanhThuTheoThang.Sum().ToString("N0") <span>đ</span></div>
+            <p class="overview-subtext">Tổng doanh thu thực nhận trong năm @reportYear</p>
+            <div class="overview-bars" role="img" aria-label="Doanh thu 12 tháng năm @reportYear">
+                @for (int i = 0; i < 12; i++) {
+                    var amount = Model.DoanhThuTheoThang.ElementAtOrDefault(i);
+                    var barHeight = amount <= 0 ? 0 : Math.Max(2, (double)(amount / maxRevenue * 100));
+                    <div class="overview-bar-col">
+                        <div class="overview-bar-track">
+                            <div class="overview-bar @(i + 1 == DateTime.Today.Month && reportYear == DateTime.Today.Year ? "overview-bar-current" : "")"
+                                 style="height:@(barHeight.ToString(CultureInfo.InvariantCulture))%"
+                                 title="Tháng @(i + 1): @amount.ToString("N0") đ"></div>
+                        </div>
+                        <span>T@(i + 1)</span>
+                    </div>
+                }
+            </div>
+            <div class="overview-panel-foot"><i class="bi bi-info-circle"></i> Chỉ tính thanh toán thành công, không bao gồm tiền cọc.</div>
+        </section>
+        <section class="overview-panel">
+            <header class="overview-panel-head"><h2><i class="bi bi-pie-chart"></i> Tình trạng thiết bị</h2><a asp-controller="ThietBi" asp-action="Index">Xem chi tiết <i class="bi bi-arrow-right"></i></a></header>
+            @if (totalStates == 0) {
+                <div class="overview-empty">Chưa có dữ liệu thiết bị.</div>
+            } else {
+                <div class="overview-status-wrap">
+                    <div class="overview-donut" style="background:@donutBackground" role="img" aria-label="@totalStates thiết bị theo trạng thái">
+                        <div class="overview-donut-center"><strong>@totalStates</strong><span>thiết bị</span></div>
+                    </div>
+                    <div class="overview-status-list">
+                        @foreach (var code in stateOrder) {
+                            var count = Model.TrangThai.GetValueOrDefault(code);
+                            <div class="overview-status-row">
+                                <span class="overview-status-dot" style="background:@stateColors[code]"></span>
+                                <span class="overview-status-name">@StatusLabel(code)</span>
+                                <strong>@count máy</strong>
+                                <small>@Math.Round(count * 100.0 / totalStates)%</small>
+                            </div>
+                        }
+                        @foreach (var item in otherStates) {
+                            <div class="overview-status-row"><span class="overview-status-dot" style="background:#cbd5e1"></span><span class="overview-status-name">@StatusLabel(item.Key)</span><strong>@item.Value máy</strong><small>@Math.Round(item.Value * 100.0 / totalStates)%</small></div>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+    </div>
+
+    <div class="overview-grid overview-work">
+        <section class="overview-panel">
+            <header class="overview-panel-head"><h2><i class="bi bi-receipt"></i> Đơn thuê gần đây</h2><a asp-controller="DonThue" asp-action="Index">Xem tất cả <i class="bi bi-arrow-right"></i></a></header>
+            @if (!Model.DonGanDay.Any()) {
+                <div class="overview-empty">Chưa có hợp đồng nào.</div>
+            } else {
+                <div class="table-responsive">
+                    <table class="overview-table">
+                        <thead><tr><th>Mã hợp đồng</th><th>Khách hàng</th><th>Ngày nhận</th><th>Ngày trả</th><th>Tiền thuê</th><th>Trạng thái</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var h in Model.DonGanDay) {
+                                <tr>
+                                    <td><strong>@h.MaHopDong</strong></td>
+                                    <td>@(h.KhachThue?.HoTen ?? h.MaKhachThue)</td>
+                                    <td>@h.ThoiGianBanGiao.ToString("dd/MM/yyyy")</td>
+                                    <td>@h.ThoiGianTraDuKien.ToString("dd/MM/yyyy")</td>
+                                    <td>@h.TongTien.ToString("N0") đ</td>
+                                    <td><span class="overview-badge overview-badge-@OrderClass(h.TrangThai)">@OrderLabel(h.TrangThai)</span></td>
+                                    <td><a asp-controller="DonThue" asp-action="Details" asp-route-id="@h.MaHopDong">Chi tiết</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+        <section class="overview-panel">
+            <header class="overview-panel-head"><h2><i class="bi bi-clipboard-check"></i> Công việc cần xử lý</h2><a asp-controller="DonThue" asp-action="Index">Xem đơn thuê <i class="bi bi-arrow-right"></i></a></header>
+            <div class="overview-task-list">
+                @foreach (var task in new[] { (Key: "coc", Label: "Chờ xác nhận tiền cọc", Icon: "bi-wallet2"), (Key: "phanbo", Label: "Chờ phân bổ thiết bị", Icon: "bi-box-seam"), (Key: "bangiao", Label: "Chờ bàn giao thiết bị", Icon: "bi-camera"), (Key: "quahan", Label: "Hợp đồng quá hạn trả", Icon: "bi-clock-history") }) {
+                    <a asp-controller="DonThue" asp-action="Index" class="overview-task">
+                        <span class="overview-task-icon"><i class="bi @task.Icon"></i></span>
+                        <span>@task.Label</span>
+                        <strong>@Model.ViecCanXuLy.GetValueOrDefault(task.Key)</strong>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+            </div>
+            <div class="overview-panel-foot">Số lượng dựa trên trạng thái hợp đồng trong hệ thống.</div>
+        </section>
+    </div>
+
+    <div class="overview-grid overview-bottom">
+        <section class="overview-panel">
+            <header class="overview-panel-head"><h2><i class="bi bi-trophy"></i> Thiết bị được thuê nhiều</h2><a asp-controller="ThietBi" asp-action="Index">Xem thiết bị <i class="bi bi-arrow-right"></i></a></header>
+            @if (!Model.PhoBien.Any()) {
+                <div class="overview-empty">Chưa có lượt thuê được ghi nhận.</div>
+            } else {
+                <div class="overview-popular">
+                    @{ var rank = 0; }
+                    @foreach (var item in Model.PhoBien) {
+                        rank++;
+                        <div class="overview-popular-row"><span class="overview-rank">@rank</span><span>@item.Ten</span><strong>@item.Luot lượt</strong></div>
+                    }
+                </div>
+            }
+        </section>
+        <section class="overview-panel">
+            <header class="overview-panel-head"><h2><i class="bi bi-calendar-event"></i> Lịch bàn giao / nhận trả sắp tới</h2><a asp-controller="LichThue" asp-action="Index">Xem lịch <i class="bi bi-arrow-right"></i></a></header>
+            @if (!Model.LichSapToi.Any()) {
+                <div class="overview-empty">Chưa có lịch sắp tới.</div>
+            } else {
+                <div class="overview-upcoming">
+                    @foreach (var h in Model.LichSapToi) {
+                        var isHandover = h.ThoiGianBanGiao >= DateTime.Now;
+                        var when = isHandover ? h.ThoiGianBanGiao : h.ThoiGianTraDuKien;
+                        <a asp-controller="DonThue" asp-action="Details" asp-route-id="@h.MaHopDong" class="overview-upcoming-row">
+                            <span class="overview-task-icon"><i class="bi @(isHandover ? "bi-box-arrow-up-right" : "bi-box-arrow-in-down-left")"></i></span>
+                            <span><strong>@(isHandover ? "Bàn giao" : "Nhận trả") · @h.MaHopDong</strong><small>@when.ToString("dd/MM/yyyy HH:mm") · @(h.KhachThue?.HoTen ?? h.MaKhachThue)</small></span>
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    }
+                </div>
+            }
+        </section>
+    </div>
 </div>
+
+<style>
+.snap-overview{font-family:Roboto,Arial,sans-serif;color:#12315f;font-size:13px;padding-bottom:22px}
+.snap-overview *{box-sizing:border-box}
+.overview-kpi-band{background:linear-gradient(180deg,#edf7ff,#e3f0ff);border-radius:16px;padding:15px;margin-bottom:16px}
+.overview-kpi-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#1765b5;font-weight:700;margin-bottom:14px}
+.overview-kpi-heading i{margin-right:6px}
+.overview-date{background:#fff;border:1px solid #d8e8fa;padding:8px 12px;border-radius:9px;font-weight:600}
+.overview-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.overview-kpi{position:relative;display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e8f0fc;border-radius:15px;padding:17px 15px;min-width:0;box-shadow:0 5px 16px rgba(25,93,161,.05);transition:transform .2s,box-shadow .2s;animation:overviewRise .45s both}
+.overview-kpi:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(25,93,161,.12)}
+.overview-kpi-icon{flex:0 0 52px;height:52px;display:grid;place-items:center;border-radius:14px;font-size:25px}
+.overview-blue .overview-kpi-icon{color:#087eff;background:#e4f3ff}.overview-green .overview-kpi-icon{color:#00b99d;background:#ddfaf4}.overview-orange .overview-kpi-icon{color:#ff9138;background:#fff0e2}.overview-purple .overview-kpi-icon{color:#9653ec;background:#f1e8ff}
+.overview-kpi-body{min-width:0;flex:1}.overview-kpi-title{font-weight:800;color:#14386a;font-size:12px;margin-bottom:8px}
+.overview-kpi-number{display:flex;align-items:baseline;gap:.25em;white-space:nowrap;color:#092e6d;font-size:clamp(16px,1.6vw,25px);font-weight:800;line-height:1.15;letter-spacing:-.6px}
+.overview-kpi-number>span{font:inherit!important;font-size:1em!important;line-height:inherit!important;color:inherit!important}
+.overview-kpi-note{font-size:11px;color:#8094b2;margin-top:8px}
+.overview-kpi-link{flex:0 0 26px;height:26px;display:grid;place-items:center;border-radius:50%;background:#eaf4ff;color:#087eff;text-decoration:none;align-self:center}
+.overview-grid{display:grid;gap:14px;margin-bottom:14px}.overview-charts{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}.overview-work{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr)}.overview-bottom{grid-template-columns:1fr 1fr}
+.overview-panel{background:#fff;border:1px solid #e7effa;border-radius:15px;padding:16px;min-width:0;box-shadow:0 5px 17px rgba(34,89,150,.045)}
+.overview-panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.overview-panel-head h2{font-size:14px;font-weight:800;margin:0;color:#0870e7}.overview-panel-head h2 i{margin-right:7px}.overview-panel-head a{color:#1682f3;font-size:12px;text-decoration:none;white-space:nowrap}.overview-panel-head a:hover{text-decoration:underline}.overview-panel-head select{min-width:110px;border-color:#dce9f8;color:#16437b}
+.overview-revenue-total{font-size:25px;font-weight:800;color:#0b3674;line-height:1.2}.overview-revenue-total span{font-size:16px}.overview-subtext{font-size:11px;color:#8a9db7;margin:4px 0 14px}
+.overview-bars{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:9px;height:205px;border-bottom:1px solid #e5effa;background:repeating-linear-gradient(to top,transparent 0,transparent 49px,#e9f1fb 50px);padding:0 5px 0;align-items:end}
+.overview-bar-col{display:flex;flex-direction:column;align-items:center;height:100%;min-width:0}.overview-bar-track{flex:1;width:100%;display:flex;align-items:end;justify-content:center;min-height:0}.overview-bar{width:min(100%,38px);background:linear-gradient(180deg,#a7d1ff,#5b9cf4);border-radius:5px 5px 0 0;min-height:0;transition:filter .2s,transform .2s}.overview-bar:hover{filter:saturate(1.4);transform:scaleX(1.08)}.overview-bar-current{background:linear-gradient(180deg,#138dff,#0069e8)}.overview-bar-col>span{height:26px;padding-top:9px;color:#6c85a9;font-size:10px;font-weight:700}.overview-panel-foot{border-top:1px solid #edf3fb;margin-top:12px;padding-top:10px;color:#8a9db6;font-size:11px}
+.overview-status-wrap{display:flex;align-items:center;gap:20px;min-height:236px}.overview-donut{width:190px;height:190px;border-radius:50%;flex:0 0 190px;display:grid;place-items:center}.overview-donut-center{width:116px;height:116px;background:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px #f0f4fa}.overview-donut-center strong{font-size:31px;color:#0c3671;line-height:1.1}.overview-donut-center span{font-size:12px;color:#6c84a5;margin-top:4px}.overview-status-list{flex:1;min-width:0}.overview-status-row{display:flex;align-items:center;gap:8px;border-bottom:1px solid #edf2f8;padding:10px 0;font-size:11px}.overview-status-dot{width:10px;height:10px;flex:0 0 10px;border-radius:50%}.overview-status-name{flex:1;min-width:0}.overview-status-row strong{white-space:nowrap}.overview-status-row small{color:#7b91b2;min-width:30px;text-align:right}
+.overview-table{width:100%;border-collapse:collapse;font-size:11px}.overview-table thead{background:#eaf4ff}.overview-table th{padding:11px 8px;color:#214b7f;font-weight:800;white-space:nowrap}.overview-table th:first-child{border-radius:8px 0 0 8px}.overview-table th:last-child{border-radius:0 8px 8px 0}.overview-table td{padding:12px 8px;border-bottom:1px solid #edf2f8;white-space:nowrap}.overview-table td:first-child strong{color:#0a63cb}.overview-table td a{color:#087cff;text-decoration:none}.overview-badge{display:inline-block;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:700}.overview-badge-info{background:#e1f1ff;color:#0870e6}.overview-badge-success{background:#dff9ee;color:#008a61}.overview-badge-danger{background:#ffe9e9;color:#d24c55}.overview-badge-warning{background:#fff2d9;color:#c27a00}
+.overview-task,.overview-upcoming-row{display:flex;align-items:center;gap:11px;text-decoration:none;color:#183b6d;padding:12px 4px;border-bottom:1px solid #edf2f8}.overview-task:hover,.overview-upcoming-row:hover{background:#f6fbff}.overview-task>span:nth-child(2){flex:1}.overview-task strong{background:#eaf3ff;color:#0870e6;border-radius:12px;min-width:24px;text-align:center;padding:4px}.overview-task>i:last-child,.overview-upcoming-row>i:last-child{color:#a4b9d3}.overview-task-icon{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:#eaf4ff;color:#087fff;flex:0 0 31px}
+.overview-popular-row{display:flex;align-items:center;gap:10px;border:1px solid #e5effc;border-radius:10px;padding:10px 12px;margin-bottom:8px}.overview-popular-row>span:nth-child(2){flex:1}.overview-popular-row strong{color:#0c73e9;font-size:11px}.overview-rank{width:24px;height:24px;border-radius:50%;background:#e9f3ff;color:#167cf0;display:grid;place-items:center;font-weight:800}.overview-upcoming-row>span:nth-child(2){flex:1;min-width:0}.overview-upcoming-row strong,.overview-upcoming-row small{display:block}.overview-upcoming-row small{font-size:11px;color:#8094af;margin-top:4px}.overview-empty{padding:55px 10px;text-align:center;color:#91a3bc}
+@@keyframes overviewRise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@@media(max-width:1250px){.overview-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.overview-kpi-number{font-size:24px}.overview-status-wrap{gap:12px}.overview-donut{width:150px;height:150px;flex-basis:150px}.overview-donut-center{width:94px;height:94px}}
+@@media(max-width:900px){.overview-charts,.overview-work,.overview-bottom{grid-template-columns:1fr}.overview-status-wrap{justify-content:center}.overview-kpi-number{font-size:22px}}
+@@media(max-width:550px){.overview-kpis{grid-template-columns:1fr}.overview-kpi-band{padding:10px}.overview-panel{padding:12px}.overview-status-wrap{flex-direction:column}.overview-status-list{width:100%}.overview-bars{gap:4px}.overview-panel-head h2{font-size:12px}.overview-revenue-total{font-size:22px}}
+@@media(prefers-reduced-motion:reduce){.overview-kpi{animation:none;transition:none}.overview-kpi:hover{transform:none}}
+</style>

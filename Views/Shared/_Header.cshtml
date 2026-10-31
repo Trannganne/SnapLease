@@ -6,7 +6,61 @@
 <header class="topbar" role="banner">
     <button type="button" id="sl-sidebar-toggle" class="sl-shell-toggle" aria-label="Thu gọn hoặc mở thanh điều hướng" aria-controls="sl-sidebar" aria-expanded="true"><i class="bi bi-list" aria-hidden="true"></i></button>
     <div class="top-actions">
-        
+        <div class="sl-notification-wrapper">
+
+    <button type="button"
+            id="notificationBell"
+            class="sl-notification-bell"
+            aria-label="Mở thông báo"
+            aria-expanded="false"
+            aria-controls="notificationDropdown">
+
+        <i class="bi bi-bell"></i>
+
+        <span id="notificationBadge"
+              class="sl-notification-badge"
+              hidden>0</span>
+
+    </button>
+
+    <div id="notificationDropdown"
+         class="sl-notification-dropdown"
+         hidden>
+
+        <div class="sl-notification-header">
+            <div>
+                <h4>Thông báo</h4>
+                <small>Cập nhật hoạt động của bạn</small>
+            </div>
+
+            <button type="button"
+                    id="notificationClose"
+                    class="btn-close"
+                    aria-label="Đóng thông báo">
+            </button>
+        </div>
+
+        <div id="notificationList"
+             class="sl-notification-list">
+
+            <div class="sl-notification-empty">
+                Đang tải thông báo...
+            </div>
+
+        </div>
+
+        <div class="sl-notification-footer">
+            <button type="button"
+                    id="notificationRefresh"
+                    class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-arrow-clockwise"></i>
+                Làm mới
+            </button>
+        </div>
+
+    </div>
+
+</div>
         <div class="sl-header-user dropdown">
             <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Mở menu tài khoản">
                 <span class="sl-avatar" aria-hidden="true"><i class="bi bi-person-fill"></i></span>

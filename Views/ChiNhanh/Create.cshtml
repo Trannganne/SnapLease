@@ -1,2 +1,234 @@
 @model RentalCamera.Models.CuaHang
-@{ViewData["Title"]="Thêm chi nhánh";}<div class="page-head"><h1>THÊM CHI NHÁNH</h1></div><form method="post" class="panel p-3">@Html.AntiForgeryToken()<div asp-validation-summary="All" class="text-danger"></div><label>Mã chi nhánh</label><input asp-for="MaCuaHang" class="form-control mb-2" required/><label>Tên chi nhánh</label><input asp-for="TenCuaHang" class="form-control mb-2" required/><label>Địa chỉ</label><input asp-for="DiaChi" class="form-control mb-2" required/><label>Số điện thoại</label><input asp-for="SoDienThoai" class="form-control mb-2"/><label>Email</label><input asp-for="Email" class="form-control mb-2"/><label>Mô tả</label><textarea asp-for="MoTa" class="form-control mb-2"></textarea><button class="btn btn-primary">Thêm chi nhánh</button></form>
+
+@{
+    ViewData["Title"] = "Thêm chi nhánh";
+}
+
+<style>
+    .branch-create-page {
+        max-width: 1050px;
+        margin: 0 auto 30px;
+        font-family: "Roboto", sans-serif;
+    }
+
+    .branch-create-card {
+        background: #fff;
+        border: 1px solid #e0eafa;
+        border-radius: 18px;
+        padding: 26px 30px;
+        box-shadow: 0 8px 25px rgba(25, 75, 145, .05);
+    }
+
+    .branch-create-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 20px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #e8eff9;
+    }
+
+    .branch-create-heading-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eaf3ff;
+        border-radius: 13px;
+        color: #0872f9;
+        font-size: 23px;
+    }
+
+    .branch-create-heading h2 {
+        margin: 0;
+        color: #102d56;
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .branch-create-heading p {
+        margin: 5px 0 0;
+        color: #8293ad;
+        font-size: 12px;
+    }
+
+    .branch-create-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 24px;
+    }
+
+    .branch-create-field {
+        min-width: 0;
+    }
+
+    .branch-create-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .branch-create-field label {
+        display: block;
+        margin-bottom: 8px;
+        color: #173b68;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .branch-create-field .form-control {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid #d4e3f8;
+        border-radius: 10px;
+        padding: 10px 13px;
+        font-size: 13px;
+        color: #173b68;
+        background: #fff;
+        box-shadow: none;
+    }
+
+    .branch-create-field .form-control:focus {
+        border-color: #0872f9;
+        box-shadow: 0 0 0 3px rgba(8,114,249,.08);
+    }
+
+    .branch-create-field textarea.form-control {
+        min-height: 90px;
+        resize: vertical;
+    }
+
+    .branch-create-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding-top: 22px;
+        margin-top: 24px;
+        border-top: 1px solid #e8eff9;
+    }
+
+    .branch-create-actions .btn {
+        min-height: 42px;
+        padding: 9px 20px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .branch-create-actions .btn-primary {
+        background: #0872f9;
+        border-color: #0872f9;
+    }
+
+    .branch-create-actions .btn-outline-primary {
+        border-color: #bdd5ff;
+        color: #0872f9;
+    }
+
+    @@media (max-width: 700px) {
+        .branch-create-card {
+            padding: 20px;
+        }
+
+        .branch-create-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .branch-create-field.full {
+            grid-column: auto;
+        }
+    }
+</style>
+
+<div class="branch-create-page">
+
+    <div class="branch-create-card">
+
+        <div class="branch-create-heading">
+            <div class="branch-create-heading-icon">
+                <i class="bi bi-shop"></i>
+            </div>
+
+            <div>
+                <h2>Thông tin chi nhánh mới</h2>
+                <p>Nhập thông tin để thêm chi nhánh vào hệ thống.</p>
+            </div>
+        </div>
+
+        <form method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="All"
+                 class="text-danger mb-3"></div>
+
+            <div class="branch-create-grid">
+
+                <div class="branch-create-field">
+                    <label asp-for="MaCuaHang">Mã chi nhánh</label>
+                    <input asp-for="MaCuaHang"
+                           class="form-control"
+                           placeholder="Ví dụ: CH003"
+                           required />
+                </div>
+
+                <div class="branch-create-field">
+                    <label asp-for="TenCuaHang">Tên chi nhánh</label>
+                    <input asp-for="TenCuaHang"
+                           class="form-control"
+                           placeholder="Nhập tên chi nhánh"
+                           required />
+                </div>
+
+                <div class="branch-create-field">
+                    <label asp-for="DiaChi">Địa chỉ</label>
+                    <input asp-for="DiaChi"
+                           class="form-control"
+                           placeholder="Nhập địa chỉ chi nhánh"
+                           required />
+                </div>
+
+                <div class="branch-create-field">
+                    <label asp-for="SoDienThoai">Số điện thoại</label>
+                    <input asp-for="SoDienThoai"
+                           class="form-control"
+                           placeholder="Nhập số điện thoại" />
+                </div>
+
+                <div class="branch-create-field">
+                    <label asp-for="Email">Email</label>
+                    <input asp-for="Email"
+                           class="form-control"
+                           placeholder="Nhập email chi nhánh" />
+                </div>
+
+                <div class="branch-create-field full">
+                    <label asp-for="MoTa">Mô tả</label>
+                    <textarea asp-for="MoTa"
+                              class="form-control"
+                              placeholder="Nhập mô tả chi nhánh..."></textarea>
+                </div>
+
+            </div>
+
+            <div class="branch-create-actions">
+
+                <a asp-action="Index"
+                   class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i>
+                    Quay lại
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i>
+                    Thêm chi nhánh
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

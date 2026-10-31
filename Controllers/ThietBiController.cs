@@ -10,17 +10,48 @@ public class ThietBiController:BaseController {
  public async Task<IActionResult> Details(string id){var x=await _db.ThietBi.Include(t=>t.DongMay)!.ThenInclude(d=>d!.ThuongHieu).Include(t=>t.CuaHang).FirstOrDefaultAsync(t=>t.MaThietBi==id);if(x==null)return NotFound();ViewBag.Anh=await _db.AnhThietBi.Where(a=>a.MaDongMay==x.MaDongMay).OrderByDescending(a=>a.LaAnhDaiDien).ThenBy(a=>a.ThuTuHienThi).Select(a=>a.DuongDanAnh).ToListAsync();ViewBag.Lich=await (from ct in _db.ChiTietHopDong join hd in _db.HopDong on ct.MaHopDong equals hd.MaHopDong where ct.MaThietBi==id && hd.TrangThai!="DA_HUY" orderby hd.ThoiGianBanGiao descending select hd).Take(8).ToListAsync();return View(x);}
  [HttpGet] public async Task<IActionResult> Create(){ViewBag.DongMay=await _db.DongMay.OrderBy(x=>x.TenDongMay).ToListAsync();ViewBag.CuaHang=await _db.CuaHang.Where(x=>x.TrangThai=="HOAT_DONG").ToListAsync();return View(new ThietBi{NgayNhap=DateTime.Today,TinhTrang="TOT",TrangThai="SAN_SANG"});}
  [HttpPost,ValidateAntiForgeryToken] public async Task<IActionResult> Create(ThietBi x,IFormFile? anh){if(await _db.ThietBi.AnyAsync(t=>t.MaThietBi==x.MaThietBi)){ModelState.AddModelError("MaThietBi","Mã thiết bị đã tồn tại.");}if(await _db.ThietBi.AnyAsync(t=>t.SoSerial==x.SoSerial)){ModelState.AddModelError("SoSerial","Serial đã tồn tại.");}if(!ModelState.IsValid){ViewBag.DongMay=await _db.DongMay.OrderBy(d=>d.TenDongMay).ToListAsync();ViewBag.CuaHang=await _db.CuaHang.ToListAsync();return View(x);} _db.ThietBi.Add(x);await _db.SaveChangesAsync();if(anh!=null){var error=await SaveModelImage(x.MaDongMay,anh);if(error!=null)TempData["Error"]=error;}TempData["Ok"]="Đã thêm thiết bị mới.";return RedirectToAction("Index");}
- [HttpGet] public async Task<IActionResult> Edit(string id){var x=await _db.ThietBi.Include(t=>t.DongMay).FirstOrDefaultAsync(t=>t.MaThietBi==id);if(x==null)return NotFound();ViewBag.CuaHang=await _db.CuaHang.OrderBy(c=>c.TenCuaHang).ToListAsync();return View(x);}
+ [HttpGet]
+public async Task<IActionResult> Edit(string id)
+{
+    var x = await _db.ThietBi
+        .Include(t => t.DongMay)
+            .ThenInclude(d => d!.ThuongHieu)
+        .Include(t => t.CuaHang)
+        .FirstOrDefaultAsync(t => t.MaThietBi == id);
+
+    if (x == null)
+        return NotFound();
+
+    // Danh sách chi nhánh
+    ViewBag.CuaHang = await _db.CuaHang
+        .OrderBy(c => c.TenCuaHang)
+        .ToListAsync();
+
+    // Danh sách ảnh theo dòng máy
+    ViewBag.Anh = await _db.AnhThietBi
+        .Where(a => a.MaDongMay == x.MaDongMay)
+        .OrderByDescending(a => a.LaAnhDaiDien)
+        .ThenBy(a => a.ThuTuHienThi)
+        .Select(a => a.DuongDanAnh)
+        .ToListAsync();
+
+    return View(x);
+}
  [HttpPost,ValidateAntiForgeryToken]
  public async Task<IActionResult> Edit(string id,string tinhTrang,string trangThai,decimal giaThueNgay,decimal tienCoc,decimal phanTramGiamGia,string? soSerial,string? maCuaHang,IFormFile? anh)
  {
   var x=await _db.ThietBi.Include(t=>t.DongMay).FirstOrDefaultAsync(t=>t.MaThietBi==id);
   if(x==null)return NotFound();
-  if(giaThueNgay<0||tienCoc<0||phanTramGiamGia<0||phanTramGiamGia>100)
-  {
-   TempData["Error"]="Giá thuê, tiền cọc hoặc giảm giá không hợp lệ.";
-   return View(x);
-  }
+if (giaThueNgay < 0 ||
+    tienCoc < 0 ||
+    phanTramGiamGia < 0 ||
+    phanTramGiamGia > 100)
+{
+    TempData["Error"] =
+        "Giá thuê, tiền cọc hoặc giảm giá không hợp lệ.";
+
+    return RedirectToAction("Edit", new { id });
+}
   if(string.IsNullOrWhiteSpace(soSerial)||string.IsNullOrWhiteSpace(maCuaHang)||!await _db.CuaHang.AnyAsync(c=>c.MaCuaHang==maCuaHang)) {TempData["Error"]="Serial hoặc chi nhánh không hợp lệ.";return RedirectToAction("Edit",new{id});}
   if(await _db.ThietBi.AnyAsync(t=>t.MaThietBi!=id&&t.SoSerial==soSerial)){TempData["Error"]="Serial đã tồn tại.";return RedirectToAction("Edit",new{id});}
   x.SoSerial=soSerial.Trim();x.MaCuaHang=maCuaHang;x.TinhTrang=tinhTrang;
@@ -48,6 +79,98 @@ public class ThietBiController:BaseController {
   _db.AnhThietBi.Add(new AnhThietBi{MaAnh="A"+Guid.NewGuid().ToString("N")[..19],MaDongMay=modelId,DuongDanAnh="/uploads/devices/"+name,LaAnhDaiDien=!has,ThuTuHienThi=await _db.AnhThietBi.CountAsync(a=>a.MaDongMay==modelId)+1});
   await _db.SaveChangesAsync();return null;
  }
+ [HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> DeleteImage(
+    string id,
+    string imageUrl)
+{
+    var device = await _db.ThietBi
+        .AsNoTracking()
+        .FirstOrDefaultAsync(x => x.MaThietBi == id);
+
+    if (device == null)
+        return NotFound();
+
+    var image = await _db.AnhThietBi
+        .FirstOrDefaultAsync(x =>
+            x.MaDongMay == device.MaDongMay &&
+            x.DuongDanAnh == imageUrl);
+
+    if (image == null)
+    {
+        TempData["Error"] = "Không tìm thấy ảnh cần xóa.";
+
+        return RedirectToAction("Edit", new { id });
+    }
+
+    var oldPath = image.DuongDanAnh;
+    var wasCover = image.LaAnhDaiDien;
+
+    // Xóa bản ghi ảnh
+    _db.AnhThietBi.Remove(image);
+
+    // Nếu xóa ảnh đại diện, chọn ảnh còn lại làm đại diện
+    if (wasCover)
+    {
+        var nextImage = await _db.AnhThietBi
+            .Where(x =>
+                x.MaDongMay == device.MaDongMay &&
+                x.MaAnh != image.MaAnh)
+            .OrderBy(x => x.ThuTuHienThi)
+            .FirstOrDefaultAsync();
+
+        if (nextImage != null)
+        {
+            nextImage.LaAnhDaiDien = true;
+        }
+    }
+
+    await _db.SaveChangesAsync();
+
+    // Chỉ xóa file nằm trong thư mục upload được quản lý
+    const string uploadPrefix = "/uploads/devices/";
+
+    if (!string.IsNullOrWhiteSpace(oldPath) &&
+        oldPath.StartsWith(
+            uploadPrefix,
+            StringComparison.OrdinalIgnoreCase))
+    {
+        var fileName = Path.GetFileName(oldPath);
+
+        var physicalPath = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "wwwroot",
+            "uploads",
+            "devices",
+            fileName
+        );
+
+        // Không xóa file nếu bản ghi khác vẫn sử dụng
+        var stillUsed = await _db.AnhThietBi
+            .AnyAsync(x => x.DuongDanAnh == oldPath);
+
+        if (!stillUsed && System.IO.File.Exists(physicalPath))
+        {
+            try
+            {
+                System.IO.File.Delete(physicalPath);
+            }
+            catch (IOException)
+            {
+                // Bản ghi đã xóa, file có thể dọn dẹp sau.
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Không có quyền xóa file vật lý.
+            }
+        }
+    }
+
+    TempData["Ok"] = "Đã xóa ảnh thiết bị thành công.";
+
+    return RedirectToAction("Edit", new { id });
+}
 protected override string[] GetAllowedRoles()
 {
     return new[] { "ADMIN", "NHAN_VIEN" };

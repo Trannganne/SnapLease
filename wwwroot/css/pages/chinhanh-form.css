@@ -1,0 +1,300 @@
+/* ==========================================
+   SNAPLEASE - BRANCH CREATE / EDIT
+========================================== */
+
+.branch-form-page {
+    font-family: "Roboto", sans-serif;
+    color: #102d56;
+    padding: 0 0 30px;
+}
+
+/* FORM CARD */
+
+.branch-form-card {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #ffffff;
+    border: 1px solid #e1ebfa;
+    border-radius: 20px;
+    box-shadow: 0 8px 28px rgba(20, 72, 140, 0.055);
+}
+
+/* HEADER */
+
+.branch-form-heading {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 23px;
+    margin-bottom: 27px;
+    border-bottom: 1px solid #e8eff9;
+}
+
+.branch-form-heading-icon {
+    width: 55px;
+    height: 55px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    background: #e8f3ff;
+    color: #0872f9;
+    font-size: 25px;
+}
+
+.branch-form-heading h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: #102d56;
+}
+
+.branch-form-heading p {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: #8293ad;
+}
+
+/* GRID */
+
+.branch-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 23px 25px;
+}
+
+/* GROUP */
+
+.branch-form-group {
+    min-width: 0;
+}
+
+.branch-form-group > label {
+    display: block;
+    margin-bottom: 9px;
+    padding-left: 46px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #173b68;
+}
+
+.branch-form-group > label span {
+    color: #ef4444;
+}
+
+.branch-full-width {
+    grid-column: 1 / -1;
+}
+
+/* INPUT */
+
+.branch-input-wrapper {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.branch-input-icon {
+    width: 42px;
+    min-width: 42px;
+    height: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dce9fa;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #0872f9;
+    font-size: 19px;
+}
+
+.branch-input-wrapper .form-control,
+.branch-input-wrapper .form-select {
+    flex: 1;
+    min-width: 0;
+    height: 43px;
+    padding: 0 13px;
+    border: 1px solid #cfe0f8;
+    border-radius: 10px;
+    background-color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    color: #183b68;
+    box-shadow: none;
+    transition: 0.2s ease;
+}
+
+.branch-input-wrapper .form-control:focus,
+.branch-input-wrapper .form-select:focus {
+    border-color: #0872f9;
+    box-shadow: 0 0 0 3px rgba(8, 114, 249, 0.08);
+}
+
+.branch-input-wrapper .form-control:disabled {
+    background: #f1f5fa;
+    color: #7285a2;
+    cursor: not-allowed;
+}
+
+/* TEXTAREA */
+
+.textarea-wrapper .branch-input-icon {
+    height: 80px;
+}
+
+.branch-input-wrapper textarea.form-control {
+    height: auto;
+    min-height: 80px;
+    padding: 12px 13px;
+    resize: vertical;
+}
+
+/* VALIDATION */
+
+.branch-form-group .text-danger {
+    display: block;
+    margin-top: 6px;
+    margin-left: 52px;
+    font-size: 11px;
+}
+
+.branch-field-hint {
+    display: block;
+    margin-top: 7px;
+    margin-left: 52px;
+    color: #8495ae;
+    font-size: 11px;
+}
+
+/* NOTICE */
+
+.branch-form-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+    margin-top: 28px;
+    padding: 16px 18px;
+    background: #edf6ff;
+    border: 1px solid #cfe4ff;
+    border-radius: 12px;
+    color: #1766b5;
+}
+
+.branch-form-notice > i {
+    font-size: 19px;
+    margin-top: 1px;
+}
+
+.branch-form-notice strong {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.branch-form-notice p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.branch-form-notice.warning {
+    background: #fff8e8;
+    border-color: #ffe2a8;
+    color: #a66500;
+}
+
+/* BUTTONS */
+
+.branch-form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.branch-back-btn,
+.branch-save-btn {
+    min-height: 43px;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.branch-back-btn {
+    border: 1px solid #bcd5ff;
+    background: #ffffff;
+    color: #0872f9;
+}
+
+.branch-back-btn:hover {
+    background: #f0f6ff;
+    color: #005fd7;
+}
+
+.branch-save-btn {
+    border: 1px solid #0872f9;
+    background: linear-gradient(135deg, #009dff, #2457f5);
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(8, 114, 249, 0.17);
+}
+
+.branch-save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 22px rgba(8, 114, 249, 0.25);
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 800px) {
+    .branch-form-card {
+        padding: 22px;
+    }
+
+    .branch-form-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .branch-full-width {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .branch-form-card {
+        padding: 16px;
+        border-radius: 15px;
+    }
+
+    .branch-form-heading h2 {
+        font-size: 17px;
+    }
+
+    .branch-form-heading-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 21px;
+    }
+
+    .branch-form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .branch-back-btn,
+    .branch-save-btn {
+        width: 100%;
+    }
+}

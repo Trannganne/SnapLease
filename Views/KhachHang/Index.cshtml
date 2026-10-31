@@ -1,2 +1,164 @@
-@model List<KhachThue>
-@{ViewData["Title"]="Quản lý khách hàng";}<div class="page-head"><div><h1>Quản lý khách hàng</h1><p>Danh sách hội viên và khách hàng thuê máy quay RENTALCAMERA</p></div></div><div class="panel"><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Khách hàng</th><th>Số điện thoại</th><th>Email</th><th>CCCD</th><th>Địa chỉ</th><th></th></tr></thead><tbody>@foreach(var x in Model){<tr><td><b>@x.HoTen</b></td><td>@x.SoDienThoai</td><td>@x.Email</td><td>@x.CCCD</td><td>@x.DiaChi</td><td><a asp-action="Details" asp-route-id="@x.MaKhachThue" class="btn btn-outline-primary btn-sm">Chi tiết</a></td></tr>}</tbody></table></div></div>
+@model IEnumerable<RentalCamera.Models.KhachThue>
+
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+
+<div class="customer-page">
+
+    <!-- THANH CÔNG CỤ -->
+    <div class="customer-page-heading">
+        <div>
+            <h2>Danh sách khách hàng</h2>
+            <p>Quản lý thông tin và tra cứu khách hàng trong hệ thống</p>
+        </div>
+
+        <div class="customer-total">
+            <i class="bi bi-people"></i>
+            <span>@Model.Count() khách hàng</span>
+        </div>
+    </div>
+
+    <!-- BỘ LỌC -->
+    <div class="customer-filter-card">
+
+        <form method="get"
+              asp-controller="KhachHang"
+              asp-action="Index"
+              class="customer-filter-grid">
+
+            <div class="customer-filter-search">
+
+                <label>Tìm kiếm khách hàng</label>
+
+                <div class="customer-search-box">
+                    <i class="bi bi-search"></i>
+
+                    <input type="text"
+                           name="q"
+                           value="@Context.Request.Query["q"]"
+                           placeholder="Tìm theo tên, số điện thoại, email..." />
+                </div>
+
+            </div>
+
+            <div class="customer-filter-actions">
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel"></i>
+                    Lọc
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-outline-primary">
+
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Đặt lại
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- DANH SÁCH -->
+    <div class="customer-table-card">
+
+        <div class="customer-card-header">
+
+            <h3>
+                <i class="bi bi-list-ul"></i>
+                DANH SÁCH KHÁCH HÀNG
+            </h3>
+
+            <span>@Model.Count() khách hàng</span>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table customer-table">
+
+                <thead>
+                    <tr>
+                        <th>Khách hàng</th>
+                        <th>Số điện thoại</th>
+                        <th>Email</th>
+                        <th>CCCD</th>
+                        <th>Địa chỉ</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var customer in Model)
+                    {
+                        <tr>
+
+                            <td>
+                                <div class="customer-name-cell">
+
+                                    <div class="customer-avatar">
+                                        @(string.IsNullOrWhiteSpace(customer.HoTen)
+                                            ? "KH"
+                                            : customer.HoTen.Trim().Substring(0, 1).ToUpper())
+                                    </div>
+
+                                    <div>
+                                        <strong>@customer.HoTen</strong>
+                                    </div>
+
+                                </div>
+                            </td>
+
+                            <td>@customer.SoDienThoai</td>
+
+                            <td>@customer.Email</td>
+
+                            <td>@customer.CCCD</td>
+
+                            <td>@customer.DiaChi</td>
+
+                            <td>
+                                <a asp-controller="KhachHang"
+                                   asp-action="Details"
+                                   asp-route-id="@customer.MaKhachThue"
+                                   class="btn btn-outline-primary btn-sm">
+
+                                    <i class="bi bi-eye"></i>
+                                    Chi tiết
+
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="6"
+                                class="text-center py-5 text-muted">
+
+                                <i class="bi bi-people fs-2"></i>
+
+                                <p class="mt-2">
+                                    Không tìm thấy khách hàng.
+                                </p>
+
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

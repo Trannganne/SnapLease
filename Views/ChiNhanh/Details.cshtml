@@ -1,5 +1,750 @@
 @model RentalCamera.Models.CuaHang
-@{ViewData["Title"]="Thiết bị chi nhánh";var devices=ViewBag.Devices as List<RentalCamera.Models.ThietBi> ?? new();var models=ViewBag.Models as List<RentalCamera.Models.DongMay> ?? new();var images=ViewBag.Images as Dictionary<string,string> ?? new();}
-<div class="page-head"><div><h1>@Model.TenCuaHang</h1><p>@Model.DiaChi · @Model.SoDienThoai</p></div><a asp-action="Edit" asp-route-id="@Model.MaCuaHang" class="btn btn-primary">Sửa chi nhánh</a></div>
-<div class="panel p-3"><h3>Thiết bị tại chi nhánh (@devices.Count)</h3><form method="get" class="row g-2 mb-3"><input type="hidden" name="id" value="@Model.MaCuaHang"/><div class="col-md-4"><input class="form-control" name="q" value="@ViewBag.Q" placeholder="Mã / serial / tên dòng máy"/></div><div class="col-md-3"><select class="form-select" name="dongMay"><option value="">Tất cả dòng máy</option>@foreach(var m in models){<option value="@m.MaDongMay" selected="@(ViewBag.DongMay==m.MaDongMay)">@m.TenDongMay</option>}</select></div><div class="col-md-3"><select class="form-select" name="status"><option value="">Mọi trạng thái</option>@foreach(var state in new[]{"SAN_SANG","DANG_GIU","DANG_THUE","BAO_TRI","HONG","NGUNG_KINH_DOANH"}){<option value="@state" selected="@(ViewBag.Status==state)">@state.Replace("_"," ")</option>}</select></div><div class="col-md-2"><button class="btn btn-primary w-100">Lọc</button></div></form>
-<div class="row g-3">@foreach(var d in devices){<div class="col-sm-6 col-lg-4"><div class="card h-100 overflow-hidden">@if(images.TryGetValue(d.MaDongMay,out var url)){<img src="@url" alt="@d.DongMay?.TenDongMay" style="height:180px;object-fit:cover;width:100%"/>}<div class="card-body"><h5>@d.DongMay?.TenDongMay</h5><p>Serial: @d.SoSerial</p><p>Giá: @d.DongMay?.GiaThueNgay.ToString("N0") đ/ngày</p><p>Trạng thái: <b>@d.TrangThai.Replace("_"," ")</b></p><a asp-controller="ThietBi" asp-action="Details" asp-route-id="@d.MaThietBi" class="btn btn-outline-primary">Chi tiết</a></div></div></div>}@if(!devices.Any()){<p>Không có thiết bị phù hợp.</p>}</div></div>
+@using RentalCamera.ViewModels
+
+@{
+    ViewData["Title"] = "Chi tiết chi nhánh";
+
+    var devices = ViewBag.Devices as List<RentalCamera.Models.ThietBi>
+        ?? new();
+
+    var models = ViewBag.Models as List<RentalCamera.Models.DongMay>
+        ?? new();
+
+    var images = ViewBag.Images as Dictionary<string, string>
+        ?? new();
+
+    var reviews = ViewBag.Reviews as List<BranchReviewVM>
+        ?? new();
+
+    var total = reviews.Count;
+
+    var average = total > 0
+        ? reviews.Average(x => x.SoSao)
+        : 0;
+
+    var fiveStars = reviews.Count(x => x.SoSao == 5);
+
+    var lowStars = reviews.Count(x => x.SoSao <= 3);
+
+    string StatusLabel(string status) => status switch
+    {
+        "SAN_SANG" => "Sẵn sàng",
+        "DANG_GIU" => "Đang giữ",
+        "DANG_THUE" => "Đang thuê",
+        "BAO_TRI" => "Bảo trì",
+        "HONG" => "Hỏng",
+        "NGUNG_KINH_DOANH" => "Ngừng kinh doanh",
+        _ => status.Replace("_", " ")
+    };
+
+    string StatusClass(string status) => status switch
+    {
+        "SAN_SANG" => "success",
+        "DANG_THUE" => "warning",
+        "DANG_GIU" => "info",
+        "BAO_TRI" => "danger",
+        "HONG" => "danger",
+        _ => "secondary"
+    };
+}
+
+<div class="branch-detail">
+
+    <!-- BREADCRUMB -->
+    <div class="branch-breadcrumb">
+        <a asp-action="Index">
+            <i class="bi bi-house"></i>
+            Quản lý chi nhánh
+        </a>
+
+        <i class="bi bi-chevron-right"></i>
+        <span>Chi tiết chi nhánh</span>
+    </div>
+
+    <!-- THÔNG TIN CHI NHÁNH -->
+    <div class="branch-profile">
+
+        <div class="branch-profile-icon">
+            <i class="bi bi-shop"></i>
+        </div>
+
+        <div class="branch-profile-info">
+
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h2>@Model.TenCuaHang</h2>
+
+                <span class="branch-active">
+                    @(
+                        Model.TrangThai == "HOAT_DONG"
+                        ? "Đang hoạt động"
+                        : "Ngừng hoạt động"
+                    )
+                </span>
+            </div>
+
+            <p>
+                <i class="bi bi-geo-alt"></i>
+                @Model.DiaChi
+            </p>
+
+            <p>
+                <i class="bi bi-telephone"></i>
+                @Model.SoDienThoai
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Email))
+            {
+                <p>
+                    <i class="bi bi-envelope"></i>
+                    @Model.Email
+                </p>
+            }
+
+        </div>
+
+        <button type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#editBranchModal">
+            <i class="bi bi-pencil-square me-1"></i>
+            Sửa chi nhánh
+        </button>
+
+    </div>
+
+    <!-- HAI TAB -->
+    <div class="branch-tabs">
+
+        <button type="button"
+                class="branch-tab active"
+                data-tab="devices">
+
+            <i class="bi bi-camera"></i>
+            Thiết bị tại chi nhánh
+            <span>@devices.Count</span>
+
+        </button>
+
+        <button type="button"
+                class="branch-tab"
+                data-tab="reviews">
+
+            <i class="bi bi-star-fill"></i>
+            Đánh giá của chi nhánh
+            <span>@total</span>
+
+        </button>
+
+    </div>
+
+    <!-- ============================= -->
+    <!-- TAB 1: THIẾT BỊ -->
+    <!-- ============================= -->
+
+    <section id="tab-devices" class="branch-tab-content active">
+
+        <div class="branch-section-title">
+            <div>
+                <h3>Danh sách thiết bị</h3>
+                <p>Quản lý thiết bị hiện có tại chi nhánh</p>
+            </div>
+        </div>
+
+        <!-- BỘ LỌC -->
+        <form method="get" class="branch-filter">
+
+            <input type="hidden"
+                   name="id"
+                   value="@Model.MaCuaHang" />
+
+            <div class="branch-search">
+                <i class="bi bi-search"></i>
+
+                <input name="q"
+                       value="@ViewBag.Q"
+                       placeholder="Tìm mã, serial, tên dòng máy..." />
+            </div>
+
+            <select name="dongMay" class="form-select">
+                <option value="">Tất cả dòng máy</option>
+
+                @foreach (var m in models)
+                {
+                    <option value="@m.MaDongMay"
+                            selected="@(ViewBag.DongMay == m.MaDongMay)">
+                        @m.TenDongMay
+                    </option>
+                }
+            </select>
+
+            <select name="status" class="form-select">
+                <option value="">Mọi trạng thái</option>
+
+                @foreach (var state in new[]
+                {
+                    "SAN_SANG",
+                    "DANG_GIU",
+                    "DANG_THUE",
+                    "BAO_TRI",
+                    "HONG",
+                    "NGUNG_KINH_DOANH"
+                })
+                {
+                    <option value="@state"
+                            selected="@(ViewBag.Status == state)">
+                        @StatusLabel(state)
+                    </option>
+                }
+            </select>
+
+            <button class="btn btn-primary">
+                <i class="bi bi-funnel"></i>
+                Lọc
+            </button>
+
+        </form>
+
+        <!-- DANH SÁCH THIẾT BỊ -->
+        <div class="row g-3">
+
+            @foreach (var d in devices)
+            {
+                <div class="col-md-6 col-xl-4">
+
+                    <div class="branch-device-card">
+
+                        <div class="branch-device-top">
+
+                            <span class="device-status @StatusClass(d.TrangThai)">
+                                @StatusLabel(d.TrangThai)
+                            </span>
+
+                        </div>
+
+                        <div class="branch-device-image">
+
+                            @if (images.TryGetValue(d.MaDongMay, out var url))
+                            {
+                                <img src="@url"
+                                     alt="@d.DongMay?.TenDongMay" />
+                            }
+                            else
+                            {
+                                <i class="bi bi-camera"></i>
+                            }
+
+                        </div>
+
+                        <div class="branch-device-body">
+
+                            <h4>@d.DongMay?.TenDongMay</h4>
+
+                            <p>
+                                Serial: @d.SoSerial
+                            </p>
+
+                            <strong class="branch-price">
+                                @d.DongMay?.GiaThueNgay.ToString("N0")
+                                đ/ngày
+                            </strong>
+
+                            <div class="branch-device-actions">
+
+                                <a asp-controller="ThietBi"
+                                   asp-action="Details"
+                                   asp-route-id="@d.MaThietBi"
+                                   class="btn btn-outline-primary">
+
+                                    Chi tiết
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+        @if (!devices.Any())
+        {
+            <div class="branch-empty">
+                <i class="bi bi-camera"></i>
+                <h4>Không tìm thấy thiết bị</h4>
+                <p>Hãy thử thay đổi bộ lọc tìm kiếm.</p>
+            </div>
+        }
+
+    </section>
+
+    <!-- ============================= -->
+    <!-- TAB 2: ĐÁNH GIÁ -->
+    <!-- ============================= -->
+
+    <section id="tab-reviews" class="branch-tab-content">
+
+        <div class="branch-section-title">
+            <div>
+                <h3>Tổng quan đánh giá</h3>
+                <p>Phản hồi của khách hàng tại chi nhánh</p>
+            </div>
+        </div>
+
+        <!-- THỐNG KÊ -->
+        <div class="branch-review-summary">
+
+            <div class="branch-rating-main">
+
+                <h2>@average.ToString("0.0")</h2>
+
+                <div class="branch-stars">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        <i class="bi @(i <= Math.Round(average, MidpointRounding.AwayFromZero)
+                            ? "bi-star-fill"
+                            : "bi-star")"></i>
+                    }
+                </div>
+
+                <p>Điểm đánh giá trung bình</p>
+                <small>Dựa trên @total đánh giá</small>
+
+            </div>
+
+            <div class="branch-rating-stats">
+
+                <div class="rating-stat">
+                    <i class="bi bi-chat-square-text"></i>
+                    <div>
+                        <strong>@total</strong>
+                        <span>Tổng lượt đánh giá</span>
+                    </div>
+                </div>
+
+                <div class="rating-stat">
+                    <i class="bi bi-star-fill"></i>
+                    <div>
+                        <strong>@fiveStars</strong>
+                        <span>Đánh giá 5 sao</span>
+                    </div>
+                </div>
+
+                <div class="rating-stat">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <div>
+                        <strong>@lowStars</strong>
+                        <span>Đánh giá từ 3 sao trở xuống</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="branch-rating-bars">
+
+                @for (int star = 5; star >= 1; star--)
+                {
+                    var count = reviews.Count(x => x.SoSao == star);
+
+                    var percent = total > 0
+                        ? count * 100.0 / total
+                        : 0;
+
+                    <div class="rating-bar-row">
+
+                        <span>@star sao</span>
+
+                        <div class="rating-bar-track">
+                            <div style="width:@percent.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                        </div>
+
+                        <small>
+                            @count (@percent.ToString("0.#")%)
+                        </small>
+
+                    </div>
+                }
+
+            </div>
+
+        </div>
+
+        <!-- BỘ LỌC ĐÁNH GIÁ -->
+        <div class="branch-review-filter">
+
+            <div class="branch-search">
+                <i class="bi bi-search"></i>
+
+                <input id="reviewSearch"
+                       placeholder="Tìm khách hàng, thiết bị, nhận xét..." />
+            </div>
+
+            <select id="reviewStarFilter" class="form-select">
+                <option value="">Tất cả số sao</option>
+                <option value="5">5 sao</option>
+                <option value="4">4 sao</option>
+                <option value="3">3 sao</option>
+                <option value="2">2 sao</option>
+                <option value="1">1 sao</option>
+            </select>
+
+            <select id="reviewStatusFilter" class="form-select">
+                <option value="">Mọi trạng thái</option>
+                <option value="DA_DUYET">Hiển thị</option>
+                <option value="TU_CHOI">Đã ẩn</option>
+            </select>
+
+        </div>
+
+        <!-- DANH SÁCH ĐÁNH GIÁ -->
+        <div id="reviewList">
+
+            @foreach (var r in reviews)
+            {
+                <div class="branch-review-item"
+                     data-stars="@r.SoSao"
+                     data-status="@r.TrangThaiKiemDuyet"
+                     data-search="@($"{r.HoTen} {r.TenDongMay} {r.SoSerial} {r.NhanXet}".ToLowerInvariant())">
+
+                    <div class="review-person">
+
+                        <div class="review-avatar">
+                            @(string.IsNullOrWhiteSpace(r.HoTen)
+                                ? "K"
+                                : r.HoTen.Substring(0, 1).ToUpper())
+                        </div>
+
+                        <div>
+                            <strong>@r.HoTen</strong>
+
+                            <small>
+                                @r.NgayDanhGia.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+
+                            <div class="branch-stars">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    <i class="bi @(i <= r.SoSao
+                                        ? "bi-star-fill"
+                                        : "bi-star")"></i>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="review-device-info">
+                        <i class="bi bi-camera"></i>
+
+                        <div>
+                            <strong>@r.TenDongMay</strong>
+                            <small>@r.SoSerial</small>
+                        </div>
+                    </div>
+
+                    <div class="review-comment">
+                        @(string.IsNullOrWhiteSpace(r.NhanXet)
+                            ? "Khách hàng chỉ đánh giá bằng số sao."
+                            : r.NhanXet)
+                    </div>
+
+                    <div class="review-state">
+
+                        @if (r.TrangThaiKiemDuyet == "DA_DUYET")
+                        {
+                            <span class="badge bg-success">
+                                Hiển thị
+                            </span>
+                        }
+                        else if (r.TrangThaiKiemDuyet == "TU_CHOI")
+                        {
+                            <span class="badge bg-warning text-dark">
+                                Đã ẩn
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                @r.TrangThaiKiemDuyet
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+        <div id="reviewEmpty"
+             class="branch-empty"
+             style="display:none">
+
+            <i class="bi bi-chat-square-text"></i>
+            <h4>Không tìm thấy đánh giá</h4>
+            <p>Hãy thử thay đổi điều kiện tìm kiếm.</p>
+
+        </div>
+
+    </section>
+
+</div>
+<!-- POPUP SỬA CHI NHÁNH -->
+<div class="modal fade"
+     id="editBranchModal"
+     tabindex="-1"
+     aria-labelledby="editBranchModalLabel"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content branch-edit-modal">
+
+            <div class="modal-header branch-modal-header">
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="branch-modal-icon">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="modal-title" id="editBranchModalLabel">
+                            Sửa chi nhánh
+                        </h5>
+                        <p class="mb-0 text-muted small">
+                            Cập nhật thông tin chi nhánh
+                        </p>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Đóng">
+                </button>
+
+            </div>
+
+            <form asp-controller="ChiNhanh"
+                  asp-action="Edit"
+                  asp-route-id="@Model.MaCuaHang"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <input type="hidden"
+                       name="MaCuaHang"
+                       value="@Model.MaCuaHang" />
+
+                <div class="modal-body p-4">
+
+                    <div class="row g-3">
+
+                        <!-- MÃ CHI NHÁNH -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Mã chi nhánh
+                            </label>
+
+                            <input type="text"
+                                   class="form-control"
+                                   value="@Model.MaCuaHang"
+                                   disabled />
+
+                            <small class="text-muted">
+                                Không thể thay đổi mã chi nhánh.
+                            </small>
+                        </div>
+
+                        <!-- TÊN CHI NHÁNH -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Tên chi nhánh
+                            </label>
+
+                            <input type="text"
+                                   name="TenCuaHang"
+                                   value="@Model.TenCuaHang"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <!-- ĐỊA CHỈ -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Địa chỉ
+                            </label>
+
+                            <input type="text"
+                                   name="DiaChi"
+                                   value="@Model.DiaChi"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <!-- SỐ ĐIỆN THOẠI -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Số điện thoại
+                            </label>
+
+                            <input type="tel"
+                                   name="SoDienThoai"
+                                   value="@Model.SoDienThoai"
+                                   class="form-control" />
+                        </div>
+
+                        <!-- EMAIL -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Email
+                            </label>
+
+                            <input type="email"
+                                   name="Email"
+                                   value="@Model.Email"
+                                   class="form-control" />
+                        </div>
+
+                        <!-- TRẠNG THÁI -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                Trạng thái
+                            </label>
+
+                            <select name="TrangThai"
+                                    class="form-select">
+
+                                <option value="@Model.TrangThai" selected>
+                                    @((Model.TrangThai ?? "").Replace("_", " "))
+                                </option>
+
+                            </select>
+
+                            <small class="text-muted">
+                                Giữ nguyên trạng thái hiện tại.
+                            </small>
+                        </div>
+
+                        <!-- MÔ TẢ -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Mô tả
+                            </label>
+
+                            <textarea name="MoTa"
+                                      class="form-control"
+                                      rows="3">@Model.MoTa</textarea>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer branch-modal-footer">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+
+                        <i class="bi bi-x-lg me-1"></i>
+                        Hủy
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-floppy me-1"></i>
+                        Lưu thay đổi
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const tabs = document.querySelectorAll(".branch-tab");
+    const sections = document.querySelectorAll(".branch-tab-content");
+
+    function openTab(tabName) {
+
+        tabs.forEach(tab => {
+            tab.classList.toggle(
+                "active",
+                tab.dataset.tab === tabName
+            );
+        });
+
+        sections.forEach(section => {
+            section.classList.toggle(
+                "active",
+                section.id === "tab-" + tabName
+            );
+        });
+
+        history.replaceState(null, "", "#" + tabName);
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener("click", function () {
+            openTab(this.dataset.tab);
+        });
+    });
+
+    const initialTab = location.hash.replace("#", "");
+
+    if (initialTab === "reviews") {
+        openTab("reviews");
+    }
+
+    const search = document.getElementById("reviewSearch");
+    const starFilter = document.getElementById("reviewStarFilter");
+    const statusFilter = document.getElementById("reviewStatusFilter");
+
+    const reviewItems = document.querySelectorAll(".branch-review-item");
+    const empty = document.getElementById("reviewEmpty");
+
+    function filterReviews() {
+
+        const keyword = search.value.trim().toLocaleLowerCase("vi");
+        const stars = starFilter.value;
+        const status = statusFilter.value;
+
+        let visible = 0;
+
+        reviewItems.forEach(item => {
+
+            const text = item.dataset.search || "";
+
+            const matchSearch = text.includes(keyword);
+            const matchStars = !stars || item.dataset.stars === stars;
+            const matchStatus = !status || item.dataset.status === status;
+
+            const show = matchSearch && matchStars && matchStatus;
+
+            item.style.display = show ? "" : "none";
+
+            if (show) visible++;
+        });
+
+        empty.style.display = visible === 0 ? "block" : "none";
+    }
+
+    search.addEventListener("input", filterReviews);
+    starFilter.addEventListener("change", filterReviews);
+    statusFilter.addEventListener("change", filterReviews);
+
+    filterReviews();
+});
+</script>

@@ -1,2 +1,486 @@
-@model List<ThietBi>
-@{ViewData["Title"]="Bảo trì & Sửa chữa";}<div class="page-head"><div><h1>Bảo trì & Sửa chữa</h1><p>Kiểm soát hỏng và lịch bảo dưỡng định kỳ các thiết bị quay chụp</p></div></div><div class="panel mb-3"><h3>Chọn thiết bị cần bảo trì / sửa chữa</h3><form asp-action="SetStatus" method="post" class="row g-2 align-items-end">@Html.AntiForgeryToken()<div class="col-md-5"><label class="form-label">Thiết bị</label><select class="form-select" name="id" required><option value="">-- Chọn thiết bị --</option>@foreach(var d in (IEnumerable<ThietBi>)ViewBag.AllDevices){<option value="@d.MaThietBi">@d.MaThietBi - @d.DongMay?.TenDongMay (@d.TrangThai)</option>}</select></div><div class="col-md-3"><label class="form-label">Trạng thái mới</label><select class="form-select" name="status"><option value="BAO_TRI">Bảo trì</option><option value="HONG">Hỏng</option><option value="SAN_SANG">Hoàn tất / sẵn sàng</option><option value="NGUNG_KINH_DOANH">Ngừng sử dụng</option></select></div><div class="col-md-3"><label class="form-label">Tình trạng thực tế</label><input class="form-control" name="tinhTrang" placeholder="Ví dụ: Cần kiểm tra ống kính" /></div><div class="col-md-1"><button class="btn btn-primary">Lưu</button></div></form></div><div class="stats compact"><div class="stat"><span>Tổng cần xử lý</span><strong>@Model.Count</strong></div><div class="stat"><span>Đang bảo trì</span><strong>@Model.Count(x=>x.TrangThai=="BAO_TRI")</strong></div><div class="stat"><span>Hỏng</span><strong>@Model.Count(x=>x.TrangThai=="HONG")</strong></div></div><div class="panel mt-3"><table class="table"><thead><tr><th>Thiết bị</th><th>Mã SKU</th><th>Vấn đề</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>@foreach(var x in Model){<tr><td>@x.DongMay?.TenDongMay</td><td>@x.MaThietBi</td><td>@x.TinhTrang</td><td><span class="badge-soft">@x.TrangThai</span></td><td><form asp-action="SetStatus" method="post" class="d-flex gap-1"><input type="hidden" name="id" value="@x.MaThietBi"><input type="hidden" name="tinhTrang" value="TOT"><button name="status" value="BAO_TRI" class="btn btn-sm btn-outline-primary">Bảo trì</button><button name="status" value="SAN_SANG" class="btn btn-sm btn-success">Hoàn tất</button><button name="status" value="NGUNG_KINH_DOANH" class="btn btn-sm btn-outline-danger">Ngừng dùng</button></form></td></tr>}</tbody></table></div>
+@model List<RentalCamera.Models.ThietBi>
+@using RentalCamera.Models
+
+@{
+    ViewData["Title"] = "Bảo trì & Sửa chữa";
+
+    var devices = ViewBag.AllDevices as IEnumerable<ThietBi>
+                  ?? Enumerable.Empty<ThietBi>();
+
+    var total = Model.Count;
+    var repairing = Model.Count(x => x.TrangThai == "BAO_TRI");
+    var broken = Model.Count(x => x.TrangThai == "HONG");
+
+    string StatusText(string? status) => status switch
+    {
+        "BAO_TRI" => "Đang bảo trì",
+        "HONG" => "Hỏng",
+        "SAN_SANG" => "Sẵn sàng",
+        "NGUNG_KINH_DOANH" => "Ngừng sử dụng",
+        "DANG_THUE" => "Đang thuê",
+        "DANG_GIU" => "Đang giữ",
+        _ => status ?? "Không xác định"
+    };
+}
+
+<div class="maintenance-page">
+
+    <!-- HEADER -->
+    <div class="maintenance-heading">
+        <div>
+            <h2>Quản lý bảo trì thiết bị</h2>
+            <p>Theo dõi, kiểm tra và cập nhật tình trạng thiết bị</p>
+        </div>
+
+        <button type="button"
+                class="btn btn-primary maintenance-add-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#maintenanceModal">
+
+            <i class="bi bi-plus-lg"></i>
+            Cập nhật bảo trì
+        </button>
+    </div>
+
+    <!-- THỐNG KÊ -->
+    <div class="maintenance-stats">
+
+        <div class="maintenance-stat stat-blue">
+            <div class="stat-icon">
+                <i class="bi bi-gear-wide-connected"></i>
+            </div>
+
+            <div>
+                <span>TỔNG CẦN XỬ LÝ</span>
+                <h2>@total</h2>
+                <p>Thiết bị cần bảo trì hoặc sửa chữa</p>
+            </div>
+        </div>
+
+        <div class="maintenance-stat stat-orange">
+            <div class="stat-icon">
+                <i class="bi bi-tools"></i>
+            </div>
+
+            <div>
+                <span>ĐANG BẢO TRÌ</span>
+                <h2>@repairing</h2>
+                <p>Thiết bị đang được bảo trì</p>
+            </div>
+        </div>
+
+        <div class="maintenance-stat stat-red">
+            <div class="stat-icon">
+                <i class="bi bi-exclamation-triangle"></i>
+            </div>
+
+            <div>
+                <span>THIẾT BỊ HỎNG</span>
+                <h2>@broken</h2>
+                <p>Thiết bị hỏng cần được xử lý</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- BỘ LỌC -->
+    <div class="maintenance-filter panel">
+
+        <div class="maintenance-search">
+            <i class="bi bi-search"></i>
+
+            <input type="text"
+                   id="maintenanceSearch"
+                   class="form-control"
+                   placeholder="Tìm tên, mã thiết bị, tình trạng..." />
+        </div>
+
+        <select id="maintenanceStatus" class="form-select">
+            <option value="">Tất cả trạng thái</option>
+            <option value="BAO_TRI">Đang bảo trì</option>
+            <option value="HONG">Hỏng</option>
+        </select>
+
+        <button type="button"
+                class="btn btn-outline-primary"
+                id="resetMaintenance">
+
+            <i class="bi bi-arrow-counterclockwise"></i>
+            Đặt lại
+        </button>
+
+    </div>
+
+    <!-- DANH SÁCH -->
+    <div class="maintenance-table panel">
+
+        <div class="maintenance-table-header">
+            <h3>
+                <i class="bi bi-list-ul"></i>
+                DANH SÁCH THIẾT BỊ CẦN BẢO TRÌ / SỬA CHỮA
+            </h3>
+
+            <span class="text-muted">
+                Hiển thị <strong id="visibleCount">@total</strong> thiết bị
+            </span>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle" id="maintenanceTable">
+
+                <thead>
+                    <tr>
+                        <th>Thiết bị</th>
+                        <th>Mã thiết bị</th>
+                        <th>Tình trạng thực tế</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var x in Model)
+                    {
+                        <tr data-status="@x.TrangThai">
+
+                            <td>
+                                <div class="fw-bold">
+                                    @x.DongMay?.TenDongMay
+                                </div>
+                                <small class="text-muted">
+                                    Serial: @x.SoSerial
+                                </small>
+                            </td>
+
+                            <td>
+                                <strong>@x.MaThietBi</strong>
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrWhiteSpace(x.TinhTrang)
+                                    ? "Chưa cập nhật"
+                                    : x.TinhTrang)
+                            </td>
+
+                            <td>
+                                @if (x.TrangThai == "BAO_TRI")
+                                {
+                                    <span class="maintenance-badge badge-repair">
+                                        <i class="bi bi-tools"></i>
+                                        Đang bảo trì
+                                    </span>
+                                }
+                                else if (x.TrangThai == "HONG")
+                                {
+                                    <span class="maintenance-badge badge-broken">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        Hỏng
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge-soft">
+                                        @StatusText(x.TrangThai)
+                                    </span>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-2 flex-wrap">
+
+                                    <!-- BẢO TRÌ -->
+                                    <form asp-action="SetStatus"
+                                          method="post">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@x.MaThietBi" />
+
+                                        <input type="hidden"
+                                               name="tinhTrang"
+                                               value="@x.TinhTrang" />
+
+                                        <button type="submit"
+                                                name="status"
+                                                value="BAO_TRI"
+                                                class="btn btn-sm btn-outline-primary">
+
+                                            <i class="bi bi-tools"></i>
+                                            Bảo trì
+                                        </button>
+                                    </form>
+
+                                    <!-- HOÀN TẤT -->
+                                    <form asp-action="SetStatus"
+                                          method="post"
+                                          onsubmit="return confirm('Xác nhận thiết bị đã hoàn tất bảo trì và sẵn sàng sử dụng?')">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@x.MaThietBi" />
+
+                                        <input type="hidden"
+                                               name="tinhTrang"
+                                               value="TOT" />
+
+                                        <button type="submit"
+                                                name="status"
+                                                value="SAN_SANG"
+                                                class="btn btn-sm btn-success">
+
+                                            <i class="bi bi-check-circle"></i>
+                                            Hoàn tất
+                                        </button>
+                                    </form>
+
+                                    <!-- NGỪNG SỬ DỤNG -->
+                                    <form asp-action="SetStatus"
+                                          method="post"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn ngừng sử dụng thiết bị này?')">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden"
+                                               name="id"
+                                               value="@x.MaThietBi" />
+
+                                        <input type="hidden"
+                                               name="tinhTrang"
+                                               value="@x.TinhTrang" />
+
+                                        <button type="submit"
+                                                name="status"
+                                                value="NGUNG_KINH_DOANH"
+                                                class="btn btn-sm btn-outline-danger">
+
+                                            <i class="bi bi-slash-circle"></i>
+                                            Ngừng dùng
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-check-circle fs-1 text-success"></i>
+                    <p class="mt-3">
+                        Hiện không có thiết bị cần bảo trì hoặc sửa chữa.
+                    </p>
+                </div>
+            }
+
+            <div id="maintenanceEmpty"
+                 class="text-center py-4 text-muted"
+                 style="display:none">
+                Không tìm thấy thiết bị phù hợp.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL CẬP NHẬT -->
+<div class="modal fade"
+     id="maintenanceModal"
+     tabindex="-1"
+     aria-labelledby="maintenanceModalTitle"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content maintenance-modal">
+
+            <form asp-action="SetStatus" method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title" id="maintenanceModalTitle">
+                        <i class="bi bi-tools text-primary"></i>
+                        Cập nhật bảo trì / sửa chữa
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Đóng">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Chọn thiết bị
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select class="form-select"
+                                name="id"
+                                required>
+
+                            <option value="">-- Chọn thiết bị --</option>
+
+                            @foreach (var d in devices)
+                            {
+                                <option value="@d.MaThietBi">
+                                    @d.MaThietBi -
+                                    @d.DongMay?.TenDongMay
+                                    (@StatusText(d.TrangThai))
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Trạng thái mới
+                        </label>
+
+                        <select class="form-select"
+                                name="status"
+                                required>
+
+                            <option value="BAO_TRI">
+                                Đang bảo trì
+                            </option>
+
+                            <option value="HONG">
+                                Hỏng
+                            </option>
+
+                            <option value="SAN_SANG">
+                                Hoàn tất - Sẵn sàng
+                            </option>
+
+                            <option value="NGUNG_KINH_DOANH">
+                                Ngừng sử dụng
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Tình trạng thực tế
+                        </label>
+
+                        <textarea class="form-control"
+                                  name="tinhTrang"
+                                  rows="4"
+                                  placeholder="Mô tả tình trạng thiết bị..."></textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal">
+
+                        Hủy
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-floppy"></i>
+                        Lưu thay đổi
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const search = document.getElementById("maintenanceSearch");
+    const status = document.getElementById("maintenanceStatus");
+    const table = document.getElementById("maintenanceTable");
+    const reset = document.getElementById("resetMaintenance");
+    const count = document.getElementById("visibleCount");
+    const empty = document.getElementById("maintenanceEmpty");
+
+    if (!search || !status || !table) return;
+
+    function filterMaintenance() {
+
+        const keyword = search.value.trim().toLowerCase();
+        const selectedStatus = status.value;
+
+        const rows = table.querySelectorAll("tbody tr[data-status]");
+
+        let visible = 0;
+
+        rows.forEach(row => {
+
+            const text = row.textContent.toLowerCase();
+            const rowStatus = row.dataset.status || "";
+
+            const matchSearch = text.includes(keyword);
+
+            const matchStatus =
+                !selectedStatus || rowStatus === selectedStatus;
+
+            const show = matchSearch && matchStatus;
+
+            row.hidden = !show;
+
+            if (show) visible++;
+        });
+
+        if (count) count.textContent = visible;
+
+        if (empty) {
+            empty.style.display =
+                rows.length > 0 && visible === 0 ? "block" : "none";
+        }
+    }
+
+    search.addEventListener("input", filterMaintenance);
+    status.addEventListener("change", filterMaintenance);
+
+    reset.addEventListener("click", function () {
+        search.value = "";
+        status.value = "";
+        filterMaintenance();
+    });
+
+});
+</script>
+}

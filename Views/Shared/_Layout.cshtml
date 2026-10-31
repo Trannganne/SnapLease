@@ -36,15 +36,38 @@
     <!-- Dashboard styles were missing: without them cards and charts stack as plain blocks. -->
     <link rel="stylesheet" href="~/css/pages/dashboard-modern.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/dashboard-kpi-polish.css" asp-append-version="true" />
+    <link rel="stylesheet"
+      href="~/css/pages/dashboard-kpi-style2.css"
+      asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/orders-branches.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/pages/unified-admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/snaplease-layout-repair.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/sidebar-refresh.css" asp-append-version="true" />
+    <link rel="stylesheet"
+      href="~/css/notifications.css"
+      asp-append-version="true" />
     <link rel="stylesheet" href="~/css/snaplease-page-photo-banner.css" asp-append-version="true" />
+    <link rel="stylesheet"
+      href="~/css/pages/device-details-modern.css"
+      asp-append-version="true" />
+      <link rel="stylesheet"
+      href="~/css/pages/device-edit-modern.css"
+      asp-append-version="true" />
+      <link rel="stylesheet"
+      href="~/css/pages/maintenance-modern.css"
+      asp-append-version="true" />
+      <link rel="stylesheet"
+      href="~/css/pages/penalty-create.css"
+      asp-append-version="true" />
+      <link rel="stylesheet"
+      href="~/css/pages/customers-modern.css"
+      asp-append-version="true" />
 </head>
 
 <body>
-
+    <div id="notificationAntiForgery" hidden>
+        @Html.AntiForgeryToken()
+    </div>
     <div class="sl-app-backdrop" id="sl-app-backdrop" aria-hidden="true"></div>
     <div class="app-shell">
 
@@ -123,6 +146,9 @@
     <script src="~/js/geekblue-components.js" asp-append-version="true" defer></script>
 
     <script src="~/js/dashboard-page-transitions.js" asp-append-version="true" defer></script>
+    <script src="~/js/notifications.js"
+        asp-append-version="true"
+        defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

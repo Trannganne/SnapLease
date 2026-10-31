@@ -1,0 +1,525 @@
+/* ==========================================
+   SNAPLEASE - DEVICE DETAILS MODERN
+========================================== */
+
+.device-details-page {
+    font-family: Roboto, Arial, sans-serif;
+    color: #102a4c;
+}
+
+/* HEADER */
+
+.device-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+
+.device-details-eyebrow {
+    color: #0875f5;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.device-details-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.device-details-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.device-details-meta > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.device-details-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* STATUS */
+
+.device-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 20px;
+    padding: 6px 11px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.device-status .bi-circle-fill {
+    font-size: 7px;
+}
+
+.device-status.available {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.device-status.renting {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.device-status.reserved {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.device-status.maintenance,
+.device-status.broken {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.device-status.inactive {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* LAYOUT */
+
+.device-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.device-left-column,
+.device-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+}
+
+/* CARDS */
+
+.device-card {
+    background: #fff;
+    border: 1px solid #e3ebf7;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 6px 22px rgba(25, 55, 95, .045);
+}
+
+.device-card-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.device-card-heading h3 {
+    font-size: 16px;
+    font-weight: 800;
+    color: #102a4c;
+    margin: 0;
+}
+
+.device-card-heading h3 i {
+    color: #0875f5;
+    margin-right: 7px;
+}
+
+.device-card-heading p {
+    color: #8492a6;
+    font-size: 12px;
+    margin: 7px 0 0;
+}
+
+/* GALLERY */
+
+.device-gallery-main {
+    height: 340px;
+    border-radius: 14px;
+    background: #f5f8fd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.device-gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 16px;
+}
+
+.device-gallery-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.device-thumb {
+    width: 82px;
+    height: 72px;
+    border: 2px solid transparent;
+    border-radius: 11px;
+    background: #f4f7fc;
+    padding: 4px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: .2s ease;
+}
+
+.device-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.device-thumb.active {
+    border-color: #0875f5;
+}
+
+.device-thumb:hover {
+    transform: translateY(-2px);
+    border-color: #7bb5ff;
+}
+
+.device-image-count {
+    padding: 6px 11px;
+    background: #eef5ff;
+    border-radius: 9px;
+    color: #0875f5;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.device-gallery-empty,
+.device-rental-empty {
+    text-align: center;
+    padding: 45px 15px;
+    color: #94a3b8;
+}
+
+.device-gallery-empty > i,
+.device-rental-empty > i {
+    font-size: 40px;
+    color: #a8c6f5;
+}
+
+.device-gallery-empty h4,
+.device-rental-empty h4 {
+    margin-top: 14px;
+    color: #334155;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.device-gallery-empty p,
+.device-rental-empty p {
+    font-size: 12px;
+}
+
+/* INFORMATION */
+
+.device-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.device-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.device-info-item span,
+.device-description span {
+    color: #8492a6;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.device-info-item strong {
+    color: #17345c;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.device-description {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e5edf7;
+}
+
+.device-description p {
+    margin: 10px 0 0;
+    color: #334155;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* PRICING */
+
+.device-pricing-card {
+    background: linear-gradient(145deg, #ffffff, #f5f9ff);
+}
+
+.device-price-label {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.device-price-main {
+    color: #0875f5;
+    font-size: 34px;
+    font-weight: 800;
+    margin: 7px 0 17px;
+}
+
+.device-price-main span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+.device-price-divider {
+    height: 1px;
+    background: #e0e9f5;
+    margin-bottom: 15px;
+}
+
+.device-price-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+.device-price-row span {
+    color: #64748b;
+}
+
+.device-price-row span i {
+    color: #0875f5;
+    margin-right: 6px;
+}
+
+.device-price-row strong {
+    color: #102a4c;
+}
+
+.device-discount {
+    color: #16a34a !important;
+}
+
+.device-price-note {
+    display: block;
+    color: #94a3b8;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 11px;
+}
+
+/* BRANCH */
+
+.device-branch {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.device-branch-icon {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #eaf3ff;
+    color: #0875f5;
+    font-size: 20px;
+}
+
+.device-branch strong {
+    font-size: 14px;
+}
+
+.device-branch p {
+    color: #64748b;
+    font-size: 12px;
+    margin: 7px 0;
+    line-height: 1.6;
+}
+
+.device-branch small {
+    color: #94a3b8;
+}
+
+/* RENTAL HISTORY */
+
+.device-rental-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.device-rental-item {
+    display: flex;
+    gap: 13px;
+    padding: 0 0 22px;
+}
+
+.device-rental-item:not(:last-child) {
+    border-left: 2px solid #dbeafe;
+    margin-left: 6px;
+    padding-left: 18px;
+}
+
+.device-rental-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #0875f5;
+    flex-shrink: 0;
+}
+
+.device-rental-item:not(:last-child) .device-rental-dot {
+    margin-left: -25px;
+}
+
+.device-rental-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.device-rental-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.device-rental-top strong {
+    font-size: 13px;
+}
+
+.device-rental-date {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 7px;
+}
+
+.device-rental-date i {
+    margin-right: 6px;
+    color: #0875f5;
+}
+
+.device-rental-link {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0875f5;
+    text-decoration: none;
+}
+
+.device-rental-link:hover {
+    text-decoration: underline;
+}
+
+/* DELETE */
+
+.device-delete-section {
+    margin-top: 20px;
+    padding: 20px 23px;
+    border: 1px solid #fee2e2;
+    border-radius: 16px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.device-delete-section h4 {
+    color: #b91c1c;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.device-delete-section p {
+    margin: 7px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1050px) {
+    .device-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .device-details-header h1 {
+        font-size: 23px;
+    }
+
+    .device-details-actions {
+        width: 100%;
+    }
+
+    .device-details-actions .btn {
+        flex: 1;
+    }
+
+    .device-card {
+        padding: 17px;
+    }
+
+    .device-gallery-main {
+        height: 250px;
+    }
+
+    .device-info-grid {
+        gap: 18px 12px;
+    }
+
+    .device-price-main {
+        font-size: 28px;
+    }
+
+    .device-delete-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .device-delete-section .btn {
+        width: 100%;
+    }
+}

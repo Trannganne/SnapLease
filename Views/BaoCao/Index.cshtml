@@ -1,15 +1,680 @@
-@model ReportVM
-<div class="panel mb-3"><div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><h3>So sánh doanh thu theo kỳ</h3><form method="get" class="d-flex gap-2"><select class="form-select" name="ky"><option value="thang" selected="@(ViewBag.Ky=="thang")">Theo tháng</option><option value="tuan" selected="@(ViewBag.Ky=="tuan")">Theo tuần</option></select><button class="btn btn-primary">Xem</button></form></div><div class="row g-3 mt-1"><div class="col-md-6"><div class="stat"><span>Kỳ hiện tại: @ViewBag.KyHienTai</span><strong>@(((decimal)ViewBag.DoanhThuHienTai).ToString("N0")) đ</strong></div></div><div class="col-md-6"><div class="stat"><span>Kỳ trước: @ViewBag.KyTruoc</span><strong>@(((decimal)ViewBag.DoanhThuTruoc).ToString("N0")) đ</strong></div></div></div>@{decimal current=(decimal)ViewBag.DoanhThuHienTai;decimal previous=(decimal)ViewBag.DoanhThuTruoc;}<p class="mt-3 mb-0">Chênh lệch: <strong>@((current-previous).ToString("+0;-0;0")) đ</strong> @if(previous>0){<span>(@(((current-previous)/previous*100).ToString("+0.0;-0.0;0"))%)</span>}else{<span>(không tính tỷ lệ khi kỳ trước bằng 0)</span>}</p></div>
+@model RentalCamera.ViewModels.ReportVM
 
-@{ViewData["Title"]="Báo cáo thống kê";}<div class="page-head"><div><h1>Báo cáo doanh thu & vận hành</h1><p>Tổng hợp doanh thu, đơn thuê và tình trạng thiết bị</p></div><button class="btn btn-outline-primary" onclick="window.print()"><i class="bi bi-printer"></i> In / Xuất PDF</button></div><div class="stats"><div class="stat"><span>Tổng doanh thu</span><strong>@Model.DoanhThu.ToString("N0")đ</strong><em>Không tính tiền cọc</em></div><div class="stat"><span>Đơn thuê hợp lệ</span><strong>@Model.DonThanhCong</strong><em>Không tính đơn đã hủy</em></div><div class="stat"><span>Tổng thiết bị</span><strong>@Model.TongThietBi</strong></div><div class="stat"><span>Tỷ lệ đang khai thác</span><strong>@Model.TyLeLapDay.ToString("0.0")%</strong></div></div><div class="dashboard-grid mt-3"><div class="panel"><h3>Doanh thu theo loại</h3>@foreach(var x in Model.DoanhThuTheoLoai){<div class="report-row"><span>@x.Key.Replace("_"," ")</span><b>@x.Value.ToString("N0")đ</b></div>}@if(!Model.DoanhThuTheoLoai.Any()){<p class="muted mt-3">Chưa có thanh toán thành công.</p>}</div><div class="panel"><h3>Tình trạng thiết bị</h3>@foreach(var x in Model.TinhTrangThietBi.OrderByDescending(x=>x.Value)){var pct=Model.TongThietBi==0?0:(double)x.Value/Model.TongThietBi*100;<div class="status-row"><div><span>@x.Key.Replace("_"," ")</span><b>@x.Value <small>@pct.ToString("0")%</small></b></div><div class="progress"><div class="progress-bar" style="width:@pct.ToString("0",System.Globalization.CultureInfo.InvariantCulture)%"></div></div></div>}</div></div><div class="panel mt-3"><h3>Đơn thuê theo trạng thái</h3><div class="row">@foreach(var x in Model.DonTheoTrangThai.OrderByDescending(x=>x.Value)){<div class="col-md-3"><div class="report-row"><span>@x.Key.Replace("_"," ")</span><b>@x.Value đơn</b></div></div>}</div></div>
+@using System.Text.Json
+@using System.Globalization
 
-<div class="panel mt-3"><h3>Xuất dữ liệu báo cáo</h3><p class="muted">Tải CSV từ số liệu đang hiển thị trên trang. Có thể mở bằng Excel; dữ liệu phản ánh bộ lọc báo cáo hiện tại.</p><button type="button" class="btn btn-outline-primary" id="sl-export-report"><i class="bi bi-filetype-csv"></i> Xuất CSV</button></div>
+@{
+    ViewData["Title"] = "Báo cáo thống kê";
+
+    var ky = ViewBag.Ky as string ?? "thang";
+
+    decimal doanhThuHienTai = Convert.ToDecimal(ViewBag.DoanhThuHienTai ?? 0);
+    decimal doanhThuTruoc = Convert.ToDecimal(ViewBag.DoanhThuTruoc ?? 0);
+
+    string kyHienTai = ViewBag.KyHienTai as string ?? "";
+    string kyTruoc = ViewBag.KyTruoc as string ?? "";
+
+    decimal chenhLech = doanhThuHienTai - doanhThuTruoc;
+
+    decimal phanTram = doanhThuTruoc == 0
+        ? 0
+        : chenhLech / doanhThuTruoc * 100;
+
+    var tinhTrang = Model.TinhTrangThietBi
+        ?? new Dictionary<string, int>();
+
+    var donTrangThai = Model.DonTheoTrangThai
+        ?? new Dictionary<string, int>();
+
+    var doanhThuLoai = Model.DoanhThuTheoLoai
+        ?? new Dictionary<string, decimal>();
+
+    string TrangThaiThietBi(string value) => value switch
+    {
+        "SAN_SANG" => "Sẵn sàng",
+        "DANG_THUE" => "Đang thuê",
+        "DANG_GIU" => "Đang giữ",
+        "BAO_TRI" => "Bảo trì",
+        "HONG" => "Hỏng",
+        "NGUNG_KINH_DOANH" => "Ngừng kinh doanh",
+        _ => value.Replace("_", " ")
+    };
+
+    string TrangThaiDon(string value) => value switch
+    {
+        "HOAN_THANH" => "Hoàn thành",
+        "DANG_THUE" => "Đang thuê",
+        "CHO_BAN_GIAO" => "Chờ bàn giao",
+        "CHO_HOAN_TRA" => "Chờ hoàn trả",
+        "DA_HUY" => "Đã hủy",
+        _ => value.Replace("_", " ")
+    };
+
+    string LoaiDoanhThu(string value) => value switch
+    {
+        "TIEN_THUE" => "Tiền thuê",
+        "PHI_GIA_HAN" => "Phí gia hạn",
+        "PHI_PHAT" => "Phí phạt",
+        _ => value.Replace("_", " ")
+    };
+
+    string[] deviceColors =
+    {
+        "#2878f4",
+        "#64b5f6",
+        "#b47bf5",
+        "#ffb547",
+        "#fa668c",
+        "#9ba8ba"
+    };
+
+    var deviceEntries = tinhTrang
+        .OrderByDescending(x => x.Value)
+        .ToList();
+
+    int totalDeviceCount = tinhTrang.Values.Sum();
+
+    int totalOrders = donTrangThai.Values.Sum();
+}
+
+<link rel="stylesheet"
+      href="~/css/pages/baocao-modern.css"
+      asp-append-version="true" />
+
+<div class="report-dashboard">
+
+    <!-- HEADER -->
+    <div class="report-heading">
+
+        <form asp-controller="BaoCao"
+              asp-action="Index"
+              method="get"
+              class="report-filters">
+
+            <div class="report-filter-field">
+
+                <label>Kỳ báo cáo</label>
+
+                <select name="ky" class="form-select">
+
+                    @if (ky == "tuan")
+                    {
+                        <option value="tuan" selected>Theo tuần</option>
+                        <option value="thang">Theo tháng</option>
+                    }
+                    else
+                    {
+                        <option value="tuan">Theo tuần</option>
+                        <option value="thang" selected>Theo tháng</option>
+                    }
+
+                </select>
+
+            </div>
+
+            <button type="submit" class="report-view-btn">
+
+                <i class="bi bi-search"></i>
+                Xem
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <!-- SO SÁNH DOANH THU -->
+    <div class="report-compare-grid">
+
+        <div class="report-compare-card current">
+
+            <div class="compare-content">
+
+                <div class="compare-label">
+
+                    <i class="bi bi-calendar3"></i>
+
+                    KỲ HIỆN TẠI: @kyHienTai
+
+                </div>
+
+                <div class="compare-value">
+                    @doanhThuHienTai.ToString("N0") đ
+                </div>
+
+                <div class="compare-growth">
+
+                    <span class="@(chenhLech >= 0 ? "growth-positive" : "growth-negative")">
+
+                        <i class="bi @(chenhLech >= 0 ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
+
+                        @(chenhLech >= 0 ? "+" : "")@phanTram.ToString("N1")%
+
+                    </span>
+
+                    <span>
+                        Chênh lệch:
+                        @(chenhLech >= 0 ? "+" : "")@chenhLech.ToString("N0") đ
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="compare-decoration">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+        </div>
+
+        <div class="report-compare-card previous">
+
+            <div class="compare-content">
+
+                <div class="compare-label">
+
+                    <i class="bi bi-calendar3"></i>
+
+                    KỲ TRƯỚC: @kyTruoc
+
+                </div>
+
+                <div class="compare-value">
+                    @doanhThuTruoc.ToString("N0") đ
+                </div>
+
+                <div class="compare-subtitle">
+                    Doanh thu kỳ trước
+                </div>
+
+            </div>
+
+            <div class="compare-decoration">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- KPI -->
+    <div class="report-kpi-grid">
+
+        <div class="report-kpi-card">
+
+            <div class="kpi-icon green">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+
+            <div class="kpi-content">
+
+                <h3>TỔNG DOANH THU</h3>
+
+                <strong>
+                    @Model.DoanhThu.ToString("N0") đ
+                </strong>
+
+                <p>Không bao gồm tiền cọc</p>
+
+            </div>
+
+            <div class="kpi-decoration green">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+
+        </div>
+
+        <div class="report-kpi-card">
+
+            <div class="kpi-icon blue">
+                <i class="bi bi-file-earmark-text"></i>
+            </div>
+
+            <div class="kpi-content">
+
+                <h3>ĐƠN THUÊ HỢP LỆ</h3>
+
+                <strong>@Model.DonThanhCong</strong>
+
+                <p>Không tính hợp đồng đã hủy</p>
+
+            </div>
+
+            <div class="kpi-decoration blue">
+                <i class="bi bi-file-earmark"></i>
+            </div>
+
+        </div>
+
+        <div class="report-kpi-card">
+
+            <div class="kpi-icon purple">
+                <i class="bi bi-camera"></i>
+            </div>
+
+            <div class="kpi-content">
+
+                <h3>TỔNG THIẾT BỊ</h3>
+
+                <strong>@Model.TongThietBi</strong>
+
+                <p>Tổng thiết bị trong hệ thống</p>
+
+            </div>
+
+            <div class="kpi-decoration purple">
+                <i class="bi bi-camera"></i>
+            </div>
+
+        </div>
+
+        <div class="report-kpi-card">
+
+            <div class="kpi-icon pink">
+                <i class="bi bi-pie-chart-fill"></i>
+            </div>
+
+            <div class="kpi-content">
+
+                <h3>TỶ LỆ ĐANG KHAI THÁC</h3>
+
+                <strong>
+                    @Model.TyLeLapDay.ToString("N1")%
+                </strong>
+
+                <p>Thiết bị đang thuê hoặc đang giữ</p>
+
+            </div>
+
+            <div class="kpi-decoration pink">
+                <i class="bi bi-pie-chart"></i>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BIỂU ĐỒ -->
+    <div class="report-charts-grid">
+
+        <!-- DOANH THU THEO LOẠI -->
+        <div class="report-panel">
+
+            <div class="report-panel-title">
+
+                <i class="bi bi-bar-chart-line"></i>
+
+                <h3>BIỂU ĐỒ DOANH THU THEO LOẠI</h3>
+
+            </div>
+
+            <div class="revenue-chart-wrapper">
+
+                <canvas id="revenueTypeChart"></canvas>
+
+            </div>
+
+            @if (!doanhThuLoai.Any())
+            {
+                <p class="text-center text-muted mt-3">
+                    Chưa có dữ liệu doanh thu.
+                </p>
+            }
+
+        </div>
+
+        <!-- TÌNH TRẠNG THIẾT BỊ -->
+        <div class="report-panel">
+
+            <div class="report-panel-title">
+
+                <i class="bi bi-pie-chart"></i>
+
+                <h3>TÌNH TRẠNG THIẾT BỊ</h3>
+
+            </div>
+
+            <div class="equipment-chart-layout">
+
+                <div class="equipment-donut-wrapper">
+
+                    <canvas id="equipmentChart"></canvas>
+
+                    <div class="donut-center">
+
+                        <strong>@Model.TongThietBi</strong>
+
+                        <span>thiết bị</span>
+
+                    </div>
+
+                </div>
+
+                <div class="equipment-legend">
+
+                    @for (int i = 0; i < deviceEntries.Count; i++)
+                    {
+                        var item = deviceEntries[i];
+
+                        var percent = totalDeviceCount == 0
+                            ? 0
+                            : (decimal)item.Value / totalDeviceCount * 100;
+
+                        var color = deviceColors[i % deviceColors.Length];
+
+                        <div class="equipment-legend-row">
+
+                            <div class="equipment-legend-info">
+
+                                <span class="legend-dot"
+                                      style="background:@color"></span>
+
+                                <span class="legend-name">
+                                    @TrangThaiThietBi(item.Key)
+                                </span>
+
+                                <strong>@item.Value</strong>
+
+                                <small>@percent.ToString("N0")%</small>
+
+                            </div>
+
+                            <div class="equipment-progress">
+
+                                <div style="width:@(percent.ToString("0.##", CultureInfo.InvariantCulture))%;background:@color"></div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- THỐNG KÊ CHI TIẾT -->
+    <div class="report-bottom-grid">
+
+        <!-- DOANH THU THEO LOẠI -->
+        <div class="report-panel">
+
+            <div class="report-panel-title">
+
+                <i class="bi bi-cash-coin"></i>
+
+                <h3>DOANH THU THEO LOẠI</h3>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="report-table">
+
+                    <thead>
+                        <tr>
+                            <th>Loại</th>
+                            <th>Doanh thu</th>
+                            <th colspan="2">Tỷ trọng</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in doanhThuLoai.OrderByDescending(x => x.Value))
+                        {
+                            var percent = Model.DoanhThu == 0
+                                ? 0
+                                : item.Value / Model.DoanhThu * 100;
+
+                            <tr>
+
+                                <td>
+                                    <strong>@LoaiDoanhThu(item.Key)</strong>
+                                </td>
+
+                                <td>
+                                    <strong>
+                                        @item.Value.ToString("N0") đ
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @percent.ToString("N1")%
+                                </td>
+
+                                <td style="width:35%">
+
+                                    <div class="report-progress">
+
+                                        <div style="width:@(percent.ToString("0.##", CultureInfo.InvariantCulture))%;background:#2878f4"></div>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        @if (!doanhThuLoai.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Chưa có dữ liệu doanh thu.
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <!-- ĐƠN THEO TRẠNG THÁI -->
+        <div class="report-panel">
+
+            <div class="report-panel-title">
+
+                <i class="bi bi-file-earmark-text"></i>
+
+                <h3>ĐƠN THUÊ THEO TRẠNG THÁI</h3>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="report-table">
+
+                    <thead>
+                        <tr>
+                            <th>Trạng thái</th>
+                            <th>Số đơn</th>
+                            <th colspan="2">Tỷ trọng</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in donTrangThai.OrderByDescending(x => x.Value))
+                        {
+                            var percent = totalOrders == 0
+                                ? 0
+                                : (decimal)item.Value / totalOrders * 100;
+
+                            <tr>
+
+                                <td>
+                                    @TrangThaiDon(item.Key)
+                                </td>
+
+                                <td>
+                                    <strong>@item.Value</strong>
+                                </td>
+
+                                <td>
+                                    @percent.ToString("N1")%
+                                </td>
+
+                                <td style="width:35%">
+
+                                    <div class="report-progress">
+
+                                        <div style="width:@(percent.ToString("0.##", CultureInfo.InvariantCulture))%;background:#2878f4"></div>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+
+                        @if (!donTrangThai.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Chưa có dữ liệu hợp đồng.
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
 <script>
-document.getElementById('sl-export-report')?.addEventListener('click',()=>{
- const lines=[['Nhóm','Chỉ tiêu','Giá trị'],['Tổng quan','Doanh thu',@Model.DoanhThu.ToString(System.Globalization.CultureInfo.InvariantCulture)],['Tổng quan','Đơn thuê hợp lệ',@Model.DonThanhCong],['Tổng quan','Tổng thiết bị',@Model.TongThietBi],['Tổng quan','Tỷ lệ khai thác (%)',@Model.TyLeLapDay.ToString(System.Globalization.CultureInfo.InvariantCulture)]];
- @foreach(var x in Model.DoanhThuTheoLoai){<text>lines.push(['Doanh thu theo loại',@Html.Raw(System.Text.Json.JsonSerializer.Serialize(x.Key)),@x.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)]);</text>}
- @foreach(var x in Model.TinhTrangThietBi){<text>lines.push(['Tình trạng thiết bị',@Html.Raw(System.Text.Json.JsonSerializer.Serialize(x.Key)),@x.Value]);</text>}
- @foreach(var x in Model.DonTheoTrangThai){<text>lines.push(['Đơn theo trạng thái',@Html.Raw(System.Text.Json.JsonSerializer.Serialize(x.Key)),@x.Value]);</text>}
- const csv='\uFEFF'+lines.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='SnapLease_BaoCao_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(url);
+document.addEventListener("DOMContentLoaded", function () {
+
+    if (typeof Chart === "undefined") {
+        console.warn("Chart.js chưa được tải.");
+        return;
+    }
+
+    const revenueLabels = @Html.Raw(JsonSerializer.Serialize(
+        doanhThuLoai.Keys.Select(LoaiDoanhThu).ToList()
+    ));
+
+    const revenueValues = @Html.Raw(JsonSerializer.Serialize(
+        doanhThuLoai.Values.ToList()
+    ));
+
+    const equipmentLabels = @Html.Raw(JsonSerializer.Serialize(
+        deviceEntries.Select(x => TrangThaiThietBi(x.Key)).ToList()
+    ));
+
+    const equipmentValues = @Html.Raw(JsonSerializer.Serialize(
+        deviceEntries.Select(x => x.Value).ToList()
+    ));
+
+    const equipmentColors = @Html.Raw(JsonSerializer.Serialize(
+        deviceEntries.Select((x, i) =>
+            deviceColors[i % deviceColors.Length]).ToList()
+    ));
+
+    const revenueCanvas = document.getElementById("revenueTypeChart");
+
+    if (revenueCanvas && revenueValues.length > 0) {
+
+        new Chart(revenueCanvas, {
+            type: "bar",
+
+            data: {
+                labels: revenueLabels,
+
+                datasets: [{
+                    label: "Doanh thu",
+                    data: revenueValues,
+                    backgroundColor: "#2878f4",
+                    borderRadius: 8,
+                    maxBarThickness: 65
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.parsed.y.toLocaleString("vi-VN") + " đ";
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value =>
+                                Number(value).toLocaleString("vi-VN")
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const equipmentCanvas = document.getElementById("equipmentChart");
+
+    if (equipmentCanvas && equipmentValues.length > 0) {
+
+        new Chart(equipmentCanvas, {
+            type: "doughnut",
+
+            data: {
+                labels: equipmentLabels,
+
+                datasets: [{
+                    data: equipmentValues,
+                    backgroundColor: equipmentColors,
+                    borderWidth: 0,
+                    hoverOffset: 5
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "73%",
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
 });
 </script>

@@ -1,12 +1,404 @@
-<div class="mb-3"><a asp-action="Create" class="btn btn-primary">+ Thêm chi nhánh</a></div>
 @model List<CuaHang>
-@{ ViewData["Title"]="Quản lý chi nhánh";
-   var deviceCounts=ViewBag.DeviceCounts as Dictionary<string,int> ?? new();
-   var staffCounts=ViewBag.StaffCounts as Dictionary<string,int> ?? new(); }
-<div class="page-head"><div><h1>Quản lý chi nhánh</h1><p>Danh sách cửa hàng và nguồn lực thực tế trong hệ thống</p></div></div>
-<form method="get" class="panel sl-admin-filter"><label for="branch-q">Tìm chi nhánh</label><div class="sl-inline-filter"><input id="branch-q" class="form-control" name="q" value="@ViewBag.Q" placeholder="Tên, mã hoặc địa chỉ cửa hàng"/><button class="btn btn-primary" type="submit">Tìm kiếm</button><a asp-action="Index" class="btn btn-outline-primary">Đặt lại</a></div></form>
-<div class="sl-admin-grid">
-@foreach(var b in Model){<article class="panel sl-admin-card"><div class="sl-admin-card-top"><span class="sl-admin-icon"><i class="bi bi-shop"></i></span><span class="badge-soft">@b.TrangThai.Replace("_"," ")</span></div><h3>@b.TenCuaHang</h3><p class="sl-admin-sub">@b.MaCuaHang</p><p><i class="bi bi-geo-alt"></i> @b.DiaChi</p><p><i class="bi bi-telephone"></i> @b.SoDienThoai</p><div class="sl-admin-card-bottom"><span><b>@(deviceCounts.GetValueOrDefault(b.MaCuaHang))</b> thiết bị</span><span><b>@(staffCounts.GetValueOrDefault(b.MaCuaHang))</b> nhân viên</span></div><a class="btn btn-outline-primary mt-3" asp-action="Details" asp-route-id="@b.MaCuaHang">Xem thiết bị tại chi nhánh</a></article>}
+@using RentalCamera.Models
+
+@{
+    ViewData["Title"] = "Quản lý chi nhánh";
+
+    var deviceCounts = ViewBag.DeviceCounts as Dictionary<string, int>
+                       ?? new Dictionary<string, int>();
+
+    var staffCounts = ViewBag.StaffCounts as Dictionary<string, int>
+                      ?? new Dictionary<string, int>();
+
+    string q = ViewBag.Q?.ToString() ?? "";
+
+    int totalBranches = Model?.Count ?? 0;
+
+    string StatusLabel(string? status) => status switch
+    {
+        "HOAT_DONG" => "HOẠT ĐỘNG",
+        "TAM_NGUNG" => "TẠM NGỪNG",
+        "NGUNG_HOAT_DONG" => "NGỪNG HOẠT ĐỘNG",
+        _ => (status ?? "CHƯA CẬP NHẬT").Replace("_", " ")
+    };
+
+    bool IsActive(string? status) =>
+        status == "HOAT_DONG";
+}
+
+<link rel="stylesheet"
+      href="~/css/pages/chinhanh-modern.css"
+      asp-append-version="true" />
+
+<div class="branch-page">
+
+    <!-- THANH TÌM KIẾM VÀ THÊM CHI NHÁNH -->
+    <div class="branch-topbar">
+
+        <div class="branch-search-card">
+
+            <form asp-controller="ChiNhanh"
+                  asp-action="Index"
+                  method="get"
+                  class="branch-search-form">
+
+                <div class="branch-search-main">
+
+                    <div class="branch-search-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+
+                    <div class="branch-search-content">
+
+                        <label for="branch-q">
+                            Tìm chi nhánh
+                        </label>
+
+                        <input id="branch-q"
+                               type="text"
+                               name="q"
+                               value="@q"
+                               placeholder="Tên, mã hoặc địa chỉ cửa hàng..." />
+
+                    </div>
+
+                </div>
+
+                <a asp-controller="ChiNhanh"
+                   asp-action="Index"
+                   class="branch-reset-btn">
+
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Đặt lại
+
+                </a>
+
+                <button type="submit"
+                        class="branch-search-btn">
+
+                    <i class="bi bi-search"></i>
+                    Tìm kiếm
+
+                </button>
+
+            </form>
+
+        </div>
+
+        <div class="branch-add-wrapper">
+            <button type="button"
+                  class="branch-add-btn"
+                  data-bs-toggle="modal"
+                  data-bs-target="#createBranchModal">
+
+               <i class="bi bi-plus-lg"></i>
+               Thêm chi nhánh
+
+            </button>
+        </div>
+
+    </div>
+
+    <!-- TIÊU ĐỀ DANH SÁCH -->
+    <div class="branch-section-heading">
+
+        <div class="branch-section-left">
+
+            <div class="branch-section-icon">
+                <i class="bi bi-shop"></i>
+            </div>
+
+            <div>
+
+                <h2>Danh sách chi nhánh</h2>
+
+                <p>
+                    Tổng cộng
+                    <strong>@totalBranches</strong>
+                    chi nhánh
+                    @if (!string.IsNullOrWhiteSpace(q))
+                    {
+                        <span>phù hợp với tìm kiếm</span>
+                    }
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- DANH SÁCH CHI NHÁNH -->
+    <div class="branch-grid">
+
+        @foreach (var b in Model)
+        {
+            int deviceCount = deviceCounts.GetValueOrDefault(b.MaCuaHang);
+            int staffCount = staffCounts.GetValueOrDefault(b.MaCuaHang);
+
+            bool isActive = IsActive(b.TrangThai);
+
+            <article class="branch-card">
+
+                <!-- HEADER CARD -->
+                <div class="branch-card-header">
+
+                    <div class="branch-shop-icon">
+                        <i class="bi bi-shop"></i>
+                    </div>
+
+                    <span class="branch-status @(isActive ? "active" : "inactive")">
+
+                        <span class="branch-status-dot"></span>
+
+                        @StatusLabel(b.TrangThai)
+
+                    </span>
+
+                </div>
+
+                <!-- TÊN CHI NHÁNH -->
+                <div class="branch-card-title">
+
+                    <h3>@b.TenCuaHang</h3>
+
+                    <span>@b.MaCuaHang</span>
+
+                </div>
+
+                <!-- THÔNG TIN LIÊN HỆ -->
+                <div class="branch-contact">
+
+                    <div class="branch-contact-row">
+
+                        <div class="branch-contact-icon">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+
+                        <div class="branch-contact-info">
+
+                            <span>Địa chỉ</span>
+
+                            <strong>
+                                @(string.IsNullOrWhiteSpace(b.DiaChi)
+                                    ? "Chưa cập nhật"
+                                    : b.DiaChi)
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                    <div class="branch-contact-row">
+
+                        <div class="branch-contact-icon">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+
+                        <div class="branch-contact-info">
+
+                            <span>Số điện thoại</span>
+
+                            <strong>
+                                @(string.IsNullOrWhiteSpace(b.SoDienThoai)
+                                    ? "Chưa cập nhật"
+                                    : b.SoDienThoai)
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- THỐNG KÊ -->
+                <div class="branch-card-stats">
+
+                    <div class="branch-stat">
+
+                        <div class="branch-stat-icon equipment">
+                            <i class="bi bi-camera"></i>
+                        </div>
+
+                        <div class="branch-stat-content">
+
+                            <span>Thiết bị</span>
+
+                            <strong>
+                                @deviceCount
+                                <small>thiết bị</small>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                    <div class="branch-stat-divider"></div>
+
+                    <div class="branch-stat">
+
+                        <div class="branch-stat-icon employees">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <div class="branch-stat-content">
+
+                            <span>Nhân viên</span>
+
+                            <strong>
+                                @staffCount
+                                <small>nhân viên</small>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- NÚT CHI TIẾT -->
+                <a asp-controller="ChiNhanh"
+                   asp-action="Details"
+                   asp-route-id="@b.MaCuaHang"
+                   class="branch-detail-btn">
+
+                    <i class="bi bi-eye"></i>
+
+                    <span>Xem chi nhánh</span>
+
+                    <i class="bi bi-chevron-right"></i>
+
+                </a>
+
+            </article>
+        }
+
+    </div>
+
+    <!-- KHÔNG CÓ DỮ LIỆU -->
+    @if (Model.Count == 0)
+    {
+        <div class="branch-empty">
+
+            <div class="branch-empty-icon">
+                <i class="bi bi-shop-window"></i>
+            </div>
+
+            <h3>Không tìm thấy chi nhánh</h3>
+
+            <p>
+                Không có chi nhánh nào phù hợp với từ khóa tìm kiếm.
+            </p>
+
+            <a asp-controller="ChiNhanh"
+               asp-action="Index"
+               class="branch-empty-btn">
+
+                <i class="bi bi-arrow-clockwise"></i>
+                Xem tất cả chi nhánh
+
+            </a>
+
+        </div>
+    }
+
 </div>
-@if(Model.Count==0){<div class="panel text-center py-4 text-muted">Không tìm thấy chi nhánh phù hợp.</div>}
-<div class="sl-admin-note">Thông tin lấy từ SQL Server. Thao tác tạo/sửa chi nhánh chỉ nên bật khi Backend có API kiểm tra quyền và lưu thay đổi.</div>
+<div class="modal fade"
+     id="createBranchModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-shop"></i>
+                    Thêm chi nhánh
+                </h5>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <form asp-controller="ChiNhanh"
+                  asp-action="Create"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div class="modal-body">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Mã chi nhánh</label>
+                            <input name="MaCuaHang"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Tên chi nhánh</label>
+                            <input name="TenCuaHang"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Địa chỉ</label>
+                            <input name="DiaChi"
+                                   class="form-control"
+                                   required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại</label>
+                            <input name="SoDienThoai"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input name="Email"
+                                   type="email"
+                                   class="form-control" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Mô tả</label>
+                            <textarea name="MoTa"
+                                      class="form-control"
+                                      rows="3"></textarea>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Hủy
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        Thêm chi nhánh
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

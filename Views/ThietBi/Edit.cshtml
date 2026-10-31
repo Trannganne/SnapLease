@@ -1,99 +1,798 @@
-@model ThietBi
+@model RentalCamera.Models.ThietBi
+@using RentalCamera.Models
+@using System.Globalization
+
 @{
     ViewData["Title"] = "Chỉnh sửa thiết bị";
+
+    var branches = ViewBag.CuaHang as List<CuaHang>
+        ?? new List<CuaHang>();
+
+    var photos = ViewBag.Anh as List<string>
+        ?? new List<string>();
+
+    var tenMay = Model.DongMay?.TenDongMay ?? "Thiết bị";
+    var thuongHieu = Model.DongMay?.ThuongHieu?.TenThuongHieu
+        ?? "Chưa cập nhật";
+
+    var giaThue = Model.DongMay?.GiaThueNgay ?? 0;
+    var tienCoc = Model.DongMay?.TienCoc ?? 0;
+    var giamGia = Model.DongMay?.PhanTramGiamGia ?? 0;
+
+    var invariant = CultureInfo.InvariantCulture;
+
+    string StatusLabel(string? status) => status switch
+    {
+        "SAN_SANG" => "Sẵn sàng",
+        "DANG_GIU" => "Đang giữ",
+        "DANG_THUE" => "Đang thuê",
+        "BAO_TRI" => "Bảo trì",
+        "HONG" => "Hỏng",
+        "NGUNG_KINH_DOANH" => "Ngừng kinh doanh",
+        _ => status?.Replace("_", " ") ?? "Chưa xác định"
+    };
 }
 
-<div class="page-head">
-    <div>
-        <h1>CHỈNH SỬA THIẾT BỊ</h1>
-        <p>Cập nhật tình trạng, trạng thái và chính sách giá thuê ngay trên một màn hình</p>
-    </div>
-</div>
+<div class="device-edit-page">
 
-<form method="post" enctype="multipart/form-data" class="panel edit-form">
+    <!-- HEADER -->
+    <div class="device-edit-header">
+
+        <div>
+            <h1>Chỉnh sửa thiết bị</h1>
+            <p>Cập nhật thông tin, giá thuê và tình trạng thiết bị</p>
+        </div>
+
+        <div class="device-edit-header-actions">
+
+            <a asp-action="Details"
+               asp-route-id="@Model.MaThietBi"
+               class="btn btn-outline-primary">
+
+                <i class="bi bi-arrow-left"></i>
+                Quay lại chi tiết
+
+            </a>
+
+        </div>
+
+    </div>
+
+    <!-- DEVICE SUMMARY -->
+    <div class="device-edit-summary">
+
+        <div class="device-edit-summary-image">
+
+            @if (photos.Any())
+            {
+                <img src="@photos[0]"
+                     alt="@tenMay" />
+            }
+            else
+            {
+                <i class="bi bi-camera"></i>
+            }
+
+        </div>
+
+        <div class="device-edit-summary-content">
+
+            <span class="device-edit-brand">
+                @thuongHieu
+            </span>
+
+            <h2>@tenMay</h2>
+
+            <div class="device-edit-summary-meta">
+
+                <span>@Model.MaThietBi</span>
+
+                <span class="device-edit-separator">|</span>
+
+                <span>Serial: @Model.SoSerial</span>
+
+                <span class="device-edit-status">
+                    <i class="bi bi-circle-fill"></i>
+                    @StatusLabel(Model.TrangThai)
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- FORM -->
+    <form asp-controller="ThietBi"
+          asp-action="Edit"
+          asp-route-id="@Model.MaThietBi"
+          method="post"
+          enctype="multipart/form-data"
+          id="deviceEditForm">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="id"
+               value="@Model.MaThietBi" />
+
+        <div class="device-edit-grid">
+
+            <!-- LEFT COLUMN -->
+            <div class="device-edit-left">
+
+                <!-- BASIC INFORMATION -->
+                <section class="device-edit-card">
+
+                    <div class="device-edit-card-heading">
+
+                        <div class="device-edit-heading-icon">
+                            <i class="bi bi-card-list"></i>
+                        </div>
+
+                        <div>
+                            <h3>Thông tin cơ bản</h3>
+                            <p>Thông tin nhận diện và quản lý thiết bị</p>
+                        </div>
+
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Mã thiết bị
+                            </label>
+
+                            <input class="form-control"
+                                   value="@Model.MaThietBi"
+                                   readonly />
+
+                            <small class="device-edit-help">
+                                Không thể thay đổi
+                            </small>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Tên thiết bị (dòng máy)
+                            </label>
+
+                            <input class="form-control"
+                                   value="@tenMay"
+                                   readonly />
+
+                            <small class="device-edit-help">
+                                Quản lý trong danh mục dòng máy
+                            </small>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Số serial <span class="text-danger">*</span>
+                            </label>
+
+                            <input class="form-control"
+                                   name="soSerial"
+                                   value="@Model.SoSerial"
+                                   required />
+
+                            <small class="device-edit-help">
+                                Nhập số serial của thiết bị
+                            </small>
+
+                        </div>
+
+                        <div class="col-12 mt-4">
+
+                            <label class="form-label">
+                                Chi nhánh đang lưu thiết bị
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select class="form-select"
+                                    name="maCuaHang"
+                                    id="deviceBranch"
+                                    required>
+
+                                @foreach (var branch in branches)
+                                {
+                                    <option value="@branch.MaCuaHang"
+                                            selected="@(branch.MaCuaHang == Model.MaCuaHang)">
+                                        @branch.TenCuaHang (@branch.MaCuaHang)
+                                    </option>
+                                }
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- PRICING -->
+                <section class="device-edit-card">
+
+                    <div class="device-edit-card-heading">
+
+                        <div class="device-edit-heading-icon">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+
+                        <div>
+                            <h3>Giá thuê & chính sách giá</h3>
+                            <p>
+                                Giá thuê, tiền cọc và giảm giá áp dụng theo dòng máy
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Giá thuê / ngày (đ)
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    <i class="bi bi-cash"></i>
+                                </span>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="giaThueNgay"
+                                       value="@giaThue.ToString(invariant)"
+                                       min="0"
+                                       step="1"
+                                       required />
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Tiền cọc (đ)
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    <i class="bi bi-wallet2"></i>
+                                </span>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="tienCoc"
+                                       value="@tienCoc.ToString(invariant)"
+                                       min="0"
+                                       step="1"
+                                       required />
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <label class="form-label">
+                                Giảm giá (%)
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    <i class="bi bi-percent"></i>
+                                </span>
+
+                                <input type="number"
+                                       class="form-control"
+                                       name="phanTramGiamGia"
+                                       value="@giamGia.ToString(invariant)"
+                                       min="0"
+                                       max="100"
+                                       step="0.01"
+                                       required />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="device-edit-info-note">
+
+                        <i class="bi bi-info-circle-fill"></i>
+
+                        <span>
+                            Thay đổi giá thuê, tiền cọc hoặc giảm giá
+                            sẽ áp dụng cho toàn bộ thiết bị thuộc dòng máy
+                            <strong>@tenMay</strong>.
+                        </span>
+
+                    </div>
+
+                </section>
+
+                <!-- STATUS -->
+                <section class="device-edit-card">
+
+                    <div class="device-edit-card-heading">
+
+                        <div class="device-edit-heading-icon">
+                            <i class="bi bi-gear"></i>
+                        </div>
+
+                        <div>
+                            <h3>Tình trạng & trạng thái</h3>
+                            <p>
+                                Cập nhật tình trạng vật lý và trạng thái hoạt động
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-7">
+
+                            <label class="form-label">
+                                Tình trạng vật lý
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <textarea class="form-control"
+                                      name="tinhTrang"
+                                      rows="4"
+                                      required>@Model.TinhTrang</textarea>
+
+                        </div>
+
+                        <div class="col-md-5">
+
+                            <label class="form-label">
+                                Trạng thái
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select class="form-select"
+                                    name="trangThai"
+                                    id="deviceStatus"
+                                    required>
+
+                                @foreach (var status in new[]
+                                {
+                                    "SAN_SANG",
+                                    "DANG_GIU",
+                                    "DANG_THUE",
+                                    "BAO_TRI",
+                                    "HONG",
+                                    "NGUNG_KINH_DOANH"
+                                })
+                                {
+                                    <option value="@status"
+                                            selected="@(Model.TrangThai == status)">
+                                        @StatusLabel(status)
+                                    </option>
+                                }
+
+                            </select>
+
+                            <div class="device-edit-status-preview"
+                                 id="deviceStatusPreview">
+
+                                <i class="bi bi-circle-fill"></i>
+
+                                <span>@StatusLabel(Model.TrangThai)</span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div class="device-edit-right">
+
+                <!-- IMAGES -->
+                <section class="device-edit-card">
+
+                    <div class="device-edit-card-heading">
+
+                        <div class="device-edit-heading-icon">
+                            <i class="bi bi-images"></i>
+                        </div>
+
+                        <div>
+                            <h3>Hình ảnh thiết bị</h3>
+                            <p>
+                                Thêm ảnh mới cho dòng máy.
+                                Ảnh được dùng chung cho các thiết bị cùng dòng máy.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="device-edit-gallery">
+
+                        <div class="device-edit-main-image">
+
+                            @if (photos.Any())
+                            {
+                                <img id="editMainImage"
+                                     src="@photos[0]"
+                                     alt="@tenMay" />
+                            }
+                            else
+                            {
+                                <div id="editImagePlaceholder"
+                                     class="device-edit-image-placeholder">
+
+                                    <i class="bi bi-camera"></i>
+
+                                    <p>Chưa có hình ảnh</p>
+
+                                </div>
+
+                                <img id="editMainImage"
+                                     alt="Ảnh xem trước"
+                                     style="display:none;" />
+                            }
+
+                        </div>
+
+                    @if (photos.Any())
+                    {
+                        <div class="device-edit-thumbnails">
+
+                            @for (int i = 0; i < photos.Count; i++)
+                            {
+                                var photo = photos[i];
+
+                                <div class="device-edit-thumb-wrapper">
+
+                                    <!-- Nút xem ảnh -->
+                                    <button type="button"
+                                            class="device-edit-thumb @(i == 0 ? "active" : "")"
+                                            data-image="@photo">
+
+                                        <img src="@photo"
+                                            alt="Ảnh @(i + 1)" />
+
+                                    </button>
+
+                                    <!-- Nút xóa ảnh -->
+                                    <button type="button"
+                                            class="device-edit-delete-image"
+                                            title="Xóa ảnh"
+                                            aria-label="Xóa ảnh @(i + 1)"
+                                            onclick="deleteDeviceImage(@i)">
+
+                                        <i class="bi bi-trash3-fill"></i>
+
+                                    </button>
+
+                                </div>
+                            }
+
+                        </div>
+                    }
+
+                    </div>
+
+                    <label for="deviceImageInput"
+                           class="device-edit-upload"
+                           id="deviceUploadZone">
+
+                        <i class="bi bi-cloud-arrow-up"></i>
+
+                        <strong>Nhấn để chọn ảnh mới</strong>
+
+                        <span>JPG, PNG, WebP · Tối đa 5 MB</span>
+
+                    </label>
+
+                    <input type="file"
+                           id="deviceImageInput"
+                           name="anh"
+                           accept="image/jpeg,image/png,image/webp"
+                           class="d-none" />
+
+                    <div id="deviceSelectedFile"
+                         class="device-edit-selected-file"></div>
+
+                </section>
+
+                <!-- BRANCH INFORMATION -->
+                <section class="device-edit-card">
+
+                    <div class="device-edit-card-heading">
+
+                        <div class="device-edit-heading-icon">
+                            <i class="bi bi-shop"></i>
+                        </div>
+
+                        <div>
+                            <h3>Thông tin chi nhánh</h3>
+                            <p>Chi nhánh hiện đang quản lý thiết bị</p>
+                        </div>
+
+                    </div>
+
+                    <div class="device-edit-branch-box">
+
+                        <div class="device-edit-branch-icon">
+                            <i class="bi bi-shop-window"></i>
+                        </div>
+
+                        <div>
+
+                            <strong id="branchDisplayName">
+                                @(Model.CuaHang?.TenCuaHang
+                                    ?? branches.FirstOrDefault(
+                                        b => b.MaCuaHang == Model.MaCuaHang
+                                    )?.TenCuaHang
+                                    ?? "Chưa xác định")
+                            </strong>
+
+                            <p id="branchDisplayAddress">
+                                @(Model.CuaHang?.DiaChi
+                                    ?? branches.FirstOrDefault(
+                                        b => b.MaCuaHang == Model.MaCuaHang
+                                    )?.DiaChi
+                                    ?? "Chưa cập nhật địa chỉ")
+                            </p>
+
+                            <small id="branchDisplayCode">
+                                Mã chi nhánh: @Model.MaCuaHang
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+        <!-- ACTION BAR -->
+        <div class="device-edit-footer">
+
+            <div class="device-edit-footer-note">
+                <i class="bi bi-shield-check"></i>
+                Kiểm tra thông tin trước khi lưu thay đổi.
+            </div>
+
+            <div class="device-edit-footer-actions">
+
+                <a asp-action="Details"
+                   asp-route-id="@Model.MaThietBi"
+                   class="btn btn-light">
+                    Hủy
+                </a>
+
+                <button type="submit"
+                        class="btn btn-primary">
+
+                    <i class="bi bi-floppy"></i>
+                    Lưu thay đổi
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+<form id="deleteDeviceImageForm"
+      asp-controller="ThietBi"
+      asp-action="DeleteImage"
+      method="post"
+      style="display:none;">
+
     @Html.AntiForgeryToken()
 
-    <div class="mb-4">
-        <h5 class="fw-bold text-primary mb-3">THÔNG TIN THIẾT BỊ</h5>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Mã thiết bị</label>
-                <input class="form-control" value="@Model.MaThietBi" disabled>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Tên thiết bị</label>
-                <input class="form-control" value="@Model.DongMay?.TenDongMay" disabled>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Số serial</label>
-                <input class="form-control" name="soSerial" value="@Model.SoSerial" required>
-            </div>
-        </div>
-    </div>
+    <input type="hidden"
+           name="id"
+           value="@Model.MaThietBi" />
 
-    <div class="row g-3 mt-2"><div class="col-md-6"><label class="form-label fw-semibold">Chi nhánh đang lưu thiết bị</label><select name="maCuaHang" class="form-select" required>@foreach(var c in (IEnumerable<CuaHang>)ViewBag.CuaHang){<option value="@c.MaCuaHang" selected="@(c.MaCuaHang==Model.MaCuaHang)">@c.TenCuaHang</option>}</select></div><div class="col-md-6"><label class="form-label fw-semibold">Thêm ảnh cho dòng máy</label><input type="file" name="anh" accept="image/jpeg,image/png,image/webp" class="form-control" /></div></div>
-    <hr class="my-4" />
+    <input type="hidden"
+           name="imageUrl"
+           id="deleteDeviceImageUrl" />
 
-    <div class="mb-4">
-        <h5 class="fw-bold text-primary mb-3">GIÁ THUÊ & TIỀN CỌC</h5>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Giá thuê / ngày (đ)</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-cash-stack"></i></span>
-                    <input class="form-control" type="number" min="0" step="1000" name="giaThueNgay" value="@(Model.DongMay?.GiaThueNgay.ToString("0") ?? "0")" required>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Tiền cọc (đ)</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-wallet2"></i></span>
-                    <input class="form-control" type="number" min="0" step="1000" name="tienCoc" value="@(Model.DongMay?.TienCoc.ToString("0") ?? "0")" required>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Giảm giá (%)</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-percent"></i></span>
-                    <input class="form-control" type="number" min="0" max="100" step="0.01" name="phanTramGiamGia" value="@(Model.DongMay?.PhanTramGiamGia.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture) ?? "0")" required>
-                </div>
-                <div class="form-text">Áp dụng cho dòng máy @Model.DongMay?.TenDongMay.</div>
-            </div>
-        </div>
-    </div>
-
-    <hr class="my-4" />
-
-    <div>
-        <h5 class="fw-bold text-primary mb-3">TÌNH TRẠNG & TRẠNG THÁI</h5>
-        <div class="row g-3">
-            <div class="col-md-8">
-                <label class="form-label fw-semibold">Tình trạng vật lý</label>
-                <textarea class="form-control" name="tinhTrang" rows="4" required>@Model.TinhTrang</textarea>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Trạng thái</label>
-                <select class="form-select" name="trangThai" required>
-                    @foreach (var s in new[] { "SAN_SANG", "DANG_GIU", "DANG_THUE", "BAO_TRI", "HONG", "NGUNG_KINH_DOANH" })
-                    {
-                        var label = s switch
-                        {
-                            "SAN_SANG" => "Sẵn sàng",
-                            "DANG_GIU" => "Đang giữ",
-                            "DANG_THUE" => "Đang thuê",
-                            "BAO_TRI" => "Bảo trì",
-                            "HONG" => "Hỏng",
-                            _ => "Ngừng kinh doanh"
-                        };
-                        <option value="@s" selected="@(Model.TrangThai == s)">@label</option>
-                    }
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="mt-4 d-flex justify-content-end gap-2">
-        <a asp-action="Details" asp-route-id="@Model.MaThietBi" class="btn btn-light">HỦY</a>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>LƯU THAY ĐỔI</button>
-    </div>
 </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // IMAGE GALLERY
+    const mainImage = document.getElementById("editMainImage");
+    const thumbnails = document.querySelectorAll(".device-edit-thumb");
+
+    thumbnails.forEach(function (button) {
+
+        button.addEventListener("click", function () {
+
+            const imageUrl = button.dataset.image;
+
+            if (!imageUrl || !mainImage) return;
+
+            mainImage.src = imageUrl;
+            mainImage.style.display = "block";
+
+            thumbnails.forEach(function (thumb) {
+                thumb.classList.remove("active");
+            });
+
+            button.classList.add("active");
+
+        });
+
+    });
+
+    // IMAGE UPLOAD PREVIEW
+    const fileInput = document.getElementById("deviceImageInput");
+    const fileName = document.getElementById("deviceSelectedFile");
+    const placeholder = document.getElementById("editImagePlaceholder");
+
+    let previewUrl = null;
+
+    if (fileInput) {
+
+        fileInput.addEventListener("change", function () {
+
+            const file = this.files[0];
+
+            if (!file) return;
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                alert("Chỉ hỗ trợ JPG, PNG hoặc WebP.");
+                this.value = "";
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Ảnh không được vượt quá 5 MB.");
+                this.value = "";
+                return;
+            }
+
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+
+            previewUrl = URL.createObjectURL(file);
+
+            if (mainImage) {
+                mainImage.src = previewUrl;
+                mainImage.style.display = "block";
+            }
+
+            if (placeholder) {
+                placeholder.style.display = "none";
+            }
+
+            if (fileName) {
+                fileName.textContent = "Ảnh đã chọn: " + file.name;
+            }
+
+            thumbnails.forEach(function (thumb) {
+                thumb.classList.remove("active");
+            });
+
+        });
+
+    }
+
+    // STATUS PREVIEW
+    const statusSelect = document.getElementById("deviceStatus");
+    const statusPreview = document.getElementById("deviceStatusPreview");
+
+    if (statusSelect && statusPreview) {
+
+        statusSelect.addEventListener("change", function () {
+
+            const selectedText =
+                this.options[this.selectedIndex].text;
+
+            const span = statusPreview.querySelector("span");
+
+            if (span) {
+                span.textContent = selectedText;
+            }
+
+            statusPreview.dataset.status = this.value;
+
+        });
+
+        statusPreview.dataset.status = statusSelect.value;
+    }
+
+    // BRANCH PREVIEW
+    const branchSelect = document.getElementById("deviceBranch");
+
+    const branchName = document.getElementById("branchDisplayName");
+    const branchCode = document.getElementById("branchDisplayCode");
+
+    if (branchSelect) {
+
+        branchSelect.addEventListener("change", function () {
+
+            const selected =
+                this.options[this.selectedIndex];
+
+            if (branchName) {
+                branchName.textContent = selected.text;
+            }
+
+            if (branchCode) {
+                branchCode.textContent =
+                    "Mã chi nhánh: " + selected.value;
+            }
+
+        });
+
+    }
+
+});
+
+</script>
+<script>
+    const devicePhotos = @Html.Raw(
+        System.Text.Json.JsonSerializer.Serialize(photos)
+    );
+
+    function deleteDeviceImage(index) {
+
+        const imageUrl = devicePhotos[index];
+
+        if (!imageUrl) {
+            alert("Không tìm thấy ảnh cần xóa.");
+            return;
+        }
+
+        const confirmed = confirm(
+            "Bạn có chắc chắn muốn xóa ảnh này?\n\n" +
+            "Ảnh sẽ bị xóa khỏi dòng máy và không thể khôi phục."
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        document.getElementById(
+            "deleteDeviceImageUrl"
+        ).value = imageUrl;
+
+        document.getElementById(
+            "deleteDeviceImageForm"
+        ).submit();
+    }
+</script>

@@ -13,9 +13,19 @@ public class HomeController : BaseController
     public async Task<IActionResult> Index(int? nam)
     {
         var now = DateTime.Now;
-        var reportYear = nam.HasValue && nam.Value >= 2000 && nam.Value <= now.Year ? nam.Value : now.Year;
-        var start = new DateTime(now.Year, now.Month, 1);
-        var end = start.AddMonths(1);
+
+// Cho phép chọn từ năm 2000 đến năm hiện tại
+const int minYear = 2000;
+int maxYear = now.Year;
+
+var reportYear = nam.HasValue
+    && nam.Value >= minYear
+    && nam.Value <= maxYear
+        ? nam.Value
+        : maxYear;
+
+var start = new DateTime(now.Year, now.Month, 1);
+var end = start.AddMonths(1);
 
         var vm = new DashboardVM
         {

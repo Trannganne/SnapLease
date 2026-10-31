@@ -1,114 +1,1383 @@
-<div class="panel mb-3 p-3"><form method="get" asp-action="Index" class="row g-2 align-items-end"><div class="col-md-4"><label class="form-label">Tìm mã hợp đồng</label><input class="form-control" name="maHopDong" value="@ViewBag.MaHopDong" placeholder="Mã hợp đồng" /></div><div class="col-md-3"><label class="form-label">Giữ chỗ</label><select name="giuCho" class="form-select"><option value="">Tất cả</option><option value="CON_HAN" selected="@(ViewBag.GiuCho == "CON_HAN")">Còn hiệu lực (20 phút)</option><option value="HET_HAN" selected="@(ViewBag.GiuCho == "HET_HAN")">Hết hạn (20 phút)</option><option value="DA_CHUYEN_HOP_DONG" selected="@(ViewBag.GiuCho == "DA_CHUYEN_HOP_DONG")">Đã chuyển hợp đồng</option></select></div><div class="col-md-3"><label class="form-label d-block">Hợp đồng</label><label><input type="checkbox" name="quaHan" value="true" checked="@(ViewBag.QuaHan == true)" /> Chỉ xem quá hạn</label></div><div class="col-md-2"><button class="btn btn-primary w-100">Lọc</button></div></form></div>
-@model OrderVM
+@model RentalCamera.ViewModels.OrderVM
 @using RentalCamera.Models
+
 @{
     ViewData["Title"] = "Đơn thuê & hợp đồng";
-    var branches = ViewBag.ChiNhanh as List<CuaHang> ?? new List<CuaHang>();
-    var names = branches.ToDictionary(x => x.MaCuaHang, x => x.TenCuaHang);
-    string BranchName(string code) => names.TryGetValue(code, out var name) ? name : code;
-    string Status(string code) => code switch {
-        "DANG_THUE" => "Đang thuê", "DA_HOAN_THANH" => "Hoàn thành",
-        "CHO_BAN_GIAO" => "Chờ bàn giao", "DANG_CHON" => "Đang chọn",
-        "DA_CHUYEN_HOP_DONG" => "Đã chuyển hợp đồng",
-        "CHO_XAC_NHAN" => "Chờ xác nhận", _ => code.Replace("_", " ")
-    };
-}
-<div class="page-head">
-    <div>
-        <h1>Đơn thuê & hợp đồng</h1>
-        <p>Theo dõi hợp đồng, phân bổ thiết bị, bàn giao và nhận trả theo chi nhánh</p>
-    </div>
-</div>
-<div class="sl-collapse-toolbar"><button type="button" class="sl-toggle-btn" data-sl-toggle="slAdvancedFilters" aria-expanded="false" aria-controls="slAdvancedFilters"><i class="bi bi-sliders"></i> Bộ lọc nâng cao <i class="bi bi-chevron-down sl-toggle-chevron"></i></button></div>
-<div id="slAdvancedFilters" class="sl-collapsible" hidden>
-<form method="get" asp-action="Index" class="panel sl-orders-filter">
-    <div class="sl-orders-filter-grid">
-        <label>Chi nhánh
-            <select class="form-select" name="chiNhanh">
-                <option value="">Tất cả chi nhánh</option>
-                @foreach(var branch in branches) {
-                    <option value="@branch.MaCuaHang" selected="@(ViewBag.ChiNhanhDaChon == branch.MaCuaHang)">@branch.TenCuaHang</option>
-                }
-            </select>
-        </label>
-        <label>Trạng thái
-            <select class="form-select" name="trangThai">
-                <option value="">Tất cả trạng thái</option>
-                @foreach(var state in new[]{"DANG_THUE","DA_HOAN_THANH","CHO_BAN_GIAO","DANG_CHON","DA_CHUYEN_HOP_DONG","CHO_XAC_NHAN"}) {
-                    <option value="@state" selected="@(ViewBag.TrangThaiDaChon == state)">@Status(state)</option>
-                }
-            </select>
-        </label>
-        <label>Từ ngày<input class="form-control" type="date" name="tuNgay" value="@ViewBag.TuNgay" /></label>
-        <label>Đến ngày<input class="form-control" type="date" name="denNgay" value="@ViewBag.DenNgay" /></label>
-        <div class="sl-orders-filter-actions">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i> Lọc</button>
-            <a class="btn btn-outline-primary" asp-action="Index"><i class="bi bi-arrow-counterclockwise"></i> Đặt lại</a>
-        </div>
-    </div>
-</form>
-</div>
-<section class="panel sl-orders-panel">
-    <h3><i class="bi bi-file-earmark-text"></i> Danh sách hợp đồng <span class="sl-orders-count">@Model.HopDong.Count</span></h3>
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead><tr><th>Mã hợp đồng</th><th>Khách hàng</th><th>Chi nhánh</th><th>Ngày thuê</th><th>Ngày trả</th><th>Tổng tiền</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-            <tbody>
-            @foreach(var x in Model.HopDong) {
-                <tr>
-                    <td><strong>@x.MaHopDong</strong></td>
-                    <td>@(x.KhachThue?.HoTen ?? x.MaKhachThue)</td>
-                    <td><span class="sl-orders-branch"><i class="bi bi-shop"></i> @BranchName(x.MaCuaHang)</span></td>
-                    <td>@x.ThoiGianBanGiao.ToString("dd/MM/yyyy")</td>
-                    <td>@x.ThoiGianTraDuKien.ToString("dd/MM/yyyy")</td>
-                    <td class="money">@x.TongTien.ToString("N0") đ</td>
-                    <td><span class="badge-soft">@Status(x.TrangThai)</span></td>
-                    <td><a class="btn btn-outline-primary btn-sm" asp-action="Details" asp-route-id="@x.MaHopDong">Chi tiết <i class="bi bi-arrow-right"></i></a></td>
-                </tr>
-            }
-            @if(Model.HopDong.Count == 0) { <tr><td colspan="8" class="text-center py-4 text-muted">Không có hợp đồng phù hợp bộ lọc.</td></tr> }
-            </tbody>
-        </table>
-    </div>
-</section>
-<section class="panel sl-orders-panel mt-3">
-    <h3><i class="bi bi-hourglass-split"></i> Đơn/giỏ hàng chờ xử lý <span class="sl-orders-count">@Model.GioHang.Count</span></h3>
-    <div class="table-responsive">
-        <table class="table align-middle">
-            <thead><tr><th>Mã</th><th>Khách hàng</th><th>Chi nhánh</th><th>Ngày tạo</th><th>Trạng thái</th></tr></thead>
-            <tbody>
-            @foreach(var x in Model.GioHang) {
-                <tr>
-                    <td><strong>@x.MaGioHang</strong></td>
-                    <td>@(x.KhachThue?.HoTen ?? x.MaKhachThue)</td>
-                    <td><span class="sl-orders-branch"><i class="bi bi-shop"></i> @BranchName(x.MaCuaHang)</span></td>
-                    <td>@x.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
-                    <td><span class="badge-soft">@Status(x.TrangThai)</span></td>
-                </tr>
-            }
-            @if(Model.GioHang.Count == 0) { <tr><td colspan="5" class="text-center py-4 text-muted">Không có đơn hoặc giỏ hàng phù hợp.</td></tr> }
-            </tbody>
-        </table>
-    </div>
-</section>
 
-<div class="sl-collapse-toolbar sl-lookup-toolbar"><button type="button" class="sl-toggle-btn" data-sl-toggle="slReservationLookup" aria-expanded="false" aria-controls="slReservationLookup"><i class="bi bi-search"></i> Tra cứu giữ chỗ <i class="bi bi-chevron-down sl-toggle-chevron"></i></button></div>
-<div id="slReservationLookup" class="sl-collapsible" hidden>
-    <div class="panel mt-2 p-3 sl-lookup-panel"><h3>Tra cứu chi tiết giữ chỗ</h3><form asp-action="GiuChoDetails" method="get" class="d-flex gap-2"><input name="id" required class="form-control" placeholder="Nhập mã giữ chỗ" /><button class="btn btn-primary">Xem chi tiết</button></form></div>
+    var branches = ViewBag.ChiNhanh as List<CuaHang>
+                   ?? new List<CuaHang>();
+
+    var names = branches.ToDictionary(
+        x => x.MaCuaHang,
+        x => x.TenCuaHang
+    );
+
+    string BranchName(string code)
+    {
+        return names.TryGetValue(code, out var name)
+            ? name
+            : code;
+    }
+
+    string Status(string code) => code switch
+    {
+        "DANG_THUE" => "Đang thuê",
+        "DA_HOAN_THANH" => "Hoàn thành",
+        "CHO_BAN_GIAO" => "Chờ bàn giao",
+        "DANG_CHON" => "Đang chọn",
+        "DA_CHUYEN_HOP_DONG" => "Đã chuyển hợp đồng",
+        "CHO_XAC_NHAN" => "Chờ xác nhận",
+        "CHO_THANH_TOAN_COC" => "Chờ thanh toán cọc",
+        "CHO_COC" => "Chờ đặt cọc",
+        "CHO_PHAN_BO" => "Chờ phân bổ",
+        "CHO_PHAN_BO_THIET_BI" => "Chờ phân bổ thiết bị",
+        "DA_HUY" => "Đã hủy",
+        _ => code?.Replace("_", " ") ?? "Không xác định"
+    };
+
+    string StatusClass(string code) => code switch
+    {
+        "DANG_THUE" => "sl-status-blue",
+        "DA_HOAN_THANH" => "sl-status-green",
+        "CHO_BAN_GIAO" => "sl-status-orange",
+        "CHO_XAC_NHAN" => "sl-status-purple",
+        "DA_HUY" => "sl-status-red",
+        "HET_HAN" => "sl-status-red",
+        _ => "sl-status-gray"
+    };
+
+    bool hasAdvancedFilter =
+        !string.IsNullOrWhiteSpace(Convert.ToString(ViewBag.ChiNhanhDaChon))
+        || !string.IsNullOrWhiteSpace(Convert.ToString(ViewBag.TrangThaiDaChon))
+        || !string.IsNullOrWhiteSpace(Convert.ToString(ViewBag.TuNgay))
+        || !string.IsNullOrWhiteSpace(Convert.ToString(ViewBag.DenNgay));
+}
+
+<div class="sl-orders-page">
+
+    <!-- =========================================
+         THANH TIÊU ĐỀ
+    ========================================== -->
+
+    <div class="sl-orders-page-heading">
+
+        <div>
+            <h2>
+                <i class="bi bi-file-earmark-text"></i>
+                Quản lý đơn thuê & hợp đồng
+            </h2>
+
+            <p>
+                Theo dõi hợp đồng, phân bổ thiết bị,
+                bàn giao và nhận trả theo chi nhánh.
+            </p>
+        </div>
+
+        <div class="sl-orders-heading-icon">
+            <i class="bi bi-files"></i>
+        </div>
+
+    </div>
+
+
+    <!-- =========================================
+         THANH BỘ LỌC THỐNG NHẤT
+    ========================================== -->
+
+    <form method="get"
+          asp-action="Index"
+          class="sl-orders-unified-filter">
+
+        <div class="row g-3 align-items-end">
+
+            <!-- MÃ HỢP ĐỒNG -->
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <label class="form-label">
+                    <i class="bi bi-search"></i>
+                    Mã hợp đồng
+                </label>
+
+                <input type="text"
+                       name="maHopDong"
+                       value="@ViewBag.MaHopDong"
+                       class="form-control"
+                       placeholder="Nhập mã hợp đồng..." />
+
+            </div>
+
+
+            <!-- GIỮ CHỖ -->
+
+            <div class="col-12 col-md-6 col-xl-2">
+
+                <label class="form-label">
+                    <i class="bi bi-clock-history"></i>
+                    Giữ chỗ
+                </label>
+
+                <select name="giuCho"
+                        class="form-select">
+
+                    <option value="">
+                        Tất cả
+                    </option>
+
+                    <option value="CON_HAN"
+                            selected="@(ViewBag.GiuCho == "CON_HAN")">
+                        Còn hiệu lực (20 phút)
+                    </option>
+
+                    <option value="HET_HAN"
+                            selected="@(ViewBag.GiuCho == "HET_HAN")">
+                        Hết hạn (20 phút)
+                    </option>
+
+                    <option value="DA_CHUYEN_HOP_DONG"
+                            selected="@(ViewBag.GiuCho == "DA_CHUYEN_HOP_DONG")">
+                        Đã chuyển hợp đồng
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- HỢP ĐỒNG QUÁ HẠN -->
+
+            <div class="col-12 col-md-6 col-xl-2">
+
+                <label class="form-label">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Hợp đồng
+                </label>
+
+                <div class="sl-orders-overdue-field">
+
+                    <label class="sl-orders-checkbox">
+
+                        <input type="checkbox"
+                               name="quaHan"
+                               value="true"
+                               checked="@(ViewBag.QuaHan == true)" />
+
+                        <span>Chỉ xem quá hạn</span>
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+            <!-- NÚT BỘ LỌC NÂNG CAO -->
+
+            <div class="col-12 col-md-6 col-xl-3">
+
+                <button type="button"
+                        class="sl-orders-advanced-button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#donThueAdvancedFilters"
+                        aria-expanded="@(hasAdvancedFilter ? "true" : "false")"
+                        aria-controls="donThueAdvancedFilters">
+
+                    <i class="bi bi-sliders2"></i>
+
+                    <span>Bộ lọc nâng cao</span>
+
+                    <i class="bi bi-chevron-down sl-orders-chevron"></i>
+
+                </button>
+
+            </div>
+
+
+            <!-- NÚT LỌC -->
+
+            <div class="col-12 col-xl-2">
+
+                <button type="submit"
+                        class="sl-orders-search-button">
+
+                    <i class="bi bi-search"></i>
+
+                    <span>Lọc</span>
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             NỘI DUNG BỘ LỌC NÂNG CAO
+        ========================================== -->
+
+        <div class="collapse @(hasAdvancedFilter ? "show" : "")"
+             id="donThueAdvancedFilters">
+
+            <div class="sl-orders-advanced-content">
+
+                <div class="sl-orders-advanced-title">
+
+                    <div>
+                        <i class="bi bi-funnel"></i>
+                        Tùy chọn lọc nâng cao
+                    </div>
+
+                    <span>
+                        Kết hợp nhiều điều kiện để tìm kiếm chính xác hơn
+                    </span>
+
+                </div>
+
+
+                <div class="row g-3">
+
+                    <!-- CHI NHÁNH -->
+
+                    <div class="col-12 col-md-6 col-xl-3">
+
+                        <label class="form-label">
+                            Chi nhánh
+                        </label>
+
+                        <select name="chiNhanh"
+                                class="form-select">
+
+                            <option value="">
+                                Tất cả chi nhánh
+                            </option>
+
+                            @foreach (var branch in branches)
+                            {
+                                <option value="@branch.MaCuaHang"
+                                        selected="@(ViewBag.ChiNhanhDaChon == branch.MaCuaHang)">
+
+                                    @branch.TenCuaHang
+
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- TRẠNG THÁI -->
+
+                    <div class="col-12 col-md-6 col-xl-3">
+
+                        <label class="form-label">
+                            Trạng thái hợp đồng
+                        </label>
+
+                        <select name="trangThai"
+                                class="form-select">
+
+                            <option value="">
+                                Tất cả trạng thái
+                            </option>
+
+                            @foreach (var state in new[]
+                            {
+                                "DANG_THUE",
+                                "DA_HOAN_THANH",
+                                "CHO_BAN_GIAO",
+                                "DANG_CHON",
+                                "DA_CHUYEN_HOP_DONG",
+                                "CHO_XAC_NHAN"
+                            })
+                            {
+                                <option value="@state"
+                                        selected="@(ViewBag.TrangThaiDaChon == state)">
+
+                                    @Status(state)
+
+                                </option>
+                            }
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- TỪ NGÀY -->
+
+                    <div class="col-12 col-md-6 col-xl-3">
+
+                        <label class="form-label">
+                            Từ ngày
+                        </label>
+
+                        <input type="date"
+                               name="tuNgay"
+                               value="@ViewBag.TuNgay"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <!-- ĐẾN NGÀY -->
+
+                    <div class="col-12 col-md-6 col-xl-3">
+
+                        <label class="form-label">
+                            Đến ngày
+                        </label>
+
+                        <input type="date"
+                               name="denNgay"
+                               value="@ViewBag.DenNgay"
+                               class="form-control" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- THANH THAO TÁC NÂNG CAO -->
+
+                <div class="sl-orders-advanced-footer">
+
+                    <span>
+                        <i class="bi bi-info-circle"></i>
+                        Các điều kiện được kết hợp khi nhấn Lọc.
+                    </span>
+
+                    <div class="sl-orders-advanced-actions">
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                            Đặt lại
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            <i class="bi bi-check2"></i>
+                            Áp dụng bộ lọc
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </form>
+
+
+    <!-- =========================================
+         DANH SÁCH HỢP ĐỒNG
+    ========================================== -->
+
+    <section class="sl-orders-list-panel">
+
+        <div class="sl-orders-section-header">
+
+            <div class="sl-orders-section-title">
+
+                <div class="sl-orders-section-icon">
+                    <i class="bi bi-file-earmark-text"></i>
+                </div>
+
+                <div>
+                    <h3>Danh sách hợp đồng</h3>
+                    <p>Quản lý và theo dõi hợp đồng thuê thiết bị</p>
+                </div>
+
+            </div>
+
+            <div class="sl-orders-header-actions">
+
+    <span class="sl-orders-count-badge">
+        @Model.HopDong.Count hợp đồng
+    </span>
+
+    <a asp-controller="GiaHan"
+       asp-action="Index"
+       class="sl-orders-renewal-btn">
+
+        <i class="bi bi-calendar2-plus"></i>
+
+        <span>Quản lý gia hạn hợp đồng</span>
+
+        <i class="bi bi-arrow-right"></i>
+
+    </a>
+
 </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table sl-orders-table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Mã hợp đồng</th>
+                        <th>Khách hàng</th>
+                        <th>Chi nhánh</th>
+                        <th>Ngày thuê</th>
+                        <th>Ngày trả</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var x in Model.HopDong)
+                    {
+                        <tr>
+
+                            <td>
+                                <strong class="sl-orders-code">
+                                    @x.MaHopDong
+                                </strong>
+                            </td>
+
+                            <td>
+                                <div class="sl-orders-customer">
+
+                                    <div class="sl-orders-avatar">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+
+                                    <span>
+                                        @(x.KhachThue?.HoTen ?? x.MaKhachThue)
+                                    </span>
+
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="sl-orders-branch-name">
+                                    <i class="bi bi-shop"></i>
+                                    @BranchName(x.MaCuaHang)
+                                </span>
+                            </td>
+
+                            <td>
+                                @x.ThoiGianBanGiao.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @x.ThoiGianTraDuKien.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                <strong class="sl-orders-money">
+                                    @x.TongTien.ToString("N0") đ
+                                </strong>
+                            </td>
+
+                            <td>
+                                <span class="sl-orders-status @StatusClass(x.TrangThai)">
+                                    @Status(x.TrangThai)
+                                </span>
+                            </td>
+
+                            <td>
+                                <a asp-action="Details"
+                                   asp-route-id="@x.MaHopDong"
+                                   class="sl-orders-detail-button">
+
+                                    Chi tiết
+
+                                    <i class="bi bi-arrow-right"></i>
+
+                                </a>
+                            </td>
+
+                        </tr>
+                    }
+
+                    @if (Model.HopDong.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8">
+
+                                <div class="sl-orders-empty">
+
+                                    <i class="bi bi-inbox"></i>
+
+                                    <h4>Không tìm thấy hợp đồng</h4>
+
+                                    <p>
+                                        Không có hợp đồng phù hợp
+                                        với điều kiện tìm kiếm.
+                                    </p>
+
+                                </div>
+
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         ĐƠN / GIỎ HÀNG CHỜ XỬ LÝ
+    ========================================== -->
+
+    <section class="sl-orders-list-panel mt-3">
+
+        <div class="sl-orders-section-header">
+
+            <div class="sl-orders-section-title">
+
+                <div class="sl-orders-section-icon sl-orders-icon-orange">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                    <h3>Đơn / giỏ hàng chờ xử lý</h3>
+                    <p>Theo dõi các yêu cầu đặt thuê và giữ chỗ</p>
+                </div>
+
+            </div>
+
+            <span class="sl-orders-count-badge">
+                @Model.GioHang.Count đơn
+            </span>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table sl-orders-table align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Mã giỏ hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Chi nhánh</th>
+                        <th>Ngày tạo</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var x in Model.GioHang)
+                    {
+                        <tr>
+
+                            <td>
+                                <strong class="sl-orders-code">
+                                    @x.MaGioHang
+                                </strong>
+                            </td>
+
+                            <td>
+                                <div class="sl-orders-customer">
+
+                                    <div class="sl-orders-avatar">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+
+                                    <span>
+                                        @(x.KhachThue?.HoTen ?? x.MaKhachThue)
+                                    </span>
+
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="sl-orders-branch-name">
+                                    <i class="bi bi-shop"></i>
+                                    @BranchName(x.MaCuaHang)
+                                </span>
+                            </td>
+
+                            <td>
+                                @x.NgayTao.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+
+                            <td>
+                                <span class="sl-orders-status @StatusClass(x.TrangThai)">
+                                    @Status(x.TrangThai)
+                                </span>
+                            </td>
+
+                        </tr>
+                    }
+
+                    @if (Model.GioHang.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="5">
+
+                                <div class="sl-orders-empty">
+
+                                    <i class="bi bi-cart-x"></i>
+
+                                    <h4>Không có đơn chờ xử lý</h4>
+
+                                    <p>
+                                        Hiện không có đơn hoặc giỏ hàng
+                                        phù hợp điều kiện tìm kiếm.
+                                    </p>
+
+                                </div>
+
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================================
+         TRA CỨU GIỮ CHỖ
+    ========================================== -->
+
+    <section class="sl-orders-lookup-section">
+
+        <button type="button"
+                class="sl-orders-lookup-toggle"
+                data-bs-toggle="collapse"
+                data-bs-target="#slReservationLookup"
+                aria-expanded="false"
+                aria-controls="slReservationLookup">
+
+            <i class="bi bi-search"></i>
+
+            Tra cứu giữ chỗ
+
+            <i class="bi bi-chevron-down sl-orders-chevron"></i>
+
+        </button>
+
+
+        <div class="collapse"
+             id="slReservationLookup">
+
+            <div class="sl-orders-lookup-panel">
+
+                <div class="sl-orders-lookup-heading">
+
+                    <i class="bi bi-search"></i>
+
+                    <div>
+                        <h3>Tra cứu chi tiết giữ chỗ</h3>
+                        <p>Nhập mã giữ chỗ để xem thông tin chi tiết</p>
+                    </div>
+
+                </div>
+
+
+                <form asp-action="GiuChoDetails"
+                      method="get"
+                      class="sl-orders-lookup-form">
+
+                    <input name="id"
+                           required
+                           class="form-control"
+                           placeholder="Nhập mã giữ chỗ..." />
+
+                    <button type="submit"
+                            class="btn btn-primary">
+
+                        <i class="bi bi-search"></i>
+                        Xem chi tiết
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<!-- =========================================
+     CSS GIAO DIỆN ĐƠN THUÊ
+========================================== -->
+
 <style>
-.sl-collapse-toolbar{display:flex;justify-content:flex-end;margin:10px 0 12px}.sl-lookup-toolbar{margin-top:18px}.sl-toggle-btn{display:inline-flex;align-items:center;gap:9px;border:1px solid #cbd8ff;background:#fff;color:#2347bc;border-radius:11px;padding:10px 16px;font:600 14px Roboto,Arial,sans-serif;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s}.sl-toggle-btn:hover{background:#f1f5ff;border-color:#2f54eb;box-shadow:0 4px 12px #2f54eb12}.sl-toggle-btn:focus-visible{outline:3px solid #a9bcff;outline-offset:2px}.sl-toggle-chevron{transition:transform .2s}.sl-toggle-btn[aria-expanded="true"] .sl-toggle-chevron{transform:rotate(180deg)}.sl-collapsible[hidden]{display:none!important}.sl-collapsible>.sl-orders-filter{margin-bottom:14px}.sl-lookup-panel h3{margin-bottom:12px}@@media(max-width:600px){.sl-toggle-btn{width:100%;justify-content:center}.sl-lookup-panel form{flex-wrap:wrap}.sl-lookup-panel form .btn{width:100%}}
+
+/* Tổng thể */
+
+.sl-orders-page {
+    font-family: 'Roboto', Arial, sans-serif;
+    color: #203b60;
+}
+
+/* Tiêu đề */
+
+.sl-orders-page-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 22px;
+}
+
+.sl-orders-page-heading h2 {
+    font-size: 21px;
+    font-weight: 800;
+    color: #123d72;
+    margin: 0 0 7px;
+}
+
+.sl-orders-page-heading h2 i {
+    color: #0875f5;
+    margin-right: 8px;
+}
+
+.sl-orders-page-heading p {
+    color: #7890ad;
+    font-size: 13px;
+    margin: 0;
+}
+
+.sl-orders-heading-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: #eaf3ff;
+    color: #0875f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+}
+
+/* Khung lọc */
+
+.sl-orders-unified-filter {
+    background: #fff;
+    border: 1px solid #e3ebf6;
+    border-radius: 17px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 22px rgba(22, 63, 120, .05);
+}
+
+.sl-orders-unified-filter .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #28466c;
+    margin-bottom: 9px;
+}
+
+.sl-orders-unified-filter .form-label i {
+    color: #2684ff;
+    margin-right: 5px;
+}
+
+.sl-orders-unified-filter .form-control,
+.sl-orders-unified-filter .form-select {
+    height: 44px;
+    border: 1px solid #dce6f3;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #28466c;
+    font-size: 13px;
+}
+
+.sl-orders-unified-filter .form-control:focus,
+.sl-orders-unified-filter .form-select:focus {
+    border-color: #2684ff;
+    box-shadow: 0 0 0 3px rgba(38,132,255,.1);
+}
+
+/* Checkbox quá hạn */
+
+.sl-orders-overdue-field {
+    height: 44px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    background: #f8fbff;
+    border: 1px solid #dce6f3;
+    border-radius: 10px;
+}
+
+.sl-orders-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13px;
+    cursor: pointer;
+    margin: 0;
+}
+
+.sl-orders-checkbox input {
+    width: 16px;
+    height: 16px;
+    accent-color: #0875f5;
+}
+
+/* Nút lọc nâng cao */
+
+.sl-orders-advanced-button {
+    width: 100%;
+    height: 44px;
+    border: 1px solid #bdd5ff;
+    border-radius: 10px;
+    background: #fff;
+    color: #0866df;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.sl-orders-advanced-button:hover {
+    background: #eff6ff;
+    border-color: #2684ff;
+}
+
+.sl-orders-advanced-button[aria-expanded="true"] {
+    background: #eff6ff;
+    border-color: #2684ff;
+}
+
+.sl-orders-chevron {
+    font-size: 11px;
+    transition: transform .2s;
+}
+
+[aria-expanded="true"] .sl-orders-chevron {
+    transform: rotate(180deg);
+}
+
+/* Nút lọc */
+
+.sl-orders-search-button {
+    width: 100%;
+    height: 44px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(120deg,#0875f5,#0062e8);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,98,232,.15);
+    transition: .2s;
+}
+
+.sl-orders-search-button:hover {
+    background: #005bd4;
+    transform: translateY(-1px);
+}
+
+/* Bộ lọc nâng cao */
+
+.sl-orders-advanced-content {
+    margin-top: 22px;
+    padding: 20px;
+    border: 1px solid #e1eaf7;
+    border-radius: 13px;
+    background: #f7faff;
+}
+
+.sl-orders-advanced-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.sl-orders-advanced-title div {
+    font-size: 14px;
+    font-weight: 700;
+    color: #28466c;
+}
+
+.sl-orders-advanced-title div i {
+    color: #0875f5;
+    margin-right: 7px;
+}
+
+.sl-orders-advanced-title span {
+    font-size: 12px;
+    color: #8296b1;
+}
+
+/* Footer nâng cao */
+
+.sl-orders-advanced-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 17px;
+    border-top: 1px solid #e1eaf7;
+}
+
+.sl-orders-advanced-footer > span {
+    font-size: 12px;
+    color: #8296b1;
+}
+
+.sl-orders-advanced-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Panel danh sách */
+
+.sl-orders-list-panel {
+    background: #fff;
+    border: 1px solid #e3ebf6;
+    border-radius: 17px;
+    padding: 22px;
+    box-shadow: 0 6px 22px rgba(22,63,120,.05);
+}
+
+.sl-orders-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 22px;
+}
+
+.sl-orders-section-title {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.sl-orders-section-icon {
+    width: 43px;
+    height: 43px;
+    background: #eaf3ff;
+    color: #0875f5;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.sl-orders-icon-orange {
+    background: #fff0dc;
+    color: #ea8a15;
+}
+
+.sl-orders-section-title h3 {
+    font-size: 17px;
+    font-weight: 800;
+    color: #173d70;
+    margin: 0 0 5px;
+}
+
+.sl-orders-section-title p {
+    font-size: 12px;
+    color: #8296b1;
+    margin: 0;
+}
+
+.sl-orders-count-badge {
+    background: #edf5ff;
+    color: #0875f5;
+    border-radius: 30px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Bảng */
+
+.sl-orders-table {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+.sl-orders-table thead th {
+    background: #f5f9ff;
+    color: #496585;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 15px 12px;
+    border-bottom: 1px solid #e3ebf6;
+    white-space: nowrap;
+}
+
+.sl-orders-table tbody td {
+    padding: 15px 12px;
+    font-size: 13px;
+    color: #385371;
+    border-bottom: 1px solid #edf2f8;
+    vertical-align: middle;
+}
+
+.sl-orders-table tbody tr:hover {
+    background: #f8fbff;
+}
+
+.sl-orders-code {
+    color: #0866df;
+    font-weight: 700;
+}
+
+/* Khách hàng */
+
+.sl-orders-customer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sl-orders-avatar {
+    width: 31px;
+    height: 31px;
+    flex-shrink: 0;
+    background: #eaf3ff;
+    color: #0875f5;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Chi nhánh */
+
+.sl-orders-branch-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #496585;
+}
+
+/* Tiền */
+
+.sl-orders-money {
+    color: #123d72;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+/* Trạng thái */
+
+.sl-orders-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 11px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.sl-status-blue {
+    background: #e8f2ff;
+    color: #0866df;
+}
+
+.sl-status-green {
+    background: #e2f8ec;
+    color: #15965b;
+}
+
+.sl-status-orange {
+    background: #fff1df;
+    color: #db8510;
+}
+
+.sl-status-purple {
+    background: #f0eaff;
+    color: #7951ce;
+}
+
+.sl-status-red {
+    background: #ffe8e8;
+    color: #dc4545;
+}
+
+.sl-status-gray {
+    background: #edf1f6;
+    color: #657b96;
+}
+
+/* Chi tiết */
+
+.sl-orders-detail-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid #bdd5ff;
+    border-radius: 9px;
+    padding: 8px 12px;
+    color: #0866df;
+    background: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: .2s;
+}
+
+.sl-orders-detail-button:hover {
+    background: #0875f5;
+    color: #fff;
+    border-color: #0875f5;
+}
+
+/* Empty */
+
+.sl-orders-empty {
+    text-align: center;
+    padding: 35px 15px;
+}
+
+.sl-orders-empty > i {
+    font-size: 38px;
+    color: #b4c7df;
+}
+
+.sl-orders-empty h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #385371;
+    margin: 12px 0 6px;
+}
+
+.sl-orders-empty p {
+    color: #8296b1;
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Tra cứu giữ chỗ */
+
+.sl-orders-lookup-section {
+    margin-top: 20px;
+}
+
+.sl-orders-lookup-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin-left: auto;
+    padding: 11px 17px;
+    background: #fff;
+    border: 1px solid #bdd5ff;
+    border-radius: 11px;
+    color: #0866df;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sl-orders-lookup-toggle:hover {
+    background: #eff6ff;
+}
+
+.sl-orders-lookup-panel {
+    background: #fff;
+    border: 1px solid #e3ebf6;
+    border-radius: 15px;
+    padding: 22px;
+    margin-top: 12px;
+}
+
+.sl-orders-lookup-heading {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-bottom: 18px;
+}
+
+.sl-orders-lookup-heading > i {
+    font-size: 23px;
+    color: #0875f5;
+}
+
+.sl-orders-lookup-heading h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 5px;
+}
+
+.sl-orders-lookup-heading p {
+    font-size: 12px;
+    color: #8296b1;
+    margin: 0;
+}
+
+.sl-orders-lookup-form {
+    display: flex;
+    gap: 10px;
+}
+
+.sl-orders-lookup-form .form-control {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    border-radius: 10px;
+}
+
+.sl-orders-lookup-form .btn {
+    white-space: nowrap;
+    border-radius: 10px;
+    padding: 0 20px;
+}
+
+/* Responsive */
+
+@@media (max-width: 991px) {
+
+    .sl-orders-advanced-title,
+    .sl-orders-advanced-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sl-orders-advanced-actions {
+        width: 100%;
+    }
+
+    .sl-orders-advanced-actions .btn {
+        flex: 1;
+    }
+}
+
+@@media (max-width: 600px) {
+
+    .sl-orders-page-heading {
+        align-items: flex-start;
+    }
+
+    .sl-orders-page-heading h2 {
+        font-size: 18px;
+    }
+
+    .sl-orders-heading-icon {
+        display: none;
+    }
+
+    .sl-orders-unified-filter,
+    .sl-orders-list-panel {
+        padding: 15px;
+    }
+
+    .sl-orders-section-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .sl-orders-lookup-form {
+        flex-direction: column;
+    }
+
+    .sl-orders-lookup-form .btn {
+        height: 44px;
+    }
+
+    .sl-orders-lookup-toggle {
+        width: 100%;
+    }
+}
+/* ====================================
+   NÚT QUẢN LÝ GIA HẠN HỢP ĐỒNG
+==================================== */
+
+.sl-orders-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.sl-orders-renewal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    min-height: 42px;
+    padding: 10px 17px;
+
+    border-radius: 11px;
+    border: 1px solid #bdd5ff;
+
+    background: #eff6ff;
+    color: #0866df;
+
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition: all .2s ease;
+}
+
+.sl-orders-renewal-btn:hover {
+    background: #0875f5;
+    border-color: #0875f5;
+    color: white;
+
+    box-shadow: 0 5px 15px rgba(8, 117, 245, .18);
+    transform: translateY(-2px);
+}
+
+.sl-orders-renewal-btn .bi-arrow-right {
+    font-size: 12px;
+}
+
+@@media (max-width: 600px) {
+    .sl-orders-header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sl-orders-renewal-btn {
+        width: 100%;
+        white-space: normal;
+    }
+}
 </style>
-<script>
-document.addEventListener('DOMContentLoaded',function(){
- document.querySelectorAll('[data-sl-toggle]').forEach(function(button){
-  var panel=document.getElementById(button.getAttribute('data-sl-toggle'));
-  if(!panel)return;
-  button.addEventListener('click',function(){var open=button.getAttribute('aria-expanded')!=='true';panel.hidden=!open;button.setAttribute('aria-expanded',String(open));});
- });
- var params=new URLSearchParams(window.location.search);
- if(['chiNhanh','trangThai','tuNgay','denNgay'].some(function(key){return params.has(key)&&params.get(key)!=='';})){
-  var button=document.querySelector('[data-sl-toggle="slAdvancedFilters"]');var panel=document.getElementById('slAdvancedFilters');if(button&&panel){panel.hidden=false;button.setAttribute('aria-expanded','true');}
- }
-});
-</script>
