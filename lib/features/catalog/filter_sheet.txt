@@ -1,0 +1,435 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import '../../core/constants/app_colors.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/primary_button.dart';
+import '../../data/catalog_repository.dart';
+import 'catalog_bloc.dart';
+
+Future<void> openFilters(BuildContext context) async {
+  final catalog = context.read<CatalogBloc>();
+  final result = await showModalBottomSheet<CatalogFilter>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder:
+        (_) => BlocProvider(
+          create: (_) => FilterBloc(catalog.state.filter),
+          child: FilterSheet(branches: catalog.state.data?.branches ?? []),
+        ),
+  );
+  if (result != null && !catalog.isClosed) catalog.add(FiltersApplied(result));
+}
+
+const _unchanged = Object();
+
+class FilterSheet extends StatelessWidget {
+  const FilterSheet({super.key, required this.branches});
+  final List<Branch> branches;
+  @override
+  Widget build(BuildContext context) => BlocBuilder<FilterBloc, CatalogFilter>(
+    builder: (context, f) {
+      void update({
+        double? min,
+        double? max,
+        Object? branch = _unchanged,
+        Object? category = _unchanged,
+        Set<String>? brands,
+        DateTime? start,
+        DateTime? end,
+        bool? available,
+        bool clearDates = false,
+      }) {
+        context.read<FilterBloc>().add(
+          FilterChanged(
+            CatalogFilter(
+              minPrice: min ?? f.minPrice,
+              maxPrice: max ?? f.maxPrice,
+              branchId:
+                  identical(branch, _unchanged)
+                      ? f.branchId
+                      : branch as String?,
+              category:
+                  identical(category, _unchanged)
+                      ? f.category
+                      : category as String?,
+              brands: brands ?? f.brands,
+              start: clearDates ? null : (start ?? f.start),
+              end: clearDates ? null : (end ?? f.end),
+              availableOnly:
+                  clearDates ? false : (available ?? f.availableOnly),
+            ),
+          ),
+        );
+      }
+
+      Future<void> pickDate(bool isStart) async {
+        final now = DateTime.now();
+        final first = DateTime(now.year, now.month, now.day);
+        final last = DateTime(now.year + 2, 12, 31);
+        final proposed =
+            (isStart ? f.start : f.end) ??
+            now.add(Duration(days: isStart ? 1 : 4));
+        final selected = await showDatePicker(
+          context: context,
+          initialDate: proposed.isBefore(first) ? first : proposed,
+          firstDate: first,
+          lastDate: last,
+          locale: const Locale('vi'),
+        );
+        if (selected == null || !context.mounted) return;
+        final time = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(proposed),
+        );
+        if (time == null || !context.mounted) return;
+        final value = DateTime(
+          selected.year,
+          selected.month,
+          selected.day,
+          time.hour,
+          time.minute,
+        );
+        update(start: isStart ? value : null, end: isStart ? null : value);
+      }
+
+      final dateError =
+          (f.start == null) != (f.end == null)
+              ? 'Vui lòng chọn đủ ngày giờ nhận và trả.'
+              : f.hasDates && !f.end!.isAfter(f.start!)
+              ? 'Thời gian trả phải sau thời gian nhận.'
+              : f.start != null && f.start!.isBefore(DateTime.now())
+              ? 'Thời gian nhận phải ở hiện tại hoặc tương lai.'
+              : null;
+      final minSlider = f.minPrice.clamp(0, 2000000).toDouble();
+      final maxSlider = f.maxPrice.clamp(minSlider, 2000000).toDouble();
+      final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+      return SizedBox(
+        height: MediaQuery.sizeOf(context).height * .9,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: keyboard),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Bộ lọc',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Đóng, không áp dụng',
+                      onPressed: () => Navigator.pop(context),
+                      icon: Icon(Icons.close),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.all(12),
+                  children: [
+                    Text(
+                      'Giá thuê / ngày',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Text(
+                      'Chưa bao gồm tiền cọc',
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _PriceInput(
+                            label: 'Từ (₫)',
+                            value: f.minPrice,
+                            onChanged: (v) => update(min: v),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _PriceInput(
+                            label: 'Đến (₫)',
+                            value: f.maxPrice,
+                            onChanged: (v) => update(max: v),
+                          ),
+                        ),
+                      ],
+                    ),
+                    RangeSlider(
+                      values: RangeValues(minSlider, maxSlider),
+                      max: 2000000,
+                      divisions: 40,
+                      labels: RangeLabels(NumberFormat.currency(locale: 'vi_VN', symbol: 'd').format(f.minPrice), NumberFormat.currency(locale: 'vi_VN', symbol: 'd').format(f.maxPrice)),
+                      onChanged: (v) => update(min: v.start, max: v.end),
+                    ),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [Text('0 ₫'), Text('2.000.000+ ₫')],
+                    ),
+                    if (f.minPrice > f.maxPrice)
+                      const InfoBanner(
+                        'Giá tối thiểu không được lớn hơn giá tối đa.',
+                        error: true,
+                      ),
+                    SizedBox(height: 24),
+                    Text(
+                      'Thời gian thuê',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _DateTile(
+                            label: 'Nhận thiết bị',
+                            value: f.start,
+                            onTap: () => pickDate(true),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _DateTile(
+                            label: 'Trả thiết bị',
+                            value: f.end,
+                            onTap: () => pickDate(false),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (f.start != null || f.end != null)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () => update(clearDates: true),
+                          child: const Text('Xóa thời gian thuê'),
+                        ),
+                      ),
+                    if (dateError != null) Text(dateError, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    SizedBox(height: 24),
+                    Text(
+                      'Chi nhánh',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      initialValue: f.branchId ?? '',
+                      isExpanded: true,
+                      items: [
+                        const DropdownMenuItem(
+                          value: '',
+                          child: Text('Tất cả chi nhánh'),
+                        ),
+                        ...branches.map(
+                          (b) => DropdownMenuItem(
+                            value: b.id,
+                            child: Text(b.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (v) => update(branch: v == '' ? null : v),
+                    ),
+                    SizedBox(height: 24),
+                    Text(
+                      'Loại thiết bị',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final category in [
+                          'Tất cả',
+                          'Máy ảnh',
+                          'Ống kính',
+                        ])
+                          ChoiceChip(
+                            label: Text(category),
+                            selected: (f.category ?? 'Tất cả') == category,
+                            onSelected:
+                                (_) => update(
+                                  category:
+                                      category == 'Tất cả' ? null : category,
+                                ),
+                          ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Thương hiệu',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final brand in ['Canon', 'Sony', 'Nikon'])
+                          FilterChip(
+                            label: Text(brand),
+                            selected: f.brands.contains(brand),
+                            onSelected: (selected) {
+                              final brands = {...f.brands};
+                              selected
+                                  ? brands.add(brand)
+                                  : brands.remove(brand);
+                              update(brands: brands);
+                            },
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Chỉ hiện thiết bị còn trống'),
+                      subtitle: Text(
+                        f.hasDates
+                            ? 'Theo thời gian thuê đã chọn'
+                            : 'Chọn ngày nhận và trả để bật',
+                      ),
+                      value: f.availableOnly,
+                      onChanged:
+                          f.hasDates && dateError == null
+                              ? (v) => update(available: v)
+                              : null,
+                    ),
+                  ],
+                ),
+              ),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: PrimaryButton(
+                          label: 'Đặt lại',
+                          outlined: true,
+                          onPressed: () {
+                            FocusScope.of(context).unfocus();
+                            context.read<FilterBloc>().add(FilterReset());
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: PrimaryButton(
+                          label: 'Áp dụng',
+                          onPressed:
+                              true && dateError == null
+                                  ? () => Navigator.pop(context, f)
+                                  : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _DateTile extends StatelessWidget {
+  const _DateTile({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+  final String label;
+  final DateTime? value;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => OutlinedButton(
+    style: OutlinedButton.styleFrom(
+      side: BorderSide(color: Theme.of(context).colorScheme.outline),
+      foregroundColor: Theme.of(context).colorScheme.onSurface,
+      padding: const EdgeInsets.all(12),
+    ),
+    onPressed: onTap,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 8),
+        const Icon(Icons.calendar_month_outlined, size: 22),
+        const SizedBox(height: 8),
+        Text(
+          value == null ? 'Chọn ngày giờ' : DateFormat('dd/MM/yyyy HH:mm').format(value!),
+          style: const TextStyle(fontSize: 14),
+        ),
+      ],
+    ),
+  );
+}
+
+class _PriceInput extends StatefulWidget {
+  const _PriceInput({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
+  final String label;
+  final double value;
+  final ValueChanged<double> onChanged;
+  @override
+  State<_PriceInput> createState() => _PriceInputState();
+}
+
+class _PriceInputState extends State<_PriceInput> {
+  late final TextEditingController controller = TextEditingController(
+    text: widget.value.toInt().toString(),
+  );
+  final focus = FocusNode();
+  @override
+  void didUpdateWidget(covariant _PriceInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!focus.hasFocus && oldWidget.value != widget.value) {
+      controller.text = widget.value.toInt().toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    focus.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => TextField(
+    controller: controller,
+    focusNode: focus,
+    keyboardType: TextInputType.number,
+    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+    decoration: InputDecoration(labelText: widget.label),
+    onChanged: (text) {
+      final value = (double.tryParse(text) ?? 0).clamp(0, 2000000).toDouble();
+      if (text.isNotEmpty && double.tryParse(text) != value) {
+        controller.value = TextEditingValue(
+          text: value.toInt().toString(),
+          selection: TextSelection.collapsed(
+            offset: value.toInt().toString().length,
+          ),
+        );
+      }
+      widget.onChanged(value);
+    },
+    onEditingComplete: () {
+      controller.text = widget.value.toInt().toString();
+      focus.unfocus();
+    },
+  );
+}
