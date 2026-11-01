@@ -68,6 +68,8 @@ public static class Schema33Mapping
             e.ToTable("GiayToTuyThan", "dbo", t => {
                 t.HasCheckConstraint("CK_GiayTo_Loai", "LoaiGiayTo IN ('CCCD','HO_CHIEU','GPLX')");
                 t.HasCheckConstraint("CK_GiayTo_TrangThai", "TrangThaiXacMinh IN ('CHO_XAC_MINH','HOP_LE','TU_CHOI')");
+                t.HasCheckConstraint("CKR_GiayTo_EkycStatus", "EkycStatus IS NULL OR EkycStatus IN ('CHO_XU_LY','CAN_DUYET','DAT','KHONG_DAT','LOI_NHA_CUNG_CAP')");
+                t.HasCheckConstraint("CKR_GiayTo_EkycScores", "(OcrConfidence IS NULL OR OcrConfidence BETWEEN 0 AND 1) AND (FaceMatchScore IS NULL OR FaceMatchScore BETWEEN 0 AND 1) AND (LivenessScore IS NULL OR LivenessScore BETWEEN 0 AND 1)");
             });
             e.Property(x => x.MaGiayTo).HasColumnType("varchar(20)").IsRequired(true);
             e.Property(x => x.MaKhachThue).HasColumnType("varchar(20)").IsRequired(true);
@@ -78,6 +80,14 @@ public static class Schema33Mapping
             e.Property(x => x.NgayTaiLen).HasColumnType("datetime2").IsRequired(true).HasDefaultValueSql("SYSDATETIME()");
             e.Property(x => x.TrangThaiXacMinh).HasColumnType("varchar(20)").IsRequired(true).HasDefaultValueSql("'CHO_XAC_MINH'");
             e.Property(x => x.GhiChu).HasColumnType("nvarchar(500)").IsRequired(false);
+            e.Property(x => x.SelfieUrl).HasColumnType("nvarchar(500)").IsRequired(false);
+            e.Property(x => x.EkycProvider).HasColumnType("varchar(50)").IsRequired(false);
+            e.Property(x => x.EkycReferenceId).HasColumnType("varchar(100)").IsRequired(false);
+            e.Property(x => x.EkycStatus).HasColumnType("varchar(30)").IsRequired(false);
+            e.Property(x => x.OcrConfidence).HasColumnType("decimal(5,4)").IsRequired(false);
+            e.Property(x => x.FaceMatchScore).HasColumnType("decimal(5,4)").IsRequired(false);
+            e.Property(x => x.LivenessScore).HasColumnType("decimal(5,4)").IsRequired(false);
+            e.Property(x => x.EkycProcessedAtUtc).HasColumnType("datetime2").IsRequired(false);
             e.HasKey("MaGiayTo").HasName("PK_GiayToTuyThan");
             e.HasIndex(new[] { "SoGiayTo" }, "UQ_GiayToTuyThan_SoGiayTo").IsUnique();
             e.HasOne<KhachThue>().WithMany().HasForeignKey("MaKhachThue").HasPrincipalKey("MaKhachThue").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK_GiayToTuyThan_MaKhachThue");

@@ -6,6 +6,8 @@ The official installation is [Schema33/README.md](Schema33/README.md). It includ
 
 `14_seed_reserve_devices.sql` is the optional, idempotent trial-data follow-up. After script 13, it designates exactly one currently `SAN_SANG` `TR33_` serial per branch/model as `DU_PHONG`. Other device states are preserved, including active holds created by earlier tests. A fresh untouched trial pair therefore has 3 public-ready + 1 reserve + 1 maintenance device. It does not target non-TR33 assets.
 
+`15_add_ekyc_fields.sql` is an idempotent forward update for an installed Schema33 database. It keeps the 33-table set and adds only the eKYC summary columns and constraints to `GiayToTuyThan`. It deliberately does not store a raw provider response. Back up the target database, apply once, then deploy the matching API build. The sealed Schema33 package remains the 376-column baseline; the application model after this forward extension has 384 scalar fields.
+
 [The SQL inventory](../Docs/SCHEMA33_SQL_INVENTORY.md) lists KEEP/ARCHIVE/REVIEW, exact historical hashes and the archive locator. Legacy source citations are provenance, not migration dependencies. Do not run an old migration or reset tool to initialize33.
 
 Three legacy REVIEW SQL files are retained because their data-check/image/workflow coverage has not been fully replaced. They are not part of the default runner and must not be executed against the current database as a setup step.

@@ -61,6 +61,7 @@ ContractSigningOtpRegistration.Register(builder.Services, trialGuard);
 AuthEmailRegistration.Register(builder.Services, trialGuard);
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
 builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
+builder.Services.Configure<EkycOptions>(builder.Configuration.GetSection(EkycOptions.SectionName));
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
     .ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler());
@@ -68,6 +69,14 @@ builder.Services.AddHttpClient("VnpaySandbox")
     .ConfigurePrimaryHttpMessageHandler(() => trialGuard.SandboxVnpay
         ? new HttpClientHandler { AllowAutoRedirect = false }
         : new DenyExternalHttpHandler());
+builder.Services.AddHttpClient("EkycGateway", client => client.Timeout = TimeSpan.FromSeconds(45))
+    .ConfigurePrimaryHttpMessageHandler(() => builder.Configuration.GetValue<bool>("Ekyc:Enabled")
+        ? new HttpClientHandler { AllowAutoRedirect = false }
+        : new DenyExternalHttpHandler());
+if (builder.Configuration.GetValue<bool>("Ekyc:Enabled"))
+    builder.Services.AddSingleton<IEkycProvider, HttpJsonEkycProvider>();
+else
+    builder.Services.AddSingleton<IEkycProvider, DisabledEkycProvider>();
 builder.Services.AddChatbot(builder.Configuration);
 builder.Services.AddScoped<FirebaseNotificationSender>();
 builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("Cloudinary"));
@@ -133,6 +142,14 @@ builder.Services.AddRateLimiter(options =>
     options.AddPolicy("chatbot", context => RateLimitPartition.GetFixedWindowLimiter(
         context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 3, Window = TimeSpan.FromMinutes(1), QueueLimit = 0 }));
+    options.AddPolicy("ekyc", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+        _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromHours(1),
+            QueueLimit = 0
+        }));
 });
 
 var app = builder.Build();
