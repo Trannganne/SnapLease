@@ -19,6 +19,9 @@ public static class CartEndpoints
         return keys.Count == 1;
     }
 
+    public static bool CompatibleHold(IEnumerable<ChiTietGiuCho> items) =>
+        items.Select(x => new { x.NgayBatDau, x.NgayKetThuc }).Distinct().Take(2).Count() == 1;
+
     public static void MapCartEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/gio-hang").RequireAuthorization("Customer");
@@ -49,6 +52,8 @@ public static class CartEndpoints
             var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
             if (model is null || !await db.CuaHang.AnyAsync(x => x.MaCuaHang == request.MaCuaHang && x.TrangThai == "HOAT_DONG", ct))
                 return Results.NotFound();
+            if (await HasDifferentRentalWindowAsync(db, customer, null, request, ct))
+                return Results.Conflict(RentalWindowMismatch());
             var limit = await EvaluateCartLimitAsync(db, customer, null, request.MaCuaHang,
                 request.NgayBatDau, request.NgayKetThuc, model, request.SoLuong, config, ct);
             if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
@@ -79,6 +84,8 @@ public static class CartEndpoints
             if (line.PhienBan != request.PhienBan) return Results.Conflict(new { loi = "Mục giỏ hàng đã thay đổi. Hãy tải lại." });
             var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == request.MaDongMay, ct);
             if (model is null || !await db.CuaHang.AnyAsync(x => x.MaCuaHang == request.MaCuaHang && x.TrangThai == "HOAT_DONG", ct)) return Results.NotFound();
+            if (await HasDifferentRentalWindowAsync(db, customer, id, request, ct))
+                return Results.Conflict(RentalWindowMismatch());
             var limit = await EvaluateCartLimitAsync(db, customer, id, request.MaCuaHang,
                 request.NgayBatDau, request.NgayKetThuc, model, request.SoLuong, config, ct);
             if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
@@ -127,8 +134,10 @@ public static class CartEndpoints
             if (lines.Count != ids.Length) return Results.Conflict(new { loi = "Một mục không còn trong giỏ hàng." });
             if (lines.Any(x => request.Items.Single(i => i.Id == x.MaChiTietGioHang).PhienBan != x.PhienBan))
                 return Results.Conflict(new { loi = "Giỏ hàng đã thay đổi. Hãy tải lại trước checkout." });
-            if (!Compatible(lines) || lines.Any(x => x.NgayBatDau <= RentalPolicy.LocalNow))
-                return Results.Conflict(new { loi = "Chọn các mục cùng chi nhánh, cùng thời điểm thuê trong tương lai." });
+            if (!Compatible(lines))
+                return Results.Conflict(RentalWindowMismatch());
+            if (lines.Any(x => x.NgayBatDau <= RentalPolicy.LocalNow))
+                return Results.Conflict(new { code = "RENTAL_START_NOT_IN_FUTURE", loi = "Thời điểm nhận thiết bị phải ở trong tương lai." });
             var first = lines[0];
             if (!await db.CuaHang.AnyAsync(x => x.MaCuaHang == first.MaCuaHang && x.TrangThai == "HOAT_DONG", ct)) return Results.Conflict(new { loi = "Chi nhánh không hoạt động." });
             var modelIds = lines.Select(x => x.MaDongMay).Distinct().ToArray();
@@ -171,6 +180,20 @@ public static class CartEndpoints
     private static bool Valid(CartLineRequest r, IConfiguration config) =>
         r.SoLuong >= 1 && r.SoLuong <= RentalRiskPolicy.StandardMaxQuantity(config) &&
         RentalEndpoints.ValidPeriod(r.NgayBatDau, r.NgayKetThuc) && r.NgayBatDau > RentalPolicy.LocalNow;
+
+    private static Task<bool> HasDifferentRentalWindowAsync(
+        RentalCameraContext db, string customer, string? excludedLineId,
+        CartLineRequest request, CancellationToken ct) =>
+        ActiveLines(db, customer).AnyAsync(x =>
+            (excludedLineId == null || x.MaChiTietGioHang != excludedLineId) &&
+            (x.MaCuaHang != request.MaCuaHang || x.NgayBatDau != request.NgayBatDau ||
+             x.NgayKetThuc != request.NgayKetThuc), ct);
+
+    private static object RentalWindowMismatch() => new
+    {
+        code = "CART_RENTAL_WINDOW_MISMATCH",
+        loi = "Mọi thiết bị trong giỏ hàng phải cùng chi nhánh, cùng thời điểm nhận và cùng thời điểm trả. Hãy chỉnh lại giỏ hàng trước khi tiếp tục thuê."
+    };
 
     private static async Task<RentalLimitDecision> EvaluateCartLimitAsync(
         RentalCameraContext db, string customer, string? excludedLineId, string storeId,
