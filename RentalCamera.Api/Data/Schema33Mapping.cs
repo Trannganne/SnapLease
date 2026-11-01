@@ -122,7 +122,7 @@ public static class Schema33Mapping
         });
         m.Entity<ThietBi>(e => {
             e.ToTable("ThietBi", "dbo", t => {
-                t.HasCheckConstraint("CK_ThietBi_TrangThai", "TrangThai IN (\n            'SAN_SANG',\n            'DANG_GIU',\n            'DANG_THUE',\n            'BAO_TRI',\n            'HONG',\n            'NGUNG_KINH_DOANH'\n        )");
+                t.HasCheckConstraint("CK_ThietBi_TrangThai", "TrangThai IN (\n            'SAN_SANG',\n            'DU_PHONG',\n            'DANG_GIU',\n            'DANG_THUE',\n            'BAO_TRI',\n            'HONG',\n            'NGUNG_KINH_DOANH'\n        )");
             });
             e.Property(x => x.MaThietBi).HasColumnType("varchar(20)").IsRequired(true);
             e.Property(x => x.MaDongMay).HasColumnType("varchar(20)").IsRequired(true);

@@ -8,6 +8,7 @@ public static class RentalRiskPolicy
     public const int DefaultStandardMaxQuantity = 10;
     public const int DefaultHighValueMaxQuantity = 3;
     public const decimal DefaultHighValueDepositThreshold = 10_000_000m;
+    public const int DefaultReserveMinimumPerModel = 1;
 
     public static int BufferMinutes(IConfiguration configuration) =>
         Math.Clamp(configuration.GetValue("Rental:BufferMinutes", DefaultBufferMinutes), 0, 1440);
@@ -22,6 +23,9 @@ public static class RentalRiskPolicy
     public static decimal HighValueDepositThreshold(IConfiguration configuration) =>
         Math.Clamp(configuration.GetValue("Rental:HighValueDepositThreshold", DefaultHighValueDepositThreshold), 0m,
             1_000_000_000m);
+
+    public static int ReserveMinimumPerModel(IConfiguration configuration) =>
+        Math.Clamp(configuration.GetValue("Rental:ReserveMinimumPerModel", DefaultReserveMinimumPerModel), 0, 100);
 
     public static bool IsHighValue(decimal deposit, IConfiguration configuration) =>
         deposit >= HighValueDepositThreshold(configuration);

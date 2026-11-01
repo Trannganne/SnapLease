@@ -189,6 +189,7 @@ app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
 app.MapChatbotEndpoints(); // Gate remains disabled; external HTTP is blocked for every named client.
 app.MapEquipmentEndpoints();
+app.MapReserveDeviceEndpoints();
 app.MapRentalEndpoints();
 app.MapCartEndpoints();
 app.MapIdentityEndpoints();

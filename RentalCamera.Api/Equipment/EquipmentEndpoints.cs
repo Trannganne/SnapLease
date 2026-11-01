@@ -8,7 +8,7 @@ namespace RentalCamera.Api.Equipment;
 public static class EquipmentEndpoints
 {
     private static readonly string[] ValidStates =
-        ["SAN_SANG", "DANG_GIU", "DANG_THUE", "BAO_TRI", "HONG", "NGUNG_KINH_DOANH"];
+        ["SAN_SANG", "DU_PHONG", "DANG_GIU", "DANG_THUE", "BAO_TRI", "HONG", "NGUNG_KINH_DOANH"];
 
     public static void MapEquipmentEndpoints(this IEndpointRouteBuilder app)
     {
@@ -113,6 +113,18 @@ public static class EquipmentEndpoints
                 var active = await db.ChiTietHopDong.Join(db.HopDong, c => c.MaHopDong, h => h.MaHopDong, (c, h) => new { c, h })
                     .AnyAsync(x => x.c.MaThietBi == id && x.h.TrangThai == "DANG_THUE" && x.c.NgayNhanThucTe == null, ct);
                 if (active) return Results.Conflict(new { loi = "Thiết bị đang thuộc hợp đồng chưa nhận lại." });
+            }
+            if (entity.TrangThai == "DANG_GIU" && request.TrangThai != "DANG_GIU")
+            {
+                var assigned = await db.ChiTietHopDong.Join(db.HopDong,
+                        c => c.MaHopDong, h => h.MaHopDong, (c, h) => new { c, h })
+                    .AnyAsync(x => x.c.MaThietBi == id && x.c.NgayGiaoThucTe == null &&
+                        x.h.TrangThai == "CHO_BAN_GIAO", ct);
+                if (assigned)
+                    return Results.Conflict(new
+                    {
+                        loi = "Thiết bị đang giữ cho hợp đồng chờ bàn giao; hãy dùng nghiệp vụ thay máy dự phòng."
+                    });
             }
             entity.TrangThai = request.TrangThai;
             if (!string.IsNullOrWhiteSpace(request.TinhTrang)) entity.TinhTrang = request.TinhTrang.Trim();

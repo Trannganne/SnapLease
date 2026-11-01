@@ -2,6 +2,7 @@ using RentalCamera.Api.Contracts;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Rental;
 using RentalCamera.Api.Payments;
+using RentalCamera.Api.Equipment;
 using Microsoft.Extensions.Configuration;
 
 #if !DIRECT_OFFLINE
@@ -76,6 +77,7 @@ riskConfig["Rental:BufferMinutes"] = "120";
 riskConfig["Rental:StandardMaxQuantity"] = "10";
 riskConfig["Rental:HighValueMaxQuantity"] = "3";
 riskConfig["Rental:HighValueDepositThreshold"] = "10000000";
+riskConfig["Rental:ReserveMinimumPerModel"] = "1";
 Check(RentalRiskPolicy.BufferMinutes(riskConfig)==120,"Rental availability buffer is configurable at two hours");
 Check(RentalRiskPolicy.Evaluate([(20_000_000m,2),(10_000_000m,1)],riskConfig).Allowed,
     "Three high-value devices across separate cart lines are allowed");
@@ -94,6 +96,17 @@ Check(RentalRiskPolicy.OccupiedUntil(scheduledReturn,null,"DANG_THUE",scheduledR
 var actualReturn=scheduledReturn.AddMinutes(30);
 Check(RentalRiskPolicy.OccupiedUntil(scheduledReturn,actualReturn,"CHO_HOAN_TRA",actualReturn,riskConfig)==actualReturn.AddHours(2),
     "Actual return restarts the turnaround buffer from receipt time");
+Check(RentalRiskPolicy.ReserveMinimumPerModel(riskConfig)==1,
+    "Reserve minimum per branch/model is configurable");
+Check(ReserveDevicePolicy.CanSwap("CHO_BAN_GIAO",null),
+    "Reserve swap is allowed before physical handover");
+Check(!ReserveDevicePolicy.CanSwap("DANG_THUE",null)&&!ReserveDevicePolicy.CanSwap("CHO_BAN_GIAO",now),
+    "Reserve swap cannot rewrite a renting or delivered contract");
+Check(ReserveDevicePolicy.IsIncidentState("BAO_TRI")&&ReserveDevicePolicy.IsIncidentState("HONG")&&
+    !ReserveDevicePolicy.IsIncidentState("DANG_THUE"),
+    "Reserve swap accepts only maintenance or damaged disposition for the old serial");
+Check(ReserveDevicePolicy.IsBelowMinimum(0,1)&&!ReserveDevicePolicy.IsBelowMinimum(1,1),
+    "Reserve alert fires only below the configured safe minimum");
 Check(RentalPolicy.CancellationRate(start,start.AddHours(-48))==0,"48h boundary");
 Check(RentalPolicy.CancellationRate(start,start.AddHours(-48).AddTicks(1))==.30m,"Below48h");
 Check(RentalPolicy.CancellationRate(start,start.AddHours(-24))==.30m,"24h boundary");
