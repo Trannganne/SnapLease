@@ -89,13 +89,6 @@ public static class ContractEndpoints
             if (!IsIdentityVerifiedForRental(giayTo))
                 return Results.Conflict(new { loi = "Giấy tờ tùy thân chưa được xác minh hợp lệ." });
 
-            if (!CartEndpoints.CompatibleHold(hold.ChiTiet))
-                return Results.Conflict(new
-                {
-                    code = "CART_RENTAL_WINDOW_MISMATCH",
-                    loi = "Giữ chỗ có thời điểm nhận/trả không đồng nhất. Hãy tạo lại giữ chỗ trước khi tiếp tục thuê."
-                });
-
             var selections=await db.ChiTietGiuCho.AsNoTracking().Where(x=>x.MaGiuCho==id).ToListAsync(ct);
             var originalIds=selections.Count>0?selections.Select(x=>x.MaChiTietGioHang).ToArray():
                 hold.ChiTiet.Where(x=>x.MaChiTietGioHang!=null).Select(x=>x.MaChiTietGioHang!).ToArray();
