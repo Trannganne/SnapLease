@@ -2,7 +2,8 @@ namespace RentalCamera.Api.Contracts;
 
 public static class RentalPolicy
 {
-    public const string TermsVersion = "2026-10-20";
+    public const string TermsVersion = "2026-11-02";
+    public const string PreviousTermsVersion = "2026-10-20";
     public static readonly string[] ProtectedContracts = ["HD588670599EC646F8AD", "HDC1BF800950C74295A7"];
     // Existing rental API stores Vietnamese wall-clock datetime2, without an offset.
     public static DateTime Utc(DateTime local) => local.Kind == DateTimeKind.Utc ? local :
@@ -10,8 +11,10 @@ public static class RentalPolicy
     public static DateTime LocalNow => DateTime.SpecifyKind(DateTime.UtcNow.AddHours(7), DateTimeKind.Unspecified);
     public static int LateDays(DateTime effectiveReturn, DateTime received) {
         var late=received-effectiveReturn;
-        return late < TimeSpan.FromHours(24) ? 0 : (int)Math.Ceiling(late.TotalDays);
+        return late <= TimeSpan.FromHours(2) ? 0 : (int)Math.Ceiling(late.TotalDays);
     }
+    public static bool UsesCurrentLateReturnPolicy(string? termsVersion, bool accepted) =>
+        accepted && termsVersion == TermsVersion;
     public static decimal CancellationRate(DateTime pickup, DateTime requested) =>
         pickup-requested >= TimeSpan.FromHours(48) ? 0m : pickup-requested >= TimeSpan.FromHours(24) ? .30m : 1m;
     public static bool CanRequestExtension(HopDongState state, DateTime serverUtc) =>
@@ -19,7 +22,7 @@ public static class RentalPolicy
     public static DateTime SigningDeadline(DateTime approvedUtc, DateTime currentReturn) =>
         approvedUtc.AddHours(2) < Utc(currentReturn) ? approvedUtc.AddHours(2) : Utc(currentReturn);
     public static bool CanUseExtensionTerms(string? originalVersion,bool accepted)=>
-        accepted&&(originalVersion==TermsVersion||originalVersion=="1.0");
+        accepted&&(originalVersion==TermsVersion||originalVersion==PreviousTermsVersion||originalVersion=="1.0");
     public static string[] AppendixTerms(string? originalVersion)=>originalVersion==TermsVersion?Terms:
         [Terms[3],Terms[4],Terms[5],"Phụ lục chỉ thay đổi hạn trả và khoản phí gia hạn nêu trên. Các điều khoản khác của hợp đồng gốc được bảo lưu, gồm chính sách hủy, tiền cọc, trả trễ và ngoại lệ lý do chính đáng đã thỏa thuận; không tự áp chính sách tài chính phiên bản mới lên hợp đồng cũ."];
 
@@ -30,7 +33,7 @@ public static class RentalPolicy
         "Gia hạn chỉ cho hợp đồng đang thuê, yêu cầu trước hạn trả có hiệu lực ít nhất 24 giờ; cần cửa hàng duyệt và khách ký phụ lục. Không được gia hạn hợp đồng quá hạn bằng cách trả phạt.",
         "Phí gia hạn dùng đơn giá gốc mỗi thiết bị, số ngày kéo dài làm tròn lên theo từng 24 giờ; quyết toán khi trả máy, không thu lại khoảng thuê đã có. Duyệt chưa làm thay đổi hạn trả.",
         "Xử lý gia hạn trong 4 giờ làm việc của chi nhánh, không muộn hơn hạn trả hiện tại trừ 2 giờ. Sau duyệt, khách có tối đa 2 giờ ký và không vượt hạn trả hiện tại. Hết hạn xử lý/ký giữ nguyên hợp đồng gốc.",
-        "Trả trễ tính riêng từng thiết bị/serial từ hạn trả có hiệu lực đến lúc cửa hàng thực tế nhận lại: dưới 24 giờ tính 0 ngày; từ 24 giờ tính ceil(tổng số giờ trễ/24), nhân đơn giá thuê/ngày gốc của thiết bị, không thêm hệ số hoặc nhân số lượng hai lần. Ví dụ 24 giờ tính 1 ngày, 24 giờ 1 phút tính 2 ngày. Không trừ 24 giờ rồi mới làm tròn. Chưa nhận lại chỉ là ước tính. Không có miễn/giảm tiền trả trễ; sửa sai thời điểm nhận thực tế cần quyền, lý do và audit.",
+        "Trả trễ tính riêng từng thiết bị/serial từ hạn trả có hiệu lực đến lúc cửa hàng thực tế nhận lại: trễ không quá 2 giờ được miễn phí; trên 2 giờ tính ceil(tổng số giờ trễ/24), nhân đơn giá thuê/ngày gốc của thiết bị, không thêm hệ số hoặc nhân số lượng hai lần. Ví dụ đúng 2 giờ tính 0 ngày, 2 giờ 1 phút đến 24 giờ tính 1 ngày, 24 giờ 1 phút tính 2 ngày. Chưa nhận lại chỉ là ước tính. Không có miễn/giảm khác; sửa sai thời điểm nhận thực tế cần quyền, lý do và audit. Chính sách này chỉ áp dụng cho hợp đồng đã ký phiên bản điều khoản hiện hành.",
         "Chính sách hủy trước bàn giao ở trên là ngoại lệ cụ thể đối với quy định báo trước 10 ngày của mẫu cũ; phụ kiện đi kèm vẫn được ghi nhận/bàn giao. Không bắt buộc giữ CCCD vật lý làm tài sản cầm cố."
     ];
 }

@@ -28,8 +28,8 @@ public static class SettlementWorkflow
     public static List<string> Blockers(State s)
     {
         var result = new List<string>();
-        if (s.Contract.PhienBanDieuKhoan != RentalPolicy.TermsVersion || !s.Contract.DaDongYDieuKhoan)
-            result.Add("Điều khoản cũ cần xử lý tương thích, chưa tự áp chính sách tài chính mới.");
+        if (!RentalPolicy.UsesCurrentLateReturnPolicy(s.Contract.PhienBanDieuKhoan, s.Contract.DaDongYDieuKhoan))
+            result.Add("Điều khoản cũ cần xử lý tương thích; không áp hồi tố chính sách trả trễ miễn phí 2 giờ.");
         if (s.Receipt?.ThucNhanLuc is null || s.Details.Count == 0 || s.Details.Any(d => d.NgayNhanThucTe is null))
             result.Add("Chưa xác nhận nhận đủ toàn bộ thiết bị.");
         if (s.Details.Any(d => d.LoaiNgoaiLeNhanTra != null)) result.Add("Còn ngoại lệ thiếu/mất thiết bị; xử lý riêng, không giả nhận trả.");
@@ -52,6 +52,8 @@ public static class SettlementWorkflow
 
     public static async Task<SettlementDocument> QuoteAsync(State s, RentalCameraContext db, CancellationToken ct)
     {
+        if (!RentalPolicy.UsesCurrentLateReturnPolicy(s.Contract.PhienBanDieuKhoan, s.Contract.DaDongYDieuKhoan))
+            throw new InvalidOperationException("Không tự tính quyết toán bằng chính sách trả trễ hiện hành cho hợp đồng đã ký điều khoản cũ.");
         var due = await RenewalEndpoints.EffectiveReturnAsync(s.Contract, db, ct);
         var charges = new List<SettlementCharge> { new("rent", "TIEN_THUE", "Tiền thuê gốc", s.Contract.TongTien, s.Contract.MaHopDong) };
         var effective = s.Appendices.Where(p => p.TrangThai == "DA_HIEU_LUC" || s.Contract.PhienBanDieuKhoan != RentalPolicy.TermsVersion && p.TrangThai == "DA_XAC_NHAN").ToList();

@@ -64,8 +64,9 @@ old records within the caller's scope. Operate on the intended IDs.
 
 ## Financial policy and compatibility
 
-- Terms version2026-10-20 is carried by new terms/PDFs; signed historical PDFs and
-  unidentified legacy policies are not rewritten. Legacy1.0 appendix terms
+- Terms version2026-11-02 is carried by new terms/PDFs. It grants a two-hour late-return
+  grace period, then charges `ceil(total late hours / 24)` original daily-price units.
+  Signed version2026-10-20 PDFs and unidentified legacy policies are not rewritten. Legacy1.0 appendix terms
   preserve unrelated original clauses, including agreed justified-reason cases.
 - Branch schedule defaults to08:00-20:00 every day in Asia/Ho_Chi_Minh. Closed or
   special dates are explicit branch/date records, never inferred holidays.

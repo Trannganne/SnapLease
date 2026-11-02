@@ -12,7 +12,7 @@ public static class LateReturnService
     {
         var h=await db.HopDong.AsNoTracking().SingleOrDefaultAsync(h=>h.MaHopDong==contractId,ct);if(h is null)return null;
         var due=await RenewalEndpoints.EffectiveReturnAsync(h,db,ct);
-        if(h.PhienBanDieuKhoan!=RentalPolicy.TermsVersion||!h.DaDongYDieuKhoan)return new(contractId,false,due,null,true,[],"Giữ nguyên điều khoản/ngoại lệ cũ; chưa tự áp công thức tài chính mới.");
+        if(!RentalPolicy.UsesCurrentLateReturnPolicy(h.PhienBanDieuKhoan,h.DaDongYDieuKhoan))return new(contractId,false,due,null,true,[],"Giữ nguyên chính sách trả trễ theo phiên bản điều khoản đã ký; không áp hồi tố công thức miễn phí 2 giờ.");
         var details=await db.ChiTietHopDong.AsNoTracking().Where(d=>d.MaHopDong==contractId&&d.NgayGiaoThucTe!=null).ToListAsync(ct);
         var now=RentalPolicy.LocalNow;
         var rows=details.Select(d=>new LateDevice(d.MaChiTietHopDong,d.MaThietBi,d.DonGia,d.NgayNhanThucTe,

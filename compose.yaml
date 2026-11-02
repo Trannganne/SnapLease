@@ -54,7 +54,7 @@ services:
       Rental__ProtectedContractIds: "${RENTAL_PROTECTED_CONTRACT_IDS:-}"
       Notifications__PushEnabled: "false"
       PasswordReset__ReturnTokenInResponse: "false"
-      ElectronicSignature__TermsVersion: "2026-10-20"
+      ElectronicSignature__TermsVersion: "2026-11-02"
       ElectronicSignature__ReturnOtpInResponse: "false"
       ElectronicSignature__Pepper: "${ELECTRONIC_SIGNATURE_PEPPER:-}"
       Email__Enabled: "${EMAIL_ENABLED:-false}"

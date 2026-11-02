@@ -37,7 +37,9 @@ internal static class SettlementLifecycleChecks
             "Prior rent payment is consumed before the deposit, without double charging");
         foreach (var example in new (string Name, DateTime Received, decimal LateFee)[] {
             ("early", due.AddDays(-1), 0), ("on time", due, 0),
-            ("late below 24 hours", due.AddHours(23), 0),
+            ("late exactly 2 hours", due.AddHours(2), 0),
+            ("late 2 hours and 1 minute", due.AddHours(2).AddMinutes(1), 175_000),
+            ("late below 24 hours", due.AddHours(23), 175_000),
             ("late exactly 24 hours", due.AddHours(24), 175_000),
             ("late 24 hours and 1 minute", due.AddHours(24).AddMinutes(1), 350_000) })
         {

@@ -140,9 +140,13 @@ Check(RentalPolicy.SigningDeadline(RentalPolicy.Utc(due).AddHours(-1),due)==Rent
 var day=DateOnly.FromDateTime(start);
 var intervals=Enumerable.Range(0,3).Select(i=>(RentalPolicy.Utc(day.AddDays(i).ToDateTime(new TimeOnly(8,0))),RentalPolicy.Utc(day.AddDays(i).ToDateTime(new TimeOnly(20,0)))));
 Check(BranchWorkingHours.AddHours(intervals,RentalPolicy.Utc(day.ToDateTime(new TimeOnly(18,30))),TimeSpan.FromHours(4))==RentalPolicy.Utc(day.AddDays(1).ToDateTime(new TimeOnly(10,30))),"Working4h crosses night");
-Check(RentalPolicy.LateDays(due,due.AddHours(23.999))==0,"Late below24h zero");
+Check(RentalPolicy.LateDays(due,due.AddHours(-1))==0,"Early return zero");
+Check(RentalPolicy.LateDays(due,due.AddHours(2))==0,"Late exact2h free");
+Check(RentalPolicy.LateDays(due,due.AddHours(2).AddMinutes(1))==1,"Late2h1m one day");
 Check(RentalPolicy.LateDays(due,due.AddHours(24))==1,"Late exact24h one");
 Check(RentalPolicy.LateDays(due,due.AddHours(24).AddMinutes(1))==2,"Late24h1m two");
+Check(RentalPolicy.UsesCurrentLateReturnPolicy(RentalPolicy.TermsVersion,true),"Current accepted terms use new late policy");
+Check(!RentalPolicy.UsesCurrentLateReturnPolicy(RentalPolicy.PreviousTermsVersion,true),"Previous signed terms are not migrated");
 var verify=new XacMinhKhachKhongDen{MaHopDong="HD1",NguoiXacMinh="STAFF",XacMinhLucUtc=now,LienHeLucUtc=now.AddMinutes(-1),GioHenKhiXacMinhKhongDen=start,KenhLienHe="PHONE",KetQuaLienHe="No answer",GhiChuKhongDen="Synthetic"};
 var v=NoShowEndpoints.Version(verify);
 verify.XacMinhLucUtc=DateTime.SpecifyKind(verify.XacMinhLucUtc,DateTimeKind.Unspecified);
