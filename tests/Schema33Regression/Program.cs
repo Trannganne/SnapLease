@@ -37,19 +37,6 @@ if (args.Length == 2 && args[0] == "--model-output")
 
 var count=0;
 void Check(bool ok,string name){if(!ok)throw new Exception(name);count++;}
-var ekycOptions = new EkycOptions
-{
-    MinimumOcrConfidence = 0.85m,
-    MinimumFaceMatchScore = 0.80m,
-    MinimumLivenessScore = 0.80m
-};
-var ekycPass = new EkycProviderResult("REF1", "001 234 567 890", true, true, true, 0.95m, 0.91m, 0.93m);
-Check(EkycDecisionPolicy.Evaluate(ekycPass, "001234567890", ekycOptions).Passed, "eKYC accepts normalized matching identity above thresholds");
-Check(!EkycDecisionPolicy.Evaluate(ekycPass with { DocumentNumber = "999" }, "001234567890", ekycOptions).Passed, "eKYC rejects document number mismatch");
-Check(!EkycDecisionPolicy.Evaluate(ekycPass with { FaceMatchScore = 0.79m }, "001234567890", ekycOptions).Passed, "eKYC rejects face score below threshold");
-Check(!EkycDecisionPolicy.Evaluate(ekycPass with { LivenessPassed = false }, "001234567890", ekycOptions).Passed, "eKYC rejects failed liveness");
-Check(!EkycDecisionPolicy.Evaluate(ekycPass with { OcrConfidence = null }, "001234567890", ekycOptions).Passed, "eKYC rejects missing OCR confidence");
-Check(EkycDecisionPolicy.Evaluate(ekycPass with { FaceMatchScore = 1.1m }, "001234567890", ekycOptions).Status == "LOI_NHA_CUNG_CAP", "eKYC rejects invalid provider score");
 var noPromotion = RentalPromotionPolicy.Evaluate(2, false);
 Check(noPromotion.Percent == 0 && noPromotion.Codes.Length == 0, "Existing customer below three devices has no promotion");
 var bulkPromotion = RentalPromotionPolicy.Evaluate(3, false);

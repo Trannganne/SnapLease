@@ -185,7 +185,6 @@ internal static class IdentityChecks
         var root = Path.Combine(Path.GetTempPath(), "offline-identity-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(Path.Combine(root, "Storage"));
         await File.WriteAllBytesAsync(Path.Combine(root, "Storage", "fixture.jpg"), [0xff, 0xd8, 0xff, 0xd9]);
-        await File.WriteAllBytesAsync(Path.Combine(root, "Storage", "back.jpg"), [0xff, 0xd8, 0xff, 0xd9]);
         try
         {
             var rows = new OfflineRows();
@@ -195,12 +194,6 @@ internal static class IdentityChecks
             builder.Configuration.Sources.Clear(); builder.Logging.ClearProviders();
             builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["Schema33Trial:ProviderMode"] = "Fake" });
             builder.Services.AddScoped<FirebaseNotificationSender>();
-            builder.Services.Configure<EkycOptions>(o =>
-            {
-                o.Enabled = true; o.MinimumOcrConfidence = 0.85m;
-                o.MinimumFaceMatchScore = 0.80m; o.MinimumLivenessScore = 0.80m;
-            });
-            builder.Services.AddSingleton<IEkycProvider, OfflineEkycProvider>();
             builder.Services.AddAuthentication("offline").AddScheme<AuthenticationSchemeOptions, OfflineAuth>("offline", _ => { });
             builder.Services.AddDbContext<RentalCameraContext>(o => o.UseSqlServer(
                 "Server=offline.invalid;Database=OfflineOnly;User ID=offline;Password=offline-only")
@@ -212,7 +205,6 @@ internal static class IdentityChecks
             foreach (var (path, method, policy) in new[] {
                 ("/api/giay-to", "POST", "Customer"),
                 ("/api/giay-to/cua-toi", "GET", "Customer"),
-                ("/api/giay-to/{id}/ekyc", "POST", "Customer"),
                 ("/api/giay-to/{id}/xac-minh", "PUT", "Staff"),
                 ("/api/khach-thue/xac-nhan-danh-tinh", "POST", "Customer") })
                 Check(Endpoint(path, method).Metadata.GetOrderedMetadata<IAuthorizeData>().Any(p => p.Policy == policy),
@@ -226,7 +218,6 @@ internal static class IdentityChecks
                         new Claim(ClaimTypes.NameIdentifier, "OFFLINE_ACCOUNT"), new Claim(ClaimTypes.Role, role)], "offline")) };
                 context.Request.Method = method;
                 context.Request.RouteValues["fileName"] = fileName;
-                context.Request.RouteValues["id"] = "OFFLINE_DOC";
                 context.Features.Set<IHttpRequestBodyDetectionFeature>(new BodyFeature());
                 context.Request.ContentType = "application/json";
                 var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(body));
@@ -269,25 +260,15 @@ internal static class IdentityChecks
                 saves.Document is { MaKhachThue: "OFFLINE_CUSTOMER", TrangThaiXacMinh: "CHO_XAC_MINH" },
                 "Upload ignores client owner/approval; server creates pending document for session owner");
             rows.HasDocument = true;
-            Check(await Invoke("/api/giay-to/{id}/ekyc", "POST", body: new EkycRequest("data:image/jpeg;base64,/9j/2Q==")) == 200 &&
-                saves.Document is { EkycStatus: "DAT", EkycProvider: "OFFLINE_EKYC", TrangThaiXacMinh: "CHO_XAC_MINH" } &&
-                !string.IsNullOrWhiteSpace(saves.Document.SelfieUrl),
-                "Passing eKYC stores summary/selfie but preserves staff final approval");
             Check(await Invoke("/api/khach-thue/xac-nhan-danh-tinh", "POST", body: confirmation with { Cccd = "OFFLINE_NUMBER" }) == 200 &&
                 saves.CustomerConfirmed && saves.DocumentStatus == "CHO_XAC_MINH",
                 "Customer confirmation saves profile without approving the document");
-            Console.WriteLine($"PASS {count} identity checks; scripted rows and fake eKYC provider, no SQL connection, real document or external provider call. SQL locking/transactions are not tested.");
+            Console.WriteLine($"PASS {count} identity checks; scripted read results, no SQL connection, real document, provider or runtime request. SQL locking/transactions are not tested.");
         }
         finally { Directory.Delete(root, true); }
     }
 
     private sealed class BodyFeature : IHttpRequestBodyDetectionFeature { public bool CanHaveBody => true; }
-    private sealed class OfflineEkycProvider : IEkycProvider
-    {
-        public string Name => "OFFLINE_EKYC";
-        public Task<EkycProviderResult> VerifyAsync(EkycVerificationInput input, CancellationToken ct) => Task.FromResult(
-            new EkycProviderResult("OFFLINE_REF", input.ExpectedDocumentNumber, true, true, true, 0.95m, 0.92m, 0.93m));
-    }
     private sealed class OfflineAuth(IOptionsMonitor<AuthenticationSchemeOptions> o, ILoggerFactory l, UrlEncoder e)
         : AuthenticationHandler<AuthenticationSchemeOptions>(o, l, e)
     { protected override Task<AuthenticateResult> HandleAuthenticateAsync() => Task.FromResult(AuthenticateResult.NoResult()); }
@@ -328,9 +309,6 @@ internal static class IdentityChecks
                     ["MaGiayTo"] = "OFFLINE_DOC", ["LoaiGiayTo"] = "CCCD", ["SoGiayTo"] = "OFFLINE_NUMBER",
                     ["MatTruocUrl"] = "/api/giay-to/anh/fixture.jpg", ["MatSauUrl"] = "/api/giay-to/anh/back.jpg",
                     ["NgayTaiLen"] = new DateTime(2030, 1, 1), ["TrangThaiXacMinh"] = "CHO_XAC_MINH", ["GhiChu"] = null,
-                    ["SelfieUrl"] = null, ["EkycProvider"] = null, ["EkycReferenceId"] = null, ["EkycStatus"] = null,
-                    ["OcrConfidence"] = null, ["FaceMatchScore"] = null, ["LivenessScore"] = null,
-                    ["EkycProcessedAtUtc"] = null,
                     ["MaNhanVien"] = "OFFLINE_STAFF", ["MaCuaHang"] = "OFFLINE_OTHER_BRANCH" };
                 foreach (var key in new[] { "MaTaiKhoan", "HoTen", "SoDienThoai", "Email", "CCCD", "DiaChi", "NgaySinh",
                     "GioiTinh", "QuocTich", "NgayCap", "NoiCap", "EmailXacMinhLucUtc" }) values[key] = null;

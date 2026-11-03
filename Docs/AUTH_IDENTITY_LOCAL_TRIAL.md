@@ -83,7 +83,7 @@ tests use scripted transactions; they do not establish SQL Server concurrency sa
 The old implementation is two-sided CCCD capture → on-device OCR/QR → customer
 reviews/consents → authenticated image upload/profile confirmation → staff approval.
 There is no selfie, face matching or liveness provider. OCR success is not identity approval.
-Schema33 reuses `KhachThue` and `GiayToTuyThan`; no extra table is used. The optional forward migration `Database/15_add_ekyc_fields.sql` adds eight eKYC summary columns to `GiayToTuyThan` without changing the 33-table set. See `Docs/EKYC_INTEGRATION.md`.
+Schema33 reuses `KhachThue` and `GiayToTuyThan`; no extra table/column is used.
 
 1. Customer: Account → **Thông tin cá nhân & Giấy tờ**. Allow camera access, capture
    front/back, or cancel/retake. Review all extracted fields before confirming.

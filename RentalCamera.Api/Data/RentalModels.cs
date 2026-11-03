@@ -53,14 +53,6 @@ public sealed class GiayToTuyThan
     public DateTime NgayTaiLen { get; set; }
     public string TrangThaiXacMinh { get; set; } = "";
     public string? GhiChu { get; set; }
-    public string? SelfieUrl { get; set; }
-    public string? EkycProvider { get; set; }
-    public string? EkycReferenceId { get; set; }
-    public string? EkycStatus { get; set; }
-    public decimal? OcrConfidence { get; set; }
-    public decimal? FaceMatchScore { get; set; }
-    public decimal? LivenessScore { get; set; }
-    public DateTime? EkycProcessedAtUtc { get; set; }
 }
 
 public sealed class DanhMuc

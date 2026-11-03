@@ -2,8 +2,6 @@ using System.Buffers.Binary;
 using System.Security.Claims;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Mvc;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
 using RentalCamera.Api.Notifications;
@@ -36,8 +34,7 @@ public static class IdentityEndpoints
 
             // Lấy MaGiayTo từ DB để kiểm tra quyền
             var relativeUrl = $"/api/giay-to/anh/{fileName}";
-            var giayTo = await db.GiayToTuyThan.AsNoTracking().FirstOrDefaultAsync(
-                x => x.MatTruocUrl == relativeUrl || x.MatSauUrl == relativeUrl || x.SelfieUrl == relativeUrl, ct);
+            var giayTo = await db.GiayToTuyThan.AsNoTracking().FirstOrDefaultAsync(x => x.MatTruocUrl == relativeUrl || x.MatSauUrl == relativeUrl, ct);
             if (giayTo is null) return Results.NotFound();
             var role = principal.FindFirstValue(ClaimTypes.Role);
             if (role == "KHACH_HANG")
@@ -145,93 +142,6 @@ public static class IdentityEndpoints
             }
         }).RequireAuthorization("Customer");
 
-        group.MapPost("/{id}/ekyc", async (
-            string id, EkycRequest request, ClaimsPrincipal principal,
-            RentalCameraContext db, IWebHostEnvironment env,
-            [FromServices] IEkycProvider provider, IOptions<EkycOptions> ekycOptions,
-            CancellationToken ct) =>
-        {
-            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
-            if (customerId is null) return Results.Forbid();
-            var document = await db.GiayToTuyThan.SingleOrDefaultAsync(
-                x => x.MaGiayTo == id && x.MaKhachThue == customerId, ct);
-            if (document is null) return Results.NotFound(new { loi = "Không tìm thấy giấy tờ." });
-            if (document.TrangThaiXacMinh != "CHO_XAC_MINH")
-                return Results.Conflict(new { loi = "Giấy tờ đã được nhân viên xử lý." });
-            if (document.LoaiGiayTo != "CCCD" || string.IsNullOrWhiteSpace(document.MatSauUrl))
-                return Results.BadRequest(new { loi = "eKYC hiện yêu cầu CCCD có đủ ảnh mặt trước và mặt sau." });
-            if (document.EkycStatus == "DAT")
-                return Results.Conflict(new { loi = "Hồ sơ đã đạt kiểm tra eKYC; vui lòng chờ nhân viên duyệt." });
-
-            var options = ekycOptions.Value;
-            var maximumBytes = Math.Clamp(options.MaximumImageMegabytes, 1, 20) * 1024 * 1024;
-            var selfie = DecodeDataImage(request.SelfieBase64, maximumBytes);
-            if (selfie.Error is not null)
-                return Results.BadRequest(new { loi = $"Ảnh selfie: {selfie.Error}" });
-            var front = ReadStoredImage(env, document.MatTruocUrl, maximumBytes);
-            var back = ReadStoredImage(env, document.MatSauUrl!, maximumBytes);
-            if (front.Image is null || back.Image is null)
-                return Results.BadRequest(new { loi = "Ảnh CCCD phải là ảnh đã tải trực tiếp lên hệ thống." });
-
-            EkycProviderResult providerResult;
-            try
-            {
-                providerResult = await provider.VerifyAsync(new(
-                    document.LoaiGiayTo, document.SoGiayTo,
-                    front.Image, back.Image, selfie.Image!), ct);
-            }
-            catch (EkycUnavailableException ex)
-            {
-                return Results.Json(new { loi = ex.Message }, statusCode: StatusCodes.Status503ServiceUnavailable);
-            }
-            catch (HttpRequestException)
-            {
-                return Results.Json(new { loi = "Không thể kết nối nhà cung cấp eKYC." }, statusCode: StatusCodes.Status503ServiceUnavailable);
-            }
-            catch (TaskCanceledException) when (!ct.IsCancellationRequested)
-            {
-                return Results.Json(new { loi = "Nhà cung cấp eKYC phản hồi quá thời gian." }, statusCode: StatusCodes.Status503ServiceUnavailable);
-            }
-
-            var decision = EkycDecisionPolicy.Evaluate(providerResult, document.SoGiayTo, options);
-            var storagePath = Path.Combine(env.ContentRootPath, "Storage");
-            Directory.CreateDirectory(storagePath);
-            var selfieFileName = $"{Guid.NewGuid()}{selfie.Extension}";
-            var selfiePath = Path.Combine(storagePath, selfieFileName);
-            await File.WriteAllBytesAsync(selfiePath, selfie.Image!.Bytes, ct);
-            var previousSelfie = document.SelfieUrl;
-            document.SelfieUrl = $"/api/giay-to/anh/{selfieFileName}";
-            document.EkycProvider = provider.Name[..Math.Min(provider.Name.Length, 50)];
-            document.EkycReferenceId = providerResult.ReferenceId[..Math.Min(providerResult.ReferenceId.Length, 100)];
-            document.EkycStatus = decision.Status;
-            document.OcrConfidence = NormalizeScore(providerResult.OcrConfidence);
-            document.FaceMatchScore = NormalizeScore(providerResult.FaceMatchScore);
-            document.LivenessScore = NormalizeScore(providerResult.LivenessScore);
-            document.EkycProcessedAtUtc = DateTime.UtcNow;
-            try
-            {
-                await db.SaveChangesAsync(ct);
-            }
-            catch
-            {
-                if (File.Exists(selfiePath)) File.Delete(selfiePath);
-                throw;
-            }
-            DeleteStoredImageIfReplaced(env, previousSelfie, document.SelfieUrl);
-
-            return Results.Ok(new
-            {
-                document.MaGiayTo,
-                document.EkycStatus,
-                document.OcrConfidence,
-                document.FaceMatchScore,
-                document.LivenessScore,
-                document.EkycProcessedAtUtc,
-                canNhanVienDuyet = decision.Passed,
-                ghiChu = decision.Reason
-            });
-        }).RequireAuthorization("Customer").RequireRateLimiting("ekyc");
-
         group.MapGet("/cho-xac-minh", async (ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
             var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
@@ -243,9 +153,7 @@ public static class IdentityEndpoints
                 .Join(db.KhachThue, g => g.MaKhachThue, k => k.MaKhachThue, (g, k) => new
                 {
                     g.MaGiayTo, g.MaKhachThue, k.HoTen, g.LoaiGiayTo, g.SoGiayTo,
-                    g.MatTruocUrl, g.MatSauUrl, g.SelfieUrl, g.NgayTaiLen,
-                    g.EkycProvider, g.EkycReferenceId, g.EkycStatus,
-                    g.OcrConfidence, g.FaceMatchScore, g.LivenessScore, g.EkycProcessedAtUtc
+                    g.MatTruocUrl, g.MatSauUrl, g.NgayTaiLen
                 }).ToListAsync(ct);
             return Results.Ok(data);
         }).RequireAuthorization("Staff");
@@ -393,67 +301,11 @@ public static class IdentityEndpoints
 
         return null;
     }
-
-    private static (EkycImage? Image, string? Extension, string? Error) DecodeDataImage(string? data, int maximumBytes)
-    {
-        if (string.IsNullOrWhiteSpace(data) || !data.StartsWith("data:image/", StringComparison.OrdinalIgnoreCase))
-            return (null, null, "Cần gửi ảnh dạng data URI Base64.");
-        var comma = data.IndexOf(',');
-        if (comma < 0 || !data[..comma].EndsWith(";base64", StringComparison.OrdinalIgnoreCase))
-            return (null, null, "Chuỗi Base64 không hợp lệ.");
-        byte[] bytes;
-        try { bytes = Convert.FromBase64String(data[(comma + 1)..]); }
-        catch (FormatException) { return (null, null, "Chuỗi Base64 không hợp lệ."); }
-        if (bytes.Length == 0 || bytes.Length > maximumBytes)
-            return (null, null, $"Dung lượng ảnh phải từ 1 byte đến {maximumBytes / 1024 / 1024}MB.");
-        var extension = GetVerifiedImageExtension(bytes);
-        if (extension is null) return (null, null, "Chỉ chấp nhận JPEG, PNG hoặc WebP hợp lệ.");
-        return (new(bytes, ContentType(extension)), extension, null);
-    }
-
-    private static (EkycImage? Image, string? Error) ReadStoredImage(
-        IWebHostEnvironment env, string relativeUrl, int maximumBytes)
-    {
-        const string prefix = "/api/giay-to/anh/";
-        if (!relativeUrl.StartsWith(prefix, StringComparison.Ordinal)) return (null, "Ảnh không thuộc kho bảo mật.");
-        var fileName = relativeUrl[prefix.Length..];
-        if (fileName != Path.GetFileName(fileName)) return (null, "Tên ảnh không hợp lệ.");
-        var storage = Path.GetFullPath(Path.Combine(env.ContentRootPath, "Storage"));
-        var path = Path.GetFullPath(Path.Combine(storage, fileName));
-        if (!path.StartsWith(storage + Path.DirectorySeparatorChar, StringComparison.Ordinal) || !File.Exists(path))
-            return (null, "Không tìm thấy ảnh.");
-        var info = new FileInfo(path);
-        if (info.Length <= 0 || info.Length > maximumBytes) return (null, "Dung lượng ảnh không hợp lệ.");
-        var bytes = File.ReadAllBytes(path);
-        var extension = GetVerifiedImageExtension(bytes);
-        return extension is null ? (null, "Tệp ảnh không hợp lệ.") : (new(bytes, ContentType(extension)), null);
-    }
-
-    private static string ContentType(string extension) => extension switch
-    {
-        ".png" => "image/png",
-        ".webp" => "image/webp",
-        _ => "image/jpeg"
-    };
-
-    private static decimal? NormalizeScore(decimal? score) =>
-        score is null ? null : Math.Round(Math.Clamp(score.Value, 0m, 1m), 4);
-
-    private static void DeleteStoredImageIfReplaced(IWebHostEnvironment env, string? oldUrl, string newUrl)
-    {
-        const string prefix = "/api/giay-to/anh/";
-        if (string.IsNullOrWhiteSpace(oldUrl) || oldUrl == newUrl || !oldUrl.StartsWith(prefix, StringComparison.Ordinal)) return;
-        var fileName = oldUrl[prefix.Length..];
-        if (fileName != Path.GetFileName(fileName)) return;
-        var path = Path.Combine(env.ContentRootPath, "Storage", fileName);
-        if (File.Exists(path)) File.Delete(path);
-    }
 }
 
 public sealed record IdentityDocumentRequest(
     string HoTen, string LoaiGiayTo, string SoGiayTo, string MatTruocUrl, string? MatSauUrl);
 public sealed record VerifyIdentityRequest(string KetQua, string? GhiChu);
-public sealed record EkycRequest(string SelfieBase64);
 
 public sealed record CustomerIdentityConfirmRequest(
     string MaGiayTo, string Cccd, string HoTen, DateOnly NgaySinh, string GioiTinh,
