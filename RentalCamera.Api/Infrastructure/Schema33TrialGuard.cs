@@ -27,6 +27,7 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
             c.GetValue<bool>("PasswordReset:ReturnTokenInResponse")) throw new InvalidOperationException("Trial isolation guard không đầy đủ.");
         Validate(c.GetConnectionString("RentalCamera") ?? "");
         ValidateVnpay(c);
+        ValidateVnptEkyc(c);
         ValidateEmail(c);
     }
 
@@ -57,6 +58,20 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
 
     private static bool TryHttps(string? value, out Uri uri) =>
         Uri.TryCreate(value, UriKind.Absolute, out uri!) && uri.Scheme == Uri.UriSchemeHttps;
+
+    private static void ValidateVnptEkyc(IConfiguration c)
+    {
+        if (!c.GetValue<bool>("VnptEkyc:Enabled"))
+        {
+            if (c.GetValue<bool>("VnptEkyc:LiveApiApproved"))
+                throw new InvalidOperationException("Không được duyệt gọi VNPT khi tích hợp đang tắt.");
+            return;
+        }
+        var options = new RentalCamera.Api.Identity.VnptEkycOptions();
+        c.GetSection(RentalCamera.Api.Identity.VnptEkycOptions.SectionName).Bind(options);
+        var error = RentalCamera.Api.Identity.VnptEkycService.ValidateConfiguration(options);
+        if (error is not null) throw new InvalidOperationException(error);
+    }
 
     private void ValidateEmail(IConfiguration c)
     {

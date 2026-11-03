@@ -17,13 +17,13 @@ IF COL_LENGTH(N'dbo.GiayToTuyThan', N'XacMinhTuDongLucUtc') IS NULL
     ALTER TABLE dbo.GiayToTuyThan ADD XacMinhTuDongLucUtc datetime2 NULL;
 
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CKR_GiayTo_KetQuaXacMinhTuDong')
-    ALTER TABLE dbo.GiayToTuyThan WITH CHECK ADD CONSTRAINT CKR_GiayTo_KetQuaXacMinhTuDong
-        CHECK (KetQuaXacMinhTuDong IS NULL OR KetQuaXacMinhTuDong IN ('CHO_XU_LY','CAN_DUYET','DAT','KHONG_DAT','LOI_NHA_CUNG_CAP'));
+    EXEC(N'ALTER TABLE dbo.GiayToTuyThan WITH CHECK ADD CONSTRAINT CKR_GiayTo_KetQuaXacMinhTuDong
+        CHECK (KetQuaXacMinhTuDong IS NULL OR KetQuaXacMinhTuDong IN (''CHO_XU_LY'',''CAN_DUYET'',''DAT'',''KHONG_DAT'',''LOI_NHA_CUNG_CAP''));');
 
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = N'CKR_GiayTo_DiemXacMinhTuDong')
-    ALTER TABLE dbo.GiayToTuyThan WITH CHECK ADD CONSTRAINT CKR_GiayTo_DiemXacMinhTuDong
+    EXEC(N'ALTER TABLE dbo.GiayToTuyThan WITH CHECK ADD CONSTRAINT CKR_GiayTo_DiemXacMinhTuDong
         CHECK ((DoTinCayOcr IS NULL OR DoTinCayOcr BETWEEN 0 AND 1)
            AND (DiemSoKhuonMat IS NULL OR DiemSoKhuonMat BETWEEN 0 AND 1)
-           AND (DiemSoSong IS NULL OR DiemSoSong BETWEEN 0 AND 1));
+           AND (DiemSoSong IS NULL OR DiemSoSong BETWEEN 0 AND 1));');
 
 COMMIT TRANSACTION;
