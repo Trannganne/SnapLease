@@ -10,9 +10,10 @@ namespace RentalCamera.Api.Media;
 public sealed class CloudinaryImageStorage(
     HttpClient httpClient,
     IOptions<CloudinaryOptions> options,
-    IConfiguration configuration)
+    IOptions<MediaStorageOptions> mediaOptions)
 {
     private readonly CloudinaryOptions _options = options.Value;
+    private readonly MediaStorageOptions _mediaOptions = mediaOptions.Value;
 
     public int MaximumBytes => Math.Max(1, _options.MaximumMegabytes) * 1024 * 1024;
 
@@ -31,7 +32,7 @@ public sealed class CloudinaryImageStorage(
     // Only call after a fresh primary DB read proves the unique public ID was not committed.
     public async Task DeleteReviewImageAsync(string publicId, CancellationToken ct)
     {
-        if (configuration["Schema33Trial:ProviderMode"] == "Fake") { await TrialMediaStorage.DeleteAsync(publicId); return; }
+        if (!_mediaOptions.UsesCloudinary) { await TrialMediaStorage.DeleteAsync(publicId); return; }
         EnsureConfigured();
         var parameters = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
@@ -57,7 +58,7 @@ public sealed class CloudinaryImageStorage(
         CancellationToken ct)
     {
         if (file.Length<=0 || file.Length>MaximumBytes) throw new InvalidOperationException("Kích thước ảnh không hợp lệ.");
-        if (configuration["Schema33Trial:ProviderMode"] == "Fake") return await TrialMediaStorage.UploadAsync(file,ct);
+        if (!_mediaOptions.UsesCloudinary) return await TrialMediaStorage.UploadAsync(file,ct);
         EnsureConfigured();
 
         var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
@@ -92,10 +93,13 @@ public sealed class CloudinaryImageStorage(
         var root = json.RootElement;
         var secureUrl = root.GetProperty("secure_url").GetString();
         var uploadedPublicId = root.GetProperty("public_id").GetString();
-        if (string.IsNullOrWhiteSpace(secureUrl) || string.IsNullOrWhiteSpace(uploadedPublicId))
+        if (!Uri.TryCreate(secureUrl, UriKind.Absolute, out var imageUri) ||
+            imageUri.Scheme != Uri.UriSchemeHttps ||
+            !string.Equals(imageUri.Host, "res.cloudinary.com", StringComparison.OrdinalIgnoreCase) ||
+            string.IsNullOrWhiteSpace(uploadedPublicId))
             throw new HttpRequestException("Cloudinary không trả về URL ảnh hợp lệ.");
 
-        return new CloudinaryUploadResult(secureUrl, uploadedPublicId);
+        return new CloudinaryUploadResult(imageUri.AbsoluteUri, uploadedPublicId);
     }
 
     private string Sign(IReadOnlyDictionary<string, string> parameters)
@@ -106,11 +110,8 @@ public sealed class CloudinaryImageStorage(
 
     private void EnsureConfigured()
     {
-        if (string.IsNullOrWhiteSpace(_options.CloudName)
-            || string.IsNullOrWhiteSpace(_options.ApiKey)
-            || string.IsNullOrWhiteSpace(_options.ApiSecret))
-            throw new InvalidOperationException(
-                "Cloudinary chưa được cấu hình. Cần đặt Cloudinary__CloudName, Cloudinary__ApiKey và Cloudinary__ApiSecret.");
+        var error = MediaStorageOptions.Validate(_mediaOptions, _options);
+        if (error is not null) throw new InvalidOperationException(error);
     }
 
     private static string ReadError(string body)

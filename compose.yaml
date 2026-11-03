@@ -72,6 +72,8 @@ services:
       Cloudinary__ApiSecret: "${CLOUDINARY_API_SECRET:-}"
       Cloudinary__EvidenceFolder: "${CLOUDINARY_EVIDENCE_FOLDER:-rental-camera/bien-ban}"
       Cloudinary__ReviewFolder: "${CLOUDINARY_REVIEW_FOLDER:-rental-camera/danh-gia}"
+      MediaStorage__Provider: "${MEDIA_STORAGE_PROVIDER:-Fake}"
+      MediaStorage__LiveUploadApproved: "${MEDIA_STORAGE_LIVE_UPLOAD_APPROVED:-false}"
       Vnpay__Enabled: "${VNPAY_ENABLED:-false}"
       Vnpay__TmnCode: "${VNPAY_TMN_CODE:-}"
       Vnpay__HashSecret: "${VNPAY_HASH_SECRET:-}"

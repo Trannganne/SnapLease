@@ -82,7 +82,15 @@ builder.Services.AddHttpClient<VnptEkycService>((provider, client) =>
 builder.Services.AddChatbot(builder.Configuration);
 builder.Services.AddScoped<FirebaseNotificationSender>();
 builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("Cloudinary"));
-builder.Services.AddHttpClient<CloudinaryImageStorage>().ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler());
+builder.Services.Configure<MediaStorageOptions>(builder.Configuration.GetSection(MediaStorageOptions.SectionName));
+builder.Services.AddHttpClient<CloudinaryImageStorage>().ConfigurePrimaryHttpMessageHandler(() =>
+    string.Equals(
+        builder.Configuration.GetValue<string>("MediaStorage:Provider"),
+        MediaStorageOptions.CloudinaryProvider,
+        StringComparison.OrdinalIgnoreCase) &&
+    builder.Configuration.GetValue<bool>("MediaStorage:LiveUploadApproved")
+        ? new HttpClientHandler { AllowAutoRedirect = false }
+        : new DenyExternalHttpHandler());
 builder.Services.AddSingleton<VnpayService>();
 builder.Services.AddScoped<AvailabilityService>();
 // ReservationExpirationService is not started by this guarded preparation runtime.

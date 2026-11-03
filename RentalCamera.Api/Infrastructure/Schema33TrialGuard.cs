@@ -28,6 +28,7 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
         Validate(c.GetConnectionString("RentalCamera") ?? "");
         ValidateVnpay(c);
         ValidateVnptEkyc(c);
+        ValidateMediaStorage(c);
         ValidateEmail(c);
     }
 
@@ -70,6 +71,16 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
         var options = new RentalCamera.Api.Identity.VnptEkycOptions();
         c.GetSection(RentalCamera.Api.Identity.VnptEkycOptions.SectionName).Bind(options);
         var error = RentalCamera.Api.Identity.VnptEkycService.ValidateConfiguration(options);
+        if (error is not null) throw new InvalidOperationException(error);
+    }
+
+    private static void ValidateMediaStorage(IConfiguration c)
+    {
+        var media = new RentalCamera.Api.Media.MediaStorageOptions();
+        var cloudinary = new RentalCamera.Api.Media.CloudinaryOptions();
+        c.GetSection(RentalCamera.Api.Media.MediaStorageOptions.SectionName).Bind(media);
+        c.GetSection("Cloudinary").Bind(cloudinary);
+        var error = RentalCamera.Api.Media.MediaStorageOptions.Validate(media, cloudinary);
         if (error is not null) throw new InvalidOperationException(error);
     }
 

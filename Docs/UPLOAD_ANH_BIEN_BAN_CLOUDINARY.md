@@ -37,6 +37,8 @@ Copy-Item .env.example .env
 Nếu `.env` đã tồn tại thì không cần sao chép lại. Mở `.env` và điền:
 
 ```env
+MEDIA_STORAGE_PROVIDER=Cloudinary
+MEDIA_STORAGE_LIVE_UPLOAD_APPROVED=true
 CLOUDINARY_CLOUD_NAME=ten_cloud_cua_ban
 CLOUDINARY_API_KEY=api_key_cua_ban
 CLOUDINARY_API_SECRET=api_secret_cua_ban
@@ -45,6 +47,10 @@ CLOUDINARY_MAXIMUM_MEGABYTES=10
 ```
 
 Không thêm dấu ngoặc kép nếu giá trị không có yêu cầu đặc biệt. File `.env` đã được loại khỏi Git và không được commit.
+
+Hai biến `MEDIA_STORAGE_*` là khóa an toàn riêng cho kho ảnh. Chúng không phụ thuộc
+`Schema33Trial:ProviderMode`, vì môi trường thử nghiệm vẫn có thể dùng các dịch vụ giả khác
+trong khi riêng ảnh biên bản được phép upload thật lên Cloudinary.
 
 ## 4. Khởi động Backend
 
@@ -61,6 +67,9 @@ Nếu hệ thống đang chạy và chỉ vừa thay đổi cấu hình Cloudina
 docker compose up -d --build api
 docker compose logs --tail 100 api
 ```
+
+Nếu dùng container Schema33 ở cổng `5003`, cần bảo đảm sáu biến phía trên được truyền vào
+container đó rồi tạo lại container. Không sửa hoặc đưa khóa thật vào `appsettings*.json`.
 
 Trạng thái mong đợi:
 
@@ -161,6 +170,11 @@ Sau khi API trả `201`:
 1. Mở URL trong `duongDanAnh` để xác nhận ảnh hiển thị được.
 2. Vào Cloudinary Console, kiểm tra thư mục `rental-camera/bien-ban`.
 3. Kiểm tra bảng `AnhBienBan`: bản ghi phải liên kết đúng chi tiết hợp đồng và lưu URL HTTPS.
+
+Các bản ghi cũ có đường dẫn dạng `/api/trial-media/...` chỉ trỏ tới file cục bộ của container
+cũ. Nếu file đó đã mất thì không thể khôi phục từ URL; nhân viên cần upload lại ảnh gốc qua
+endpoint trên. Bản ghi mới sẽ nhận URL `https://res.cloudinary.com/...` và hiển thị được trên
+máy khác.
 
 ## 10. Lỗi thường gặp
 
