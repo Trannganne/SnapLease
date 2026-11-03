@@ -103,6 +103,9 @@ public static class ContractEndpoints
             if (models.Count != modelIds.Count)
                 return Results.Conflict(new { loi = "Dữ liệu dòng máy trong giữ chỗ không còn hợp lệ." });
 
+            var promotion = RentalPromotionPolicy.Evaluate(hold.ChiTiet.Sum(x => x.SoLuong),
+                await RentalPromotionPolicy.IsNewCustomerAsync(db, customerId, ct));
+
             var limit = RentalRiskPolicy.Evaluate(
                 hold.ChiTiet.Select(x => (models[x.MaDongMay].TienCoc, x.SoLuong)), configuration);
             if (!limit.Allowed) return Results.Conflict(RentalRiskPolicy.LimitError(limit));
@@ -128,7 +131,8 @@ public static class ContractEndpoints
             {
                 var model = models[line.MaDongMay];
                 var days = (decimal)Math.Ceiling((line.NgayKetThuc - line.NgayBatDau).TotalDays);
-                var unitPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
+                var catalogPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
+                var unitPrice = promotion.Apply(catalogPrice);
                 total += unitPrice * days * line.SoLuong;
                 deposit += model.TienCoc * line.SoLuong;
 
@@ -179,7 +183,8 @@ public static class ContractEndpoints
             return Results.Created($"/api/hop-dong/{contract.MaHopDong}", new
             {
                 contract.MaHopDong, contract.MaGiuCho, contract.TongTien,
-                contract.TongTienCoc, contract.TrangThai, contract.NgayTaoHopDong
+                contract.TongTienCoc, contract.TrangThai, contract.NgayTaoHopDong,
+                khuyenMai = promotion
             });
             }
             catch (DbUpdateException dbEx) when (dbEx.InnerException is SqlException sqlEx && (sqlEx.Number == 2601 || sqlEx.Number == 2627))

@@ -50,6 +50,17 @@ Check(!EkycDecisionPolicy.Evaluate(ekycPass with { FaceMatchScore = 0.79m }, "00
 Check(!EkycDecisionPolicy.Evaluate(ekycPass with { LivenessPassed = false }, "001234567890", ekycOptions).Passed, "eKYC rejects failed liveness");
 Check(!EkycDecisionPolicy.Evaluate(ekycPass with { OcrConfidence = null }, "001234567890", ekycOptions).Passed, "eKYC rejects missing OCR confidence");
 Check(EkycDecisionPolicy.Evaluate(ekycPass with { FaceMatchScore = 1.1m }, "001234567890", ekycOptions).Status == "LOI_NHA_CUNG_CAP", "eKYC rejects invalid provider score");
+var noPromotion = RentalPromotionPolicy.Evaluate(2, false);
+Check(noPromotion.Percent == 0 && noPromotion.Codes.Length == 0, "Existing customer below three devices has no promotion");
+var bulkPromotion = RentalPromotionPolicy.Evaluate(3, false);
+Check(bulkPromotion.Percent == 10 && bulkPromotion.HasThreeOrMoreDevices && bulkPromotion.Apply(100_000) == 90_000,
+    "Three-device rental receives ten percent promotion");
+var newCustomerPromotion = RentalPromotionPolicy.Evaluate(1, true);
+Check(newCustomerPromotion.Percent == 10 && newCustomerPromotion.IsNewCustomer,
+    "New customer receives ten percent promotion");
+var combinedPromotion = RentalPromotionPolicy.Evaluate(3, true);
+Check(combinedPromotion.Percent == 10 && combinedPromotion.Codes.Length == 2 && combinedPromotion.Apply(100_000) == 90_000,
+    "New-customer and three-device promotions do not stack above ten percent");
 var now=new DateTime(2026,10,27,1,0,0,DateTimeKind.Utc);
 var start=new DateTime(2026,11,10,8,0,0);
 var end=start.AddDays(2);

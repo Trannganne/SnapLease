@@ -282,6 +282,10 @@ public static class RentalEndpoints
                     await tx.CommitAsync(ct);
 
                     var customer = await db.KhachThue.AsNoTracking().FirstOrDefaultAsync(x => x.MaKhachThue == customerId, ct);
+                    var promotion = RentalPromotionPolicy.Evaluate(request.SoLuong,
+                        await RentalPromotionPolicy.IsNewCustomerAsync(db, customerId, ct));
+                    var promotedQuote = CalculatePrice(model, request.SoLuong,
+                        request.NgayBatDau, request.NgayKetThuc, promotion);
                     return Results.Created($"/api/giu-cho/{hold.MaGiuCho}", new
                     {
                         maGiuCho = hold.MaGiuCho, 
@@ -290,8 +294,9 @@ public static class RentalEndpoints
                         thoiGianServer = utcNow, 
                         trangThai = hold.TrangThai, 
                         daXacNhanThongTin = customer?.DaXacNhanThongTin ?? false,
-                        tongTienThue = cartLine.ThanhTien,
-                        tienCoc = cartLine.TienCoc
+                        tongTienThue = promotedQuote.TongTienThue,
+                        tienCoc = cartLine.TienCoc,
+                        khuyenMai = promotion
                     });
                 }
                 catch (DbUpdateException)
@@ -491,16 +496,20 @@ public static class RentalEndpoints
     public sealed record PriceQuote(
         string MaDongMay, int SoLuong, DateTime NgayBatDau, DateTime NgayKetThuc,
         int SoNgayTinhPhi, decimal GiaThueNgay, decimal PhanTramGiamGia, decimal DonGiaSauGiam,
-        decimal TongTienThue, decimal TienCocMotDonVi, decimal TongTienCoc);
+        decimal TongTienThue, decimal TienCocMotDonVi, decimal TongTienCoc,
+        decimal PhanTramKhuyenMai, string[] MaKhuyenMai);
 
-    internal static PriceQuote CalculatePrice(DongMay model, int quantity, DateTime from, DateTime to)
+    internal static PriceQuote CalculatePrice(DongMay model, int quantity, DateTime from, DateTime to,
+        RentalPromotionDecision? promotion = null)
     {
         var days = (int)Math.Ceiling((to - from).TotalDays);
-        var unitPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
+        var catalogPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
+        var unitPrice = promotion?.Apply(catalogPrice) ?? catalogPrice;
         return new PriceQuote(
             model.MaDongMay, quantity, from, to, days,
             model.GiaThueNgay, model.PhanTramGiamGia, unitPrice,
-            unitPrice * days * quantity, model.TienCoc, model.TienCoc * quantity
+            unitPrice * days * quantity, model.TienCoc, model.TienCoc * quantity,
+            promotion?.Percent ?? 0m, promotion?.Codes ?? []
         );
     }
 

@@ -35,8 +35,13 @@ public static class CartEndpoints
             var customer = await ApiAccess.CustomerIdAsync(principal, db, ct);
             if (customer is null) return Results.Forbid();
             var lines = await ActiveLines(db, customer).OrderBy(x => x.MaChiTietGioHang).ToListAsync(ct);
+            var isNewCustomer = await RentalPromotionPolicy.IsNewCustomerAsync(db, customer, ct);
             var result = new List<object>();
-            foreach (var line in lines) result.Add(await ToDtoAsync(line, db, availability, ct));
+            foreach (var line in lines)
+            {
+                var promotion = PromotionForLine(lines, line, isNewCustomer);
+                result.Add(await ToDtoAsync(line, db, availability, ct, promotion));
+            }
             return Results.Ok(result);
         });
         group.MapPost("/chi-tiet", async (CartLineRequest request, ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability, IConfiguration config, CancellationToken ct) =>
@@ -65,7 +70,11 @@ public static class CartEndpoints
             db.ChiTietGioHang.Add(line);
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
-            return Results.Created("/api/gio-hang/chi-tiet/" + line.MaChiTietGioHang, await ToDtoAsync(line, db, availability, ct));
+            var activeLines = await ActiveLines(db, customer).ToListAsync(ct);
+            var promotion = PromotionForLine(activeLines, line,
+                await RentalPromotionPolicy.IsNewCustomerAsync(db, customer, ct));
+            return Results.Created("/api/gio-hang/chi-tiet/" + line.MaChiTietGioHang,
+                await ToDtoAsync(line, db, availability, ct, promotion));
         });
         group.MapPut("/chi-tiet/{id}", async (string id, CartLineRequest request, ClaimsPrincipal principal, RentalCameraContext db, AvailabilityService availability, IConfiguration config, CancellationToken ct) =>
         {
@@ -87,7 +96,10 @@ public static class CartEndpoints
             RentalEndpoints.ApplyServerPrice(line, model, request.SoLuong, request.NgayBatDau, request.NgayKetThuc);
             await db.SaveChangesAsync(ct);
             await tx.CommitAsync(ct);
-            return Results.Ok(await ToDtoAsync(line, db, availability, ct));
+            var activeLines = await ActiveLines(db, customer).ToListAsync(ct);
+            var promotion = PromotionForLine(activeLines, line,
+                await RentalPromotionPolicy.IsNewCustomerAsync(db, customer, ct));
+            return Results.Ok(await ToDtoAsync(line, db, availability, ct, promotion));
         });
         group.MapDelete("/chi-tiet/{id}", async (string id, Guid phienBan, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
@@ -186,15 +198,28 @@ public static class CartEndpoints
             existing.Select(x => (x.TienCoc, x.SoLuong))
                 .Append((requestedModel.TienCoc, requestedQuantity)), config);
     }
-    private static async Task<object> ToDtoAsync(ChiTietGioHang line, RentalCameraContext db, AvailabilityService availability, CancellationToken ct)
+    private static RentalPromotionDecision PromotionForLine(
+        IEnumerable<ChiTietGioHang> lines, ChiTietGioHang selected, bool isNewCustomer)
+    {
+        var quantity = lines
+            .Where(x => x.MaCuaHang == selected.MaCuaHang
+                && x.NgayBatDau == selected.NgayBatDau
+                && x.NgayKetThuc == selected.NgayKetThuc)
+            .Sum(x => x.SoLuong);
+        return RentalPromotionPolicy.Evaluate(quantity, isNewCustomer);
+    }
+
+    private static async Task<object> ToDtoAsync(ChiTietGioHang line, RentalCameraContext db,
+        AvailabilityService availability, CancellationToken ct, RentalPromotionDecision? promotion = null)
     {
         var model = await db.DongMay.AsNoTracking().SingleAsync(x => x.MaDongMay == line.MaDongMay, ct);
         var store = await db.CuaHang.AsNoTracking().SingleAsync(x => x.MaCuaHang == line.MaCuaHang, ct);
-        var quote = RentalEndpoints.CalculatePrice(model, line.SoLuong, line.NgayBatDau, line.NgayKetThuc);
+        var quote = RentalEndpoints.CalculatePrice(model, line.SoLuong, line.NgayBatDau, line.NgayKetThuc, promotion);
         var available = await availability.GetAvailableAsync(line.MaCuaHang, line.MaDongMay, line.NgayBatDau, line.NgayKetThuc, null, null, ct);
         var image = await db.AnhThietBi.AsNoTracking().Where(x => x.MaDongMay == line.MaDongMay).OrderByDescending(x => x.LaAnhDaiDien).Select(x => x.DuongDanAnh).FirstOrDefaultAsync(ct);
         return new { line.MaChiTietGioHang, line.PhienBan, line.MaCuaHang, store.TenCuaHang, line.MaDongMay, model.TenDongMay,
-            line.SoLuong, line.NgayBatDau, line.NgayKetThuc, anhDaiDien=image, baoGia=quote, soLuongConTrong=available,
+            line.SoLuong, line.NgayBatDau, line.NgayKetThuc, anhDaiDien=image, khuyenMai=promotion,
+            baoGia=quote, soLuongConTrong=available,
             khaDung=store.TrangThai == "HOAT_DONG" && line.NgayBatDau > RentalPolicy.LocalNow && available >= line.SoLuong };
     }
     internal static async Task<object> HoldDtoAsync(string id, string customer, RentalCameraContext db, CancellationToken ct)
@@ -202,12 +227,14 @@ public static class CartEndpoints
         var hold = await db.GiuCho.AsNoTracking().SingleAsync(x => x.MaGiuCho == id && x.MaKhachThue == customer, ct);
         var confirmed = await db.KhachThue.AnyAsync(x => x.MaKhachThue == customer && x.DaXacNhanThongTin, ct);
         var lines = await db.ChiTietGiuCho.AsNoTracking().Where(x => x.MaGiuCho == id).ToListAsync(ct);
+        var promotion = RentalPromotionPolicy.Evaluate(lines.Sum(x => x.SoLuong),
+            await RentalPromotionPolicy.IsNewCustomerAsync(db, customer, ct));
         var quotes = new List<RentalEndpoints.PriceQuote>();
         var items=new List<object>();
         var store=await db.CuaHang.AsNoTracking().SingleAsync(s=>s.MaCuaHang==hold.MaCuaHang,ct);
         foreach (var line in lines) {
             var model = await db.DongMay.AsNoTracking().SingleAsync(x => x.MaDongMay == line.MaDongMay, ct);
-            var quote=RentalEndpoints.CalculatePrice(model, line.SoLuong, line.NgayBatDau, line.NgayKetThuc);
+            var quote=RentalEndpoints.CalculatePrice(model, line.SoLuong, line.NgayBatDau, line.NgayKetThuc, promotion);
             quotes.Add(quote);
             items.Add(new{maChiTietGioHang=line.MaChiTietGioHang,phienBan=line.PhienBanGioHang,
                 hold.MaCuaHang,store.TenCuaHang,line.MaDongMay,model.TenDongMay,line.SoLuong,line.NgayBatDau,line.NgayKetThuc,
@@ -215,7 +242,7 @@ public static class CartEndpoints
         }
         return new { hold.MaGiuCho, hold.MaCuaHang, hetHanLuc=DateTime.SpecifyKind(hold.HetHanLuc,DateTimeKind.Utc),
             thoiGianServer=DateTime.UtcNow, trangThai=hold.TrangThai == "DANG_GIU" && hold.HetHanLuc <= DateTime.UtcNow ? "HET_HAN" : hold.TrangThai,
-            daXacNhanThongTin=confirmed, baoGia=quotes,cartItems=items,
+            daXacNhanThongTin=confirmed, khuyenMai=promotion, baoGia=quotes,cartItems=items,
             chiTiet=lines.Select(c=>new{c.MaChiTietGiuCho,c.MaDongMay,c.SoLuong,c.NgayBatDau,c.NgayKetThuc}) };
     }
 }
