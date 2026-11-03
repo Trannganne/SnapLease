@@ -448,6 +448,62 @@
     ],
     [
       "dbo",
+      "GiayToTuyThan",
+      "NhaCungCapXacMinh",
+      "varchar(30)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "MaThamChieuXacMinh",
+      "varchar(100)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "KetQuaXacMinhTuDong",
+      "varchar(30)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "DoTinCayOcr",
+      "decimal(5,4)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "DiemSoKhuonMat",
+      "decimal(5,4)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "DiemSoSong",
+      "decimal(5,4)",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "GiayToTuyThan",
+      "XacMinhTuDongLucUtc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
       "DanhMuc",
       "MaDanhMuc",
       "varchar(20)",
@@ -5052,6 +5108,16 @@
       "table": "GiayToTuyThan",
       "name": "CK_GiayTo_TrangThai",
       "definition": "TrangThaiXacMinh IN ('CHO_XAC_MINH','HOP_LE','TU_CHOI')"
+    },
+    {
+      "table": "GiayToTuyThan",
+      "name": "CKR_GiayTo_KetQuaXacMinhTuDong",
+      "definition": "KetQuaXacMinhTuDong IS NULL OR KetQuaXacMinhTuDong IN ('CHO_XU_LY','CAN_DUYET','DAT','KHONG_DAT','LOI_NHA_CUNG_CAP')"
+    },
+    {
+      "table": "GiayToTuyThan",
+      "name": "CKR_GiayTo_DiemXacMinhTuDong",
+      "definition": "(DoTinCayOcr IS NULL OR DoTinCayOcr BETWEEN 0 AND 1) AND (DiemSoKhuonMat IS NULL OR DiemSoKhuonMat BETWEEN 0 AND 1) AND (DiemSoSong IS NULL OR DiemSoSong BETWEEN 0 AND 1)"
     },
     {
       "table": "DanhMuc",

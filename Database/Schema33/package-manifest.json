@@ -1,10 +1,10 @@
 {
-  "Status": "FILES_SEALED_PENDING_RUNTIME_EF_AND_DEFINITION_CHECKS",
+  "Status": "REVIEWED_READY_FOR_DATABASE",
   "Database": "RentalCameraDb30_Test",
   "Environment": "Schema33Trial",
   "createdUtc": "2026-10-27T20:59:00.848552+07:00",
   "requiredTables": 33,
-  "requiredColumns": 376,
+  "requiredColumns": 383,
   "files": [
     {
       "path": "00_preflight.sql",
@@ -12,7 +12,7 @@
     },
     {
       "path": "01_schema33.sql",
-      "sha256": "39dc3b65af1a83ad23cbe2a363b93bf491ac3e476ed95e85be6309a1f3817160"
+      "sha256": "d22d2f2871540dd0bef12fc40454455b655ad2d5efb3ffe8b1cd79e35d06ed85"
     },
     {
       "path": "02_seed_catalog.sql",
@@ -20,7 +20,7 @@
     },
     {
       "path": "04_verify_schema.sql",
-      "sha256": "0cadc1e19f942d6c15dce30dfb768963a65af3ecb68d8922a842c5e9f89196c7"
+      "sha256": "11b9d81a2ab142118244e643c07b1d3ede5eaa20c50bd59d93b7a45f4274829c"
     },
     {
       "path": "05_verify_seed_catalog.sql",
@@ -28,15 +28,15 @@
     },
     {
       "path": "schema.json",
-      "sha256": "379d725eb3b1b5bcbc46ceb38687d0e04695778aca3f3b075ab6d3db3cd13610"
+      "sha256": "f254d3b73662080b5173b5f8cfe20c38ab8190170745d189d47bc22f860185c6"
     },
     {
       "path": "constraints.json",
-      "sha256": "e991e7ce98af8057c688c5ce9e0bc6f84b6badff4cb5f157c6265f6848d8cfb3"
+      "sha256": "594e2215a4e68951ee418d58f745a928c58c64cec9150504d03513918b5035c5"
     },
     {
       "path": "expected-metadata.json",
-      "sha256": "6dcad625becd2d88d100a66f4ef8377a4b7d989b6b231a726e0f74b7e1eef7ea"
+      "sha256": "30bc97c11806ffc0c8215c4ffea71644eb052dd0598eae07c58bb391ae960f06"
     },
     {
       "path": "seed-catalog.json",
@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "c58c2205f42e38c94cea0e796ea91a92850930a8c051ad558103649c812a9fbc"
+      "sha256": "7465819f8581571ed27e936cb3f75103aeeaf9c0c5df0aa0892151484bee3f86"
     },
     {
       "path": "Invoke-Schema33Package.ps1",
@@ -55,27 +55,24 @@
       "sha256": "f1e89c5c006dcd493a4a4b78164bdb973b9be7b83c8c001a2702daefb47a47fa"
     }
   ],
-  "executionBlockers": [
-    "Runtime EF model versus source DDL/design parity pending",
-    "Fresh SQL preflight unavailable while Docker engine does not respond"
-  ],
+  "executionBlockers": [],
   "designHashes": {
     "schema33-revised.json": "9c2273a8a5d46d49dbf5f09406b3fe52a126e72a078ff76816b1530d62330fad",
     "constraints33-revised.json": "5bbf540ea63437568283d83318736b5d57fc5aa44daf43ec4470cf0ff240a760"
   },
-  "handoffStatus": "SOURCE_HANDOFF_READY_DATABASE_API_NOT_RUN",
+  "handoffStatus": "REVIEWED_READY_FOR_RECEIVER_PREFLIGHT_AND_INSTALL",
   "postInstallChecksRequired": [
-    "Actual33 table/376 column and full structural metadata match",
+    "Actual 33 table/383 column and full structural metadata match",
     "Stored CHECK/default/filter canonical definition comparison",
     "Catalog seed verification",
     "Runtime database binding and HTTP API smoke"
   ],
   "cleanup": {
     "scope": "backend trial only",
-    "buildStatus": "RECORDED_PRE_CLEANUP_PASS_NOT_RERUN",
-    "databaseStatus": "NOT_RUN",
-    "apiSmokeStatus": "NOT_RUN",
-    "regressionStatus": "NOT_RUN",
+    "buildStatus": "PASS_NET8_ZERO_WARNING_ZERO_ERROR_2026_11_03",
+    "databaseStatus": "RECEIVER_PREFLIGHT_AND_INSTALL_REQUIRED",
+    "apiSmokeStatus": "REQUIRED_AFTER_RECEIVER_INSTALL",
+    "regressionStatus": "PASS_EF_EXACT33_383_AND_62_SOURCE_CHECKS_2026_11_03",
     "provenanceRegistry": "../../Docs/SCHEMA33_SQL_INVENTORY.md",
     "historicalSourceReferencesAreLogicalOriginsNotRuntimeDependencies": true
   },
