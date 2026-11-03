@@ -60,7 +60,7 @@ và merchant secrets chỉ được truyền bằng cấu hình runtime riêng, 
 | Kiểm tra | Trạng thái |
 |---|---|
 | Backend build bằng SDK 8.0.427 | PASS sau khi gỡ eKYC; 0 lỗi, 0 cảnh báo |
-| Khai báo EF source | 33 bảng/376 scalar; regression model runtime PASS |
+| Khai báo EF source | 33 bảng/383 scalar sau phần mở rộng kết quả VNPT (baseline sealed: 376); regression model runtime PASS |
 | Model EF runtime/DDL so với model | Chưa có kết quả; lệnh Docker đang chờ đã được ngắt khi daemon không phản hồi |
 | Database/DDL/seed hậu kiểm | NOT_RUN trong đợt này; chưa gửi lệnh DDL/seed |
 | API SMOKE | NOT_RUN; `http://127.0.0.1:5003` chỉ là cổng dự kiến |

@@ -153,7 +153,9 @@ public static class IdentityEndpoints
                 .Join(db.KhachThue, g => g.MaKhachThue, k => k.MaKhachThue, (g, k) => new
                 {
                     g.MaGiayTo, g.MaKhachThue, k.HoTen, g.LoaiGiayTo, g.SoGiayTo,
-                    g.MatTruocUrl, g.MatSauUrl, g.NgayTaiLen
+                    g.MatTruocUrl, g.MatSauUrl, g.NgayTaiLen,
+                    g.NhaCungCapXacMinh, g.MaThamChieuXacMinh, g.KetQuaXacMinhTuDong,
+                    g.DoTinCayOcr, g.DiemSoKhuonMat, g.DiemSoSong, g.XacMinhTuDongLucUtc
                 }).ToListAsync(ct);
             return Results.Ok(data);
         }).RequireAuthorization("Staff");

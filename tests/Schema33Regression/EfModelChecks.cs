@@ -32,8 +32,8 @@ public static class Schema33EfChecks
             throw new Exception("EF physical table set mismatch. Missing: " +
                 string.Join(",", ExpectedTables.Except(actualTables)) + "; unexpected: " +
                 string.Join(",", actualTables.Except(ExpectedTables)));
-        if (entities.Sum(e => e.GetProperties().Count()) != 376)
-            throw new Exception("EF scalar mapping differs from reviewed376 fields");
+        if (entities.Sum(e => e.GetProperties().Count()) != 383)
+            throw new Exception("EF scalar mapping differs from reviewed 383 fields (Schema33 plus VNPT verification result extension)");
         if (entities.Any(e => e.GetProperties().Any(p => p.IsShadowProperty())))
             throw new Exception("Unexpected shadow relationship/property");
         var hold = entities.Single(e => e.GetTableName() == "ChiTietGiuCho" && (e.GetSchema() ?? "dbo") == "dbo");
@@ -59,7 +59,7 @@ public static class Schema33EfChecks
             throw new Exception("Valid paid penalty rejected");
         if (entities.SelectMany(e => e.GetForeignKeys()).Any(f => f.DeleteBehavior != DeleteBehavior.NoAction))
             throw new Exception("Unexpected cascade");
-        Console.WriteLine("PASS EF exact33 schema.table set,376 scalar/no shadows and restrictive FKs; no database connected.");
+        Console.WriteLine("PASS EF exact33 schema.table set,383 scalar/no shadows and restrictive FKs; no database connected.");
     }
 }
 #endif

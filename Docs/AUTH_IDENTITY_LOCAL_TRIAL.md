@@ -83,7 +83,9 @@ tests use scripted transactions; they do not establish SQL Server concurrency sa
 The old implementation is two-sided CCCD capture → on-device OCR/QR → customer
 reviews/consents → authenticated image upload/profile confirmation → staff approval.
 There is no selfie, face matching or liveness provider. OCR success is not identity approval.
-Schema33 reuses `KhachThue` and `GiayToTuyThan`; no extra table/column is used.
+Schema33 reuses `KhachThue` and `GiayToTuyThan`; no extra table is used. The optional
+VNPT result extension adds seven nullable summary columns to `GiayToTuyThan`. It stores
+no selfie and does not replace the staff's final `TrangThaiXacMinh` decision.
 
 1. Customer: Account → **Thông tin cá nhân & Giấy tờ**. Allow camera access, capture
    front/back, or cancel/retake. Review all extracted fields before confirming.

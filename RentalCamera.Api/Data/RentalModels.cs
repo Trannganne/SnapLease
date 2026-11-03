@@ -53,6 +53,13 @@ public sealed class GiayToTuyThan
     public DateTime NgayTaiLen { get; set; }
     public string TrangThaiXacMinh { get; set; } = "";
     public string? GhiChu { get; set; }
+    public string? NhaCungCapXacMinh { get; set; }
+    public string? MaThamChieuXacMinh { get; set; }
+    public string? KetQuaXacMinhTuDong { get; set; }
+    public decimal? DoTinCayOcr { get; set; }
+    public decimal? DiemSoKhuonMat { get; set; }
+    public decimal? DiemSoSong { get; set; }
+    public DateTime? XacMinhTuDongLucUtc { get; set; }
 }
 
 public sealed class DanhMuc
