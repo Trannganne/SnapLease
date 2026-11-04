@@ -6,9 +6,10 @@
 - `GiayToTuyThan` has seven nullable, provider-result fields added by
   `Database/16_add_vnpt_identity_result_fields.sql`.
 - No selfie, raw provider payload or API credential is stored in the database.
-- `TrangThaiXacMinh` remains the staff's final decision; an automatic result cannot
-  approve a customer by itself.
-- Existing CCCD front/back upload and branch-scoped staff review remain unchanged.
+- A complete VNPT pass automatically changes `TrangThaiXacMinh` to `HOP_LE` and copies
+  the unique CCCD number to the customer profile. Failed or incomplete checks remain
+  `CHO_XAC_MINH` for staff review.
+- Existing CCCD front/back upload and the staff fallback endpoint remain unchanged.
 
 ## Implemented provider adapter
 
@@ -17,7 +18,9 @@ required secrets: Token ID, Token Key and Access Token. The adapter performs exa
 
 1. three uploads (`file-service/v1/addFile`) for front, back and the transient selfie;
 2. one combined two-sided OCR request (`ai/v1/ocr/id`); and
-3. one face comparison (`ai/v1/face/compare`).
+3. one face comparison (`ai/v1/face/compare`); and
+4. one server-to-server face liveness check (`ai/v1/face/liveness`) using the transient
+   selfie hash returned by VNPT.
 
 Handoff status: provider uploads have succeeded in the local trial, but the combined OCR
 request is still rejected by VNPT with HTTP 400. End-to-end VNPT verification is therefore
@@ -34,10 +37,11 @@ period. Enabling the live gate therefore means the operator has accepted that th
 uploaded images are transmitted to VNPT under its trial terms; the application must not
 claim immediate provider-side deletion.
 
-VNPT's input standard warns that static-image liveness endpoints are not recommended
-without its capture SDK. Therefore this backend does not claim or synthesize liveness:
-`DiemSoSong` remains null and the endpoint returns `liveness = SDK_REQUIRED`. A future
-Flutter/Web SDK integration needs a separately reviewed, tamper-resistant result contract.
+The backend never trusts a client-provided liveness flag. It sends VNPT's own uploaded
+selfie hash to the documented liveness API and accepts only `liveness=success` together
+with `is_eye_open=yes`. `DiemSoSong` stores `1` for that pass and `0` otherwise. Mobile
+should still use VNPT's live capture SDK to reduce replay/photo-of-photo risk; its result
+must not bypass this server-side provider check.
 
 The customer-only endpoint is:
 
@@ -45,8 +49,10 @@ The customer-only endpoint is:
 
 with `{ "selfieBase64": "data:image/jpeg;base64,..." }`. It accepts only a customer's
 own two-sided CCCD and refuses a second provider call after any result was recorded, which
-protects the 100-request trial quota. A provider success can only produce `CAN_DUYET` or
-`KHONG_DAT`; it never changes the staff-controlled `TrangThaiXacMinh` to `HOP_LE`.
+protects the 100-request trial quota. Only matching CCCD number, face score at or above the
+configured threshold, successful liveness and open eyes produce `DAT` and automatic
+`HOP_LE`. Any failed condition produces `KHONG_DAT` and leaves the document pending for
+staff review. Duplicate CCCD ownership is rejected and cannot be auto-approved.
 
 ## Image gate
 
@@ -74,5 +80,5 @@ these .NET configuration names. Never commit them, send them in chat, return the
 API, include them in screenshots or write them to logs.
 
 `tests/VnptEkycRegression` uses only a synthetic in-memory provider. It verifies the
-headers, exact provider-call count, score normalization, mismatch behavior and the
+headers, exact provider-call count, score normalization, face/liveness failure behavior and the
 pre-quota image gate without contacting VNPT.

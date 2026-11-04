@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
@@ -61,16 +62,52 @@ public static class VnptIdentityEndpoints
                 document.KetQuaXacMinhTuDong = result.Outcome;
                 document.DoTinCayOcr = result.OcrConfidence;
                 document.DiemSoKhuonMat = result.FaceScore;
-                document.DiemSoSong = null; // Liveness phải đến từ SDK VNPT, không suy đoán từ API ảnh tĩnh.
+                document.DiemSoSong = result.LivenessScore;
                 document.XacMinhTuDongLucUtc = DateTime.UtcNow;
-                await db.SaveChangesAsync(CancellationToken.None);
+                if (result.Outcome == "DAT")
+                {
+                    var cccd = document.SoGiayTo.Trim();
+                    if (await db.KhachThue.AnyAsync(
+                        x => x.CCCD == cccd && x.MaKhachThue != document.MaKhachThue,
+                        CancellationToken.None))
+                    {
+                        document.KetQuaXacMinhTuDong = "KHONG_DAT";
+                        document.GhiChu = "CCCD đã được sử dụng bởi khách thuê khác.";
+                    }
+                    else
+                    {
+                        var customer = await db.KhachThue.SingleAsync(
+                            x => x.MaKhachThue == document.MaKhachThue,
+                            CancellationToken.None);
+                        document.TrangThaiXacMinh = "HOP_LE";
+                        document.GhiChu = "Đã tự động xác minh bởi VNPT eKYC.";
+                        customer.CCCD = cccd;
+                        ApiAccess.AddNotification(
+                            db, customer.MaTaiKhoan, "XAC_MINH_GIAY_TO",
+                            "Kết quả xác minh giấy tờ",
+                            "Giấy tờ của bạn đã được VNPT eKYC xác minh tự động.",
+                            eventCode: "IDENTITY_VERIFICATION_RESULT",
+                            targetType: "GIAY_TO_TUY_THAN",
+                            targetId: document.MaGiayTo);
+                    }
+                }
+                try
+                {
+                    await db.SaveChangesAsync(CancellationToken.None);
+                }
+                catch (DbUpdateException ex) when (ex.InnerException is SqlException { Number: 2601 or 2627 })
+                {
+                    db.ChangeTracker.Clear();
+                    return Results.Conflict(new { loi = "CCCD đã được sử dụng bởi khách thuê khác." });
+                }
                 return Results.Ok(new
                 {
                     document.MaGiayTo,
                     document.KetQuaXacMinhTuDong,
                     document.DoTinCayOcr,
                     document.DiemSoKhuonMat,
-                    liveness = "SDK_REQUIRED",
+                    document.DiemSoSong,
+                    liveness = result.IsLive ? "DAT" : "KHONG_DAT",
                     document.TrangThaiXacMinh
                 });
             }

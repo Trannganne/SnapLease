@@ -54,9 +54,16 @@ public sealed class VnptEkycService(HttpClient http, IOptions<VnptEkycOptions> c
             client_session = clientSession,
             token = requestToken
         }, ct);
+        using var liveness = await PostJsonAsync("ai/v1/face/liveness", new
+        {
+            img = selfieHash,
+            client_session = clientSession,
+            token = requestToken
+        }, ct);
 
         var ocrObject = RequireSuccessObject(ocr.RootElement, "VNPT_OCR_FAILED");
         var compareObject = RequireSuccessObject(compare.RootElement, "VNPT_FACE_COMPARE_FAILED");
+        var livenessObject = RequireSuccessObject(liveness.RootElement, "VNPT_FACE_LIVENESS_FAILED");
         var extractedNumber = FirstText(ocrObject, "citizen_id", "id") ?? "";
         var faceMessage = FirstText(compareObject, "msg") ?? "";
         var faceScore = NormalizeProbability(ReadDecimal(compareObject, "prob"));
@@ -64,15 +71,19 @@ public sealed class VnptEkycService(HttpClient http, IOptions<VnptEkycOptions> c
         var numberMatches = NormalizeDocumentNumber(extractedNumber) == NormalizeDocumentNumber(expectedDocumentNumber);
         var faceMatches = string.Equals(faceMessage, "MATCH", StringComparison.OrdinalIgnoreCase)
             && faceScore is not null && faceScore >= options.FaceMatchThreshold;
+        var isLive = string.Equals(FirstText(livenessObject, "liveness"), "success", StringComparison.OrdinalIgnoreCase)
+            && string.Equals(FirstText(livenessObject, "is_eye_open"), "yes", StringComparison.OrdinalIgnoreCase);
 
         return new VnptIdentityResult(
             correlationId,
-            numberMatches && faceMatches ? "CAN_DUYET" : "KHONG_DAT",
+            numberMatches && faceMatches && isLive ? "DAT" : "KHONG_DAT",
             ocrConfidence,
             faceScore,
+            isLive ? 1m : 0m,
             extractedNumber.Length > 0,
             numberMatches,
-            faceMatches);
+            faceMatches,
+            isLive);
     }
 
     public static string? ValidateConfiguration(VnptEkycOptions value)
@@ -288,7 +299,8 @@ public sealed class VnptEkycService(HttpClient http, IOptions<VnptEkycOptions> c
 public sealed record VnptImage(byte[] Bytes, string ContentType);
 public sealed record VnptIdentityResult(
     string ReferenceId, string Outcome, decimal? OcrConfidence, decimal? FaceScore,
-    bool DocumentNumberExtracted, bool DocumentNumberMatches, bool FaceMatches);
+    decimal LivenessScore, bool DocumentNumberExtracted, bool DocumentNumberMatches,
+    bool FaceMatches, bool IsLive);
 
 public sealed class VnptEkycException(string code, string message, int status) : Exception(message)
 {

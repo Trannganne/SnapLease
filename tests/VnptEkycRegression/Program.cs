@@ -25,11 +25,13 @@ void Check(bool condition, string name)
 }
 
 var result = await service.VerifyAsync(image, image, image, "001234567890", CancellationToken.None);
-Check(result.Outcome == "CAN_DUYET", "matching OCR and face produce staff-review candidate");
-Check(result.DocumentNumberMatches && result.FaceMatches, "document number and face match are preserved");
+Check(result.Outcome == "DAT", "matching OCR, face and liveness produce automatic pass");
+Check(result.DocumentNumberMatches && result.FaceMatches && result.IsLive,
+    "document number, face and liveness pass are preserved");
 Check(result.OcrConfidence == 0.95m && result.FaceScore == 0.92m, "provider scores are normalized to zero-to-one");
-Check(handler.UploadCount == 3 && handler.OcrCount == 1 && handler.CompareCount == 1,
-    "verification uses exactly three uploads, one OCR and one face comparison");
+Check(result.LivenessScore == 1m, "successful liveness is persisted as a normalized score");
+Check(handler.UploadCount == 3 && handler.OcrCount == 1 && handler.CompareCount == 1 && handler.LivenessCount == 1,
+    "verification uses exactly three uploads, one OCR, one face comparison and one liveness check");
 Check(handler.HeadersValid, "every provider request carries required secrets without query-string exposure");
 Check(handler.UploadMacHeaderAbsent && handler.AiMacHeaderPresent,
     "mac-address is limited to documented AI requests");
@@ -38,6 +40,12 @@ handler.FaceMatches = false;
 var mismatch = await service.VerifyAsync(image, image, image, "001234567890", CancellationToken.None);
 Check(mismatch.Outcome == "KHONG_DAT" && !mismatch.FaceMatches,
     "face mismatch cannot become an automatic pass");
+
+handler.FaceMatches = true;
+handler.IsLive = false;
+var notLive = await service.VerifyAsync(image, image, image, "001234567890", CancellationToken.None);
+Check(notLive.Outcome == "KHONG_DAT" && !notLive.IsLive && notLive.LivenessScore == 0m,
+    "failed liveness cannot become an automatic pass");
 
 var callsBeforeInvalidImage = handler.TotalCount;
 try
@@ -81,11 +89,13 @@ sealed class ProviderHandler : HttpMessageHandler
     public int UploadCount { get; private set; }
     public int OcrCount { get; private set; }
     public int CompareCount { get; private set; }
-    public int TotalCount => UploadCount + OcrCount + CompareCount;
+    public int LivenessCount { get; private set; }
+    public int TotalCount => UploadCount + OcrCount + CompareCount + LivenessCount;
     public bool HeadersValid { get; private set; } = true;
     public bool UploadMacHeaderAbsent { get; private set; } = true;
     public bool AiMacHeaderPresent { get; private set; } = true;
     public bool FaceMatches { get; set; } = true;
+    public bool IsLive { get; set; } = true;
 
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
@@ -118,6 +128,14 @@ sealed class ProviderHandler : HttpMessageHandler
             response = FaceMatches
                 ? "{\"message\":\"IDG-00000000\",\"object\":{\"msg\":\"MATCH\",\"prob\":92}}"
                 : "{\"message\":\"IDG-00000000\",\"object\":{\"msg\":\"NOMATCH\",\"prob\":58}}";
+        }
+        else if (request.RequestUri.AbsolutePath == "/ai/v1/face/liveness")
+        {
+            LivenessCount++;
+            AiMacHeaderPresent &= request.Headers.GetValues("mac-address").Single() == "TEST1";
+            response = IsLive
+                ? "{\"message\":\"IDG-00000000\",\"object\":{\"liveness\":\"success\",\"liveness_msg\":\"Real people\",\"is_eye_open\":\"yes\"}}"
+                : "{\"message\":\"IDG-00000000\",\"object\":{\"liveness\":\"failure\",\"liveness_msg\":\"Not real people\",\"is_eye_open\":\"no\"}}";
         }
         else throw new Exception("Unexpected provider path: " + request.RequestUri.AbsolutePath);
         return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
