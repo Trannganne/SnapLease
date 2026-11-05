@@ -117,7 +117,7 @@ public sealed class NotificationDeliveryWorker(IServiceScopeFactory scopes, Fire
     {
         await FirebaseMessaging.GetMessaging(firebase).SendAsync(new Message {
                     Fid = device.Token,
-                    Notification = new Notification { Title="SNAPLEASE", Body="Bạn có thông báo mới." },
+                    Notification = new Notification { Title=n.TieuDe, Body=n.NoiDung },
                     Data = new Dictionary<string,string> { ["notificationId"]=n.MaThongBao, ["eventCode"]=n.EventCode ?? "",
                         ["targetType"]=n.TargetType ?? "", ["targetId"]=n.TargetId ?? "" },
                     Android = new AndroidConfig { CollapseKey=n.MaThongBao, Notification=new AndroidNotification { Tag=n.MaThongBao } }

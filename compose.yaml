@@ -52,7 +52,9 @@ services:
       Rental__ContractSignMinutes: "30"
       Rental__BackgroundJobsEnabled: "false"
       Rental__ProtectedContractIds: "${RENTAL_PROTECTED_CONTRACT_IDS:-}"
-      Notifications__PushEnabled: "false"
+      Notifications__PushEnabled: "${NOTIFICATIONS_PUSH_ENABLED:-false}"
+      Notifications__ReturnReminderEnabled: "${NOTIFICATIONS_RETURN_REMINDER_ENABLED:-false}"
+      Notifications__WorkerRole: "${NOTIFICATIONS_WORKER_ROLE:-Disabled}"
       PasswordReset__ReturnTokenInResponse: "false"
       ElectronicSignature__TermsVersion: "2026-11-02"
       ElectronicSignature__ReturnOtpInResponse: "false"
@@ -66,6 +68,8 @@ services:
       Email__FromAddress: "${EMAIL_FROM_ADDRESS:-}"
       Email__FromName: "${EMAIL_FROM_NAME:-SNAPLEASE}"
       Firebase__ProjectId: "${FIREBASE_PROJECT_ID:?Configure Firebase project}"
+      Firebase__CredentialsPath: /run/secrets/firebase_admin
+      Firebase__LiveApiApproved: "${FIREBASE_LIVE_API_APPROVED:-false}"
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase_admin
       Cloudinary__CloudName: "${CLOUDINARY_CLOUD_NAME:-}"
       Cloudinary__ApiKey: "${CLOUDINARY_API_KEY:-}"

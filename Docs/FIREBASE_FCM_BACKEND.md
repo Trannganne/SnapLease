@@ -26,9 +26,15 @@ Sao chép `.env.example` thành `.env`, sau đó điền tối thiểu:
 ```env
 FIREBASE_PROJECT_ID=snaplease-b1256
 FIREBASE_ADMIN_CREDENTIALS_FILE=D:/SnapLease-Secrets/snaplease-firebase-admin.json
+FIREBASE_LIVE_API_APPROVED=true
+NOTIFICATIONS_PUSH_ENABLED=true
+NOTIFICATIONS_RETURN_REMINDER_ENABLED=true
+NOTIFICATIONS_WORKER_ROLE=Primary
 ```
 
-`FIREBASE_ADMIN_CREDENTIALS_FILE` là đường dẫn trên máy host. Docker Compose mount file này vào container tại `/run/secrets/firebase_admin` và đặt `GOOGLE_APPLICATION_CREDENTIALS` trỏ tới đường dẫn đó.
+`FIREBASE_ADMIN_CREDENTIALS_FILE` là đường dẫn trên máy host. Docker Compose mount file này vào container tại `/run/secrets/firebase_admin`, cấu hình `Firebase:CredentialsPath` và đặt `GOOGLE_APPLICATION_CREDENTIALS` trỏ tới cùng đường dẫn đó.
+
+Chỉ **một** backend dùng chung database được đặt `NOTIFICATIONS_WORKER_ROLE=Primary`. Các backend còn lại phải để `Disabled`; không bật hai worker trên hai máy cùng lúc. Với Schema33 trial, guard chỉ cho khởi động khi Push, ReturnReminder, phê duyệt Firebase, credential và phạm vi người nhận thử nghiệm đều đầy đủ.
 
 ## 3. Khởi động backend
 
@@ -101,7 +107,15 @@ Các sự kiện hiện đã nối FCM:
 | Sự kiện | `eventCode` | `targetType` |
 | --- | --- | --- |
 | Tạo hợp đồng chờ ký | `CONTRACT_CREATED` | `HOP_DONG` |
+| Đổi trạng thái hợp đồng | `CONTRACT_*` | `HOP_DONG` |
+| Đổi trạng thái thanh toán | `PAYMENT_*` | `HOP_DONG` |
+| Đổi trạng thái gia hạn | `EXTENSION_*` | `HOP_DONG` |
+| Nhắc trả trước 24 giờ | `RETURN_DUE_24H` | `HOP_DONG` |
+| Nhắc trả trước 2 giờ | `RETURN_DUE_2H` | `HOP_DONG` |
+| Nhắc quá hạn | `RETURN_OVERDUE` | `HOP_DONG` |
 | Kết quả xác minh giấy tờ | `IDENTITY_VERIFICATION_RESULT` | `GIAY_TO_TUY_THAN` |
+
+Worker kiểm tra lại trạng thái hợp đồng, hạn trả có hiệu lực và việc gia hạn/hoàn tất ngay trước khi gửi. Mỗi sự kiện có khóa chống trùng; bản ghi delivery được lease và retry có giới hạn. Nội dung push sử dụng đúng tiêu đề/nội dung đã lưu, còn các trường điều hướng nằm trong data payload.
 
 ## 6. Phối hợp với mobile
 

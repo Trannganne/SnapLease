@@ -18,7 +18,8 @@ public sealed class TestPushDeliveryPolicy
         "CONTRACT_CREATED", "CONTRACT_SIGNED", "CONTRACT_AWAITING_HANDOVER", "CONTRACT_RENTING", "CONTRACT_COMPLETED", "CONTRACT_CANCELLED",
         "PAYMENT_CHO_THANH_TOAN", "PAYMENT_THANH_CONG", "PAYMENT_THAT_BAI", "PAYMENT_DA_HOAN",
         "EXTENSION_CHO_XAC_NHAN", "EXTENSION_CHO_KY", "EXTENSION_TU_CHOI", "EXTENSION_DA_HUY", "EXTENSION_DA_HIEU_LUC",
-        "EXTENSION_HET_HAN_XU_LY", "EXTENSION_HET_HAN_KY"];
+        "EXTENSION_HET_HAN_XU_LY", "EXTENSION_HET_HAN_KY",
+        "RETURN_DUE_24H", "RETURN_DUE_2H", "RETURN_OVERDUE"];
     public string AccountId { get; private init; } = "";
     public string CustomerId { get; private init; } = "";
     public string DeviceRegistrationId { get; private init; } = "";
@@ -32,36 +33,39 @@ public sealed class TestPushDeliveryPolicy
     // somebody accidentally removes all recipient settings while PushEnabled is true.
     public static bool Configured(IConfiguration config) => config.GetSection(Section).Exists() ||
         config.GetSection(LegacySection).Exists() || !string.IsNullOrWhiteSpace(config["Notifications:TestAccountId"]) ||
-        new SqlConnectionStringBuilder(config.GetConnectionString("RentalCamera") ?? "").InitialCatalog == "RentalCameraDb20_Test";
+        new SqlConnectionStringBuilder(config.GetConnectionString("RentalCamera") ?? "").InitialCatalog == Schema33TrialGuard.DatabaseName;
 
     public static TestPushDeliveryPolicy? FromConfiguration(IConfiguration config)
     {
         string? Get(string key) => config[Section + ":" + key];
         var events = (Get("AllowedEvents") ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var accountId = Get("AccountId")?.Trim();
+        var customerId = Get("CustomerId")?.Trim();
         if (config.GetSection(LegacySection).Exists() || Get("Enabled") != "true" || Get("Mode") != "Continuous" ||
-            config["Notifications:TestAccountId"] != "TK130ED33FD1FE41229" ||
+            string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(customerId) ||
+            config["Notifications:TestAccountId"] != accountId ||
             config["Rental:BackgroundJobsEnabled"] != "false" || config["ElectronicSignature:ReturnOtpInResponse"] != "false" ||
-            Get("AccountId") != "TK130ED33FD1FE41229" || Get("CustomerId") != "KH031BC569C14B44B2A" ||
             !Guid.TryParseExact(Get("DeviceRegistrationId"), "D", out _) ||
             !Regex.IsMatch(Get("DeviceTokenHash") ?? "", "\\A[0-9A-F]{64}\\z") ||
             !DateTime.TryParseExact(Get("CutoverUtc"), "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var cutover) ||
             cutover.Kind != DateTimeKind.Utc || cutover.Year < 2020 ||
             events.Length != EventCodes.Length || !events.ToHashSet(StringComparer.Ordinal).SetEquals(EventCodes)) return null;
-        return new() { AccountId = Get("AccountId")!, CustomerId = Get("CustomerId")!,
+        return new() { AccountId = accountId, CustomerId = customerId,
             DeviceRegistrationId = Get("DeviceRegistrationId")!, DeviceTokenHash = Get("DeviceTokenHash")!, CutoverUtc = cutover };
     }
 
     public IQueryable<NotificationDelivery> Deliveries(IQueryable<NotificationDelivery> deliveries, IQueryable<ThongBao> notices,
         IQueryable<HopDong> contracts, IQueryable<ThanhToan> payments, IQueryable<PhuLuc> appendices)
     {
-        var allowed = notices.Where(n => n.MaTaiKhoan == AccountId && n.EventKey != null && n.HanTraNhac == null &&
+        var allowed = notices.Where(n => n.MaTaiKhoan == AccountId && n.EventKey != null &&
             n.ThoiGianGui >= CutoverUtc && n.TargetType == "HOP_DONG" && n.TargetId != null &&
             !RentalPolicy.ProtectedContracts.Contains(n.TargetId) && EventCodes.Contains(n.EventCode!) &&
             contracts.Any(h => h.MaHopDong == n.TargetId && h.MaKhachThue == CustomerId) &&
-            (n.EventCode!.StartsWith("CONTRACT_") && n.EventKey == n.EventCode + ":HOP_DONG:" + n.TargetId ||
-             n.EventCode.StartsWith("PAYMENT_") && payments.Any(p => p.MaHopDong == n.TargetId && p.PhuongThuc == "TIEN_MAT" &&
+            (n.EventCode!.StartsWith("RETURN_") && n.HanTraNhac != null ||
+             n.HanTraNhac == null && n.EventCode.StartsWith("CONTRACT_") && n.EventKey == n.EventCode + ":HOP_DONG:" + n.TargetId ||
+             n.HanTraNhac == null && n.EventCode.StartsWith("PAYMENT_") && payments.Any(p => p.MaHopDong == n.TargetId &&
                  n.EventKey == "payment:" + p.MaThanhToan + ":" + n.EventCode.Substring(8)) ||
-             n.EventCode.StartsWith("EXTENSION_") && appendices.Any(p => p.MaHopDong == n.TargetId &&
+             n.HanTraNhac == null && n.EventCode.StartsWith("EXTENSION_") && appendices.Any(p => p.MaHopDong == n.TargetId &&
                  n.EventKey == "extension:" + p.MaPhuLuc + ":" + n.EventCode.Substring(10))));
         return deliveries.Where(d => d.DeviceTokenId == DeviceRegistrationId && allowed.Any(n => n.MaThongBao == d.MaThongBao));
     }
@@ -97,7 +101,7 @@ public sealed class TestPushDeliveryPolicy
         LastProblem = null;
         try
         {
-            var correctDb = await db.Database.SqlQueryRaw<int>("SELECT CASE WHEN DB_NAME() COLLATE Latin1_General_100_BIN2=N'RentalCameraDb20_Test' THEN 1 ELSE 0 END AS [Value]").SingleAsync(ct);
+            var correctDb = await db.Database.SqlQueryRaw<int>($"SELECT CASE WHEN DB_NAME() COLLATE Latin1_General_100_BIN2=N'{Schema33TrialGuard.DatabaseName}' THEN 1 ELSE 0 END AS [Value]").SingleAsync(ct);
             if (correctDb != 1) { Halted = true; HaltReason = "WRONG_DATABASE"; return false; }
             NotificationDelivery? delivery;
             await using (var tx = await db.Database.BeginTransactionAsync(ct))

@@ -9,7 +9,7 @@ public sealed class ReturnReminderWorker(IServiceScopeFactory scopes,IConfigurat
 {
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        if(!configuration.GetValue("Rental:BackgroundJobsEnabled",true))return;
+        if(!configuration.GetValue("Notifications:ReturnReminderEnabled",false))return;
         using var timer=new PeriodicTimer(TimeSpan.FromMinutes(1));
         while(!ct.IsCancellationRequested) {
             try { await RunAsync(ct); }

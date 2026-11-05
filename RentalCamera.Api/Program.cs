@@ -1,5 +1,3 @@
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -81,6 +79,17 @@ builder.Services.AddHttpClient<VnptEkycService>((provider, client) =>
         : new DenyExternalHttpHandler());
 builder.Services.AddChatbot(builder.Configuration);
 builder.Services.AddScoped<FirebaseNotificationSender>();
+var primaryNotificationWorker = string.Equals(
+    builder.Configuration["Notifications:WorkerRole"],
+    "Primary",
+    StringComparison.Ordinal);
+if (primaryNotificationWorker && builder.Configuration.GetValue<bool>("Notifications:PushEnabled"))
+{
+    builder.Services.AddSingleton(FirebaseRegistration.CreateApp);
+    builder.Services.AddHostedService<NotificationDeliveryWorker>();
+}
+if (primaryNotificationWorker && builder.Configuration.GetValue<bool>("Notifications:ReturnReminderEnabled"))
+    builder.Services.AddHostedService<ReturnReminderWorker>();
 builder.Services.Configure<CloudinaryOptions>(builder.Configuration.GetSection("Cloudinary"));
 builder.Services.Configure<MediaStorageOptions>(builder.Configuration.GetSection(MediaStorageOptions.SectionName));
 builder.Services.AddHttpClient<CloudinaryImageStorage>().ConfigurePrimaryHttpMessageHandler(() =>
@@ -94,8 +103,6 @@ builder.Services.AddHttpClient<CloudinaryImageStorage>().ConfigurePrimaryHttpMes
 builder.Services.AddSingleton<VnpayService>();
 builder.Services.AddScoped<AvailabilityService>();
 // ReservationExpirationService is not started by this guarded preparation runtime.
-// NotificationDeliveryWorker is not started by this guarded preparation runtime.
-// ReturnReminderWorker is not started by this guarded preparation runtime.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {

@@ -22,10 +22,11 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
             throw new InvalidOperationException("Schema33 trial package guard chưa được duyệt/cấu hình. Không khởi động backend.");
         server = c["Schema33Trial:ExpectedDataSource"] ?? "";
         if (string.IsNullOrWhiteSpace(server) || c["Schema33Trial:ProviderMode"] != "Fake" ||
-            c.GetValue<bool>("Rental:BackgroundJobsEnabled") || c.GetValue<bool>("Notifications:PushEnabled") ||
+            c.GetValue<bool>("Rental:BackgroundJobsEnabled") ||
             c.GetValue<bool>("Chatbot:Enabled") || c.GetValue<bool>("ElectronicSignature:ReturnOtpInResponse") ||
             c.GetValue<bool>("PasswordReset:ReturnTokenInResponse")) throw new InvalidOperationException("Trial isolation guard không đầy đủ.");
         Validate(c.GetConnectionString("RentalCamera") ?? "");
+        ValidateNotifications(c);
         ValidateVnpay(c);
         ValidateVnptEkyc(c);
         ValidateMediaStorage(c);
@@ -33,6 +34,28 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
     }
 
     public bool SandboxVnpay => sandboxVnpay;
+
+    private static void ValidateNotifications(IConfiguration c)
+    {
+        var pushEnabled = c.GetValue<bool>("Notifications:PushEnabled");
+        var reminderEnabled = c.GetValue<bool>("Notifications:ReturnReminderEnabled");
+        var liveApproved = c.GetValue<bool>("Firebase:LiveApiApproved");
+        var workerRole = c["Notifications:WorkerRole"] ?? "Disabled";
+
+        if (!pushEnabled && !reminderEnabled)
+        {
+            if (liveApproved || !string.Equals(workerRole, "Disabled", StringComparison.Ordinal))
+                throw new InvalidOperationException("Firebase/worker đang tắt nhưng cấu hình phê duyệt không nhất quán.");
+            return;
+        }
+
+        if (!pushEnabled || !reminderEnabled || !liveApproved ||
+            !string.Equals(workerRole, "Primary", StringComparison.Ordinal) ||
+            string.IsNullOrWhiteSpace(c["Firebase:ProjectId"]) ||
+            string.IsNullOrWhiteSpace(c["Firebase:CredentialsPath"]) ||
+            RentalCamera.Api.Notifications.TestPushDeliveryPolicy.FromConfiguration(c) is null)
+            throw new InvalidOperationException("FCM trial chưa được phê duyệt hoặc cấu hình fail-closed chưa đầy đủ.");
+    }
 
     private void ValidateVnpay(IConfiguration c)
     {

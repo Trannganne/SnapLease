@@ -19,7 +19,7 @@ public sealed class FirebaseNotificationSender
         ILogger<FirebaseNotificationSender> logger)
     {
         this.db = db;
-        fake = configuration["Schema33Trial:ProviderMode"] == "Fake";
+        fake = !configuration.GetValue<bool>("Notifications:PushEnabled");
         messaging = fake ? null : FirebaseMessaging.GetMessaging(services.GetRequiredService<FirebaseApp>());
         this.logger = logger;
     }

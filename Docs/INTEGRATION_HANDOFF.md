@@ -94,10 +94,12 @@ contract/payment/renewal events. NotificationDeliveryWorker runs independently
 of `Rental:BackgroundJobsEnabled`. Push=false leaves inbox records available and
 does not itself replay pending records.
 
-`Rental:BackgroundJobsEnabled` gates both ReservationExpirationService (holds
-and pending-signature expiry) and ReturnReminderWorker (appendix expiry and
-24h/2h/overdue/repeated return reminders). Leave it false when an environment has
-unreviewed old records. It is not a switch for FCM alone.
+`Rental:BackgroundJobsEnabled` remains false in the guarded runtime and does not
+start the other reservation jobs. `Notifications:ReturnReminderEnabled` controls
+only ReturnReminderWorker (appendix expiry and 24h/2h/overdue reminders), while
+`Notifications:PushEnabled` controls delivery. Both are accepted only with the
+reviewed Firebase/test-recipient profile and `Notifications:WorkerRole=Primary`.
+Only one backend sharing the database may own that role.
 
 For an explicitly scoped continuous test recipient use the existing
 `Notifications:TestDelivery` guard, not an unrestricted worker:
@@ -110,8 +112,9 @@ For an explicitly scoped continuous test recipient use the existing
 - Cutover is chosen once from reviewed server state before enabling; earlier
   pending notices/inbox/history remain unchanged and are not replayed by this
   scoped worker. Do not move it on restart or reset historical counters.
-- Keep jobs=false and OTP fallback=false for this scope. Set PushEnabled=true
-  only after reviewing the intended recipient/backlog; defaults stay false.
+- Keep jobs=false and OTP fallback=false for this scope. Set PushEnabled and
+  ReturnReminderEnabled=true only after reviewing the intended recipient/backlog;
+  defaults stay false.
 - Logout/rebind deactivates or pauses the corresponding association; sender checks
   current account/device before sending. A changed token/registration requires
   fresh binding confirmation. Never put registration tokens in logs or source.

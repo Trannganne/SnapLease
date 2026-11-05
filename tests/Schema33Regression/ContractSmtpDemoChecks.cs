@@ -6,6 +6,7 @@ using RentalCamera.Api.Contracts;
 using RentalCamera.Api.Email;
 using RentalCamera.Api.Infrastructure;
 using RentalCamera.Api.Auth;
+using RentalCamera.Api.Notifications;
 using Microsoft.AspNetCore.DataProtection;
 
 internal static class ContractSmtpDemoChecks
@@ -168,12 +169,52 @@ internal static class ContractSmtpDemoChecks
         Rejected("ConnectionStrings:RentalCamera", "Server=offline-sql;Database=RentalCameraDb30_Test;User ID=sa;Password=offline-only", "Admin SQL login is rejected");
         Rejected("ConnectionStrings:RentalCamera", "Server=offline-sql;Database=RentalCameraDb30_Test;Integrated Security=true", "Integrated SQL authentication is rejected");
         Rejected("Rental:BackgroundJobsEnabled", "true", "Jobs remain disabled");
-        Rejected("Notifications:PushEnabled", "true", "Push remains disabled");
+        Rejected("Notifications:PushEnabled", "true", "Incomplete push configuration remains blocked");
         Rejected("Chatbot:Enabled", "true", "Chatbot remains disabled");
         Rejected("ElectronicSignature:ReturnOtpInResponse", "true", "OTP response fallback remains blocked");
         Rejected("PasswordReset:ReturnTokenInResponse", "true", "Auth token response fallback remains blocked");
         Rejected("Vnpay:FakeTrial", "false", "Payment must remain fake");
         Rejected("Vnpay:PaymentUrl", "https://example.invalid/payment", "External payment URL is rejected");
+
+        var notificationValues = Settings(true);
+        notificationValues["Notifications:PushEnabled"] = "true";
+        notificationValues["Notifications:ReturnReminderEnabled"] = "true";
+        notificationValues["Notifications:WorkerRole"] = "Primary";
+        notificationValues["Notifications:TestAccountId"] = "OFFLINE_ACCOUNT";
+        notificationValues["Notifications:TestDelivery:Enabled"] = "true";
+        notificationValues["Notifications:TestDelivery:Mode"] = "Continuous";
+        notificationValues["Notifications:TestDelivery:AccountId"] = "OFFLINE_ACCOUNT";
+        notificationValues["Notifications:TestDelivery:CustomerId"] = "OFFLINE_CUSTOMER";
+        notificationValues["Notifications:TestDelivery:DeviceRegistrationId"] = "11111111-2222-3333-4444-555555555555";
+        notificationValues["Notifications:TestDelivery:DeviceTokenHash"] = new string('A', 64);
+        notificationValues["Notifications:TestDelivery:CutoverUtc"] = "2030-01-01T00:00:00.0000000Z";
+        notificationValues["Notifications:TestDelivery:AllowedEvents"] = string.Join(',', TestPushDeliveryPolicy.EventCodes);
+        notificationValues["Firebase:ProjectId"] = "offline-project";
+        notificationValues["Firebase:CredentialsPath"] = "offline-service-account.json";
+        notificationValues["Firebase:LiveApiApproved"] = "true";
+        var notificationConfig = Config(notificationValues);
+        _ = new Schema33TrialGuard(notificationConfig, new OfflineEnvironment());
+        Check(TestPushDeliveryPolicy.Configured(notificationConfig) &&
+            TestPushDeliveryPolicy.FromConfiguration(notificationConfig) is not null &&
+            TestPushDeliveryPolicy.EventCodes.Contains("RETURN_DUE_24H") &&
+            TestPushDeliveryPolicy.EventCodes.Contains("RETURN_DUE_2H") &&
+            TestPushDeliveryPolicy.EventCodes.Contains("RETURN_OVERDUE"),
+            "Approved primary notification profile includes all return reminders");
+        foreach (var invalid in new[]
+        {
+            ("Notifications:WorkerRole", "Secondary"),
+            ("Notifications:ReturnReminderEnabled", "false"),
+            ("Firebase:LiveApiApproved", "false"),
+            ("Firebase:CredentialsPath", ""),
+            ("Notifications:TestAccountId", "OTHER_ACCOUNT")
+        })
+        {
+            var changed = new Dictionary<string, string?>(notificationValues) { [invalid.Item1] = invalid.Item2 };
+            var rejected = false;
+            try { _ = new Schema33TrialGuard(Config(changed), new OfflineEnvironment()); }
+            catch (InvalidOperationException) { rejected = true; }
+            Check(rejected, "Incomplete or secondary notification worker profile is blocked");
+        }
         try
         {
             _ = new Schema33TrialGuard(config, new OfflineEnvironment { EnvironmentName = "Production" });
@@ -252,7 +293,13 @@ internal static class ContractSmtpDemoChecks
         ["Email:Enabled"] = smtp ? "true" : "false", ["Email:Host"] = "smtp.example.invalid",
         ["Email:Port"] = "587", ["Email:UseSsl"] = "true", ["Email:Username"] = "sender@example.invalid",
         ["Email:FromAddress"] = "sender@example.invalid", ["Email:Password"] = "offline-placeholder",
-        ["ElectronicSignature:Pepper"] = "offline-placeholder-not-a-real-secret"
+        ["ElectronicSignature:Pepper"] = "offline-placeholder-not-a-real-secret",
+        ["ElectronicSignature:ReturnOtpInResponse"] = "false",
+        ["Rental:BackgroundJobsEnabled"] = "false",
+        ["Notifications:PushEnabled"] = "false",
+        ["Notifications:ReturnReminderEnabled"] = "false",
+        ["Notifications:WorkerRole"] = "Disabled",
+        ["Firebase:LiveApiApproved"] = "false"
     };
 
     private sealed class OfflineEnvironment : IHostEnvironment
