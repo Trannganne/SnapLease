@@ -131,9 +131,12 @@ CREATE TABLE dbo.[DongMay] (
     [GiaThueNgay] decimal(18,2) NOT NULL,
     [TienCoc] decimal(18,2) NOT NULL,
     [PhanTramGiamGia] decimal(5,2) NOT NULL CONSTRAINT [DF33_DongMay_PhanTramGiamGia] DEFAULT (0),
+    [TGBatDau] datetime2 NULL,
+    [TGKetThuc] datetime2 NULL,
     CONSTRAINT [PK_DongMay] PRIMARY KEY ([MaDongMay]),
     CONSTRAINT [CK_DongMay_Gia] CHECK (GiaThueNgay >= 0 AND TienCoc >= 0),
-    CONSTRAINT [CK_DongMay_GiamGia] CHECK (PhanTramGiamGia BETWEEN 0 AND 100)
+    CONSTRAINT [CK_DongMay_GiamGia] CHECK (PhanTramGiamGia BETWEEN 0 AND 100),
+    CONSTRAINT [CK_DongMay_ThoiGianGiamGia] CHECK ((TGBatDau IS NULL AND TGKetThuc IS NULL) OR (TGBatDau IS NOT NULL AND TGKetThuc IS NOT NULL AND TGKetThuc > TGBatDau))
 );
 
 CREATE TABLE dbo.[ThietBi] (

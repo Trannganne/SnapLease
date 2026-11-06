@@ -115,6 +115,8 @@ INSERT @ExpectedColumns VALUES
 (N'dbo',N'DongMay',N'GiaThueNgay',N'decimal(18,2)',0,NULL),
 (N'dbo',N'DongMay',N'TienCoc',N'decimal(18,2)',0,NULL),
 (N'dbo',N'DongMay',N'PhanTramGiamGia',N'decimal(5,2)',0,N'0'),
+(N'dbo',N'DongMay',N'TGBatDau',N'datetime2',1,NULL),
+(N'dbo',N'DongMay',N'TGKetThuc',N'datetime2',1,NULL),
 (N'dbo',N'ThietBi',N'MaThietBi',N'varchar(20)',0,NULL),
 (N'dbo',N'ThietBi',N'MaDongMay',N'varchar(20)',0,NULL),
 (N'dbo',N'ThietBi',N'MaCuaHang',N'varchar(20)',0,NULL),
@@ -718,6 +720,7 @@ INSERT @ExpectedChecks VALUES
 (N'DanhMuc',N'CK_DanhMuc_TrangThai',N'TrangThai IN (''HOAT_DONG'',''TAM_AN'')'),
 (N'DongMay',N'CK_DongMay_Gia',N'GiaThueNgay >= 0 AND TienCoc >= 0'),
 (N'DongMay',N'CK_DongMay_GiamGia',N'PhanTramGiamGia BETWEEN 0 AND 100'),
+(N'DongMay',N'CK_DongMay_ThoiGianGiamGia',N'(TGBatDau IS NULL AND TGKetThuc IS NULL) OR (TGBatDau IS NOT NULL AND TGKetThuc IS NOT NULL AND TGKetThuc > TGBatDau)'),
 (N'ThietBi',N'CK_ThietBi_TrangThai',N'TrangThai IN (
             ''SAN_SANG'',
             ''DANG_GIU'',
@@ -906,4 +909,4 @@ SELECT (SELECT v.Kind,v.TableName,v.ObjectName,v.ExpectedDefinition,v.ActualDefi
  UNION ALL
  SELECT N'INDEX_FILTER',e.TableName,e.IndexName,e.Definition,i.filter_definition FROM @ExpectedFilters e JOIN sys.tables t ON t.name=e.TableName AND SCHEMA_NAME(t.schema_id)=N'dbo' JOIN sys.indexes i ON i.object_id=t.object_id AND i.name=e.IndexName
 )v ORDER BY v.Kind,v.TableName,v.ObjectName FOR JSON PATH,INCLUDE_NULL_VALUES) DefinitionsJson;
-SELECT N'STRUCTURAL_METADATA_MATCH; DEFINITION_AST_COMPARE_REQUIRED' Result,33 PhysicalTableCount,383 ScalarCount;
+SELECT N'STRUCTURAL_METADATA_MATCH; DEFINITION_AST_COMPARE_REQUIRED' Result,33 PhysicalTableCount,385 ScalarCount;

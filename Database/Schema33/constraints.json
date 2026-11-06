@@ -2587,6 +2587,20 @@
       ]
     },
     {
+      "table": "DongMay",
+      "kind": "CHECK",
+      "name": "CK_DongMay_ThoiGianGiamGia",
+      "columns": [],
+      "predicate": "(TGBatDau IS NULL AND TGKetThuc IS NULL) OR (TGBatDau IS NOT NULL AND TGKetThuc IS NOT NULL AND TGKetThuc > TGBatDau)",
+      "status": "BỔ SUNG CỬA SỔ KHUYẾN MÃI CATALOG",
+      "source": [
+        {
+          "file": "Database/01_schema.sql",
+          "line": 105
+        }
+      ]
+    },
+    {
       "table": "ThietBi",
       "kind": "CHECK",
       "name": "CK_ThietBi_TrangThai",

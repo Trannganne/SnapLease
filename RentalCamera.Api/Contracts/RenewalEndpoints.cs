@@ -209,7 +209,11 @@ public static class RenewalEndpoints
         if(to.Kind!=DateTimeKind.Unspecified||to<=current||to-current>TimeSpan.FromDays(90))return No("Hạn mới không hợp lệ; dùng giờ Việt Nam không kèm múi giờ.");
         if(await hours.AddWorkingHoursUtcAsync(h.MaCuaHang,DateTime.UtcNow,4,ct) is null)return No("Chưa có lịch làm việc chi nhánh được xác nhận.");
         if(!await AvailableAsync(h,current,to,db,availability,ct))return No("Thiết bị/serial thực tế không còn khả dụng cho toàn bộ thời gian gia hạn.");
-        var daily=await db.ChiTietHopDong.Where(d=>d.MaHopDong==h.MaHopDong).SumAsync(d=>(decimal?)d.DonGia,ct)??0;
+        var extensionModels=await db.ChiTietHopDong.Where(d=>d.MaHopDong==h.MaHopDong)
+            .Join(db.ThietBi,d=>d.MaThietBi,t=>t.MaThietBi,(d,t)=>t.MaDongMay)
+            .Join(db.DongMay,modelId=>modelId,m=>m.MaDongMay,(modelId,m)=>m)
+            .ToListAsync(ct);
+        var daily=extensionModels.Sum(model=>RentalPromotionPolicy.EffectiveCatalogPrice(model,DateTime.UtcNow));
         if(daily<=0)return No("Không xác định được đơn giá gốc.");
         var days=(int)Math.Ceiling((to-current).TotalDays);return new(true,null,current,to,days,Math.Round(days*daily,2));
     }

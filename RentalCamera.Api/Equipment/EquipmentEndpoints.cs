@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using RentalCamera.Api.Data;
 using RentalCamera.Api.Infrastructure;
+using RentalCamera.Api.Rental;
 
 namespace RentalCamera.Api.Equipment;
 
@@ -32,6 +33,7 @@ public static class EquipmentEndpoints
                     x.DongMay.MaDanhMuc, x.DongMay.DanhMuc.TenDanhMuc,
                     x.DongMay.MaThuongHieu, x.DongMay.ThuongHieu.TenThuongHieu,
                     x.DongMay.GiaThueNgay, x.DongMay.TienCoc, x.DongMay.PhanTramGiamGia,
+                    x.DongMay.TGBatDau, x.DongMay.TGKetThuc,
                     AnhDaiDien = x.DongMay.AnhThietBi.Where(a => a.LaAnhDaiDien)
                         .Select(a => a.DuongDanAnh).FirstOrDefault()
                 }).ToListAsync(ct);
@@ -49,6 +51,7 @@ public static class EquipmentEndpoints
                     x.DongMay.MoTa, x.DongMay.MaDanhMuc, x.DongMay.DanhMuc.TenDanhMuc,
                     x.DongMay.MaThuongHieu, x.DongMay.ThuongHieu.TenThuongHieu,
                     x.DongMay.GiaThueNgay, x.DongMay.TienCoc, x.DongMay.PhanTramGiamGia,
+                    x.DongMay.TGBatDau, x.DongMay.TGKetThuc,
                     Anh = x.DongMay.AnhThietBi.OrderBy(a => a.ThuTuHienThi)
                         .Select(a => new
                         {
@@ -173,13 +176,35 @@ public static class EquipmentEndpoints
         {
             if (request.GiaThueNgay < 0 || request.TienCoc < 0 || request.PhanTramGiamGia is < 0 or > 100)
                 return Results.BadRequest(new { loi = "Giá không hợp lệ." });
+            if (request.TGBatDau.HasValue != request.TGKetThuc.HasValue ||
+                request.TGBatDau.HasValue && request.TGKetThuc <= request.TGBatDau)
+                return Results.BadRequest(new { loi = "Khoảng thời gian giảm giá không hợp lệ." });
             var model = await db.DongMay.SingleOrDefaultAsync(x => x.MaDongMay == id, ct);
             if (model is null) return Results.NotFound();
             model.GiaThueNgay = request.GiaThueNgay;
             model.TienCoc = request.TienCoc;
             model.PhanTramGiamGia = request.PhanTramGiamGia;
+            model.TGBatDau = request.TGBatDau;
+            model.TGKetThuc = request.TGKetThuc;
             await db.SaveChangesAsync(ct);
-            return Results.Ok(new { model.MaDongMay, model.GiaThueNgay, model.TienCoc, model.PhanTramGiamGia });
+            return Results.Ok(new { model.MaDongMay, model.GiaThueNgay, model.TienCoc, model.PhanTramGiamGia,
+                model.TGBatDau, model.TGKetThuc,
+                phanTramGiamGiaHieuLuc = RentalPromotionPolicy.EffectiveCatalogPercent(model) });
+        }).RequireAuthorization("Admin");
+
+        app.MapPost("/api/dong-may/khuyen-mai/reset-het-han", async (RentalCameraContext db, CancellationToken ct) =>
+        {
+            var now = DateTime.UtcNow;
+            var expired = await db.DongMay.Where(x => x.PhanTramGiamGia > 0 && x.TGKetThuc != null && x.TGKetThuc <= now)
+                .ToListAsync(ct);
+            foreach (var model in expired)
+            {
+                model.PhanTramGiamGia = 0;
+                model.TGBatDau = null;
+                model.TGKetThuc = null;
+            }
+            await db.SaveChangesAsync(ct);
+            return Results.Ok(new { soDongMayDaReset = expired.Count, thoiGianXuLyUtc = now });
         }).RequireAuthorization("Admin");
     }
 
@@ -198,4 +223,5 @@ public sealed record DeviceRequest(
     string TinhTrang, string TrangThai, DateOnly? NgayNhap);
 public sealed record UpdateDeviceRequest(string SoSerial, string TinhTrang, DateOnly? NgayNhap);
 public sealed record DeviceStateRequest(string TrangThai, string? TinhTrang);
-public sealed record PriceRequest(decimal GiaThueNgay, decimal TienCoc, decimal PhanTramGiamGia);
+public sealed record PriceRequest(decimal GiaThueNgay, decimal TienCoc, decimal PhanTramGiamGia,
+    DateTime? TGBatDau = null, DateTime? TGKetThuc = null);

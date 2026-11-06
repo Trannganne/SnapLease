@@ -115,6 +115,7 @@ public static class Schema33Mapping
             e.ToTable("DongMay", "dbo", t => {
                 t.HasCheckConstraint("CK_DongMay_Gia", "GiaThueNgay >= 0 AND TienCoc >= 0");
                 t.HasCheckConstraint("CK_DongMay_GiamGia", "PhanTramGiamGia BETWEEN 0 AND 100");
+                t.HasCheckConstraint("CK_DongMay_ThoiGianGiamGia", "(TGBatDau IS NULL AND TGKetThuc IS NULL) OR (TGBatDau IS NOT NULL AND TGKetThuc IS NOT NULL AND TGKetThuc > TGBatDau)");
             });
             e.Property(x => x.MaDongMay).HasColumnType("varchar(20)").IsRequired(true);
             e.Property(x => x.MaDanhMuc).HasColumnType("varchar(20)").IsRequired(true);
@@ -124,6 +125,8 @@ public static class Schema33Mapping
             e.Property(x => x.GiaThueNgay).HasColumnType("decimal(18,2)").IsRequired(true);
             e.Property(x => x.TienCoc).HasColumnType("decimal(18,2)").IsRequired(true);
             e.Property(x => x.PhanTramGiamGia).HasColumnType("decimal(5,2)").IsRequired(true).HasDefaultValueSql("0");
+            e.Property(x => x.TGBatDau).HasColumnType("datetime2").IsRequired(false);
+            e.Property(x => x.TGKetThuc).HasColumnType("datetime2").IsRequired(false);
             e.HasKey("MaDongMay").HasName("PK_DongMay");
             e.HasIndex(new[] { "MaThuongHieu", "TenDongMay" }, "UQ_DongMay").IsUnique();
             e.HasOne<DanhMuc>(x => x.DanhMuc).WithMany().HasForeignKey("MaDanhMuc").HasPrincipalKey("MaDanhMuc").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK_DongMay_MaDanhMuc");

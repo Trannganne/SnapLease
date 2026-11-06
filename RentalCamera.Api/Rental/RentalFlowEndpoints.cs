@@ -503,11 +503,12 @@ public static class RentalEndpoints
         RentalPromotionDecision? promotion = null)
     {
         var days = (int)Math.Ceiling((to - from).TotalDays);
-        var catalogPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
+        var effectiveCatalogPercent = RentalPromotionPolicy.EffectiveCatalogPercent(model);
+        var catalogPrice = RentalPromotionPolicy.EffectiveCatalogPrice(model);
         var unitPrice = promotion?.Apply(catalogPrice) ?? catalogPrice;
         return new PriceQuote(
             model.MaDongMay, quantity, from, to, days,
-            model.GiaThueNgay, model.PhanTramGiamGia, unitPrice,
+            model.GiaThueNgay, effectiveCatalogPercent, unitPrice,
             unitPrice * days * quantity, model.TienCoc, model.TienCoc * quantity,
             promotion?.Percent ?? 0m, promotion?.Codes ?? []
         );

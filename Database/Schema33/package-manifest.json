@@ -4,7 +4,7 @@
   "Environment": "Schema33Trial",
   "createdUtc": "2026-10-27T20:59:00.848552+07:00",
   "requiredTables": 33,
-  "requiredColumns": 383,
+  "requiredColumns": 385,
   "files": [
     {
       "path": "00_preflight.sql",
@@ -12,7 +12,7 @@
     },
     {
       "path": "01_schema33.sql",
-      "sha256": "d22d2f2871540dd0bef12fc40454455b655ad2d5efb3ffe8b1cd79e35d06ed85"
+      "sha256": "3c158ecf22d7587278fa26f4b1241e0c4d20362a257e0af8ee518a7345fc74bf"
     },
     {
       "path": "02_seed_catalog.sql",
@@ -20,7 +20,7 @@
     },
     {
       "path": "04_verify_schema.sql",
-      "sha256": "11b9d81a2ab142118244e643c07b1d3ede5eaa20c50bd59d93b7a45f4274829c"
+      "sha256": "a1d00d0f187a13388b4b975548cd5a3df60c7900a774b9855aac98aa28e692af"
     },
     {
       "path": "05_verify_seed_catalog.sql",
@@ -28,15 +28,15 @@
     },
     {
       "path": "schema.json",
-      "sha256": "f254d3b73662080b5173b5f8cfe20c38ab8190170745d189d47bc22f860185c6"
+      "sha256": "2077645c4c8a1fc08b42bcdc83ea2eb535596b78bb538671a18e1dc23e5c60ac"
     },
     {
       "path": "constraints.json",
-      "sha256": "594e2215a4e68951ee418d58f745a928c58c64cec9150504d03513918b5035c5"
+      "sha256": "c0f193f389a3f9c2647ec87dd77960e295f714ae6f0fbf14d71729686ea25feb"
     },
     {
       "path": "expected-metadata.json",
-      "sha256": "30bc97c11806ffc0c8215c4ffea71644eb052dd0598eae07c58bb391ae960f06"
+      "sha256": "296054b3ef59323c31e798919a815c81f34a813f7826fd4521d21690f3b70a52"
     },
     {
       "path": "seed-catalog.json",
@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "7465819f8581571ed27e936cb3f75103aeeaf9c0c5df0aa0892151484bee3f86"
+      "sha256": "e6b16fa0fb2c2805813de3b82ab925e53cf5bcb16e46919290cdd9432907aba2"
     },
     {
       "path": "Invoke-Schema33Package.ps1",
@@ -62,17 +62,17 @@
   },
   "handoffStatus": "REVIEWED_READY_FOR_RECEIVER_PREFLIGHT_AND_INSTALL",
   "postInstallChecksRequired": [
-    "Actual 33 table/383 column and full structural metadata match",
+    "Actual 33 table/385 column and full structural metadata match",
     "Stored CHECK/default/filter canonical definition comparison",
     "Catalog seed verification",
     "Runtime database binding and HTTP API smoke"
   ],
   "cleanup": {
     "scope": "backend trial only",
-    "buildStatus": "PASS_NET8_ZERO_WARNING_ZERO_ERROR_2026_11_03",
+    "buildStatus": "PASS_NET8_ZERO_WARNING_ZERO_ERROR_2026_11_06",
     "databaseStatus": "RECEIVER_PREFLIGHT_AND_INSTALL_REQUIRED",
     "apiSmokeStatus": "REQUIRED_AFTER_RECEIVER_INSTALL",
-    "regressionStatus": "PASS_EF_EXACT33_383_AND_62_SOURCE_CHECKS_2026_11_03",
+    "regressionStatus": "PASS_EF_EXACT33_385_AND_68_SOURCE_CHECKS_2026_11_06",
     "provenanceRegistry": "../../Docs/SCHEMA33_SQL_INVENTORY.md",
     "historicalSourceReferencesAreLogicalOriginsNotRuntimeDependencies": true
   },

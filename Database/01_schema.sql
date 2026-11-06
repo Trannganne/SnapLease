@@ -84,6 +84,8 @@ CREATE TABLE DongMay (
     GiaThueNgay DECIMAL(18,2) NOT NULL,
     TienCoc DECIMAL(18,2) NOT NULL,
     PhanTramGiamGia DECIMAL(5,2) NOT NULL DEFAULT 0,
+    TGBatDau DATETIME2 NULL,
+    TGKetThuc DATETIME2 NULL,
 
     CONSTRAINT FK_DongMay_DanhMuc
         FOREIGN KEY (MaDanhMuc) REFERENCES DanhMuc(MaDanhMuc),
@@ -98,7 +100,11 @@ CREATE TABLE DongMay (
         CHECK (GiaThueNgay >= 0 AND TienCoc >= 0),
 
     CONSTRAINT CK_DongMay_GiamGia
-        CHECK (PhanTramGiamGia BETWEEN 0 AND 100)
+        CHECK (PhanTramGiamGia BETWEEN 0 AND 100),
+
+    CONSTRAINT CK_DongMay_ThoiGianGiamGia
+        CHECK ((TGBatDau IS NULL AND TGKetThuc IS NULL)
+            OR (TGBatDau IS NOT NULL AND TGKetThuc IS NOT NULL AND TGKetThuc > TGBatDau))
 );
 GO
 

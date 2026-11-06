@@ -98,10 +98,22 @@ public static class CatalogEndpoints
             if (!string.IsNullOrWhiteSpace(maCuaHang))
                 query = query.Where(x => db.ThietBi.Any(t => t.MaDongMay == x.MaDongMay && t.MaCuaHang == maCuaHang && t.TrangThai == "SAN_SANG"));
             var total = await query.CountAsync(ct);
+            var now = DateTime.UtcNow;
             var items = await query.OrderBy(x => x.TenDongMay).Skip((page - 1) * pageSize).Take(pageSize)
                 .Select(x => new
                 {
-                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia,
+                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc,
+                    PhanTramGiamGiaCauHinh = x.PhanTramGiamGia,
+                    PhanTramGiamGia = x.PhanTramGiamGia > 0 &&
+                        (x.TGBatDau == null && x.TGKetThuc == null ||
+                         x.TGBatDau != null && x.TGKetThuc != null && now >= x.TGBatDau && now < x.TGKetThuc)
+                        ? x.PhanTramGiamGia : 0m,
+                    GiaThueNgaySauGiam = Math.Round(x.GiaThueNgay * (100m -
+                        (x.PhanTramGiamGia > 0 &&
+                         (x.TGBatDau == null && x.TGKetThuc == null ||
+                          x.TGBatDau != null && x.TGKetThuc != null && now >= x.TGBatDau && now < x.TGKetThuc)
+                            ? x.PhanTramGiamGia : 0m)) / 100m, 2),
+                    x.TGBatDau, x.TGKetThuc,
                     x.MaDanhMuc, x.DanhMuc.TenDanhMuc, x.MaThuongHieu, x.ThuongHieu.TenThuongHieu,
                     AnhDaiDien = x.AnhThietBi.Where(a => a.LaAnhDaiDien)
                         .Select(a => a.DuongDanAnh).FirstOrDefault(),
@@ -121,10 +133,22 @@ public static class CatalogEndpoints
         });
         models.MapGet("/{id}", async (string id, RentalCameraContext db, CancellationToken ct) =>
         {
+            var now = DateTime.UtcNow;
             var result = await db.DongMay.AsNoTracking().Where(x => x.MaDongMay == id)
                 .Select(x => new
                 {
-                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc, x.PhanTramGiamGia,
+                    x.MaDongMay, x.TenDongMay, x.MoTa, x.GiaThueNgay, x.TienCoc,
+                    PhanTramGiamGiaCauHinh = x.PhanTramGiamGia,
+                    PhanTramGiamGia = x.PhanTramGiamGia > 0 &&
+                        (x.TGBatDau == null && x.TGKetThuc == null ||
+                         x.TGBatDau != null && x.TGKetThuc != null && now >= x.TGBatDau && now < x.TGKetThuc)
+                        ? x.PhanTramGiamGia : 0m,
+                    GiaThueNgaySauGiam = Math.Round(x.GiaThueNgay * (100m -
+                        (x.PhanTramGiamGia > 0 &&
+                         (x.TGBatDau == null && x.TGKetThuc == null ||
+                          x.TGBatDau != null && x.TGKetThuc != null && now >= x.TGBatDau && now < x.TGKetThuc)
+                            ? x.PhanTramGiamGia : 0m)) / 100m, 2),
+                    x.TGBatDau, x.TGKetThuc,
                     x.MaDanhMuc, x.DanhMuc.TenDanhMuc, x.MaThuongHieu, x.ThuongHieu.TenThuongHieu,
                     Anh = x.AnhThietBi.OrderBy(a => a.ThuTuHienThi)
                         .Select(a => new
@@ -154,7 +178,8 @@ public static class CatalogEndpoints
                 MaDongMay = ApiAccess.NewId("DONG"), MaDanhMuc = request.MaDanhMuc,
                 MaThuongHieu = request.MaThuongHieu, TenDongMay = request.TenDongMay.Trim(),
                 MoTa = request.MoTa?.Trim(), GiaThueNgay = request.GiaThueNgay,
-                TienCoc = request.TienCoc, PhanTramGiamGia = request.PhanTramGiamGia
+                TienCoc = request.TienCoc, PhanTramGiamGia = request.PhanTramGiamGia,
+                TGBatDau = request.TGBatDau, TGKetThuc = request.TGKetThuc
             };
             db.DongMay.Add(entity);
             await db.SaveChangesAsync(ct);
@@ -175,6 +200,8 @@ public static class CatalogEndpoints
             entity.GiaThueNgay = request.GiaThueNgay;
             entity.TienCoc = request.TienCoc;
             entity.PhanTramGiamGia = request.PhanTramGiamGia;
+            entity.TGBatDau = request.TGBatDau;
+            entity.TGKetThuc = request.TGKetThuc;
             await db.SaveChangesAsync(ct);
             return Results.Ok(entity);
         }).RequireAuthorization("Admin");
@@ -213,6 +240,10 @@ public static class CatalogEndpoints
             string.IsNullOrWhiteSpace(request.MaThuongHieu)) return "Thiếu thông tin dòng máy.";
         if (request.GiaThueNgay < 0 || request.TienCoc < 0 || request.PhanTramGiamGia is < 0 or > 100)
             return "Giá, tiền cọc hoặc tỷ lệ giảm giá không hợp lệ.";
+        if (request.TGBatDau.HasValue != request.TGKetThuc.HasValue)
+            return "Thời gian bắt đầu và kết thúc giảm giá phải cùng được nhập hoặc cùng để trống.";
+        if (request.TGBatDau.HasValue && request.TGKetThuc <= request.TGBatDau)
+            return "Thời gian kết thúc giảm giá phải sau thời gian bắt đầu.";
         return null;
     }
 }
@@ -222,5 +253,6 @@ public sealed record UpdateCategoryRequest(string TenDanhMuc, string? MoTa, stri
 public sealed record BrandRequest(string TenThuongHieu, string? QuocGia);
 public sealed record ModelRequest(
     string MaDanhMuc, string MaThuongHieu, string TenDongMay, string? MoTa,
-    decimal GiaThueNgay, decimal TienCoc, decimal PhanTramGiamGia);
+    decimal GiaThueNgay, decimal TienCoc, decimal PhanTramGiamGia,
+    DateTime? TGBatDau = null, DateTime? TGKetThuc = null);
 public sealed record ImageRequest(string DuongDanAnh, bool LaAnhDaiDien, int ThuTuHienThi);

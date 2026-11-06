@@ -87,6 +87,8 @@ public sealed class DongMay
     public decimal GiaThueNgay { get; set; }
     public decimal TienCoc { get; set; }
     public decimal PhanTramGiamGia { get; set; } = 0;
+    public DateTime? TGBatDau { get; set; }
+    public DateTime? TGKetThuc { get; set; }
     public ICollection<AnhThietBi> AnhThietBi { get; set; } = new List<AnhThietBi>();
     public DanhMuc DanhMuc { get; set; } = null!;
     public ThuongHieu ThuongHieu { get; set; } = null!;

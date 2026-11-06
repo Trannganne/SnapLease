@@ -8,7 +8,7 @@
     "removed_source_tables": 9,
     "new_table_count": 2,
     "current_source_fields_on_31_retained_tables": 328,
-    "target_field_count": 383,
+    "target_field_count": 385,
     "HD60_fields_mapped": 60,
     "HD60_mapping_counts": {
       "HopDong": 21,
@@ -3743,7 +3743,7 @@
       "pk": [
         "MaDongMay"
       ],
-      "current_columns": 8,
+      "current_columns": 10,
       "columns": [
         {
           "name": "MaDongMay",
@@ -3991,6 +3991,48 @@
             }
           ],
           "clr_type": "decimal",
+          "clr_initializer_not_sql_default": null
+        },
+        {
+          "name": "TGBatDau",
+          "sql_type": "datetime2",
+          "nullable": true,
+          "default_sql": null,
+          "status": "BỔ SUNG",
+          "reason": "Cửa sổ hiệu lực khuyến mãi catalog; phải đi cùng TGKetThuc.",
+          "meaning": "Thời điểm bắt đầu áp dụng PhanTramGiamGia; NULL cùng TGKetThuc giữ tương thích dữ liệu cũ.",
+          "source_model": {
+            "file": "RentalCamera.Api/Data/RentalModels.cs",
+            "line": 103
+          },
+          "source_sql": {
+            "file": "Database/01_schema.sql",
+            "line": 87
+          },
+          "current_definition": "TGBatDau DATETIME2 NULL",
+          "current_sql_variants": [],
+          "clr_type": "DateTime?",
+          "clr_initializer_not_sql_default": null
+        },
+        {
+          "name": "TGKetThuc",
+          "sql_type": "datetime2",
+          "nullable": true,
+          "default_sql": null,
+          "status": "BỔ SUNG",
+          "reason": "Cửa sổ hiệu lực khuyến mãi catalog; phải đi cùng TGBatDau.",
+          "meaning": "Thời điểm kết thúc loại trừ; từ thời điểm này thuê mới và gia hạn dùng giá gốc.",
+          "source_model": {
+            "file": "RentalCamera.Api/Data/RentalModels.cs",
+            "line": 104
+          },
+          "source_sql": {
+            "file": "Database/01_schema.sql",
+            "line": 88
+          },
+          "current_definition": "TGKetThuc DATETIME2 NULL",
+          "current_sql_variants": [],
+          "clr_type": "DateTime?",
           "clr_initializer_not_sql_default": null
         }
       ],
@@ -4718,6 +4760,20 @@
             {
               "file": "Database/01_schema.sql",
               "line": 81
+            }
+          ]
+        },
+        {
+          "table": "DongMay",
+          "kind": "CHECK",
+          "name": "CK_DongMay_ThoiGianGiamGia",
+          "columns": [],
+          "predicate": "(TGBatDau IS NULL AND TGKetThuc IS NULL) OR (TGBatDau IS NOT NULL AND TGKetThuc IS NOT NULL AND TGKetThuc > TGBatDau)",
+          "status": "BỔ SUNG CỬA SỔ KHUYẾN MÃI CATALOG",
+          "source": [
+            {
+              "file": "Database/01_schema.sql",
+              "line": 105
             }
           ]
         }

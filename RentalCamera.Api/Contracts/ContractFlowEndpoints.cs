@@ -131,7 +131,7 @@ public static class ContractEndpoints
             {
                 var model = models[line.MaDongMay];
                 var days = (decimal)Math.Ceiling((line.NgayKetThuc - line.NgayBatDau).TotalDays);
-                var catalogPrice = Math.Round(model.GiaThueNgay * (100 - model.PhanTramGiamGia) / 100, 2);
+                var catalogPrice = RentalPromotionPolicy.EffectiveCatalogPrice(model);
                 var unitPrice = promotion.Apply(catalogPrice);
                 total += unitPrice * days * line.SoLuong;
                 deposit += model.TienCoc * line.SoLuong;

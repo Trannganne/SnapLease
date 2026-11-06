@@ -624,6 +624,22 @@
     ],
     [
       "dbo",
+      "DongMay",
+      "TGBatDau",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
+      "DongMay",
+      "TGKetThuc",
+      "datetime2",
+      1,
+      null
+    ],
+    [
+      "dbo",
       "ThietBi",
       "MaThietBi",
       "varchar(20)",
@@ -5133,6 +5149,11 @@
       "table": "DongMay",
       "name": "CK_DongMay_GiamGia",
       "definition": "PhanTramGiamGia BETWEEN 0 AND 100"
+    },
+    {
+      "table": "DongMay",
+      "name": "CK_DongMay_ThoiGianGiamGia",
+      "definition": "(TGBatDau IS NULL AND TGKetThuc IS NULL) OR (TGBatDau IS NOT NULL AND TGKetThuc IS NOT NULL AND TGKetThuc > TGBatDau)"
     },
     {
       "table": "ThietBi",
