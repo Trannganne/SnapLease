@@ -180,6 +180,16 @@ var payment=new ThanhToan{MaThanhToan="REF1",MaHopDong="HD1",LoaiThanhToan="HOAN
 var hash=RefundWorkflow.Hash(payment);payment.SoTien=500_001;
 Check(hash!=RefundWorkflow.Hash(payment),"Refund acknowledgement binds exact amount");
 Check(RefundWorkflow.IsRefund("HOAN_THU_THUA")&&!RefundWorkflow.IsRefund("THU_QUYET_TOAN"),"Refund distinct from collection");
+var historyPayments = new[]
+{
+    new ThanhToan { MaThanhToan="PAY_DEPOSIT", MaHopDong="HD1", LoaiThanhToan="TIEN_COC", TrangThai="THANH_CONG", SoTien=1_250_000m },
+    new ThanhToan { MaThanhToan="PAY_RENT", MaHopDong="HD1", LoaiThanhToan="TIEN_THUE", TrangThai="THANH_CONG", SoTien=250_000m },
+    new ThanhToan { MaThanhToan="PAY_EXTENSION", MaHopDong="HD1", LoaiThanhToan="PHI_GIA_HAN", TrangThai="THANH_CONG", SoTien=125_000m },
+    new ThanhToan { MaThanhToan="PAY_FAILED", MaHopDong="HD1", LoaiThanhToan="PHI_PHAT", TrangThai="THAT_BAI", SoTien=500_000m },
+    new ThanhToan { MaThanhToan="REFUND", MaHopDong="HD1", LoaiThanhToan="HOAN_COC", TrangThai="THANH_CONG", SoTien=1_250_000m }
+};
+Check(RentalHistoryPolicy.TotalPaid(historyPayments)==1_625_000m,
+    "Rental history totals only successful collected payments and excludes failed/refund rows");
 var identity=new GiayToTuyThan{TrangThaiXacMinh="HOP_LE"};
 Check(ContractEndpoints.IsIdentityVerifiedForRental(identity),"Verified identity can create rental contract");
 identity.TrangThaiXacMinh="CHO_XAC_MINH";

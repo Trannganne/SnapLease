@@ -245,6 +245,104 @@ public static class ContractEndpoints
             return Results.Ok(data);
         }).RequireAuthorization("Customer");
 
+        contracts.MapGet("/cua-toi/nhat-ky", async (
+            ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+            if (customerId is null) return Results.Forbid();
+
+            var contractsData = await db.HopDong.AsNoTracking()
+                .Where(contract => contract.MaKhachThue == customerId)
+                .OrderByDescending(contract => contract.NgayTaoHopDong)
+                .Select(contract => new
+                {
+                    contract.MaHopDong,
+                    contract.MaGiuCho,
+                    contract.MaCuaHang,
+                    contract.NgayTaoHopDong,
+                    contract.NgayKy,
+                    contract.ThoiGianBanGiao,
+                    contract.ThoiGianTraDuKien,
+                    contract.TongTien,
+                    contract.TongTienCoc,
+                    contract.TrangThai,
+                    TenCuaHang = db.CuaHang
+                        .Where(store => store.MaCuaHang == contract.MaCuaHang)
+                        .Select(store => store.TenCuaHang)
+                        .FirstOrDefault() ?? "",
+                    ThietBi = db.ChiTietGiuCho
+                        .Where(detail => detail.MaGiuCho == contract.MaGiuCho)
+                        .Join(db.DongMay,
+                            detail => detail.MaDongMay,
+                            model => model.MaDongMay,
+                            (detail, model) => model)
+                        .Select(model => new
+                        {
+                            model.MaDongMay,
+                            model.TenDongMay,
+                            HinhAnh = model.AnhThietBi
+                                .Where(image => image.LaAnhDaiDien)
+                                .Select(image => image.DuongDanAnh)
+                                .FirstOrDefault()
+                                ?? model.AnhThietBi
+                                    .Select(image => image.DuongDanAnh)
+                                    .FirstOrDefault()
+                                ?? ""
+                        })
+                        .FirstOrDefault(),
+                    SoLuongThietBi = db.ChiTietGiuCho
+                        .Where(detail => detail.MaGiuCho == contract.MaGiuCho)
+                        .Sum(detail => (int?)detail.SoLuong) ?? 0
+                })
+                .ToListAsync(ct);
+
+            var contractIds = contractsData.Select(contract => contract.MaHopDong).ToArray();
+            var collectedTypes = RentalHistoryPolicy.CollectedPaymentTypes;
+            var paidByContract = contractIds.Length == 0
+                ? new Dictionary<string, decimal>(StringComparer.Ordinal)
+                : await db.ThanhToan.AsNoTracking()
+                    .Where(payment => contractIds.Contains(payment.MaHopDong)
+                        && payment.TrangThai == "THANH_CONG"
+                        && collectedTypes.Contains(payment.LoaiThanhToan))
+                    .GroupBy(payment => payment.MaHopDong)
+                    .Select(group => new
+                    {
+                        MaHopDong = group.Key,
+                        SoTienDaThanhToan = group.Sum(payment => payment.SoTien)
+                    })
+                    .ToDictionaryAsync(
+                        row => row.MaHopDong,
+                        row => row.SoTienDaThanhToan,
+                        StringComparer.Ordinal,
+                        ct);
+
+            var history = contractsData.Select(contract => new
+            {
+                contract.MaHopDong,
+                contract.MaGiuCho,
+                contract.MaCuaHang,
+                contract.NgayTaoHopDong,
+                contract.NgayKy,
+                contract.ThoiGianBanGiao,
+                contract.ThoiGianTraDuKien,
+                contract.TongTien,
+                contract.TongTienCoc,
+                SoTienDaThanhToan = paidByContract.GetValueOrDefault(contract.MaHopDong),
+                contract.TrangThai,
+                contract.TenCuaHang,
+                contract.ThietBi,
+                contract.SoLuongThietBi
+            }).ToList();
+
+            return Results.Ok(new
+            {
+                SoHopDongDaDat = contractsData.Count,
+                SoHopDongDaHuy = contractsData.Count(contract => contract.TrangThai == "DA_HUY"),
+                TongTienDaThanhToan = paidByContract.Values.Sum(),
+                LichSu = history
+            });
+        }).RequireAuthorization("Customer");
+
         contracts.MapGet("/theo-giu-cho/{maGiuCho}", async (
             string maGiuCho, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
