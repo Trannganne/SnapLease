@@ -93,13 +93,6 @@ INSERT @ExpectedColumns VALUES
 (N'dbo',N'GiayToTuyThan',N'NgayTaiLen',N'datetime2',0,N'SYSDATETIME()'),
 (N'dbo',N'GiayToTuyThan',N'TrangThaiXacMinh',N'varchar(20)',0,N'''CHO_XAC_MINH'''),
 (N'dbo',N'GiayToTuyThan',N'GhiChu',N'nvarchar(500)',1,NULL),
-(N'dbo',N'GiayToTuyThan',N'NhaCungCapXacMinh',N'varchar(30)',1,NULL),
-(N'dbo',N'GiayToTuyThan',N'MaThamChieuXacMinh',N'varchar(100)',1,NULL),
-(N'dbo',N'GiayToTuyThan',N'KetQuaXacMinhTuDong',N'varchar(30)',1,NULL),
-(N'dbo',N'GiayToTuyThan',N'DoTinCayOcr',N'decimal(5,4)',1,NULL),
-(N'dbo',N'GiayToTuyThan',N'DiemSoKhuonMat',N'decimal(5,4)',1,NULL),
-(N'dbo',N'GiayToTuyThan',N'DiemSoSong',N'decimal(5,4)',1,NULL),
-(N'dbo',N'GiayToTuyThan',N'XacMinhTuDongLucUtc',N'datetime2',1,NULL),
 (N'dbo',N'DanhMuc',N'MaDanhMuc',N'varchar(20)',0,NULL),
 (N'dbo',N'DanhMuc',N'TenDanhMuc',N'nvarchar(150)',0,NULL),
 (N'dbo',N'DanhMuc',N'MoTa',N'nvarchar(500)',1,NULL),
@@ -715,8 +708,6 @@ INSERT @ExpectedChecks VALUES
 (N'NhanVien',N'CK_NhanVien_TrangThai',N'TrangThai IN (''HOAT_DONG'',''NGHI_VIEC'')'),
 (N'GiayToTuyThan',N'CK_GiayTo_Loai',N'LoaiGiayTo IN (''CCCD'',''HO_CHIEU'',''GPLX'')'),
 (N'GiayToTuyThan',N'CK_GiayTo_TrangThai',N'TrangThaiXacMinh IN (''CHO_XAC_MINH'',''HOP_LE'',''TU_CHOI'')'),
-(N'GiayToTuyThan',N'CKR_GiayTo_KetQuaXacMinhTuDong',N'KetQuaXacMinhTuDong IS NULL OR KetQuaXacMinhTuDong IN (''CHO_XU_LY'',''CAN_DUYET'',''DAT'',''KHONG_DAT'',''LOI_NHA_CUNG_CAP'')'),
-(N'GiayToTuyThan',N'CKR_GiayTo_DiemXacMinhTuDong',N'(DoTinCayOcr IS NULL OR DoTinCayOcr BETWEEN 0 AND 1) AND (DiemSoKhuonMat IS NULL OR DiemSoKhuonMat BETWEEN 0 AND 1) AND (DiemSoSong IS NULL OR DiemSoSong BETWEEN 0 AND 1)'),
 (N'DanhMuc',N'CK_DanhMuc_TrangThai',N'TrangThai IN (''HOAT_DONG'',''TAM_AN'')'),
 (N'DongMay',N'CK_DongMay_Gia',N'GiaThueNgay >= 0 AND TienCoc >= 0'),
 (N'DongMay',N'CK_DongMay_GiamGia',N'PhanTramGiamGia BETWEEN 0 AND 100'),
@@ -909,4 +900,4 @@ SELECT (SELECT v.Kind,v.TableName,v.ObjectName,v.ExpectedDefinition,v.ActualDefi
  UNION ALL
  SELECT N'INDEX_FILTER',e.TableName,e.IndexName,e.Definition,i.filter_definition FROM @ExpectedFilters e JOIN sys.tables t ON t.name=e.TableName AND SCHEMA_NAME(t.schema_id)=N'dbo' JOIN sys.indexes i ON i.object_id=t.object_id AND i.name=e.IndexName
 )v ORDER BY v.Kind,v.TableName,v.ObjectName FOR JSON PATH,INCLUDE_NULL_VALUES) DefinitionsJson;
-SELECT N'STRUCTURAL_METADATA_MATCH; DEFINITION_AST_COMPARE_REQUIRED' Result,33 PhysicalTableCount,385 ScalarCount;
+SELECT N'STRUCTURAL_METADATA_MATCH; DEFINITION_AST_COMPARE_REQUIRED' Result,33 PhysicalTableCount,378 ScalarCount;

@@ -2517,34 +2517,6 @@
       ]
     },
     {
-      "table": "GiayToTuyThan",
-      "kind": "CHECK",
-      "name": "CKR_GiayTo_KetQuaXacMinhTuDong",
-      "columns": [],
-      "predicate": "KetQuaXacMinhTuDong IS NULL OR KetQuaXacMinhTuDong IN ('CHO_XU_LY','CAN_DUYET','DAT','KHONG_DAT','LOI_NHA_CUNG_CAP')",
-      "status": "BỔ SUNG THEO EF SCHEMA33",
-      "source": [
-        {
-          "file": "RentalCamera.Api/Data/Schema33Mapping.cs",
-          "line": 71
-        }
-      ]
-    },
-    {
-      "table": "GiayToTuyThan",
-      "kind": "CHECK",
-      "name": "CKR_GiayTo_DiemXacMinhTuDong",
-      "columns": [],
-      "predicate": "(DoTinCayOcr IS NULL OR DoTinCayOcr BETWEEN 0 AND 1) AND (DiemSoKhuonMat IS NULL OR DiemSoKhuonMat BETWEEN 0 AND 1) AND (DiemSoSong IS NULL OR DiemSoSong BETWEEN 0 AND 1)",
-      "status": "BỔ SUNG THEO EF SCHEMA33",
-      "source": [
-        {
-          "file": "RentalCamera.Api/Data/Schema33Mapping.cs",
-          "line": 72
-        }
-      ]
-    },
-    {
       "table": "DanhMuc",
       "kind": "CHECK",
       "name": "CK_DanhMuc_TrangThai",

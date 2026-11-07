@@ -92,18 +92,9 @@ CREATE TABLE dbo.[GiayToTuyThan] (
     [NgayTaiLen] datetime2 NOT NULL CONSTRAINT [DF33_GiayToTuyThan_NgayTaiLen] DEFAULT (SYSDATETIME()),
     [TrangThaiXacMinh] varchar(20) NOT NULL CONSTRAINT [DF33_GiayToTuyThan_TrangThaiXacMinh] DEFAULT ('CHO_XAC_MINH'),
     [GhiChu] nvarchar(500) NULL,
-    [NhaCungCapXacMinh] varchar(30) NULL,
-    [MaThamChieuXacMinh] varchar(100) NULL,
-    [KetQuaXacMinhTuDong] varchar(30) NULL,
-    [DoTinCayOcr] decimal(5,4) NULL,
-    [DiemSoKhuonMat] decimal(5,4) NULL,
-    [DiemSoSong] decimal(5,4) NULL,
-    [XacMinhTuDongLucUtc] datetime2 NULL,
     CONSTRAINT [PK_GiayToTuyThan] PRIMARY KEY ([MaGiayTo]),
     CONSTRAINT [CK_GiayTo_Loai] CHECK (LoaiGiayTo IN ('CCCD','HO_CHIEU','GPLX')),
-    CONSTRAINT [CK_GiayTo_TrangThai] CHECK (TrangThaiXacMinh IN ('CHO_XAC_MINH','HOP_LE','TU_CHOI')),
-    CONSTRAINT [CKR_GiayTo_KetQuaXacMinhTuDong] CHECK (KetQuaXacMinhTuDong IS NULL OR KetQuaXacMinhTuDong IN ('CHO_XU_LY','CAN_DUYET','DAT','KHONG_DAT','LOI_NHA_CUNG_CAP')),
-    CONSTRAINT [CKR_GiayTo_DiemXacMinhTuDong] CHECK ((DoTinCayOcr IS NULL OR DoTinCayOcr BETWEEN 0 AND 1) AND (DiemSoKhuonMat IS NULL OR DiemSoKhuonMat BETWEEN 0 AND 1) AND (DiemSoSong IS NULL OR DiemSoSong BETWEEN 0 AND 1))
+    CONSTRAINT [CK_GiayTo_TrangThai] CHECK (TrangThaiXacMinh IN ('CHO_XAC_MINH','HOP_LE','TU_CHOI'))
 );
 
 CREATE TABLE dbo.[DanhMuc] (

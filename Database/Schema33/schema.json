@@ -8,7 +8,7 @@
     "removed_source_tables": 9,
     "new_table_count": 2,
     "current_source_fields_on_31_retained_tables": 328,
-    "target_field_count": 385,
+    "target_field_count": 378,
     "HD60_fields_mapped": 60,
     "HD60_mapping_counts": {
       "HopDong": 21,
@@ -22,7 +22,7 @@
       "FK": 68,
       "UNIQUE": 34,
       "INDEX": 32,
-      "CHECK": 72
+      "CHECK": 71
     },
     "validation_scope": "STATIC DESIGN CONSISTENCY, NO SQL/EF/API EXECUTION"
   },
@@ -2461,111 +2461,6 @@
           ],
           "clr_type": "string?",
           "clr_initializer_not_sql_default": null
-        },
-        {
-          "name": "NhaCungCapXacMinh",
-          "sql_type": "varchar(30)",
-          "nullable": true,
-          "default_sql": null,
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "reason": "Lưu mã nhà cung cấp eKYC đã xử lý lần xác minh.",
-          "meaning": "Nhà cung cấp kết quả xác minh tự động.",
-          "source_model": { "file": "RentalCamera.Api/Data/RentalModels.cs", "line": 56 },
-          "source_sql": { "file": "Database/Schema33/01_schema33.sql", "line": 95 },
-          "current_definition": "NhaCungCapXacMinh VARCHAR(30) NULL",
-          "current_sql_variants": [],
-          "clr_type": "string?",
-          "clr_initializer_not_sql_default": null
-        },
-        {
-          "name": "MaThamChieuXacMinh",
-          "sql_type": "varchar(100)",
-          "nullable": true,
-          "default_sql": null,
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "reason": "Đối soát yêu cầu với nhà cung cấp eKYC.",
-          "meaning": "Mã tham chiếu bên nhà cung cấp.",
-          "source_model": { "file": "RentalCamera.Api/Data/RentalModels.cs", "line": 57 },
-          "source_sql": { "file": "Database/Schema33/01_schema33.sql", "line": 96 },
-          "current_definition": "MaThamChieuXacMinh VARCHAR(100) NULL",
-          "current_sql_variants": [],
-          "clr_type": "string?",
-          "clr_initializer_not_sql_default": null
-        },
-        {
-          "name": "KetQuaXacMinhTuDong",
-          "sql_type": "varchar(30)",
-          "nullable": true,
-          "default_sql": null,
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "reason": "Lưu kết luận máy của luồng eKYC.",
-          "meaning": "Trạng thái kết quả xác minh tự động.",
-          "source_model": { "file": "RentalCamera.Api/Data/RentalModels.cs", "line": 58 },
-          "source_sql": { "file": "Database/Schema33/01_schema33.sql", "line": 97 },
-          "current_definition": "KetQuaXacMinhTuDong VARCHAR(30) NULL",
-          "current_sql_variants": [],
-          "clr_type": "string?",
-          "clr_initializer_not_sql_default": null
-        },
-        {
-          "name": "DoTinCayOcr",
-          "sql_type": "decimal(5,4)",
-          "nullable": true,
-          "default_sql": null,
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "reason": "Lưu điểm OCR chuẩn hóa trong khoảng 0 đến 1.",
-          "meaning": "Độ tin cậy OCR.",
-          "source_model": { "file": "RentalCamera.Api/Data/RentalModels.cs", "line": 59 },
-          "source_sql": { "file": "Database/Schema33/01_schema33.sql", "line": 98 },
-          "current_definition": "DoTinCayOcr DECIMAL(5,4) NULL",
-          "current_sql_variants": [],
-          "clr_type": "decimal?",
-          "clr_initializer_not_sql_default": null
-        },
-        {
-          "name": "DiemSoKhuonMat",
-          "sql_type": "decimal(5,4)",
-          "nullable": true,
-          "default_sql": null,
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "reason": "Lưu điểm đối chiếu khuôn mặt trong khoảng 0 đến 1.",
-          "meaning": "Điểm so khớp khuôn mặt.",
-          "source_model": { "file": "RentalCamera.Api/Data/RentalModels.cs", "line": 60 },
-          "source_sql": { "file": "Database/Schema33/01_schema33.sql", "line": 99 },
-          "current_definition": "DiemSoKhuonMat DECIMAL(5,4) NULL",
-          "current_sql_variants": [],
-          "clr_type": "decimal?",
-          "clr_initializer_not_sql_default": null
-        },
-        {
-          "name": "DiemSoSong",
-          "sql_type": "decimal(5,4)",
-          "nullable": true,
-          "default_sql": null,
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "reason": "Lưu điểm liveness trong khoảng 0 đến 1.",
-          "meaning": "Điểm kiểm tra người thật.",
-          "source_model": { "file": "RentalCamera.Api/Data/RentalModels.cs", "line": 61 },
-          "source_sql": { "file": "Database/Schema33/01_schema33.sql", "line": 100 },
-          "current_definition": "DiemSoSong DECIMAL(5,4) NULL",
-          "current_sql_variants": [],
-          "clr_type": "decimal?",
-          "clr_initializer_not_sql_default": null
-        },
-        {
-          "name": "XacMinhTuDongLucUtc",
-          "sql_type": "datetime2",
-          "nullable": true,
-          "default_sql": null,
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "reason": "Ghi nhận thời điểm hoàn tất lần gọi eKYC.",
-          "meaning": "Thời điểm xác minh tự động theo UTC.",
-          "source_model": { "file": "RentalCamera.Api/Data/RentalModels.cs", "line": 62 },
-          "source_sql": { "file": "Database/Schema33/01_schema33.sql", "line": 101 },
-          "current_definition": "XacMinhTuDongLucUtc DATETIME2 NULL",
-          "current_sql_variants": [],
-          "clr_type": "DateTime?",
-          "clr_initializer_not_sql_default": null
         }
       ],
       "notes": [
@@ -2849,28 +2744,6 @@
               "file": "Database/01_schema.sql",
               "line": 194
             }
-          ]
-        },
-        {
-          "table": "GiayToTuyThan",
-          "kind": "CHECK",
-          "name": "CKR_GiayTo_KetQuaXacMinhTuDong",
-          "columns": [],
-          "predicate": "KetQuaXacMinhTuDong IS NULL OR KetQuaXacMinhTuDong IN ('CHO_XU_LY','CAN_DUYET','DAT','KHONG_DAT','LOI_NHA_CUNG_CAP')",
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "source": [
-            { "file": "RentalCamera.Api/Data/Schema33Mapping.cs", "line": 71 }
-          ]
-        },
-        {
-          "table": "GiayToTuyThan",
-          "kind": "CHECK",
-          "name": "CKR_GiayTo_DiemXacMinhTuDong",
-          "columns": [],
-          "predicate": "(DoTinCayOcr IS NULL OR DoTinCayOcr BETWEEN 0 AND 1) AND (DiemSoKhuonMat IS NULL OR DiemSoKhuonMat BETWEEN 0 AND 1) AND (DiemSoSong IS NULL OR DiemSoSong BETWEEN 0 AND 1)",
-          "status": "BỔ SUNG THEO EF SCHEMA33",
-          "source": [
-            { "file": "RentalCamera.Api/Data/Schema33Mapping.cs", "line": 72 }
           ]
         }
       ]

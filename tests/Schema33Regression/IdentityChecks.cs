@@ -309,9 +309,6 @@ internal static class IdentityChecks
                     ["MaGiayTo"] = "OFFLINE_DOC", ["LoaiGiayTo"] = "CCCD", ["SoGiayTo"] = "OFFLINE_NUMBER",
                     ["MatTruocUrl"] = "/api/giay-to/anh/fixture.jpg", ["MatSauUrl"] = "/api/giay-to/anh/back.jpg",
                     ["NgayTaiLen"] = new DateTime(2030, 1, 1), ["TrangThaiXacMinh"] = "CHO_XAC_MINH", ["GhiChu"] = null,
-                    ["NhaCungCapXacMinh"] = null, ["MaThamChieuXacMinh"] = null, ["KetQuaXacMinhTuDong"] = null,
-                    ["DoTinCayOcr"] = null, ["DiemSoKhuonMat"] = null, ["DiemSoSong"] = null,
-                    ["XacMinhTuDongLucUtc"] = null,
                     ["MaNhanVien"] = "OFFLINE_STAFF", ["MaCuaHang"] = "OFFLINE_OTHER_BRANCH" };
                 foreach (var key in new[] { "MaTaiKhoan", "HoTen", "SoDienThoai", "Email", "CCCD", "DiaChi", "NgaySinh",
                     "GioiTinh", "QuocTich", "NgayCap", "NoiCap", "EmailXacMinhLucUtc" }) values[key] = null;

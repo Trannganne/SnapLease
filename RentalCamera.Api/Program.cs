@@ -59,22 +59,11 @@ ContractSigningOtpRegistration.Register(builder.Services, trialGuard);
 AuthEmailRegistration.Register(builder.Services, trialGuard);
 builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("Vnpay"));
 builder.Services.Configure<BankTransferOptions>(builder.Configuration.GetSection("BankTransfer"));
-builder.Services.Configure<VnptEkycOptions>(builder.Configuration.GetSection(VnptEkycOptions.SectionName));
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient(Microsoft.Extensions.Options.Options.DefaultName)
     .ConfigurePrimaryHttpMessageHandler(() => new DenyExternalHttpHandler());
 builder.Services.AddHttpClient("VnpaySandbox")
     .ConfigurePrimaryHttpMessageHandler(() => trialGuard.SandboxVnpay
-        ? new HttpClientHandler { AllowAutoRedirect = false }
-        : new DenyExternalHttpHandler());
-builder.Services.AddHttpClient<VnptEkycService>((provider, client) =>
-{
-    var configured = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<VnptEkycOptions>>().Value;
-    client.BaseAddress = new Uri(configured.BaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(Math.Clamp(configured.TimeoutSeconds, 5, 120));
-}).ConfigurePrimaryHttpMessageHandler(() =>
-    builder.Configuration.GetValue<bool>("VnptEkyc:Enabled") &&
-    builder.Configuration.GetValue<bool>("VnptEkyc:LiveApiApproved")
         ? new HttpClientHandler { AllowAutoRedirect = false }
         : new DenyExternalHttpHandler());
 builder.Services.AddChatbot(builder.Configuration);
@@ -219,7 +208,6 @@ app.MapReserveDeviceEndpoints();
 app.MapRentalEndpoints();
 app.MapCartEndpoints();
 app.MapIdentityEndpoints();
-app.MapVnptIdentityEndpoints();
 app.MapContractEndpoints();
 app.MapRenewalEndpoints();
 app.MapCancellationEndpoints();

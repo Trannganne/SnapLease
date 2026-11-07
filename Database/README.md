@@ -8,7 +8,7 @@ The official installation is [Schema33/README.md](Schema33/README.md). It includ
 
 `15_remove_ekyc_fields.sql` is an idempotent cleanup for a trial database that previously received the cancelled eKYC extension. It removes only the two eKYC constraints and eight eKYC-only columns from `GiayToTuyThan`, returning the model to the reviewed 33-table/376-field baseline. It preserves the CCCD front/back images and the manual verification status. Back up the target database before applying it; a fresh Schema33 database does not need this script.
 
-`16_add_vnpt_identity_result_fields.sql` is the idempotent forward extension for the approved VNPT trial. It keeps the 33-table set and adds seven nullable result fields plus two checks to `GiayToTuyThan`. It does not store a selfie, raw provider payload or secret, and it does not change the staff's final verification status. Apply it only with a matching API build; the sealed Schema33 package remains the 376-field baseline while the extended application model has 383 fields.
+`17_remove_vnpt_identity_result_fields.sql` is the idempotent cleanup for databases that received the later VNPT result extension. It removes exactly seven VNPT result columns and their two checks from `GiayToTuyThan`. It preserves the CCCD images, customer profile data, manual verification status and the two timed-promotion columns in `DongMay`. Back up and verify the target before applying it; a fresh 378-field Schema33 database does not need this cleanup.
 
 [The SQL inventory](../Docs/SCHEMA33_SQL_INVENTORY.md) lists KEEP/ARCHIVE/REVIEW, exact historical hashes and the archive locator. Legacy source citations are provenance, not migration dependencies. Do not run an old migration or reset tool to initialize33.
 
