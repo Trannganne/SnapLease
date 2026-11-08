@@ -18,16 +18,18 @@ Khi cần kiểm thử merchant VNPAY Sandbox thật trên cùng database33, ch�
 ## Ngoại lệ SMTP OTP ký hợp đồng được duyệt riêng
 
 Profile mặc định vẫn Fake. Một môi trường demo được người quản lý duyệt có thể đặt
-`ContractOtpEmail:Mode=SmtpDemo`, `SmtpApproved=true` và `AllowedRecipient` là duy nhất
-email thử đã được duyệt. `Schema33Trial:ProviderMode` vẫn phải là `Fake`; không đổi
+`ContractOtpEmail:Mode=SmtpDemo` và `SmtpApproved=true`. SMTP gửi tới email đã xác minh
+của từng khách hàng, không còn giới hạn `AllowedRecipient`. `Schema33Trial:ProviderMode`
+vẫn phải là `Fake`; không đổi
 sang Development/Production hoặc bỏ guard để bật SMTP. Mọi binding database,
 PackageApproved, login runtime riêng, payment giả/URL loopback và các cờ tắt
 jobs/push/chatbot/OTP response/auth-token response vẫn bắt buộc như trước.
 
-Chỉ POST `/api/hop-dong/{id}/yeu-cau-ky` dùng provider có key `ContractSigningOtp`.
-Provider mặc định, OTP phụ lục và email xác minh/quên mật khẩu vẫn dùng mailbox giả.
-Người nhận lấy từ `KhachThue.Email` của khách hàng sở hữu hợp đồng; allowlist chỉ
-kiểm tra email này, không thay thế người nhận hoặc nhận địa chỉ từ Flutter.
+POST `/api/hop-dong/{id}/yeu-cau-ky` và `/api/gia-han/{id}/yeu-cau-ky` dùng provider
+có key `ContractSigningOtp`. Người nhận luôn lấy từ `KhachThue.Email` của khách hàng
+đang đăng nhập; Flutter không được truyền địa chỉ nhận. Hai API trả
+`EMAIL_NOT_VERIFIED` nếu `EmailXacMinhLucUtc` chưa có giá trị. Giới hạn API, thời gian
+chờ 60 giây và tối đa 5 lần gửi/thử tiếp tục được áp dụng để chống gửi lặp/spam.
 `SmtpContractOtpEmailSender` hiện có được tái sử dụng, không đổi HTTP contract/PDF/
 điều khoản/OTP hoặc điều kiện ký.
 

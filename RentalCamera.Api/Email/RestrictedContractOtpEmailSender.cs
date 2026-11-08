@@ -18,7 +18,7 @@ public static class ContractSigningOtpRegistration
             services.AddSingleton<SmtpContractOtpEmailSender>();
             services.AddKeyedSingleton<IContractOtpEmailSender>(ServiceKey, (sp, _) =>
                 new RestrictedContractOtpEmailSender(
-                    sp.GetRequiredService<SmtpContractOtpEmailSender>(), guard.AllowedContractOtpRecipient!));
+                    sp.GetRequiredService<SmtpContractOtpEmailSender>()));
         }
         else
         {
@@ -34,13 +34,13 @@ public static class AuthEmailRegistration
     {
         services.AddSingleton<IAuthEmailSender>(sp => guard.AuthSmtpDemoEnabled
             ? new RestrictedAuthEmailSender(sp.GetRequiredService<SmtpContractOtpEmailSender>(),
-                guard.AllowedContractOtpRecipient!, guard.AuthLinkBaseUri!, sp.GetRequiredService<IConfiguration>())
+                guard.AuthLinkBaseUri!, sp.GetRequiredService<IConfiguration>())
             : sp.GetRequiredService<FakeTrialSender>());
     }
 }
 
 public sealed class RestrictedAuthEmailSender(SmtpContractOtpEmailSender inner,
-    string allowedRecipient, Uri linkBaseUri, IConfiguration configuration) : IAuthEmailSender
+    Uri linkBaseUri, IConfiguration configuration) : IAuthEmailSender
 {
     public static Uri BuildLink(Uri baseUri, string purpose, string token) =>
         new UriBuilder(baseUri) { Fragment = "purpose=" + Uri.EscapeDataString(purpose) + "&token=" + Uri.EscapeDataString(token) }.Uri;
@@ -48,8 +48,7 @@ public sealed class RestrictedAuthEmailSender(SmtpContractOtpEmailSender inner,
     public async Task SendAsync(string email, string purpose, string token, CancellationToken ct)
     {
         if (purpose is not ("VERIFY_EMAIL" or "RESET_PASSWORD") ||
-            AuthLinkService.NormalizeEmail(email) is not { } normalized ||
-            !string.Equals(normalized, allowedRecipient, StringComparison.OrdinalIgnoreCase))
+            AuthLinkService.NormalizeEmail(email) is not { })
             throw new AuthEmailDeliveryException();
         var title = purpose == "VERIFY_EMAIL" ? "Xác minh email SnapLease" : "Đặt lại mật khẩu SnapLease";
         var section = purpose == "VERIFY_EMAIL" ? "EmailVerification" : "PasswordReset";
@@ -70,7 +69,7 @@ public sealed class AuthEmailDeliveryException : Exception
 }
 
 public sealed class RestrictedContractOtpEmailSender(
-    IContractOtpEmailSender inner, string allowedRecipient) : IContractOtpEmailSender
+    IContractOtpEmailSender inner) : IContractOtpEmailSender
 {
     public bool IsConfigured => inner.IsConfigured;
 
@@ -80,11 +79,11 @@ public sealed class RestrictedContractOtpEmailSender(
         cancellationToken.ThrowIfCancellationRequested();
         var recipient = recipientEmail?.Trim();
         if (string.IsNullOrWhiteSpace(recipient) || !MailAddress.TryCreate(recipient, out var address) ||
-            !string.Equals(address.Address, recipient, StringComparison.OrdinalIgnoreCase) ||
-            !string.Equals(recipient, allowedRecipient, StringComparison.OrdinalIgnoreCase))
-            throw new InvalidOperationException("SMTP OTP demo chỉ cho phép người nhận đã được duyệt.");
+            !string.Equals(address.Address, recipient, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidOperationException("Địa chỉ email nhận OTP không hợp lệ.");
 
-        // Keep the server-selected recipient. Never redirect to the allowlist.
+        // The endpoint selects this address from the authenticated customer's database record.
+        // Never accept a client-provided recipient and never redirect mail to another mailbox.
         return inner.SendAsync(recipientEmail!, recipientName, contractId, otp, expiresAt, cancellationToken);
     }
 }

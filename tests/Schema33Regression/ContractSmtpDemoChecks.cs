@@ -77,12 +77,12 @@ internal static class ContractSmtpDemoChecks
         Check(sender is RestrictedAuthEmailSender, "Auth resolves real restricted adapter while signing keeps its keyed provider");
         Check(providers.GetRequiredKeyedService<IContractOtpEmailSender>(ContractSigningOtpRegistration.ServiceKey) is RestrictedContractOtpEmailSender,
             "Contract signing still resolves its original restricted provider");
-        foreach (var test in new[] { ("other@example.invalid", "RESET_PASSWORD"), ("allowed@example.invalid", "UNKNOWN_PURPOSE") })
+        foreach (var test in new[] { ("not-an-email", "RESET_PASSWORD"), ("allowed@example.invalid", "UNKNOWN_PURPOSE") })
         {
             var rejected = false;
             try { await sender.SendAsync(test.Item1, test.Item2, "offline-placeholder", CancellationToken.None); }
             catch (AuthEmailDeliveryException) { rejected = true; }
-            Check(rejected, "Unapproved recipient/purpose cannot reach SMTP");
+            Check(rejected, "Invalid recipient/purpose cannot reach SMTP");
         }
         var token = "offline+/%token==";
         var link = RestrictedAuthEmailSender.BuildLink(guard.AuthLinkBaseUri!, "RESET_PASSWORD", token);
@@ -153,8 +153,6 @@ internal static class ContractSmtpDemoChecks
         Rejected("ContractOtpEmail:SmtpApproved", "false", "Unapproved SMTP is blocked");
         Rejected("ContractOtpEmail:Mode", "Unknown", "Unknown mode is blocked");
         Rejected("ContractOtpEmail:Mode", "Fake", "SMTP cannot leak into fake mode");
-        Rejected("ContractOtpEmail:AllowedRecipient", "", "Recipient approval is required");
-        Rejected("ContractOtpEmail:AllowedRecipient", "Name <allowed@example.invalid>", "Display-name allowlist is rejected");
         Rejected("Email:Enabled", "false", "SMTP enabled flag is required");
         Rejected("Email:Host", "", "SMTP host is required");
         Rejected("Email:Port", "465", "Implicit TLS port is rejected");
@@ -223,16 +221,18 @@ internal static class ContractSmtpDemoChecks
         catch (InvalidOperationException) { count++; }
 
         var capture = new CaptureSender();
-        var sender = new RestrictedContractOtpEmailSender(capture, guard.AllowedContractOtpRecipient!);
+        var sender = new RestrictedContractOtpEmailSender(capture);
         var expiresAt = new DateTime(2030, 1, 1, 0, 5, 0, DateTimeKind.Utc);
         await sender.SendAsync("ALLOWED@example.invalid", "Offline customer", "OFFLINE_CONTRACT", "offline-placeholder", expiresAt, CancellationToken.None);
-        Check(capture.Calls == 1 && capture.Recipient == "ALLOWED@example.invalid", "Original server recipient is forwarded without replacement");
-        foreach (var recipient in new[] { "other@example.invalid", "allowed@example.invalid.attacker.invalid", "Name <allowed@example.invalid>", "" })
+        await sender.SendAsync("second.customer@example.invalid", "Second offline customer", "SECOND_CONTRACT", "offline-placeholder", expiresAt, CancellationToken.None);
+        Check(capture.Calls == 2 && capture.Recipient == "second.customer@example.invalid",
+            "Two different customer mailboxes are forwarded without replacement");
+        foreach (var recipient in new[] { "Name <allowed@example.invalid>", "not-an-email", "" })
         {
             var blocked = false;
             try { await sender.SendAsync(recipient, "Offline", "OFFLINE_CONTRACT", "offline-placeholder", expiresAt, CancellationToken.None); }
             catch (InvalidOperationException) { blocked = true; }
-            Check(blocked && capture.Calls == 1, "Unapproved recipient never reaches transport");
+            Check(blocked && capture.Calls == 2, "Invalid recipient never reaches transport");
         }
         using (var cancelled = new CancellationTokenSource())
         {
@@ -242,7 +242,7 @@ internal static class ContractSmtpDemoChecks
                 await sender.SendAsync("allowed@example.invalid", "Offline", "OFFLINE_CONTRACT", "offline-placeholder", expiresAt, cancelled.Token);
                 throw new Exception("Cancelled email was accepted");
             }
-            catch (OperationCanceledException) { Check(capture.Calls == 1, "Cancellation never reaches transport"); }
+            catch (OperationCanceledException) { Check(capture.Calls == 2, "Cancellation never reaches transport"); }
         }
         capture.Fail = true;
         try
@@ -250,24 +250,21 @@ internal static class ContractSmtpDemoChecks
             await sender.SendAsync("allowed@example.invalid", "Offline", "OFFLINE_CONTRACT", "offline-placeholder", expiresAt, CancellationToken.None);
             throw new Exception("Transport failure was swallowed");
         }
-        catch (OfflineTransportException) { Check(capture.Calls == 2, "Transport failure propagates without retry"); }
+        catch (OfflineTransportException) { Check(capture.Calls == 3, "Transport failure propagates without retry"); }
 
         var signature = new ContractSignatureService(config);
         var hash = signature.HashOtp("offline-placeholder");
         Check(new ContractSignatureService(config).VerifyOtp("offline-placeholder", hash.Hash, hash.Salt), "Same Pepper survives service reconstruction");
         var appendixCapture = new CaptureSender();
-        var appendixSender = new RestrictedContractOtpEmailSender(appendixCapture, guard.AllowedContractOtpRecipient!);
+        var appendixSender = new RestrictedContractOtpEmailSender(appendixCapture);
         await appendixSender.SendAsync("ALLOWED@example.invalid", "Offline customer", "phụ lục OFFLINE_APPENDIX",
             "offline-placeholder", expiresAt, CancellationToken.None);
         Check(appendixCapture.Calls == 1 && appendixCapture.Recipient == "ALLOWED@example.invalid" &&
             appendixCapture.DocumentId == "phụ lục OFFLINE_APPENDIX", "Appendix keeps the server recipient and document identity");
-        try
-        {
-            await appendixSender.SendAsync("other@example.invalid", "Offline", "phụ lục OFFLINE_APPENDIX",
-                "offline-placeholder", expiresAt, CancellationToken.None);
-            throw new Exception("Unapproved appendix recipient was accepted");
-        }
-        catch (InvalidOperationException) { Check(appendixCapture.Calls == 1, "Appendix recipient outside allowlist never reaches transport"); }
+        await appendixSender.SendAsync("second.customer@example.invalid", "Second offline customer", "phụ lục SECOND_APPENDIX",
+            "offline-placeholder", expiresAt, CancellationToken.None);
+        Check(appendixCapture.Calls == 2 && appendixCapture.Recipient == "second.customer@example.invalid",
+            "Appendix supports a second verified customer mailbox");
         appendixCapture.Fail = true;
         try
         {
@@ -275,7 +272,7 @@ internal static class ContractSmtpDemoChecks
                 "offline-placeholder", expiresAt, CancellationToken.None);
             throw new Exception("Appendix transport failure was swallowed");
         }
-        catch (OfflineTransportException) { Check(appendixCapture.Calls == 2, "Appendix transport failure propagates without retry"); }
+        catch (OfflineTransportException) { Check(appendixCapture.Calls == 3, "Appendix transport failure propagates without retry"); }
         await AppendixOtpProviderChecks.RunAsync(Check);
         Console.WriteLine($"PASS {count} contract/appendix SMTP guard/provider checks; no SQL, network HTTP or SMTP calls.");
     }
@@ -289,7 +286,6 @@ internal static class ContractSmtpDemoChecks
         ["Vnpay:ReturnUrl"] = "http://127.0.0.1/return", ["Vnpay:IpnUrl"] = "http://127.0.0.1/ipn",
         ["Vnpay:QueryDrUrl"] = "http://127.0.0.1/query", ["ContractOtpEmail:Mode"] = smtp ? "SmtpDemo" : "Fake",
         ["ContractOtpEmail:SmtpApproved"] = smtp ? "true" : "false",
-        ["ContractOtpEmail:AllowedRecipient"] = smtp ? "allowed@example.invalid" : "",
         ["Email:Enabled"] = smtp ? "true" : "false", ["Email:Host"] = "smtp.example.invalid",
         ["Email:Port"] = "587", ["Email:UseSsl"] = "true", ["Email:Username"] = "sender@example.invalid",
         ["Email:FromAddress"] = "sender@example.invalid", ["Email:Password"] = "offline-placeholder",

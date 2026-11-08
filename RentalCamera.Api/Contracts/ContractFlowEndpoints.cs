@@ -518,13 +518,20 @@ public static class ContractEndpoints
 
             var recipient = await db.KhachThue.AsNoTracking()
                 .Where(x => x.MaKhachThue == customerId)
-                .Select(x => new { x.HoTen, x.Email })
+                .Select(x => new { x.HoTen, x.Email, x.EmailXacMinhLucUtc })
                 .SingleOrDefaultAsync(ct);
             if (recipient is null) return Results.Forbid();
-            if (emailSender.IsConfigured && string.IsNullOrWhiteSpace(recipient.Email))
+            if (string.IsNullOrWhiteSpace(recipient.Email))
                 return Results.BadRequest(new
                 {
+                    code = "EMAIL_REQUIRED",
                     loi = "Tài khoản khách hàng chưa có email để nhận OTP ký hợp đồng."
+                });
+            if (recipient.EmailXacMinhLucUtc is null)
+                return Results.Conflict(new
+                {
+                    code = "EMAIL_NOT_VERIFIED",
+                    loi = "Email chưa được xác minh. Vui lòng xác minh email trước khi yêu cầu OTP ký hợp đồng."
                 });
 
             await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);

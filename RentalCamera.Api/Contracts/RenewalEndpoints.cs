@@ -142,7 +142,9 @@ public static class RenewalEndpoints
             if(p.MaBamTepPdf is null || !await pdf.VerifyAsync("appendix-"+id,p.MaBamTepPdf,ct))return Results.NotFound();
             return Results.File(pdf.OpenRead("appendix-"+id),"application/pdf");
         }).RequireAuthorization();
-        app.MapPost("/api/gia-han/{id}/yeu-cau-ky",RequestSignatureAsync).RequireAuthorization("Customer");
+        app.MapPost("/api/gia-han/{id}/yeu-cau-ky",RequestSignatureAsync)
+            .RequireAuthorization("Customer")
+            .RequireRateLimiting("auth");
         app.MapPut("/api/gia-han/{id}/ky",SignAsync).RequireAuthorization("Customer");
         app.MapPost("/api/gia-han/{id}/huy",async(string id,ClaimsPrincipal principal,RentalCameraContext db,CancellationToken ct)=> {
             var customer=await ApiAccess.CustomerIdAsync(principal,db,ct);
@@ -169,7 +171,9 @@ public static class RenewalEndpoints
         if(p.TrangThai!="CHO_KY"||p.MaBamTepPdf is null||!await pdf.VerifyAsync("appendix-"+id,p.MaBamTepPdf,ct)){await tx.CommitAsync(ct);return Results.Conflict(new{loi="Phụ lục không có PDF hợp lệ đang chờ ký."});}
         if(p.OtpGuiLucUtc>DateTime.UtcNow.AddSeconds(-60))return Results.Conflict(new{loi="Đợi 60 giây trước khi gửi lại OTP."});
         if(p.SoLanGuiOtp>=5||p.SoLanThuOtp>=5)return Results.Conflict(new{loi="Đã hết lượt gửi/thử OTP cho phụ lục này."});
-        var recipient=await db.KhachThue.SingleAsync(k=>k.MaKhachThue==customer,ct);if(string.IsNullOrWhiteSpace(recipient.Email))return Results.BadRequest(new{loi="Thiếu email nhận OTP."});
+        var recipient=await db.KhachThue.SingleAsync(k=>k.MaKhachThue==customer,ct);
+        if(string.IsNullOrWhiteSpace(recipient.Email))return Results.BadRequest(new{code="EMAIL_REQUIRED",loi="Thiếu email nhận OTP."});
+        if(recipient.EmailXacMinhLucUtc is null)return Results.Conflict(new{code="EMAIL_NOT_VERIFIED",loi="Email chưa được xác minh. Vui lòng xác minh email trước khi yêu cầu OTP ký phụ lục."});
         var otp=signature.GenerateOtp();var hashed=signature.HashOtp(otp);p.MaOtpHash=hashed.Hash;p.MuoiOtp=hashed.Salt;p.SoLanGuiOtp++;
         p.MaXacNhanKy=ApiAccess.NewId("XP");p.OtpGuiLucUtc=DateTime.UtcNow;
         if(p.HanKyUtc is not DateTime signingDeadline)return Results.Conflict(new{loi="Thiếu hạn ký."});

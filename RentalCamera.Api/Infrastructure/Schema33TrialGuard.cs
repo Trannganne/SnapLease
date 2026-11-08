@@ -11,7 +11,6 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
     private readonly bool sandboxVnpay;
     public const string DatabaseName = "RentalCameraDb30_Test";
     public bool ContractSmtpDemoEnabled { get; private set; }
-    public string? AllowedContractOtpRecipient { get; private set; }
     public bool AuthSmtpDemoEnabled { get; private set; }
     public Uri? AuthLinkBaseUri { get; private set; }
     public Schema33TrialGuard(IConfiguration c, IHostEnvironment env)
@@ -102,17 +101,15 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
         }
         else if (emailMode == "SmtpDemo")
         {
-            var allowedRecipient = c["ContractOtpEmail:AllowedRecipient"]?.Trim();
             var username = c["Email:Username"]?.Trim();
             if (!c.GetValue<bool>("ContractOtpEmail:SmtpApproved") || !c.GetValue<bool>("Email:Enabled") ||
                 string.IsNullOrWhiteSpace(c["Email:Host"]) || c.GetValue<int>("Email:Port") != 587 ||
                 !c.GetValue<bool>("Email:UseSsl") || !IsPlainEmail(username) ||
                 !string.Equals(username, c["Email:FromAddress"]?.Trim(), StringComparison.OrdinalIgnoreCase) ||
-                string.IsNullOrWhiteSpace(c["Email:Password"]) || !IsPlainEmail(allowedRecipient) ||
+                string.IsNullOrWhiteSpace(c["Email:Password"]) ||
                 string.IsNullOrWhiteSpace(c["ElectronicSignature:Pepper"]))
-                throw new InvalidOperationException("SMTP OTP demo chưa được duyệt hoặc cấu hình TLS/người nhận/bí mật chưa đầy đủ.");
+                throw new InvalidOperationException("SMTP OTP chưa được duyệt hoặc cấu hình TLS/bí mật chưa đầy đủ.");
             ContractSmtpDemoEnabled = true;
-            AllowedContractOtpRecipient = allowedRecipient;
         }
         else
         {
