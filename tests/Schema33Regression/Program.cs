@@ -4,6 +4,7 @@ using RentalCamera.Api.Rental;
 using RentalCamera.Api.Payments;
 using RentalCamera.Api.Equipment;
 using RentalCamera.Api.Identity;
+using RentalCamera.Api.Handover;
 using Microsoft.Extensions.Configuration;
 
 #if !DIRECT_OFFLINE
@@ -196,6 +197,11 @@ identity.TrangThaiXacMinh="CHO_XAC_MINH";
 Check(!ContractEndpoints.IsIdentityVerifiedForRental(identity),"Pending identity cannot create rental contract");
 identity.TrangThaiXacMinh="TU_CHOI";
 Check(!ContractEndpoints.IsIdentityVerifiedForRental(identity),"Rejected identity cannot create rental contract");
+Check(HandoverEndpoints.CanCustomerConfirm("DANG_THUE", 1, 0)
+      && !HandoverEndpoints.CanCustomerConfirm("CHO_BAN_GIAO", 1, 0)
+      && !HandoverEndpoints.CanCustomerConfirm("DANG_THUE", 0, 0)
+      && !HandoverEndpoints.CanCustomerConfirm("DANG_THUE", 1, 1),
+    "Customer handover confirmation requires a renting contract and complete physical handover");
 #if DIRECT_OFFLINE
 Console.WriteLine("NOT_RUN: EF mapping and exact33 schema.table checks skipped by DIRECT_OFFLINE.");
 #else

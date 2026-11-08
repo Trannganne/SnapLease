@@ -8,7 +8,7 @@
     "removed_source_tables": 9,
     "new_table_count": 2,
     "current_source_fields_on_31_retained_tables": 328,
-    "target_field_count": 378,
+    "target_field_count": 379,
     "HD60_fields_mapped": 60,
     "HD60_mapping_counts": {
       "HopDong": 21,
@@ -10366,13 +10366,13 @@
     {
       "table": "dbo.HopDong",
       "name": "HopDong",
-      "role": "Một hợp đồng thuê với20 scalar cốt lõi nguồn và trạng thái nhận trả duy nhất TrangThaiNhanTra; không chứa các nhóm nhận trả/hủy/no-show/ACK của HD60.",
+      "role": "Một hợp đồng thuê với21 scalar cốt lõi nguồn, cờ khách xác nhận bàn giao và trạng thái nhận trả duy nhất TrangThaiNhanTra; không chứa các nhóm nhận trả/hủy/no-show/ACK của HD60.",
       "grain": "Một hợp đồng thuê; TrangThai vẫn là trạng thái hợp đồng, TrangThaiNhanTra là trạng thái nhận lại/kiểm tra riêng.",
       "cardinality": "Khách1→n hợp đồng; mỗi hợp đồng0..1 biên bản/đối soát hủy/xác minh; trạng thái chỉ ởHD.",
       "pk": [
         "MaHopDong"
       ],
-      "current_columns": 20,
+      "current_columns": 21,
       "columns": [
         {
           "name": "MaHopDong",
@@ -10883,6 +10883,37 @@
               "definition": "DaDongYDieuKhoan BIT NOT NULL\n        CONSTRAINT DF_HopDong_DaDongYDieuKhoan DEFAULT 0 WITH VALUES",
               "file": "Database/06_test.sql",
               "line": 5
+            }
+          ],
+          "clr_type": "bool",
+          "clr_initializer_not_sql_default": null
+        },
+        {
+          "name": "DaXacNhanBanGiao",
+          "sql_type": "bit",
+          "nullable": false,
+          "default_sql": "0",
+          "status": "BỔ SUNG — ĐÃ DUYỆT",
+          "reason": "Lưu xác nhận cuối cùng của khách sau khi nhân viên đã hoàn tất bàn giao; không thay đổi trạng thái hợp đồng.",
+          "meaning": "True khi chính khách sở hữu hợp đồng xác nhận đã nhận đủ thiết bị.",
+          "source_model": {
+            "file": "RentalCamera.Api/Data/RentalModels.cs",
+            "line": 199
+          },
+          "source_sql": {
+            "file": "Database/18_add_customer_handover_confirmation.sql",
+            "line": 7
+          },
+          "current_definition": "DaXacNhanBanGiao BIT NOT NULL DEFAULT 0",
+          "current_sql_variants": [
+            {
+              "name": "DaXacNhanBanGiao",
+              "sql_type": "bit",
+              "nullable_sql": "NOT NULL",
+              "default_sql": "0",
+              "definition": "DaXacNhanBanGiao BIT NOT NULL DEFAULT 0",
+              "file": "Database/18_add_customer_handover_confirmation.sql",
+              "line": 7
             }
           ],
           "clr_type": "bool",

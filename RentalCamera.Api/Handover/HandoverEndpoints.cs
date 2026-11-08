@@ -62,6 +62,58 @@ public static class HandoverEndpoints
             return Results.Ok(new { contract.MaHopDong, contract.TrangThai, thoiGianBanGiao = now });
         }).RequireAuthorization("Staff");
 
+        contracts.MapPost("/{id}/xac-nhan-ban-giao", async (
+            string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var customerId = await ApiAccess.CustomerIdAsync(principal, db, ct);
+            if (customerId is null) return Results.Forbid();
+
+            await using var tx = await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable, ct);
+            await TransactionLock.AcquireAsync(db, "contract:" + id, ct);
+
+            var contract = await db.HopDong.SingleOrDefaultAsync(
+                x => x.MaHopDong == id && x.MaKhachThue == customerId, ct);
+            if (contract is null) return Results.NotFound();
+            if (contract.TrangThai != "DANG_THUE")
+                return Results.Conflict(new { loi = "Nhân viên chưa hoàn tất bàn giao thiết bị." });
+
+            var handoverState = await db.ChiTietHopDong
+                .Where(x => x.MaHopDong == id)
+                .GroupBy(_ => 1)
+                .Select(group => new
+                {
+                    SoThietBi = group.Count(),
+                    ChuaBanGiao = group.Count(x => x.NgayGiaoThucTe == null)
+                })
+                .SingleOrDefaultAsync(ct);
+            if (!CanCustomerConfirm(contract.TrangThai, handoverState?.SoThietBi ?? 0,
+                    handoverState?.ChuaBanGiao ?? 0))
+                return Results.Conflict(new { loi = "Biên bản bàn giao chưa đầy đủ." });
+
+            if (contract.DaXacNhanBanGiao)
+            {
+                await tx.CommitAsync(ct);
+                return Results.Ok(new
+                {
+                    contract.MaHopDong,
+                    contract.TrangThai,
+                    contract.DaXacNhanBanGiao,
+                    daCapNhat = false
+                });
+            }
+
+            contract.DaXacNhanBanGiao = true;
+            await db.SaveChangesAsync(ct);
+            await tx.CommitAsync(ct);
+            return Results.Ok(new
+            {
+                contract.MaHopDong,
+                contract.TrangThai,
+                contract.DaXacNhanBanGiao,
+                daCapNhat = true
+            });
+        }).RequireAuthorization("Customer");
+
         contracts.MapPost("/{id}/nhan-lai", (string id, ReturnRequest request, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
             ReturnWorkflow.ReceiveAsync(id, request, principal, db, ct)).RequireAuthorization("Staff");
         app.MapReturnWorkflowEndpoints();
@@ -123,6 +175,9 @@ public static class HandoverEndpoints
             return Results.Created($"/api/chi-tiet-hop-dong/{id}/anh-bien-ban", image);
         }).DisableAntiforgery().RequireAuthorization("Staff");
     }
+
+    public static bool CanCustomerConfirm(string contractStatus, int deviceCount, int missingHandoverCount) =>
+        contractStatus == "DANG_THUE" && deviceCount > 0 && missingHandoverCount == 0;
 
     private static async Task<List<object>> ContractDetails(string id, RentalCameraContext db, CancellationToken ct) =>
         await db.ChiTietHopDong.AsNoTracking().Where(x => x.MaHopDong == id)

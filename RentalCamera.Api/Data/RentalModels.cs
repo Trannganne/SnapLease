@@ -196,6 +196,7 @@ public sealed class HopDong
     public string? HinhThucKy { get; set; }
     public string? TepHopDongUrl { get; set; }
     public bool DaDongYDieuKhoan { get; set; } = false;
+    public bool DaXacNhanBanGiao { get; set; } = false;
     public string? PhienBanDieuKhoan { get; set; }
     public string? MaBamNoiDung { get; set; }
     public string? MaBamTepPdf { get; set; }

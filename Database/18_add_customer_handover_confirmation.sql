@@ -1,0 +1,11 @@
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+
+IF COL_LENGTH(N'dbo.HopDong', N'DaXacNhanBanGiao') IS NULL
+BEGIN
+    ALTER TABLE dbo.HopDong
+        ADD DaXacNhanBanGiao bit NOT NULL
+            CONSTRAINT DF33_HopDong_DaXacNhanBanGiao DEFAULT (0) WITH VALUES;
+END;
+
+COMMIT TRANSACTION;

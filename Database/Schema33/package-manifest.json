@@ -4,7 +4,7 @@
   "Environment": "Schema33Trial",
   "createdUtc": "2026-10-27T20:59:00.848552+07:00",
   "requiredTables": 33,
-  "requiredColumns": 378,
+  "requiredColumns": 379,
   "files": [
     {
       "path": "00_preflight.sql",
@@ -12,7 +12,7 @@
     },
     {
       "path": "01_schema33.sql",
-      "sha256": "e518bf3166a831be80343b7eefa84ac9261e67fe10121dc90b5b0770a38f0821"
+      "sha256": "1cc06c01396b0b2f1d6542b7f840f191e7ac070b0d5132b4b8b17522096ace95"
     },
     {
       "path": "02_seed_catalog.sql",
@@ -20,7 +20,7 @@
     },
     {
       "path": "04_verify_schema.sql",
-      "sha256": "699263ff089210e1b0d8662c5104b72018ef09a8e0f3716afcca10b4631a320c"
+      "sha256": "fb63c8d4bf59948637c9c0689044974317b24a88c7c5bde99b1f71f7a9289bba"
     },
     {
       "path": "05_verify_seed_catalog.sql",
@@ -28,7 +28,7 @@
     },
     {
       "path": "schema.json",
-      "sha256": "757d33ff467befc119656b95d13af0e1f8ad221f67fe03403393d2cd8477973e"
+      "sha256": "ce47280a40104b0a1854dd35f6897febec8ed59f2f581d7dcf5a9b8a09d729b6"
     },
     {
       "path": "constraints.json",
@@ -36,7 +36,7 @@
     },
     {
       "path": "expected-metadata.json",
-      "sha256": "00c83232f1ec8d116c2918ecd0d6f9e207395320e1839df53f909912d94c7027"
+      "sha256": "bf3ab21c629f5aafc76d3a48564747b19f39eb0f092490c30b2a3a3f0da150f5"
     },
     {
       "path": "seed-catalog.json",
@@ -44,7 +44,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "d7fa8a491cf4d61a85e20a1c5d920a277c5a7ca0a79f807e7ee8d18f9ad0f7f0"
+      "sha256": "b5a61d25f8010f257f501b42549c327f1c6a74e74c344cd2e422c25c251de0b5"
     },
     {
       "path": "Invoke-Schema33Package.ps1",
@@ -62,7 +62,7 @@
   },
   "handoffStatus": "REVIEWED_READY_FOR_RECEIVER_PREFLIGHT_AND_INSTALL",
   "postInstallChecksRequired": [
-    "Actual 33 table/378 column and full structural metadata match",
+    "Actual 33 table/379 column and full structural metadata match",
     "Stored CHECK/default/filter canonical definition comparison",
     "Catalog seed verification",
     "Runtime database binding and HTTP API smoke"
@@ -72,7 +72,7 @@
     "buildStatus": "PASS_NET8_ZERO_WARNING_ZERO_ERROR_2026_11_07",
     "databaseStatus": "RECEIVER_PREFLIGHT_AND_INSTALL_REQUIRED",
     "apiSmokeStatus": "REQUIRED_AFTER_RECEIVER_INSTALL",
-    "regressionStatus": "PASS_EF_EXACT33_378_AND_69_SOURCE_CHECKS_2026_11_07",
+    "regressionStatus": "PASS_EF_EXACT33_379_AND_70_SOURCE_CHECKS_2026_11_08",
     "provenanceRegistry": "../../Docs/SCHEMA33_SQL_INVENTORY.md",
     "historicalSourceReferencesAreLogicalOriginsNotRuntimeDependencies": true
   },

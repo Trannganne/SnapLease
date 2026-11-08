@@ -164,7 +164,8 @@ public static class ContractEndpoints
                 ThoiGianTraDuKien = hold.ChiTiet.Max(x => x.NgayKetThuc),
                 TongTien = total, TongTienCoc = deposit,
                 HinhThucKy = null, TrangThai = "CHO_KY", TepHopDongUrl = null,
-                DaDongYDieuKhoan = false, PhienBanDieuKhoan = RentalPolicy.TermsVersion,
+                DaDongYDieuKhoan = false, DaXacNhanBanGiao = false,
+                PhienBanDieuKhoan = RentalPolicy.TermsVersion,
                 MaBamNoiDung = null, MaBamTepPdf = null, NoiDungHopDongJson = null
             };
             db.HopDong.Add(contract);
@@ -230,7 +231,7 @@ public static class ContractEndpoints
                 {
                     x.MaHopDong, x.MaGiuCho, x.MaCuaHang, x.NgayTaoHopDong, x.NgayKy,
                     x.ThoiGianBanGiao, x.ThoiGianTraDuKien,
-                    x.TongTien, x.TongTienCoc, x.TrangThai,
+                    x.TongTien, x.TongTienCoc, x.TrangThai, x.DaXacNhanBanGiao,
                     TenCuaHang = db.CuaHang.Where(c => c.MaCuaHang == x.MaCuaHang).Select(c => c.TenCuaHang).FirstOrDefault() ?? "",
                     ThietBi = db.ChiTietGiuCho.Where(ct => ct.MaGiuCho == x.MaGiuCho)
                         .Join(db.DongMay, ct => ct.MaDongMay, dm => dm.MaDongMay, (ct, dm) => dm)
@@ -266,6 +267,7 @@ public static class ContractEndpoints
                     contract.TongTien,
                     contract.TongTienCoc,
                     contract.TrangThai,
+                    contract.DaXacNhanBanGiao,
                     TenCuaHang = db.CuaHang
                         .Where(store => store.MaCuaHang == contract.MaCuaHang)
                         .Select(store => store.TenCuaHang)
@@ -329,6 +331,7 @@ public static class ContractEndpoints
                 contract.TongTienCoc,
                 SoTienDaThanhToan = paidByContract.GetValueOrDefault(contract.MaHopDong),
                 contract.TrangThai,
+                contract.DaXacNhanBanGiao,
                 contract.TenCuaHang,
                 contract.ThietBi,
                 contract.SoLuongThietBi
@@ -425,7 +428,7 @@ public static class ContractEndpoints
                 contract.TrangThai, contract.TepHopDongUrl,
                 KhachThue = khachThue,
                 ChiNhanh = cuaHang,
-                contract.DaDongYDieuKhoan, contract.PhienBanDieuKhoan,
+                contract.DaDongYDieuKhoan, contract.DaXacNhanBanGiao, contract.PhienBanDieuKhoan,
                 contract.MaBamNoiDung, contract.MaBamTepPdf,
                 DatTheoDongMay = booked, ChiTiet = details,
                 QuyetToan = settlementView,

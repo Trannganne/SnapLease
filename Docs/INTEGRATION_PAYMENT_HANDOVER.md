@@ -138,6 +138,12 @@ of the actual operator or safe concurrency over the final read/check/write seque
 Those improvements and any required handover schema are not implemented by this delivery.
 Do not interpret a successful current response as proof the new policies were enforced.
 
+`POST /api/hop-dong/{contractId}/xac-nhan-ban-giao`, customer and contract owner only:
+
+- only accepts a contract already in `DANG_THUE` after staff has recorded actual handover for every device;
+- sets `daXacNhanBanGiao=true` and is idempotent;
+- does not change `trangThai`. If the customer does not confirm, the contract remains `DANG_THUE`.
+
 Read `GET /api/hop-dong/{contractId}` for all booked models/quantities and assigned details
 (serial, condition, actual dates, `anhBienBan`). `GET .../ban-giao` has handover details but
 does not aggregate images. Both use contract ownership/store access. Contract pickup time
@@ -148,8 +154,8 @@ Photo registration exists at `POST /api/chi-tiet-hop-dong/{detailId}/anh-bien-ba
 { "loai": "BAN_GIAO", "duongDanAnh": "<existing real image URL>", "moTa": "<description>" }
 ```
 
-It registers a URL, not a multipart upload. No customer handover confirmation endpoint/button
-is added. Mobile displays the Backend result after staff handover.
+It registers a URL, not a multipart upload. Mobile should display the Backend result after staff
+handover and call the customer confirmation endpoint only after the customer accepts the handover.
 
 ## Build/test and teammate update
 

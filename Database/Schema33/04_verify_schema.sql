@@ -182,6 +182,7 @@ INSERT @ExpectedColumns VALUES
 (N'dbo',N'HopDong',N'HinhThucKy',N'varchar(20)',1,NULL),
 (N'dbo',N'HopDong',N'TepHopDongUrl',N'nvarchar(500)',1,NULL),
 (N'dbo',N'HopDong',N'DaDongYDieuKhoan',N'bit',0,N'0'),
+(N'dbo',N'HopDong',N'DaXacNhanBanGiao',N'bit',0,N'0'),
 (N'dbo',N'HopDong',N'PhienBanDieuKhoan',N'varchar(20)',1,NULL),
 (N'dbo',N'HopDong',N'MaBamNoiDung',N'char(64)',1,NULL),
 (N'dbo',N'HopDong',N'MaBamTepPdf',N'char(64)',1,NULL),
@@ -900,4 +901,4 @@ SELECT (SELECT v.Kind,v.TableName,v.ObjectName,v.ExpectedDefinition,v.ActualDefi
  UNION ALL
  SELECT N'INDEX_FILTER',e.TableName,e.IndexName,e.Definition,i.filter_definition FROM @ExpectedFilters e JOIN sys.tables t ON t.name=e.TableName AND SCHEMA_NAME(t.schema_id)=N'dbo' JOIN sys.indexes i ON i.object_id=t.object_id AND i.name=e.IndexName
 )v ORDER BY v.Kind,v.TableName,v.ObjectName FOR JSON PATH,INCLUDE_NULL_VALUES) DefinitionsJson;
-SELECT N'STRUCTURAL_METADATA_MATCH; DEFINITION_AST_COMPARE_REQUIRED' Result,33 PhysicalTableCount,378 ScalarCount;
+SELECT N'STRUCTURAL_METADATA_MATCH; DEFINITION_AST_COMPARE_REQUIRED' Result,33 PhysicalTableCount,379 ScalarCount;

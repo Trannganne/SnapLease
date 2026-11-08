@@ -278,6 +278,7 @@ public static class Schema33Mapping
             e.Property(x => x.HinhThucKy).HasColumnType("varchar(20)").IsRequired(false);
             e.Property(x => x.TepHopDongUrl).HasColumnType("nvarchar(500)").IsRequired(false);
             e.Property(x => x.DaDongYDieuKhoan).HasColumnType("bit").IsRequired(true).HasDefaultValueSql("0");
+            e.Property(x => x.DaXacNhanBanGiao).HasColumnType("bit").IsRequired(true).HasDefaultValueSql("0");
             e.Property(x => x.PhienBanDieuKhoan).HasColumnType("varchar(20)").IsRequired(false);
             e.Property(x => x.MaBamNoiDung).HasColumnType("char(64)").IsRequired(false);
             e.Property(x => x.MaBamTepPdf).HasColumnType("char(64)").IsRequired(false);

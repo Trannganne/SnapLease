@@ -262,6 +262,7 @@ CREATE TABLE dbo.[HopDong] (
     [HinhThucKy] varchar(20) NULL,
     [TepHopDongUrl] nvarchar(500) NULL,
     [DaDongYDieuKhoan] bit NOT NULL CONSTRAINT [DF33_HopDong_DaDongYDieuKhoan] DEFAULT (0),
+    [DaXacNhanBanGiao] bit NOT NULL CONSTRAINT [DF33_HopDong_DaXacNhanBanGiao] DEFAULT (0),
     [PhienBanDieuKhoan] varchar(20) NULL,
     [MaBamNoiDung] char(64) NULL,
     [MaBamTepPdf] char(64) NULL,

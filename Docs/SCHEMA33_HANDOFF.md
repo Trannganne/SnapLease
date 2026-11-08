@@ -60,7 +60,7 @@ và merchant secrets chỉ được truyền bằng cấu hình runtime riêng, 
 | Kiểm tra | Trạng thái |
 |---|---|
 | Backend build bằng SDK 8.0.427 | PASS ngày 07/11/2026 sau khi bỏ bảy trường kết quả eKYC; 0 lỗi, 0 cảnh báo |
-| Khai báo EF source | PASS: 33 bảng/378 scalar, không shadow field, FK restrictive; 69 source-level checks PASS. Baseline 376 cộng hai mốc khuyến mãi DongMay; bảy trường kết quả VNPT đã loại bỏ. |
+| Khai báo EF source | 33 bảng/379 scalar, không shadow field, FK restrictive. Baseline 376 cộng hai mốc khuyến mãi DongMay và cờ khách xác nhận bàn giao trên HopDong; bảy trường kết quả VNPT đã loại bỏ. |
 | Model EF runtime/DDL so với model | Chưa có kết quả; lệnh Docker đang chờ đã được ngắt khi daemon không phản hồi |
 | Database/DDL/seed hậu kiểm | NOT_RUN trong đợt này; chưa gửi lệnh DDL/seed |
 | API SMOKE | NOT_RUN; `http://127.0.0.1:5003` chỉ là cổng dự kiến |

@@ -32,13 +32,18 @@ public static class Schema33EfChecks
             throw new Exception("EF physical table set mismatch. Missing: " +
                 string.Join(",", ExpectedTables.Except(actualTables)) + "; unexpected: " +
                 string.Join(",", actualTables.Except(ExpectedTables)));
-        if (entities.Sum(e => e.GetProperties().Count()) != 378)
-            throw new Exception("EF scalar mapping differs from reviewed 378 fields (Schema33 plus timed catalog promotion)");
+        if (entities.Sum(e => e.GetProperties().Count()) != 379)
+            throw new Exception("EF scalar mapping differs from reviewed 379 fields (Schema33 plus customer handover confirmation)");
         if (entities.Any(e => e.GetProperties().Any(p => p.IsShadowProperty())))
             throw new Exception("Unexpected shadow relationship/property");
         var hold = entities.Single(e => e.GetTableName() == "ChiTietGiuCho" && (e.GetSchema() ?? "dbo") == "dbo");
         if (hold.FindProperty("MaChiTietGioHangHopDong") == null || hold.FindProperty("MaChiTietGioHang")!.IsNullable)
             throw new Exception("Hold original/snapshot linkage mismatch");
+        var contract = entities.Single(e => e.GetTableName() == "HopDong" && (e.GetSchema() ?? "dbo") == "dbo");
+        var customerHandoverConfirmation = contract.FindProperty("DaXacNhanBanGiao");
+        if (customerHandoverConfirmation == null || customerHandoverConfirmation.IsNullable
+            || customerHandoverConfirmation.ClrType != typeof(bool))
+            throw new Exception("HopDong customer handover confirmation mapping mismatch");
         var sql = db.Database.GenerateCreateScript(); // String generation only; never execute DDL.
         if (outputDirectory != null)
         {
@@ -59,7 +64,7 @@ public static class Schema33EfChecks
             throw new Exception("Valid paid penalty rejected");
         if (entities.SelectMany(e => e.GetForeignKeys()).Any(f => f.DeleteBehavior != DeleteBehavior.NoAction))
             throw new Exception("Unexpected cascade");
-        Console.WriteLine("PASS EF exact33 schema.table set,378 scalar/no shadows and restrictive FKs; no database connected.");
+        Console.WriteLine("PASS EF exact33 schema.table set,379 scalar/no shadows and restrictive FKs; no database connected.");
     }
 }
 #endif

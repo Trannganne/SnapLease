@@ -1161,6 +1161,14 @@
     [
       "dbo",
       "HopDong",
+      "DaXacNhanBanGiao",
+      "bit",
+      0,
+      "0"
+    ],
+    [
+      "dbo",
+      "HopDong",
       "PhienBanDieuKhoan",
       "varchar(20)",
       1,
@@ -5831,6 +5839,11 @@
     {
       "table": "HopDong",
       "column": "DaDongYDieuKhoan",
+      "definition": "0"
+    },
+    {
+      "table": "HopDong",
+      "column": "DaXacNhanBanGiao",
       "definition": "0"
     },
     {
