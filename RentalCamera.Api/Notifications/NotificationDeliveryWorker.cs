@@ -120,7 +120,15 @@ public sealed class NotificationDeliveryWorker(IServiceScopeFactory scopes, Fire
                     Notification = new Notification { Title=n.TieuDe, Body=n.NoiDung },
                     Data = new Dictionary<string,string> { ["notificationId"]=n.MaThongBao, ["eventCode"]=n.EventCode ?? "",
                         ["targetType"]=n.TargetType ?? "", ["targetId"]=n.TargetId ?? "" },
-                    Android = new AndroidConfig { CollapseKey=n.MaThongBao, Notification=new AndroidNotification { Tag=n.MaThongBao } }
+                    Android = new AndroidConfig
+                    {
+                        CollapseKey = n.MaThongBao,
+                        Notification = new AndroidNotification
+                        {
+                            Tag = n.MaThongBao,
+                            EventTimestamp = DateTime.UtcNow
+                        }
+                    }
                 }, ct);
     }
     private static async Task SaveDeliveryAsync(RentalCameraContext db,IDbContextTransaction? guard,CancellationToken ct)
