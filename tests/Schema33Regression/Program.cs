@@ -38,6 +38,7 @@ if (args.Length == 2 && args[0] == "--model-output")
 
 var count=0;
 void Check(bool ok,string name){if(!ok)throw new Exception(name);count++;}
+await ChatbotChecks.RunAsync();
 var noPromotion = RentalPromotionPolicy.Evaluate(2, false);
 Check(noPromotion.Percent == 0 && noPromotion.Codes.Length == 0, "Existing customer below three devices has no promotion");
 var bulkPromotion = RentalPromotionPolicy.Evaluate(3, false);

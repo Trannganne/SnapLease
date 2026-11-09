@@ -168,7 +168,7 @@ internal static class ContractSmtpDemoChecks
         Rejected("ConnectionStrings:RentalCamera", "Server=offline-sql;Database=RentalCameraDb30_Test;Integrated Security=true", "Integrated SQL authentication is rejected");
         Rejected("Rental:BackgroundJobsEnabled", "true", "Jobs remain disabled");
         Rejected("Notifications:PushEnabled", "true", "Incomplete push configuration remains blocked");
-        Rejected("Chatbot:Enabled", "true", "Chatbot remains disabled");
+        Rejected("Chatbot:Enabled", "true", "Chatbot remains disabled in Schema33Trial");
         Rejected("ElectronicSignature:ReturnOtpInResponse", "true", "OTP response fallback remains blocked");
         Rejected("PasswordReset:ReturnTokenInResponse", "true", "Auth token response fallback remains blocked");
         Rejected("Vnpay:FakeTrial", "false", "Payment must remain fake");
@@ -198,6 +198,24 @@ internal static class ContractSmtpDemoChecks
             TestPushDeliveryPolicy.EventCodes.Contains("RETURN_DUE_2H") &&
             TestPushDeliveryPolicy.EventCodes.Contains("RETURN_OVERDUE"),
             "Approved primary notification profile includes all return reminders");
+
+        var chatbotSandboxValues = Settings(false);
+        chatbotSandboxValues["Vnpay:Enabled"] = "true";
+        chatbotSandboxValues["Vnpay:FakeTrial"] = "false";
+        chatbotSandboxValues["Vnpay:PaymentUrl"] = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+        chatbotSandboxValues["Vnpay:QueryDrUrl"] = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
+        chatbotSandboxValues["Vnpay:ReturnUrl"] = "https://schema33.example.test/api/thanh-toan/vnpay/return";
+        chatbotSandboxValues["Vnpay:IpnUrl"] = "https://schema33.example.test/api/thanh-toan/vnpay/ipn";
+        chatbotSandboxValues["Chatbot:Enabled"] = "true";
+        chatbotSandboxValues["Chatbot:LiveApiApproved"] = "true";
+        chatbotSandboxValues["Chatbot:FreePlanConfirmed"] = "true";
+        chatbotSandboxValues["Chatbot:ApiKey"] = "synthetic-test-key";
+        chatbotSandboxValues["Chatbot:Model"] = "synthetic-test-model";
+        chatbotSandboxValues["Chatbot:ApprovedKnowledgeSha256"] = new string('a', 64);
+        var chatbotSandboxGuard = new Schema33TrialGuard(Config(chatbotSandboxValues),
+            new OfflineEnvironment { EnvironmentName = "Schema33Sandbox" });
+        Check(chatbotSandboxGuard.ChatbotExternalHttpAllowed,
+            "Schema33Sandbox permits chatbot HTTP only with complete explicit approval");
         foreach (var invalid in new[]
         {
             ("Notifications:WorkerRole", "Secondary"),

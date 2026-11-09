@@ -5,9 +5,13 @@ namespace RentalCamera.Api.Chatbot;
 public sealed class ChatService(IChatCatalog catalog, IChatProvider provider,
     ChatKnowledge knowledge, IOptions<ChatbotOptions> options)
 {
+    public string KnowledgeSha256 => knowledge.Sha256;
+    public string Model => options.Value.Model;
     public string? UnavailableReason => !options.Value.Enabled ? "Trợ lý AI chưa được bật." :
+        !options.Value.LiveApiApproved ? "Kết nối AI bên ngoài chưa được phê duyệt." :
         !options.Value.FreePlanConfirmed ? "Chưa xác nhận tài khoản AI thuộc gói miễn phí." :
         string.IsNullOrWhiteSpace(options.Value.ApiKey) ? "Trợ lý AI chưa được cấu hình." :
+        string.IsNullOrWhiteSpace(options.Value.Model) ? "Trợ lý AI chưa được cấu hình model." :
         !string.Equals(options.Value.ApprovedKnowledgeSha256, knowledge.Sha256, StringComparison.OrdinalIgnoreCase)
             ? "Nguồn kiến thức đang chờ duyệt hoặc đã thay đổi." : null;
 

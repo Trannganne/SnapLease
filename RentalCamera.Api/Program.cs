@@ -66,7 +66,7 @@ builder.Services.AddHttpClient("VnpaySandbox")
     .ConfigurePrimaryHttpMessageHandler(() => trialGuard.SandboxVnpay
         ? new HttpClientHandler { AllowAutoRedirect = false }
         : new DenyExternalHttpHandler());
-builder.Services.AddChatbot(builder.Configuration);
+builder.Services.AddChatbot(builder.Configuration, trialGuard.ChatbotExternalHttpAllowed);
 builder.Services.AddScoped<FirebaseNotificationSender>();
 var primaryNotificationWorker = string.Equals(
     builder.Configuration["Notifications:WorkerRole"],
@@ -151,12 +151,17 @@ builder.Services.AddRateLimiter(options =>
 });
 
 var app = builder.Build();
+var chatbotKnowledge = app.Services.GetRequiredService<ChatKnowledge>();
+app.Logger.LogInformation("Chatbot knowledge SHA-256: {KnowledgeSha256}. Enabled: {Enabled}.",
+    chatbotKnowledge.Sha256, builder.Configuration.GetValue<bool>("Chatbot:Enabled"));
 app.UseConcurrencyResponse();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("Frontend");
-app.UseRateLimiter();
 app.UseAuthentication();
+// Chatbot rate limiting partitions authenticated customers by account ID.
+// Authentication must therefore run before the limiter.
+app.UseRateLimiter();
 app.UseAuthorization();
 
 if (args.Length == 2 && args[0] == "set-password")
@@ -202,7 +207,7 @@ app.MapAuthEndpoints();
 app.MapNotificationEndpoints();
 app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
-app.MapChatbotEndpoints(); // Gate remains disabled; external HTTP is blocked for every named client.
+app.MapChatbotEndpoints();
 app.MapEquipmentEndpoints();
 app.MapReserveDeviceEndpoints();
 app.MapRentalEndpoints();

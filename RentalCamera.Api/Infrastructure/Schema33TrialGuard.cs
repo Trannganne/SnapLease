@@ -22,9 +22,10 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
         server = c["Schema33Trial:ExpectedDataSource"] ?? "";
         if (string.IsNullOrWhiteSpace(server) || c["Schema33Trial:ProviderMode"] != "Fake" ||
             c.GetValue<bool>("Rental:BackgroundJobsEnabled") ||
-            c.GetValue<bool>("Chatbot:Enabled") || c.GetValue<bool>("ElectronicSignature:ReturnOtpInResponse") ||
+            c.GetValue<bool>("ElectronicSignature:ReturnOtpInResponse") ||
             c.GetValue<bool>("PasswordReset:ReturnTokenInResponse")) throw new InvalidOperationException("Trial isolation guard không đầy đủ.");
         Validate(c.GetConnectionString("RentalCamera") ?? "");
+        ValidateChatbot(c);
         ValidateNotifications(c);
         ValidateVnpay(c);
         ValidateMediaStorage(c);
@@ -32,6 +33,23 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
     }
 
     public bool SandboxVnpay => sandboxVnpay;
+    public bool ChatbotExternalHttpAllowed { get; private set; }
+
+    private void ValidateChatbot(IConfiguration c)
+    {
+        var enabled = c.GetValue<bool>("Chatbot:Enabled");
+        var approved = c.GetValue<bool>("Chatbot:LiveApiApproved");
+        if (!enabled)
+        {
+            if (approved) throw new InvalidOperationException("Chatbot đang tắt nhưng phê duyệt API ngoài vẫn bật.");
+            return;
+        }
+        if (!sandboxVnpay || !approved || !c.GetValue<bool>("Chatbot:FreePlanConfirmed") ||
+            string.IsNullOrWhiteSpace(c["Chatbot:ApiKey"]) || string.IsNullOrWhiteSpace(c["Chatbot:Model"]) ||
+            string.IsNullOrWhiteSpace(c["Chatbot:ApprovedKnowledgeSha256"]))
+            throw new InvalidOperationException("Chatbot chỉ được bật trong Schema33Sandbox với cấu hình và phê duyệt đầy đủ.");
+        ChatbotExternalHttpAllowed = true;
+    }
 
     private static void ValidateNotifications(IConfiguration c)
     {

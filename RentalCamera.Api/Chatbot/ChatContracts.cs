@@ -3,10 +3,11 @@ namespace RentalCamera.Api.Chatbot;
 public sealed class ChatbotOptions
 {
     public bool Enabled { get; set; }
+    public bool LiveApiApproved { get; set; }
     public bool FreePlanConfirmed { get; set; }
     public string ApiKey { get; set; } = "";
+    public string Model { get; set; } = "";
     public string ApprovedKnowledgeSha256 { get; set; } = "";
-    public const string Model = "qwen/qwen3.8-27b";
 }
 
 public sealed record ChatTurn(string Role, string Text);
