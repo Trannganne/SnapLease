@@ -168,12 +168,31 @@ public static class HandoverEndpoints
             var image = new AnhBienBan
             {
                 MaAnhBienBan = ApiAccess.NewId("BB"), MaChiTietHopDong = id, Loai = loai,
-                DuongDanAnh = upload.SecureUrl, MoTa = moTa?.Trim(), ThoiGianChup = RentalPolicy.LocalNow
+                DuongDanAnh = upload.SecureUrl, PublicId = upload.PublicId, MoTa = moTa?.Trim(), ThoiGianChup = RentalPolicy.LocalNow
             };
             db.AnhBienBan.Add(image);
             await db.SaveChangesAsync(ct);
             return Results.Created($"/api/chi-tiet-hop-dong/{id}/anh-bien-ban", image);
         }).DisableAntiforgery().RequireAuthorization("Staff");
+
+        app.MapDelete("/api/anh-bien-ban/{id}", async (string id, ClaimsPrincipal principal, RentalCameraContext db,
+            CloudinaryImageStorage imageStorage, ILoggerFactory loggerFactory, CancellationToken ct) =>
+        {
+            var image = await db.AnhBienBan.SingleOrDefaultAsync(x => x.MaAnhBienBan == id, ct);
+            if (image is null) return Results.NotFound(new { loi = "Ảnh biên bản không tồn tại.", code = "EVIDENCE_NOT_FOUND" });
+            var detail = await db.ChiTietHopDong.Where(x => x.MaChiTietHopDong == image.MaChiTietHopDong)
+                .Join(db.HopDong, x => x.MaHopDong, x => x.MaHopDong, (d, h) => new { d, h }).SingleAsync(ct);
+            var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
+            if (scope is null || (!scope.IsAdmin && detail.h.MaCuaHang != scope.StoreId)) return Results.Forbid();
+            if (detail.h.TrangThai is "HOAN_THANH" or "DA_HUY" || detail.d.NgayNhanThucTe != null)
+                return Results.Conflict(new { loi = "Biên bản đã xác nhận hoặc quyết toán nên không thể xóa ảnh.", code = "EVIDENCE_FINALIZED" });
+            if (!string.IsNullOrWhiteSpace(image.PublicId))
+            {
+                try { await imageStorage.DeleteReviewImageAsync(image.PublicId, ct); }
+                catch (Exception ex) { loggerFactory.CreateLogger("Cloudinary").LogError(ex, "Xóa ảnh biên bản thất bại."); return Results.Problem("Không thể xóa tệp ảnh.", statusCode: 502); }
+            }
+            db.AnhBienBan.Remove(image); await db.SaveChangesAsync(ct); return Results.NoContent();
+        }).RequireAuthorization("Staff");
     }
 
     public static bool CanCustomerConfirm(string contractStatus, int deviceCount, int missingHandoverCount) =>

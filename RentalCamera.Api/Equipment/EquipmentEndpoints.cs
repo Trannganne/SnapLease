@@ -134,6 +134,17 @@ public static class EquipmentEndpoints
             await db.SaveChangesAsync(ct);
             return Results.Ok(new { entity.MaThietBi, entity.TrangThai, entity.TinhTrang });
         });
+        devices.MapDelete("/{id}", async (string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);
+            if (scope is null) return Results.Forbid();
+            var entity = await db.ThietBi.SingleOrDefaultAsync(x => x.MaThietBi == id, ct);
+            if (entity is null) return Results.NotFound(new { loi = "Thiết bị không tồn tại.", code = "DEVICE_NOT_FOUND" });
+            if (!scope.IsAdmin && entity.MaCuaHang != scope.StoreId) return Results.Forbid();
+            if (await db.ChiTietHopDong.AnyAsync(x => x.MaThietBi == id, ct))
+                return Results.Conflict(new { loi = "Thiết bị đã phát sinh hợp đồng; chỉ có thể ngừng kinh doanh.", code = "DEVICE_HAS_CONTRACT" });
+            db.ThietBi.Remove(entity); await db.SaveChangesAsync(ct); return Results.NoContent();
+        });
         devices.MapGet("/{id}/lich-su", async (string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
             var scope = await ApiAccess.StaffScopeAsync(principal, db, ct);

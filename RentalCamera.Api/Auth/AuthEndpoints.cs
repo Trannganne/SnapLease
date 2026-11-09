@@ -224,6 +224,18 @@ public static class AuthEndpoints
             });
         }).RequireAuthorization();
 
+        group.MapPost("/logout", async (ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var accountId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var account = await db.TaiKhoan.SingleOrDefaultAsync(x => x.MaTaiKhoan == accountId, ct);
+            if (account is null) return Results.Unauthorized();
+            account.PhienBanBaoMat = checked(account.PhienBanBaoMat + 1);
+            var tokens = await db.FcmDeviceToken.Where(x => x.MaTaiKhoan == accountId && x.IsActive).ToListAsync(ct);
+            foreach (var token in tokens) { token.IsActive = false; token.UpdatedAt = DateTime.UtcNow; }
+            await db.SaveChangesAsync(ct);
+            return Results.NoContent();
+        }).RequireAuthorization();
+
         group.MapPut("/doi-mat-khau", async (
             ChangePasswordRequest request,
             ClaimsPrincipal principal,

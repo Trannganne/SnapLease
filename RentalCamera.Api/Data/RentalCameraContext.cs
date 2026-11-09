@@ -35,6 +35,12 @@ public sealed class RentalCameraContext(DbContextOptions<RentalCameraContext> op
     public DbSet<BienBanNhanTra> BienBanNhanTra => Set<BienBanNhanTra>();
     public DbSet<DoiSoatHuyHopDong> DoiSoatHuyHopDong => Set<DoiSoatHuyHopDong>();
     public DbSet<XacMinhKhachKhongDen> XacMinhKhachKhongDen => Set<XacMinhKhachKhongDen>();
+    public DbSet<LichSuTrangThaiTaiKhoan> LichSuTrangThaiTaiKhoan => Set<LichSuTrangThaiTaiKhoan>();
+    public DbSet<NhatKyHeThong> NhatKyHeThong => Set<NhatKyHeThong>();
+    public DbSet<PhieuBaoTri> PhieuBaoTri => Set<PhieuBaoTri>();
+    public DbSet<HuHongThietBi> HuHongThietBi => Set<HuHongThietBi>();
+    public DbSet<LichSuCapNhatHuHong> LichSuCapNhatHuHong => Set<LichSuCapNhatHuHong>();
+    public DbSet<TinNhan> TinNhan => Set<TinNhan>();
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         Schema33WriteGuard.Validate(ChangeTracker);

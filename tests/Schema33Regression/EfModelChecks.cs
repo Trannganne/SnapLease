@@ -17,7 +17,9 @@ public static class Schema33EfChecks
         "dbo.QuyetToanHopDong", "dbo.PhanBoQuyetToan",
         "dbo.DanhGia", "dbo.AnhDanhGia", "dbo.AnhBienBan",
         "dbo.ThongBao", "dbo.FcmDeviceToken", "dbo.NotificationDelivery", "dbo.IdempotencyKey",
-        "dbo.BienBanNhanTra", "dbo.DoiSoatHuyHopDong", "dbo.XacMinhKhachKhongDen"
+        "dbo.BienBanNhanTra", "dbo.DoiSoatHuyHopDong", "dbo.XacMinhKhachKhongDen",
+        "dbo.LichSuTrangThaiTaiKhoan", "dbo.NhatKyHeThong", "dbo.PhieuBaoTri",
+        "dbo.HuHongThietBi", "dbo.LichSuCapNhatHuHong", "dbo.TinNhan"
     };
 
     public static void Run(string? outputDirectory = null)
@@ -28,12 +30,12 @@ public static class Schema33EfChecks
         var actualTables = entities.Where(e => e.GetTableName() != null)
             .Select(e => $"{e.GetSchema() ?? db.Model.GetDefaultSchema() ?? "dbo"}.{e.GetTableName()}")
             .ToHashSet(StringComparer.Ordinal);
-        if (ExpectedTables.Count != 33 || !actualTables.SetEquals(ExpectedTables))
+        if (ExpectedTables.Count != 39 || !actualTables.SetEquals(ExpectedTables))
             throw new Exception("EF physical table set mismatch. Missing: " +
                 string.Join(",", ExpectedTables.Except(actualTables)) + "; unexpected: " +
                 string.Join(",", actualTables.Except(ExpectedTables)));
-        if (entities.Sum(e => e.GetProperties().Count()) != 379)
-            throw new Exception("EF scalar mapping differs from reviewed 379 fields (Schema33 plus customer handover confirmation)");
+        if (entities.Sum(e => e.GetProperties().Count()) != 442)
+            throw new Exception($"EF scalar mapping differs from reviewed 442 fields; actual {entities.Sum(e => e.GetProperties().Count())}");
         if (entities.Any(e => e.GetProperties().Any(p => p.IsShadowProperty())))
             throw new Exception("Unexpected shadow relationship/property");
         var hold = entities.Single(e => e.GetTableName() == "ChiTietGiuCho" && (e.GetSchema() ?? "dbo") == "dbo");
@@ -64,7 +66,7 @@ public static class Schema33EfChecks
             throw new Exception("Valid paid penalty rejected");
         if (entities.SelectMany(e => e.GetForeignKeys()).Any(f => f.DeleteBehavior != DeleteBehavior.NoAction))
             throw new Exception("Unexpected cascade");
-        Console.WriteLine("PASS EF exact33 schema.table set,379 scalar/no shadows and restrictive FKs; no database connected.");
+        Console.WriteLine("PASS EF Schema33 plus web-admin migration: 39 tables, 442 scalar/no shadows and restrictive FKs; no database connected.");
     }
 }
 #endif

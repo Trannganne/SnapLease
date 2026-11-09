@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using RentalCamera.Api.Auth;
+using RentalCamera.Api.Admin;
 using RentalCamera.Api.Catalog;
 using RentalCamera.Api.Chatbot;
 using RentalCamera.Api.Contracts;
@@ -21,6 +22,9 @@ using RentalCamera.Api.Rental;
 using RentalCamera.Api.Reports;
 using RentalCamera.Api.Reviews;
 using RentalCamera.Api.Settlement;
+using RentalCamera.Api.Customers;
+using RentalCamera.Api.Messaging;
+using RentalCamera.Api.Operations;
 using System.Threading.RateLimiting;
 using RentalCamera.Api.Infrastructure;
 
@@ -163,6 +167,7 @@ app.UseAuthentication();
 // Authentication must therefore run before the limiter.
 app.UseRateLimiter();
 app.UseAuthorization();
+app.UseBusinessAudit();
 
 if (args.Length == 2 && args[0] == "set-password")
 {
@@ -204,11 +209,15 @@ app.MapGet("/api/dieu-khoan/hien-hanh", () => Results.Ok(new {
     phienBan=RentalPolicy.TermsVersion, noiDung=RentalPolicy.Terms, muiGio="Asia/Ho_Chi_Minh"
 }));
 app.MapAuthEndpoints();
+app.MapEmployeeEndpoints();
+app.MapAccountStatusEndpoints();
 app.MapNotificationEndpoints();
 app.MapFcmTokenEndpoints();
 app.MapCatalogEndpoints();
 app.MapChatbotEndpoints();
+app.MapMessageEndpoints();
 app.MapEquipmentEndpoints();
+app.MapAssetOperationsEndpoints();
 app.MapReserveDeviceEndpoints();
 app.MapRentalEndpoints();
 app.MapCartEndpoints();
@@ -228,6 +237,9 @@ app.MapHandoverEndpoints();
 app.MapSettlementEndpoints();
 app.MapReviewEndpoints();
 app.MapReportEndpoints();
+app.MapOperationalReportEndpoints();
+app.MapCustomerManagementEndpoints();
+app.MapAuditEndpoints();
 
 app.Run();
 

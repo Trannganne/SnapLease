@@ -5,6 +5,7 @@ using RentalCamera.Api.Payments;
 using RentalCamera.Api.Equipment;
 using RentalCamera.Api.Identity;
 using RentalCamera.Api.Handover;
+using RentalCamera.Api.Admin;
 using Microsoft.Extensions.Configuration;
 
 #if !DIRECT_OFFLINE
@@ -39,6 +40,14 @@ if (args.Length == 2 && args[0] == "--model-output")
 var count=0;
 void Check(bool ok,string name){if(!ok)throw new Exception(name);count++;}
 await ChatbotChecks.RunAsync();
+Check(EmployeeEndpoints.IsContractInProgress("CHO_KY") &&
+      EmployeeEndpoints.IsContractInProgress("DA_KY") &&
+      EmployeeEndpoints.IsContractInProgress("CHO_BAN_GIAO") &&
+      EmployeeEndpoints.IsContractInProgress("DANG_THUE") &&
+      EmployeeEndpoints.IsContractInProgress("CHO_HOAN_TRA") &&
+      !EmployeeEndpoints.IsContractInProgress("DA_HUY") &&
+      !EmployeeEndpoints.IsContractInProgress("HOAN_THANH"),
+    "Employee cannot leave while assigned contract work remains in progress");
 var noPromotion = RentalPromotionPolicy.Evaluate(2, false);
 Check(noPromotion.Percent == 0 && noPromotion.Codes.Length == 0, "Existing customer below three devices has no promotion");
 var bulkPromotion = RentalPromotionPolicy.Evaluate(3, false);

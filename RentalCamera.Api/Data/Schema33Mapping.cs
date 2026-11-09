@@ -576,11 +576,16 @@ public static class Schema33Mapping
             e.Property(x => x.GhiChuKiemDuyet).HasColumnType("nvarchar(500)").IsRequired(false);
             e.Property(x => x.NgayKiemDuyet).HasColumnType("datetime2").IsRequired(false);
             e.Property(x => x.NguoiCapNhatHienThi).HasColumnType("varchar(20)").IsRequired(false);
+            e.Property(x => x.TraLoi).HasColumnType("nvarchar(500)").IsRequired(false);
+            e.Property(x => x.NguoiTraLoi).HasColumnType("varchar(20)").IsRequired(false);
+            e.Property(x => x.TraLoiLucUtc).HasColumnType("datetime2").IsRequired(false);
+            e.Property(x => x.SuaTraLoiLucUtc).HasColumnType("datetime2").IsRequired(false);
             e.HasKey("MaDanhGia").HasName("PK_DanhGia");
             e.HasIndex(new[] { "MaChiTietHopDong" }, "UQ_DanhGia_MaChiTietHopDong").IsUnique();
             e.HasOne<ChiTietHopDong>().WithMany().HasForeignKey("MaChiTietHopDong").HasPrincipalKey("MaChiTietHopDong").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK_DanhGia_MaChiTietHopDong");
             e.HasOne<KhachThue>().WithMany().HasForeignKey("MaKhachThue").HasPrincipalKey("MaKhachThue").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK_DanhGia_MaKhachThue");
             e.HasOne<TaiKhoan>().WithMany().HasForeignKey("NguoiCapNhatHienThi").HasPrincipalKey("MaTaiKhoan").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FKR_DanhGia_NguoiCapNhatHienThi");
+            e.HasOne<TaiKhoan>().WithMany().HasForeignKey("NguoiTraLoi").HasPrincipalKey("MaTaiKhoan").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK_DanhGia_NguoiTraLoi");
         });
         m.Entity<AnhDanhGia>(e => {
             e.ToTable("AnhDanhGia", "dbo", t => {
@@ -589,6 +594,7 @@ public static class Schema33Mapping
             e.Property(x => x.MaAnhDanhGia).HasColumnType("varchar(20)").IsRequired(true);
             e.Property(x => x.MaDanhGia).HasColumnType("varchar(20)").IsRequired(true);
             e.Property(x => x.DuongDanAnh).HasColumnType("nvarchar(500)").IsRequired(true);
+            e.Property(x => x.PublicId).HasColumnType("nvarchar(200)").IsRequired(false);
             e.Property(x => x.PublicId).HasColumnType("nvarchar(200)").IsRequired(true);
             e.Property(x => x.ThuTu).HasColumnType("tinyint").IsRequired(true);
             e.Property(x => x.NgayTao).HasColumnType("datetime2").IsRequired(true).HasDefaultValueSql("SYSDATETIME()");
@@ -753,6 +759,45 @@ public static class Schema33Mapping
             e.HasIndex(new[] { "XacMinhLucUtc", "CoTranhChapKhongDen" }, "IX33_XacMinhKhachKhongDen_Time");
             e.HasOne<HopDong>().WithMany().HasForeignKey("MaHopDong").HasPrincipalKey("MaHopDong").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK33_XacMinhKhachKhongDen_HopDong");
             e.HasOne<TaiKhoan>().WithMany().HasForeignKey("NguoiXacMinh").HasPrincipalKey("MaTaiKhoan").OnDelete(DeleteBehavior.NoAction).HasConstraintName("FK33_XacMinhKhachKhongDen_NguoiXacMinh");
+        });
+        m.Entity<LichSuTrangThaiTaiKhoan>(e => {
+            e.ToTable("LichSuTrangThaiTaiKhoan", "dbo");
+            e.HasKey(x => x.MaLichSu); e.Property(x => x.MaLichSu).HasColumnType("varchar(20)");
+            e.Property(x => x.MaTaiKhoan).HasColumnType("varchar(20)"); e.Property(x => x.TrangThaiCu).HasColumnType("varchar(20)");
+            e.Property(x => x.TrangThaiMoi).HasColumnType("varchar(20)"); e.Property(x => x.LyDo).HasColumnType("nvarchar(500)");
+            e.Property(x => x.NguoiThaoTac).HasColumnType("varchar(20)"); e.Property(x => x.ThoiGian).HasColumnType("datetime2");
+            e.HasIndex(x => new { x.MaTaiKhoan, x.ThoiGian });
+            e.HasOne<TaiKhoan>().WithMany().HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.NoAction);
+            e.HasOne<TaiKhoan>().WithMany().HasForeignKey(x => x.NguoiThaoTac).OnDelete(DeleteBehavior.NoAction);
+        });
+        m.Entity<NhatKyHeThong>(e => {
+            e.ToTable("NhatKyHeThong", "dbo"); e.HasKey(x => x.MaNhatKy); e.Property(x => x.MaNhatKy).HasColumnType("varchar(20)");
+            e.Property(x => x.MaTaiKhoan).HasColumnType("varchar(20)"); e.Property(x => x.VaiTro).HasColumnType("varchar(20)");
+            e.Property(x => x.HanhDong).HasColumnType("varchar(10)"); e.Property(x => x.DuongDan).HasColumnType("nvarchar(500)");
+            e.Property(x => x.DoiTuong).HasColumnType("nvarchar(100)"); e.Property(x => x.MaDoiTuong).HasColumnType("nvarchar(100)");
+            e.Property(x => x.MaCuaHang).HasColumnType("varchar(20)"); e.Property(x => x.DiaChiIp).HasColumnType("varchar(45)"); e.Property(x => x.ThoiGian).HasColumnType("datetime2");
+            e.HasIndex(x => x.ThoiGian); e.HasIndex(x => new { x.MaTaiKhoan, x.ThoiGian });
+            e.HasOne<TaiKhoan>().WithMany().HasForeignKey(x => x.MaTaiKhoan).OnDelete(DeleteBehavior.NoAction);
+        });
+        m.Entity<PhieuBaoTri>(e => {
+            e.ToTable("PhieuBaoTri", "dbo"); e.HasKey(x => x.MaPhieuBaoTri); e.Property(x => x.MaPhieuBaoTri).HasColumnType("varchar(20)");
+            e.Property(x => x.MaThietBi).HasColumnType("varchar(20)"); e.Property(x => x.MaCuaHang).HasColumnType("varchar(20)"); e.Property(x => x.TrangThai).HasColumnType("varchar(20)");
+            e.Property(x => x.ChiPhiDuKien).HasColumnType("decimal(18,2)"); e.Property(x => x.ChiPhiThucTe).HasColumnType("decimal(18,2)"); e.Property(x => x.NguoiTao).HasColumnType("varchar(20)");
+            e.HasIndex(x => new { x.MaThietBi, x.TrangThai }); e.HasOne<ThietBi>().WithMany().HasForeignKey(x => x.MaThietBi).OnDelete(DeleteBehavior.NoAction); e.HasOne<CuaHang>().WithMany().HasForeignKey(x => x.MaCuaHang).OnDelete(DeleteBehavior.NoAction);
+        });
+        m.Entity<HuHongThietBi>(e => {
+            e.ToTable("HuHongThietBi", "dbo"); e.HasKey(x => x.MaHuHong); e.Property(x => x.MaHuHong).HasColumnType("varchar(20)"); e.Property(x => x.MaThietBi).HasColumnType("varchar(20)");
+            e.Property(x => x.MaPhieuBaoTri).HasColumnType("varchar(20)"); e.Property(x => x.MucDo).HasColumnType("varchar(20)"); e.Property(x => x.TrangThai).HasColumnType("varchar(20)"); e.Property(x => x.NguoiGhiNhan).HasColumnType("varchar(20)"); e.Property(x => x.ChiPhiSuaChua).HasColumnType("decimal(18,2)");
+            e.HasIndex(x => new { x.MaThietBi, x.ThoiGianGhiNhan }); e.HasOne<ThietBi>().WithMany().HasForeignKey(x => x.MaThietBi).OnDelete(DeleteBehavior.NoAction); e.HasOne<PhieuBaoTri>().WithMany().HasForeignKey(x => x.MaPhieuBaoTri).OnDelete(DeleteBehavior.NoAction);
+        });
+        m.Entity<LichSuCapNhatHuHong>(e => {
+            e.ToTable("LichSuCapNhatHuHong", "dbo"); e.HasKey(x => x.MaLichSu); e.Property(x => x.MaLichSu).HasColumnType("varchar(20)"); e.Property(x => x.MaHuHong).HasColumnType("varchar(20)");
+            e.Property(x => x.TrangThaiCu).HasColumnType("varchar(20)"); e.Property(x => x.TrangThaiMoi).HasColumnType("varchar(20)"); e.Property(x => x.NguoiThaoTac).HasColumnType("varchar(20)"); e.Property(x => x.ChiPhiCu).HasColumnType("decimal(18,2)"); e.Property(x => x.ChiPhiMoi).HasColumnType("decimal(18,2)");
+            e.HasOne<HuHongThietBi>().WithMany().HasForeignKey(x => x.MaHuHong).OnDelete(DeleteBehavior.NoAction);
+        });
+        m.Entity<TinNhan>(e => {
+            e.ToTable("TinNhan", "dbo"); e.HasKey(x => x.MaTinNhan); e.Property(x => x.MaTinNhan).HasColumnType("varchar(20)"); e.Property(x => x.MaKhachThue).HasColumnType("varchar(20)"); e.Property(x => x.MaCuaHang).HasColumnType("varchar(20)"); e.Property(x => x.NguoiGui).HasColumnType("varchar(20)"); e.Property(x => x.NoiDung).HasColumnType("nvarchar(1000)"); e.Property(x => x.GuiLucUtc).HasColumnType("datetime2"); e.Property(x => x.DaDocLucUtc).HasColumnType("datetime2");
+            e.HasIndex(x => new { x.MaKhachThue, x.GuiLucUtc }); e.HasOne<KhachThue>().WithMany().HasForeignKey(x => x.MaKhachThue).OnDelete(DeleteBehavior.NoAction); e.HasOne<CuaHang>().WithMany().HasForeignKey(x => x.MaCuaHang).OnDelete(DeleteBehavior.NoAction); e.HasOne<TaiKhoan>().WithMany().HasForeignKey(x => x.NguoiGui).OnDelete(DeleteBehavior.NoAction);
         });
     }
 }

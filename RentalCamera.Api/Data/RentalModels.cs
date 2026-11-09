@@ -393,6 +393,10 @@ public sealed class DanhGia
     public string? GhiChuKiemDuyet { get; set; }
     public DateTime? NgayKiemDuyet { get; set; }
     public string? NguoiCapNhatHienThi { get; set; }
+    public string? TraLoi { get; set; }
+    public string? NguoiTraLoi { get; set; }
+    public DateTime? TraLoiLucUtc { get; set; }
+    public DateTime? SuaTraLoiLucUtc { get; set; }
 }
 
 public sealed class AnhDanhGia
@@ -411,8 +415,91 @@ public sealed class AnhBienBan
     public string MaChiTietHopDong { get; set; } = "";
     public string Loai { get; set; } = "";
     public string DuongDanAnh { get; set; } = "";
+    public string? PublicId { get; set; }
     public string? MoTa { get; set; }
     public DateTime ThoiGianChup { get; set; }
+}
+
+public sealed class LichSuTrangThaiTaiKhoan
+{
+    public string MaLichSu { get; set; } = "";
+    public string MaTaiKhoan { get; set; } = "";
+    public string TrangThaiCu { get; set; } = "";
+    public string TrangThaiMoi { get; set; } = "";
+    public string? LyDo { get; set; }
+    public string NguoiThaoTac { get; set; } = "";
+    public DateTime ThoiGian { get; set; }
+}
+
+public sealed class NhatKyHeThong
+{
+    public string MaNhatKy { get; set; } = "";
+    public string? MaTaiKhoan { get; set; }
+    public string? VaiTro { get; set; }
+    public string HanhDong { get; set; } = "";
+    public string DuongDan { get; set; } = "";
+    public string? DoiTuong { get; set; }
+    public string? MaDoiTuong { get; set; }
+    public string? MaCuaHang { get; set; }
+    public int TrangThaiHttp { get; set; }
+    public string? DiaChiIp { get; set; }
+    public DateTime ThoiGian { get; set; }
+}
+
+public sealed class PhieuBaoTri
+{
+    public string MaPhieuBaoTri { get; set; } = "";
+    public string MaThietBi { get; set; } = "";
+    public string MaCuaHang { get; set; } = "";
+    public string MoTaLoi { get; set; } = "";
+    public string TrangThai { get; set; } = "MOI_TAO";
+    public decimal? ChiPhiDuKien { get; set; }
+    public decimal? ChiPhiThucTe { get; set; }
+    public string? GhiChu { get; set; }
+    public string NguoiTao { get; set; } = "";
+    public DateTime ThoiGianTao { get; set; }
+    public DateTime? ThoiGianBatDau { get; set; }
+    public DateTime? ThoiGianHoanTat { get; set; }
+}
+
+public sealed class HuHongThietBi
+{
+    public string MaHuHong { get; set; } = "";
+    public string MaThietBi { get; set; } = "";
+    public string? MaPhieuBaoTri { get; set; }
+    public string MoTa { get; set; } = "";
+    public string MucDo { get; set; } = "NHE";
+    public decimal ChiPhiSuaChua { get; set; }
+    public string TrangThai { get; set; } = "CHUA_SUA";
+    public string? TinhTrangSauSuaChua { get; set; }
+    public string NguoiGhiNhan { get; set; } = "";
+    public DateTime ThoiGianGhiNhan { get; set; }
+    public DateTime? ThoiGianCapNhat { get; set; }
+}
+
+public sealed class LichSuCapNhatHuHong
+{
+    public string MaLichSu { get; set; } = "";
+    public string MaHuHong { get; set; } = "";
+    public string TrangThaiCu { get; set; } = "";
+    public string TrangThaiMoi { get; set; } = "";
+    public decimal ChiPhiCu { get; set; }
+    public decimal ChiPhiMoi { get; set; }
+    public string NguoiThaoTac { get; set; } = "";
+    public string? GhiChu { get; set; }
+    public DateTime ThoiGian { get; set; }
+}
+
+public sealed class TinNhan
+{
+    public string MaTinNhan { get; set; } = "";
+    public string MaKhachThue { get; set; } = "";
+    public string? MaCuaHang { get; set; }
+    public string NguoiGui { get; set; } = "";
+    public bool LaKhach { get; set; }
+    public string NoiDung { get; set; } = "";
+    public DateTime GuiLucUtc { get; set; }
+    public DateTime? DaDocLucUtc { get; set; }
 }
 
 public sealed class ThongBao

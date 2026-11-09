@@ -377,6 +377,33 @@ public static class ReviewEndpoints
             return Results.Ok(await GetReviewAsync(db, id, ct));
         }).RequireAuthorization("Admin");
 
+        app.MapPut("/api/danh-gia/{id}/tra-loi", async (string id, ReplyReviewRequest request, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var reply = request.TraLoi?.Trim();
+            if (string.IsNullOrWhiteSpace(reply) || reply.Length > 500) return Results.BadRequest(new { loi = "Nội dung trả lời phải từ 1 đến 500 ký tự.", code = "INVALID_REVIEW_REPLY" });
+            var scope = await ApiAccess.StaffScopeAsync(principal, db, ct); if (scope is null) return Results.Forbid();
+            var review = await db.DanhGia.SingleOrDefaultAsync(x => x.MaDanhGia == id, ct); if (review is null) return Results.NotFound();
+            var storeId = await db.ChiTietHopDong.Where(x => x.MaChiTietHopDong == review.MaChiTietHopDong).Join(db.HopDong, x => x.MaHopDong, x => x.MaHopDong, (_, h) => h.MaCuaHang).SingleAsync(ct);
+            if (!scope.IsAdmin && storeId != scope.StoreId) return Results.Forbid();
+            var firstReply = review.TraLoiLucUtc is null; var now = DateTime.UtcNow;
+            review.TraLoi = reply; review.NguoiTraLoi = ApiAccess.AccountId(principal); if (firstReply) review.TraLoiLucUtc = now; else review.SuaTraLoiLucUtc = now;
+            if (firstReply)
+            {
+                var account = await db.KhachThue.Where(x => x.MaKhachThue == review.MaKhachThue).Select(x => x.MaTaiKhoan).SingleAsync(ct);
+                ApiAccess.AddNotification(db, account, "DANH_GIA", "Cửa hàng đã trả lời đánh giá", reply, "REVIEW_REPLIED", "DANH_GIA", id);
+            }
+            await db.SaveChangesAsync(ct); return Results.Ok(await GetReviewAsync(db, id, ct));
+        }).RequireAuthorization("Staff");
+
+        app.MapDelete("/api/danh-gia/{id}/tra-loi", async (string id, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
+        {
+            var scope = await ApiAccess.StaffScopeAsync(principal, db, ct); if (scope is null) return Results.Forbid();
+            var review = await db.DanhGia.SingleOrDefaultAsync(x => x.MaDanhGia == id, ct); if (review is null) return Results.NotFound();
+            var storeId = await db.ChiTietHopDong.Where(x => x.MaChiTietHopDong == review.MaChiTietHopDong).Join(db.HopDong, x => x.MaHopDong, x => x.MaHopDong, (_, h) => h.MaCuaHang).SingleAsync(ct);
+            if (!scope.IsAdmin && storeId != scope.StoreId) return Results.Forbid();
+            review.TraLoi = null; review.NguoiTraLoi = null; review.TraLoiLucUtc = null; review.SuaTraLoiLucUtc = null; await db.SaveChangesAsync(ct); return Results.NoContent();
+        }).RequireAuthorization("Staff");
+
         app.MapGet("/api/danh-gia/{id}/lich-su-hien-thi", () => Results.Json(new { code="REVIEW_HISTORY_REMOVED" }, statusCode:410)).RequireAuthorization("Admin");
     }
 
@@ -407,6 +434,8 @@ public static class ReviewEndpoints
                     row.customer.HoTen,
                     row.detail.MaChiTietHopDong,
                     row.contract.MaHopDong,
+                    row.contract.MaCuaHang,
+                    TenCuaHang = db.CuaHang.Where(x => x.MaCuaHang == row.contract.MaCuaHang).Select(x => x.TenCuaHang).FirstOrDefault() ?? "",
                     row.device.MaThietBi,
                     row.device.SoSerial,
                     row.model.MaDongMay,
@@ -444,6 +473,11 @@ public static class ReviewEndpoints
             row.review.TrangThaiKiemDuyet,
             includePrivateDetails ? row.review.GhiChuKiemDuyet : null,
             includePrivateDetails ? row.review.NgayKiemDuyet : null,
+            row.review.TraLoi,
+            row.review.TraLoiLucUtc,
+            row.review.SuaTraLoiLucUtc,
+            row.MaCuaHang,
+            row.TenCuaHang,
             new ReviewDeviceResponse(
                 includePrivateDetails ? row.MaThietBi : null,
                 includePrivateDetails ? row.SoSerial : null,
@@ -465,6 +499,7 @@ public sealed record CreateReviewRequest(
     List<string>? DiemNoiBat);
 
 public sealed record ModerateReviewRequest(string TrangThai, string? GhiChu);
+public sealed record ReplyReviewRequest(string? TraLoi);
 
 public sealed record ReviewHighlightOption(string Ma, string Ten);
 
@@ -492,6 +527,11 @@ public sealed record ReviewResponse(
     string? TrangThaiKiemDuyet,
     string? GhiChuKiemDuyet,
     DateTime? NgayKiemDuyet,
+    string? TraLoi,
+    DateTime? TraLoiLucUtc,
+    DateTime? SuaTraLoiLucUtc,
+    string MaCuaHang,
+    string TenCuaHang,
     ReviewDeviceResponse ThietBi,
     IReadOnlyList<ReviewHighlightOption> DiemNoiBat,
     IReadOnlyList<ReviewImageResponse> HinhAnh)
