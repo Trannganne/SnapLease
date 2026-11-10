@@ -59,6 +59,15 @@ Check(newCustomerPromotion.Percent == 10 && newCustomerPromotion.IsNewCustomer,
 var combinedPromotion = RentalPromotionPolicy.Evaluate(3, true);
 Check(combinedPromotion.Percent == 10 && combinedPromotion.Codes.Length == 2 && combinedPromotion.Apply(100_000) == 90_000,
     "New-customer and three-device promotions do not stack above ten percent");
+var contractLinePrice=ContractPricePresentation.ForLine(125_000m,100_000m,90_000m,2,3m);
+Check(contractLinePrice.GiaGoc==125_000m &&
+      contractLinePrice.PhanTramKhuyenMaiDaApDung==10m &&
+      contractLinePrice.SoTienKhuyenMaiDaApDung==60_000m,
+    "Contract detail exposes original price and the promotion captured at checkout");
+var contractPromotion=ContractPricePresentation.ForContract(600_000m,540_000m);
+Check(contractPromotion.PhanTramKhuyenMaiDaApDung==10m &&
+      contractPromotion.SoTienKhuyenMaiDaApDung==60_000m,
+    "Contract promotion summary uses immutable checkout totals");
 var promotionStart = new DateTime(2026,11,6,8,0,0,DateTimeKind.Utc);
 var promotionEnd = promotionStart.AddDays(2);
 var timedModel = new DongMay

@@ -49,6 +49,18 @@ handler.Response = "{\"vnp_ResponseCode\":\"94\"}";
 var duplicate = await Query();
 Check(!duplicate.Success && duplicate.ErrorDetail == "QueryDrRejected", "duplicate query is unknown, not merchant mismatch");
 
+var acceptedReturn = VnpayReturnPage.Build("TT<01>", "HD&01", "00");
+Check(acceptedReturn.Contains(WebUtility.HtmlEncode("Đã ghi nhận kết quả thanh toán")),
+    "return fallback renders success heading");
+Check(acceptedReturn.Contains("TT&lt;01&gt;") && acceptedReturn.Contains("HD&amp;01"),
+    "return fallback HTML-encodes identifiers");
+Check(acceptedReturn.Contains("Quay lại ứng dụng"),
+    "return fallback offers an app return action");
+var failedReturn = VnpayReturnPage.Build("TT02", "HD02", "24");
+Check(failedReturn.Contains(WebUtility.HtmlEncode("Giao dịch chưa hoàn tất")) &&
+      failedReturn.Contains(WebUtility.HtmlEncode("thử lại")),
+    "return fallback explains an unfinished payment");
+
 sealed class ClientFactory(QueryHandler handler) : IHttpClientFactory {
     public HttpClient CreateClient(string name) => new(handler, disposeHandler: false);
 }

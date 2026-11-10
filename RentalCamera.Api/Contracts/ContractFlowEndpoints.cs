@@ -375,16 +375,37 @@ public static class ContractEndpoints
                 .Where(snapshotLine=>snapshotIds.Contains(snapshotLine.MaChiTietGioHang) &&
                     snapshotLine.MaGioHang==contract.MaGioHang && snapshotLine.GioHang.TrangThai=="DA_CHUYEN_HOP_DONG")
                 .ToDictionaryAsync(snapshotLine=>snapshotLine.MaChiTietGioHang,ct);
+            var originalSnapshotIds=bookedList.Select(x=>x.MaChiTietGioHang).Distinct().ToArray();
+            var originalPriceSnapshots=await db.ChiTietGioHang.AsNoTracking()
+                .Where(snapshotLine=>originalSnapshotIds.Contains(snapshotLine.MaChiTietGioHang))
+                .ToDictionaryAsync(snapshotLine=>snapshotLine.MaChiTietGioHang,ct);
 
-            var booked = bookedList.Select(x => new {
-                x.MaDongMay,
-                TenDongMay = models.ContainsKey(x.MaDongMay) ? models[x.MaDongMay].TenDongMay : null,
-                DonGiaTieuChuan = x.MaChiTietGioHangHopDong!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHangHopDong)?(decimal?)priceSnapshots[x.MaChiTietGioHangHopDong].DonGia:null,
-                ThanhTien = x.MaChiTietGioHangHopDong!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHangHopDong)?(decimal?)priceSnapshots[x.MaChiTietGioHangHopDong].ThanhTien:null,
-                NguonGia = x.MaChiTietGioHangHopDong!=null&&priceSnapshots.ContainsKey(x.MaChiTietGioHangHopDong)?"ANH_CHUP_HOP_DONG":"CHUA_XAC_DINH",
-                x.SoLuong, x.NgayBatDau, x.NgayKetThuc,
-                SoNgayThue = (decimal)Math.Ceiling((x.NgayKetThuc - x.NgayBatDau).TotalDays)
+            var booked = bookedList.Select(x => {
+                var contractSnapshot=x.MaChiTietGioHangHopDong!=null&&priceSnapshots.TryGetValue(x.MaChiTietGioHangHopDong,out var saved)
+                    ? saved : null;
+                originalPriceSnapshots.TryGetValue(x.MaChiTietGioHang,out var originalSnapshot);
+                models.TryGetValue(x.MaDongMay,out var model);
+                var price=ContractPricePresentation.ForLine(model?.GiaThueNgay,
+                    originalSnapshot?.DonGia,contractSnapshot?.DonGia,x.SoLuong,
+                    (decimal)Math.Ceiling((x.NgayKetThuc-x.NgayBatDau).TotalDays));
+                return new {
+                    x.MaDongMay,
+                    TenDongMay = model?.TenDongMay,
+                    DonGiaTieuChuan = contractSnapshot?.DonGia,
+                    ThanhTien = contractSnapshot?.ThanhTien,
+                    NguonGia = contractSnapshot is not null?"ANH_CHUP_HOP_DONG":"CHUA_XAC_DINH",
+                    GiaGoc = price.GiaGoc,
+                    DonGiaTruocKhuyenMai = price.DonGiaTruocKhuyenMai,
+                    DonGiaSauKhuyenMai = price.DonGiaSauKhuyenMai,
+                    PhanTramKhuyenMaiDaApDung = price.PhanTramKhuyenMaiDaApDung,
+                    SoTienKhuyenMaiDaApDung = price.SoTienKhuyenMaiDaApDung,
+                    x.SoLuong, x.NgayBatDau, x.NgayKetThuc,
+                    SoNgayThue = price.SoNgayThue
+                };
             }).ToList();
+            var tongTienGoc=booked.Sum(x=>x.GiaGoc.GetValueOrDefault()*x.SoNgayThue*x.SoLuong);
+            var tongTienTruocKhuyenMai=booked.Sum(x=>x.DonGiaTruocKhuyenMai.GetValueOrDefault()*x.SoNgayThue*x.SoLuong);
+            var khuyenMai=ContractPricePresentation.ForContract(tongTienTruocKhuyenMai,contract.TongTien);
 
             var detailRows = await db.ChiTietHopDong.AsNoTracking().Where(x => x.MaHopDong == id)
                 .Join(db.ThietBi.AsNoTracking(), c => c.MaThietBi, t => t.MaThietBi, (c, t) => new
@@ -425,6 +446,13 @@ public static class ContractEndpoints
                 contract.NgayTaoHopDong, contract.NgayKy,
                 contract.ThoiGianBanGiao, contract.ThoiGianTraDuKien,
                 contract.TongTien, contract.TongTienCoc, contract.HinhThucKy,
+                TongTienGoc = tongTienGoc,
+                KhuyenMaiDaApDung = new {
+                    TongTienTruocKhuyenMai = tongTienTruocKhuyenMai,
+                    khuyenMai.PhanTramKhuyenMaiDaApDung,
+                    khuyenMai.SoTienKhuyenMaiDaApDung,
+                    TongTienSauKhuyenMai = contract.TongTien
+                },
                 contract.TrangThai, contract.TepHopDongUrl,
                 KhachThue = khachThue,
                 ChiNhanh = cuaHang,
@@ -1175,3 +1203,39 @@ public sealed record ExtensionQuote(
     DateTime ThoiHanTraMoi,
     int SoNgayGiaHan,
     decimal ChiPhiDuKien);
+
+public sealed record ContractLinePricePresentation(
+    decimal? GiaGoc,
+    decimal? DonGiaTruocKhuyenMai,
+    decimal? DonGiaSauKhuyenMai,
+    decimal? PhanTramKhuyenMaiDaApDung,
+    decimal? SoTienKhuyenMaiDaApDung,
+    decimal SoNgayThue);
+
+public sealed record ContractPromotionPresentation(
+    decimal PhanTramKhuyenMaiDaApDung,
+    decimal SoTienKhuyenMaiDaApDung);
+
+public static class ContractPricePresentation
+{
+    public static ContractLinePricePresentation ForLine(decimal? originalCatalogPrice,
+        decimal? priceBeforePromotion, decimal? priceAfterPromotion, int quantity, decimal rentalDays)
+    {
+        decimal? percent = priceBeforePromotion is > 0m && priceAfterPromotion is not null
+            ? Math.Round((priceBeforePromotion.Value-priceAfterPromotion.Value)*100m/priceBeforePromotion.Value,2)
+            : null;
+        decimal? discount = priceBeforePromotion is not null && priceAfterPromotion is not null
+            ? Math.Max(0m,(priceBeforePromotion.Value-priceAfterPromotion.Value)*quantity*rentalDays)
+            : null;
+        return new(originalCatalogPrice,priceBeforePromotion,priceAfterPromotion,percent,discount,rentalDays);
+    }
+
+    public static ContractPromotionPresentation ForContract(decimal priceBeforePromotion, decimal priceAfterPromotion)
+    {
+        var discount=Math.Max(0m,priceBeforePromotion-priceAfterPromotion);
+        var percent=priceBeforePromotion>0m
+            ? Math.Round(discount*100m/priceBeforePromotion,2)
+            : 0m;
+        return new(percent,discount);
+    }
+}

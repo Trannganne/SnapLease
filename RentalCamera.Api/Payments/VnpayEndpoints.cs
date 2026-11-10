@@ -431,17 +431,9 @@ public static class VnpayEndpoints
                 return Results.Redirect(redirectUrl);
             }
 
-            return Results.Ok(new
-            {
-                payment.MaThanhToan,
-                payment.MaHopDong,
-                payment.SoTien,
-                payment.TrangThai,
-                nhaCungCap = "VNPAY",
-                callbackHopLe = true,
-                maPhanHoiVnpay = callback.ResponseCode,
-                thongBao = "Kết quả chính thức được cập nhật qua IPN; ứng dụng hãy đọc lại trạng thái giao dịch."
-            });
+            return Results.Content(
+                VnpayReturnPage.Build(payment.MaThanhToan, payment.MaHopDong, callback.ResponseCode),
+                "text/html; charset=utf-8");
         }).AllowAnonymous();
     }
 

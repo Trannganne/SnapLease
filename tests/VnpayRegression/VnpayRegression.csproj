@@ -4,5 +4,6 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <Compile Include="../../RentalCamera.Api/Payments/VnpayService.cs" Link="VnpayService.cs" />
     <Compile Include="../../RentalCamera.Api/Payments/VnpayOptions.cs" Link="VnpayOptions.cs" />
+    <Compile Include="../../RentalCamera.Api/Payments/VnpayReturnPage.cs" Link="VnpayReturnPage.cs" />
   </ItemGroup>
 </Project>
