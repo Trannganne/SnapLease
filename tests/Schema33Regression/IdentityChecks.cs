@@ -84,6 +84,19 @@ internal static class IdentityChecks
         rows.Reset();
         Check(await Invoke("/api/auth/email", "PUT", new ChangeEmailRequest(" Fresh@Example.invalid ")) == 204 &&
             rows.Saves == 1 && rows.SavedEmail == "FRESH@EXAMPLE.INVALID", "Unused normalized email can update through the existing endpoint");
+        rows.Reset();
+        Check(await Invoke("/api/auth/lien-he", "PUT", new UpdateContactRequest("current@example.invalid", "phone-invalid")) == 400 && rows.Saves == 0,
+            "Contact update rejects an invalid phone number without writing");
+        rows.Reset(); rows.DuplicatePhone = true; rows.RequirePhoneLock = true;
+        Check(await Invoke("/api/auth/lien-he", "PUT", new UpdateContactRequest("current@example.invalid", "0999999999")) == 409 && rows.Saves == 0,
+            "Contact update rejects a phone number owned by another customer");
+        Check(rows.Locks.SequenceEqual(["account:OFFLINE_ACCOUNT", "email:" + AuthLinkService.Fingerprint("CURRENT@EXAMPLE.INVALID"), "phone:0999999999"]),
+            "Contact update serializes account, normalized email and phone checks");
+        rows.Reset(); rows.DuplicatePhone = false; rows.RequirePhoneLock = true;
+        Check(await Invoke("/api/auth/lien-he", "PUT", new UpdateContactRequest(" contact@example.invalid ", "0987654321")) == 200 &&
+            rows.Saves == 1 && rows.SavedEmail == "CONTACT@EXAMPLE.INVALID" && rows.SavedPhone == "0987654321" &&
+            rows.SavedEmailVerified == null && rows.SavedEpoch == 1,
+            "Contact update saves normalized unique values and invalidates email verification and sessions");
         Check(AuthLinkService.NormalizeEmail("bad@@example.invalid") == null && AuthLinkService.NormalizeEmail(" x@Example.invalid ") == "X@EXAMPLE.INVALID",
             "Normalization rejects invalid email and folds whitespace/case consistently");
         Console.WriteLine($"PASS {count} registration/email endpoint checks; scripted duplicate rows and transactions, no SQL connection or account mutation. Real SQL locking/concurrency remains unverified.");
@@ -94,8 +107,13 @@ internal static class IdentityChecks
         public List<string> Locks = [];
         public int Saves;
         public bool Duplicate = true;
+        public bool DuplicatePhone;
+        public bool RequirePhoneLock;
         public string? SavedEmail;
-        public void Reset() { Locks.Clear(); Saves = 0; SavedEmail = null; }
+        public string? SavedPhone;
+        public DateTime? SavedEmailVerified;
+        public int? SavedEpoch;
+        public void Reset() { Locks.Clear(); Saves = 0; SavedEmail = null; SavedPhone = null; SavedEmailVerified = null; SavedEpoch = null; DuplicatePhone = false; RequirePhoneLock = false; }
         public override ValueTask<InterceptionResult<int>> NonQueryExecutingAsync(DbCommand command, CommandEventData eventData,
             InterceptionResult<int> result, CancellationToken cancellationToken = default)
         {
@@ -112,9 +130,11 @@ internal static class IdentityChecks
             if (sql.Contains("EXISTS"))
             {
                 var emailLookup = sql.Contains("[Email]");
-                if (emailLookup && (Locks.Count == 0 || !Locks.Last().StartsWith("email:"))) throw new Exception("Missing normalized email lock before lookup");
+                var phoneLookup = sql.Contains("[SoDienThoai]");
+                if (emailLookup && !Locks.Any(x => x.StartsWith("email:"))) throw new Exception("Missing normalized email lock before lookup");
+                if (phoneLookup && RequirePhoneLock && !Locks.Any(x => x.StartsWith("phone:"))) throw new Exception("Missing phone lock before lookup");
                 if (emailLookup && sql.Contains("EmailXacMinhLucUtc")) throw new Exception("Unverified mailboxes must not be excluded");
-                table.Columns.Add("value", typeof(bool)); table.Rows.Add(emailLookup && Duplicate);
+                table.Columns.Add("value", typeof(bool)); table.Rows.Add((emailLookup && Duplicate) || (phoneLookup && DuplicatePhone));
             }
             else
             {
@@ -136,7 +156,11 @@ internal static class IdentityChecks
             InterceptionResult<int> result, CancellationToken cancellationToken = default)
         {
             rows.Saves++;
-            rows.SavedEmail = eventData.Context!.ChangeTracker.Entries<KhachThue>().Single().Entity.Email;
+            var customer = eventData.Context!.ChangeTracker.Entries<KhachThue>().Single().Entity;
+            rows.SavedEmail = customer.Email;
+            rows.SavedPhone = customer.SoDienThoai;
+            rows.SavedEmailVerified = customer.EmailXacMinhLucUtc;
+            rows.SavedEpoch = eventData.Context.ChangeTracker.Entries<TaiKhoan>().SingleOrDefault()?.Entity.PhienBanBaoMat;
             return ValueTask.FromResult(InterceptionResult<int>.SuppressWithResult(1));
         }
     }

@@ -270,6 +270,7 @@ public static class IdentityEndpoints
                 hoTen = customer.HoTen,
                 soDienThoai = customer.SoDienThoai,
                 email = customer.Email,
+                emailDaXacMinh = customer.EmailXacMinhLucUtc != null,
                 cccd = customer.CCCD,
                 diaChiThuongTru = customer.DiaChi,
                 ngaySinh = customer.NgaySinh,

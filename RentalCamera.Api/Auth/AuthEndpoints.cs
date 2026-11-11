@@ -124,6 +124,46 @@ public static class AuthEndpoints
             }
             await tx.CommitAsync(ct); return Results.NoContent();
         }).RequireAuthorization("Customer");
+        group.MapPut("/lien-he", async (UpdateContactRequest r, ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) => {
+            var email=AuthLinkService.NormalizeEmail(r.Email);
+            var phone=r.SoDienThoai?.Trim();
+            if(email==null || string.IsNullOrWhiteSpace(phone) || !Regex.IsMatch(phone,"^[0-9]{9,15}$"))
+                return Results.BadRequest(new { code="INVALID_CONTACT", loi="Email hoặc số điện thoại không hợp lệ." });
+
+            var id=ApiAccess.AccountId(principal);
+            if(string.IsNullOrWhiteSpace(id))return Results.Unauthorized();
+            await using var tx=await db.Database.BeginTransactionAsync(IsolationLevel.Serializable,ct);
+            await TransactionLock.AcquireAsync(db,"account:"+id,ct);
+            await TransactionLock.AcquireAsync(db,"email:"+AuthLinkService.Fingerprint(email),ct);
+            await TransactionLock.AcquireAsync(db,"phone:"+phone,ct);
+            var account=await db.TaiKhoan.SingleOrDefaultAsync(a=>a.MaTaiKhoan==id && a.TrangThai=="HOAT_DONG",ct);
+            var customer=await db.KhachThue.SingleOrDefaultAsync(k=>k.MaTaiKhoan==id,ct);
+            if(account==null || customer==null)return Results.Unauthorized();
+            if(await db.KhachThue.AnyAsync(k=>k.MaTaiKhoan!=id && k.Email!=null && k.Email.Trim().ToUpper()==email,ct))
+                return Results.Conflict(new { code="EMAIL_ALREADY_USED", loi="Email đã được sử dụng bởi tài khoản khác." });
+            if(await db.KhachThue.AnyAsync(k=>k.MaTaiKhoan!=id && k.SoDienThoai==phone,ct))
+                return Results.Conflict(new { code="PHONE_ALREADY_USED", loi="Số điện thoại đã được sử dụng bởi tài khoản khác." });
+
+            var emailChanged=AuthLinkService.NormalizeEmail(customer.Email)!=email;
+            var phoneChanged=customer.SoDienThoai!=phone;
+            if(emailChanged){
+                customer.Email=email;
+                customer.EmailXacMinhLucUtc=null;
+                account.PhienBanBaoMat=checked(account.PhienBanBaoMat+1);
+            }
+            if(phoneChanged)customer.SoDienThoai=phone;
+            if(emailChanged || phoneChanged){
+                try{await db.SaveChangesAsync(ct);}
+                catch(DbUpdateException){return Results.Conflict(new { code="CONTACT_ALREADY_USED", loi="Email hoặc số điện thoại đã được sử dụng." });}
+            }
+            await tx.CommitAsync(ct);
+            return Results.Ok(new {
+                email=customer.Email,
+                soDienThoai=customer.SoDienThoai,
+                emailDaXacMinh=customer.EmailXacMinhLucUtc!=null,
+                yeuCauDangNhapLai=emailChanged
+            });
+        }).RequireAuthorization("Customer");
         group.MapPost("/quen-mat-khau", async (ForgotPasswordRequest request, RentalCameraContext db, AuthLinkService links, IAuthEmailSender sender, IConfiguration config, CancellationToken ct) => {
             var email=AuthLinkService.NormalizeEmail(request.EmailHoacSoDienThoai);
             if(email!=null){
@@ -301,3 +341,4 @@ public sealed record ChangePasswordRequest(string MatKhauCu, string MatKhauMoi);
 
 public sealed record EmailVerificationRequest(string Token);
 public sealed record ChangeEmailRequest(string Email);
+public sealed record UpdateContactRequest(string Email, string SoDienThoai);
