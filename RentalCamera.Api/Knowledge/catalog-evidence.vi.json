@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": "TR33_M01",
+    "summary": "Máy ảnh mirrorless ngàm RF dùng cảm biến CMOS full-frame khoảng 24,2 MP; hỗ trợ quay 4K 59,94p không crop với 6K oversampling và có hai khe thẻ SD tương thích UHS-II.",
+    "source": "https://www.usa.canon.com/support/p/eos-r6-mark-ii"
+  },
+  {
+    "id": "TR33_M02",
+    "summary": "Máy ảnh mirrorless full-frame 33 MP; hỗ trợ chống rung cảm biến 5 trục và quay 4K 60p ở chế độ Super 35mm.",
+    "source": "https://www.sony.com/electronics/support/e-mount-body-ilce-7m4-series/ilce-7m4/specifications"
+  },
+  {
+    "id": "TR33_M03",
+    "summary": "Ống kính zoom ngàm RF 24-70 mm, khẩu độ cố định f/2.8; có chống rung quang học, Nano USM, cấu trúc 21 thấu kính trong 15 nhóm và ren lọc 82 mm.",
+    "source": "https://files.canon-europe.com/files/webcontent/rf-lens-world/features/rf-lineup/index.html?pop=pop18"
+  },
+  {
+    "id": "TR33_M04",
+    "summary": "Gimbal có tải trọng thử nghiệm 4,5 kg, thời lượng hoạt động tối đa 12 giờ theo điều kiện thử nghiệm của DJI và kết nối Bluetooth 5.0.",
+    "source": "https://www.dji.com/support/product/rs-3-pro"
+  },
+  {
+    "id": "TR33_M05",
+    "summary": "Pin sạc InfoLITHIUM Z-series có thông số 7,2 V, 16,4 Wh, dung lượng 2.280 mAh và khối lượng khoảng 83 g.",
+    "source": "https://electronics.sony.com/imaging/imaging-accessories/interchangeable-lens-camera-accessories/p/npfz100"
+  },
+  {
+    "id": "TR33_M06",
+    "summary": "Thẻ SDXC UHS-II 128 GB chuẩn V60/U3; tốc độ đọc công bố đến 280 MB/s và ghi đến 100 MB/s cho bản 128 GB; hỗ trợ quy trình ghi 6K, 4K và Full HD tùy thiết bị chủ.",
+    "source": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/memory-cards/extreme-pro-uhs-ii-sd/data-sheet-extreme-pro-uhs-ii-sd-v60.pdf"
+  }
+]
