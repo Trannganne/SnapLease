@@ -26,6 +26,7 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
             c.GetValue<bool>("PasswordReset:ReturnTokenInResponse")) throw new InvalidOperationException("Trial isolation guard không đầy đủ.");
         Validate(c.GetConnectionString("RentalCamera") ?? "");
         ValidateChatbot(c);
+        ValidateGoogleLogin(c);
         ValidateNotifications(c);
         ValidateVnpay(c);
         ValidateMediaStorage(c);
@@ -34,6 +35,20 @@ public sealed class Schema33TrialGuard : DbConnectionInterceptor
 
     public bool SandboxVnpay => sandboxVnpay;
     public bool ChatbotExternalHttpAllowed { get; private set; }
+
+    private static void ValidateGoogleLogin(IConfiguration c)
+    {
+        var enabled = c.GetValue<bool>("GoogleLogin:Enabled");
+        var approved = c.GetValue<bool>("GoogleLogin:LiveApiApproved");
+        if (!enabled)
+        {
+            if (approved) throw new InvalidOperationException("Google login đang tắt nhưng phê duyệt API ngoài vẫn bật.");
+            return;
+        }
+        if (!approved || string.IsNullOrWhiteSpace(c["Firebase:ProjectId"]) ||
+            string.IsNullOrWhiteSpace(c["Firebase:CredentialsPath"]))
+            throw new InvalidOperationException("Google login chưa được phê duyệt hoặc thiếu cấu hình Firebase Admin.");
+    }
 
     private void ValidateChatbot(IConfiguration c)
     {

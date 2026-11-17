@@ -76,9 +76,16 @@ var primaryNotificationWorker = string.Equals(
     builder.Configuration["Notifications:WorkerRole"],
     "Primary",
     StringComparison.Ordinal);
-if (primaryNotificationWorker && builder.Configuration.GetValue<bool>("Notifications:PushEnabled"))
-{
+var pushEnabled = primaryNotificationWorker && builder.Configuration.GetValue<bool>("Notifications:PushEnabled");
+var googleLoginEnabled = builder.Configuration.GetValue<bool>("GoogleLogin:Enabled");
+if (pushEnabled || googleLoginEnabled)
     builder.Services.AddSingleton(FirebaseRegistration.CreateApp);
+if (googleLoginEnabled)
+    builder.Services.AddSingleton<IGoogleIdentityTokenVerifier, FirebaseGoogleIdentityTokenVerifier>();
+else
+    builder.Services.AddSingleton<IGoogleIdentityTokenVerifier, DisabledGoogleIdentityTokenVerifier>();
+if (pushEnabled)
+{
     builder.Services.AddHostedService<NotificationDeliveryWorker>();
 }
 if (primaryNotificationWorker && builder.Configuration.GetValue<bool>("Notifications:ReturnReminderEnabled"))

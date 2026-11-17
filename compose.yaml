@@ -76,6 +76,8 @@ services:
       Firebase__ProjectId: "${FIREBASE_PROJECT_ID:?Configure Firebase project}"
       Firebase__CredentialsPath: /run/secrets/firebase_admin
       Firebase__LiveApiApproved: "${FIREBASE_LIVE_API_APPROVED:-false}"
+      GoogleLogin__Enabled: "${GOOGLE_LOGIN_ENABLED:-false}"
+      GoogleLogin__LiveApiApproved: "${GOOGLE_LOGIN_LIVE_API_APPROVED:-false}"
       GOOGLE_APPLICATION_CREDENTIALS: /run/secrets/firebase_admin
       Cloudinary__CloudName: "${CLOUDINARY_CLOUD_NAME:-}"
       Cloudinary__ApiKey: "${CLOUDINARY_API_KEY:-}"

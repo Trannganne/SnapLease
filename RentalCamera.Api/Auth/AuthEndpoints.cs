@@ -244,6 +244,112 @@ public static class AuthEndpoints
             });
         }).RequireRateLimiting("auth");
 
+        group.MapPost("/google", async (
+            GoogleLoginRequest request,
+            RentalCameraContext db,
+            IPasswordHasher<TaiKhoan> hasher,
+            TokenIssuer issuer,
+            IGoogleIdentityTokenVerifier verifier,
+            IConfiguration configuration,
+            CancellationToken ct) =>
+        {
+            if (!configuration.GetValue<bool>("GoogleLogin:Enabled"))
+                return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+            if (string.IsNullOrWhiteSpace(request.IdToken) || request.IdToken.Length > 10_000)
+                return Results.BadRequest(new { code = "INVALID_GOOGLE_TOKEN", loi = "Google ID token không hợp lệ." });
+
+            var identity = await verifier.VerifyAsync(request.IdToken.Trim(), ct);
+            var email = AuthLinkService.NormalizeEmail(identity?.Email);
+            if (identity is null || !identity.EmailVerified || email is null)
+                return Results.Unauthorized();
+
+            await using var tx = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+            await TransactionLock.AcquireAsync(db, "email:" + AuthLinkService.Fingerprint(email), ct);
+
+            var customer = await db.KhachThue.SingleOrDefaultAsync(
+                x => x.Email != null && x.Email.Trim().ToUpper() == email, ct);
+            TaiKhoan account;
+            var newAccount = false;
+
+            if (customer is not null)
+            {
+                var existingAccount = await db.TaiKhoan.SingleOrDefaultAsync(
+                    x => x.MaTaiKhoan == customer.MaTaiKhoan && x.TrangThai == "HOAT_DONG", ct);
+                if (existingAccount is null || existingAccount.VaiTro != "KHACH_HANG") return Results.Unauthorized();
+                account = existingAccount;
+                if (customer.EmailXacMinhLucUtc is null)
+                {
+                    customer.EmailXacMinhLucUtc = DateTime.UtcNow;
+                    await db.SaveChangesAsync(ct);
+                }
+            }
+            else
+            {
+                var phone = request.SoDienThoai?.Trim();
+                if (string.IsNullOrWhiteSpace(phone) || !Regex.IsMatch(phone, "^[0-9]{9,15}$"))
+                    return Results.BadRequest(new
+                    {
+                        code = "PHONE_REQUIRED_FOR_GOOGLE_SIGNUP",
+                        loi = "Tài khoản Google mới cần số điện thoại hợp lệ để tạo hồ sơ khách hàng."
+                    });
+
+                await TransactionLock.AcquireAsync(db, "phone:" + phone, ct);
+                if (await db.KhachThue.AnyAsync(x => x.SoDienThoai == phone, ct))
+                    return Results.Conflict(new { code = "PHONE_ALREADY_USED", loi = "Số điện thoại đã được sử dụng." });
+
+                var usernameHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(email)))[..16].ToLowerInvariant();
+                var username = "google_" + usernameHash;
+                await TransactionLock.AcquireAsync(db, "username:" + username, ct);
+                if (await db.TaiKhoan.AnyAsync(x => x.TenDangNhap == username, ct))
+                    return Results.Conflict(new { code = "GOOGLE_ACCOUNT_CONFLICT", loi = "Không thể liên kết tài khoản Google này." });
+
+                account = new TaiKhoan
+                {
+                    MaTaiKhoan = "TK" + Guid.NewGuid().ToString("N")[..17].ToUpperInvariant(),
+                    TenDangNhap = username,
+                    VaiTro = "KHACH_HANG",
+                    TrangThai = "HOAT_DONG",
+                    NgayTao = DateTime.Now
+                };
+                account.MatKhauHash = hasher.HashPassword(
+                    account, Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)));
+                customer = new KhachThue
+                {
+                    MaKhachThue = "KH" + Guid.NewGuid().ToString("N")[..17].ToUpperInvariant(),
+                    MaTaiKhoan = account.MaTaiKhoan,
+                    HoTen = null,
+                    SoDienThoai = phone,
+                    Email = email,
+                    EmailXacMinhLucUtc = DateTime.UtcNow
+                };
+                db.TaiKhoan.Add(account);
+                db.KhachThue.Add(customer);
+                try
+                {
+                    await db.SaveChangesAsync(ct);
+                }
+                catch (DbUpdateException)
+                {
+                    return Results.Conflict(new { code = "GOOGLE_ACCOUNT_CONFLICT", loi = "Không thể tạo tài khoản Google do thông tin đã tồn tại." });
+                }
+                newAccount = true;
+            }
+
+            await tx.CommitAsync(ct);
+            return Results.Ok(new
+            {
+                accessToken = issuer.Issue(account.MaTaiKhoan, account.PhienBanBaoMat),
+                tokenType = "Bearer",
+                expiresInSeconds = 3600,
+                account.MaTaiKhoan,
+                customer.MaKhachThue,
+                account.TenDangNhap,
+                account.VaiTro,
+                email = customer.Email,
+                laTaiKhoanMoi = newAccount
+            });
+        }).RequireRateLimiting("auth");
+
         group.MapGet("/me", async (ClaimsPrincipal principal, RentalCameraContext db, CancellationToken ct) =>
         {
             var accountId = principal.FindFirstValue(ClaimTypes.NameIdentifier)!;
@@ -337,6 +443,7 @@ public sealed record RegisterRequest(string TenDangNhap, string MatKhau, string 
 public sealed record ForgotPasswordRequest(string EmailHoacSoDienThoai);
 public sealed record ResetPasswordRequest(string ResetToken, string MatKhauMoi);
 public sealed record LoginRequest(string TenDangNhap, string MatKhau);
+public sealed record GoogleLoginRequest(string IdToken, string? SoDienThoai);
 public sealed record ChangePasswordRequest(string MatKhauCu, string MatKhauMoi);
 
 public sealed record EmailVerificationRequest(string Token);
