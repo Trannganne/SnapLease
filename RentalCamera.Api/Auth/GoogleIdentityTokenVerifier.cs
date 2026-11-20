@@ -48,12 +48,26 @@ public sealed class FirebaseGoogleIdentityTokenVerifier(FirebaseApp app) : IGoog
         {
             using var document = JsonDocument.Parse(JsonSerializer.Serialize(value));
             return document.RootElement.TryGetProperty("sign_in_provider", out var provider) &&
-                string.Equals(provider.GetString(), "google.com", StringComparison.Ordinal);
+                ContainsGoogleProvider(provider);
         }
         catch (JsonException)
         {
             return false;
         }
+    }
+
+    private static bool ContainsGoogleProvider(JsonElement element)
+    {
+        if (element.ValueKind == JsonValueKind.String)
+            return string.Equals(element.GetString(), "google.com", StringComparison.Ordinal);
+
+        if (element.ValueKind == JsonValueKind.Array)
+            return element.EnumerateArray().Any(ContainsGoogleProvider);
+
+        if (element.ValueKind == JsonValueKind.Object)
+            return element.EnumerateObject().Any(property => ContainsGoogleProvider(property.Value));
+
+        return false;
     }
 
     private static bool TryString(IReadOnlyDictionary<string, object> claims, string key, out string value)
