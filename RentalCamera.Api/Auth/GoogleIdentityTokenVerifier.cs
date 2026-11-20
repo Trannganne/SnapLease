@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FirebaseAdmin;
 using FirebaseAdmin.Auth;
+using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace RentalCamera.Api.Auth;
 
@@ -46,7 +47,9 @@ public sealed class FirebaseGoogleIdentityTokenVerifier(FirebaseApp app) : IGoog
         if (!claims.TryGetValue("firebase", out var value) || value is null) return false;
         try
         {
-            using var document = JsonDocument.Parse(JsonSerializer.Serialize(value));
+            // Firebase Admin decodes nested claims as Newtonsoft JSON tokens. Serializing those
+            // with System.Text.Json turns JValue/JObject instances into array-shaped data.
+            using var document = JsonDocument.Parse(JsonConvert.SerializeObject(value));
             return document.RootElement.TryGetProperty("sign_in_provider", out var provider) &&
                 ContainsGoogleProvider(provider);
         }
