@@ -418,9 +418,10 @@ public static class VnpayEndpoints
                 attempt is not null && attempt.SoTien != payment.SoTien)
                 return Results.BadRequest(new { loi = "Số tiền hoặc giao dịch Return không khớp khoản thu." });
 
-            if (vnpay.MobileCallbackUrl is { } mobileCallbackUrl)
+            string? appReturnUrl = null;
+            if (!string.IsNullOrWhiteSpace(vnpay.MobileCallbackUrl))
             {
-                var redirectUrl = QueryHelpers.AddQueryString(mobileCallbackUrl, new Dictionary<string, string?>
+                appReturnUrl = QueryHelpers.AddQueryString(vnpay.MobileCallbackUrl, new Dictionary<string, string?>
                 {
                     ["maThanhToan"] = payment.MaThanhToan,
                     ["maHopDong"] = payment.MaHopDong,
@@ -428,11 +429,10 @@ public static class VnpayEndpoints
                     ["maPhanHoiVnpay"] = callback.ResponseCode,
                     ["callbackHopLe"] = "true"
                 });
-                return Results.Redirect(redirectUrl);
             }
 
             return Results.Content(
-                VnpayReturnPage.Build(payment.MaThanhToan, payment.MaHopDong, callback.ResponseCode),
+                VnpayReturnPage.Build(payment.MaThanhToan, payment.MaHopDong, callback.ResponseCode, appReturnUrl),
                 "text/html; charset=utf-8");
         }).AllowAnonymous();
     }

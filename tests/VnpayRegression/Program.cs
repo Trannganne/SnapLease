@@ -56,6 +56,13 @@ Check(acceptedReturn.Contains("TT&lt;01&gt;") && acceptedReturn.Contains("HD&amp
     "return fallback HTML-encodes identifiers");
 Check(acceptedReturn.Contains("Quay lại ứng dụng"),
     "return fallback offers an app return action");
+var deepLinkReturn = VnpayReturnPage.Build(
+    "TT01", "HD01", "00", "rentalcamera://payment-result?maThanhToan=TT01&callbackHopLe=true");
+Check(deepLinkReturn.Contains(
+        "href=\"rentalcamera://payment-result?maThanhToan=TT01&amp;callbackHopLe=true\""),
+    "return page links back to the registered mobile deep link");
+Check(!deepLinkReturn.Contains("history.back()"),
+    "configured mobile deep link replaces browser history fallback");
 var failedReturn = VnpayReturnPage.Build("TT02", "HD02", "24");
 Check(failedReturn.Contains(WebUtility.HtmlEncode("Giao dịch chưa hoàn tất")) &&
       failedReturn.Contains(WebUtility.HtmlEncode("thử lại")),
